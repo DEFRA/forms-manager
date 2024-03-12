@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises'
 import { join } from 'path'
 import { config } from '~/src/config'
-// eslint-disable-next-line no-unused-vars
 import * as Types from '../api-types.js'
 
 // TODO look at prisma to generate this
