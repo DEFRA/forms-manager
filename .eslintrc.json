@@ -4,12 +4,12 @@
     "node": true,
     "jest": true
   },
-  "extends": ["standard", "prettier"],
+  "extends": ["standard", "prettier", "plugin:jsdoc/recommended"],
   "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest"
   },
-  "plugins": ["prettier"],
+  "plugins": ["prettier", "jsdoc"],
   "rules": {
     "prettier/prettier": "error",
     "no-console": "error"
