@@ -1,5 +1,5 @@
 import { listForms as listFormMetadataEntries } from './form-metadata-repository'
-import * as Types from '../api-types.js'
+import * as Types from '../types.js'
 
 /**
  * Lists the available forms

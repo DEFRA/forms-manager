@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises'
 import { join } from 'path'
 import { config } from '~/src/config'
-import * as Types from '../api-types.js'
+import * as Types from '../types.js'
 
 // TODO look at prisma to generate this
 
