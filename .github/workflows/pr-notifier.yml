@@ -18,7 +18,7 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.15.0
         with:
-          channel-id: '${{ env.SLACK_CHANNEL_ID }}'
+          channel-id: ${{ env.SLACK_CHANNEL_ID }}
           payload: |
             {
                 "blocks": [
@@ -46,7 +46,7 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.15.0
         with:
-          channel-id: '${{ env.SLACK_CHANNEL_ID }}'
+          channel-id: ${{ env.SLACK_CHANNEL_ID }}
           payload: |
             {
                 "blocks": [
@@ -74,7 +74,7 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.15.0
         with:
-          channel-id: '${{ env.SLACK_CHANNEL_ID }}'
+          channel-id: ${{ env.SLACK_CHANNEL_ID }}
           payload: |
             {
                 "blocks": [
