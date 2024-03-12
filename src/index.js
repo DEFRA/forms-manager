@@ -10,6 +10,9 @@ process.on('unhandledRejection', (error) => {
   process.exit(1)
 })
 
+/**
+ * Starts the server.
+ */
 async function startServer() {
   const server = await createServer()
   await server.start()

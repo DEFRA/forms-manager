@@ -41,7 +41,7 @@ const listForms = async () => {
 /**
  * Retrieves a file from the form store
  * @param {string} formId ID of the form
- * @return {Promise<import('../api-types.js').FormConfiguration[]>} form configuration
+ * @returns {Promise<Types.FormConfiguration>} form configuration
  */
 const getFormMetadata = async (formId) => {
   const formMetadataFilename = getFormMetadataFilename(formId)

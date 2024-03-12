@@ -11,6 +11,10 @@ import { secureContext } from '~/src/helpers/secure-context'
 
 const isProduction = config.get('isProduction')
 
+/**
+ * Creates the Hapi server
+ * @returns {hapi.Server} - The Hapi server
+ */
 async function createServer() {
   const server = hapi.server({
     port: config.get('port'),

@@ -1,3 +1,7 @@
+/**
+ * Returns a list of dummy entities.
+ * @returns {Promise<object[]>} - A list of entities.
+ */
 async function fetchEntities() {
   return Promise.resolve([
     {

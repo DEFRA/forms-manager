@@ -3,6 +3,11 @@ import { fetchEntities } from '~/src/helpers/db/fetch-entities'
 
 const logger = createLogger()
 
+/**
+ * Populate the database with data from the API.
+ * @param {object} mongo - The MongoClient
+ * @param {object} db - the database from MongoClient.db(..)
+ */
 async function populateApi(mongo, db) {
   const entitiesCollection = db.collection('entities')
 

@@ -29,6 +29,10 @@ const mongoPlugin = {
   }
 }
 
+/**
+ * Creates the indexes for the server. Currently creates one on the entities collection.
+ * @param {object} db - the mongo database object
+ */
 async function createIndexes(db) {
   await db.collection('entities').createIndex({ id: 1 })
 }
