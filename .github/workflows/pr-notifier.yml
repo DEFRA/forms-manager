@@ -26,7 +26,7 @@ jobs:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": ":large_yellow_circle: *${{ github.event.repository.name }}:* Pull request opened by ${{ github.event.actor.login }}"
+                            "text": ":large_yellow_circle: *${{ github.event.repository.name }}:* Pull request opened by ${{ github.event.pull_request.user.login }}"
                         }
                     },
                     {
