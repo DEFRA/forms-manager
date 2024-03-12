@@ -75,6 +75,13 @@ const config = convict({
     nullable: true,
     default: null,
     env: 'CDP_HTTPS_PROXY'
+  },
+  formDirectory: {
+    doc: 'Directory on disk to store the forms',
+    format: String,
+    nullable: false,
+    default: 'forms',
+    env: 'FORMS_DIRECTORY'
   }
 })
 
