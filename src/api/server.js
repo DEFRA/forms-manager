@@ -4,7 +4,8 @@ import hapi from '@hapi/hapi'
 import { config } from '~/src/config'
 import { router } from '~/src/api/router'
 import { requestLogger } from '~/src/helpers/logging/request-logger'
-import { mongoPlugin } from '~/src/helpers/mongodb'
+// Temporarily disabled. Will be restored in task #335165
+// import { mongoPlugin } from '~/src/helpers/mongodb'
 import { failAction } from '~/src/helpers/fail-action'
 import { populateDb } from '~/src/helpers/db/populate-db'
 import { secureContext } from '~/src/helpers/secure-context'
@@ -50,7 +51,8 @@ async function createServer() {
     await server.register(secureContext)
   }
 
-  await server.register({ plugin: mongoPlugin, options: {} })
+  // Temporarily disabled. Will be restored in task #335165
+  // await server.register({ plugin: mongoPlugin, options: {} })
 
   await server.register(router, {
     routes: { prefix: config.get('appPathPrefix') }
