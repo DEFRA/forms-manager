@@ -26,14 +26,7 @@ jobs:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": ":large_yellow_circle: *${{ github.event.repository.name }}:* Pull request opened by ${{ github.event.pull_request.user.login }}"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "<${{ github.event.pull_request.html_url }}>"
+                            "text": ":large_yellow_circle: *${{ github.event.repository.name }}:* Pull request opened by ${{ github.event.pull_request.user.login }}\n<${{ github.event.pull_request.html_url }}>"
                         }
                     }
                 ]
@@ -54,14 +47,7 @@ jobs:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": ":white_check_mark: *${{ github.event.repository.name }}:* Pull request merged"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "<${{ github.event.pull_request.html_url }}>"
+                            "text": ":white_check_mark: *${{ github.event.repository.name }}:* Pull request merged\n<${{ github.event.pull_request.html_url }}>"
                         }
                     }
                 ]
@@ -82,14 +68,7 @@ jobs:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": ":wastebasket: *${{ github.event.repository.name }}:* Pull request closed"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "<${{ github.event.pull_request.html_url }}>"
+                            "text": ":wastebasket: *${{ github.event.repository.name }}:* Pull request closed\n<${{ github.event.pull_request.html_url }}>"
                         }
                     }
                 ]
