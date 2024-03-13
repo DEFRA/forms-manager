@@ -1,9 +1,9 @@
-import fs from 'fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { listForms } from './form-metadata-repository'
 
 const formDirectory = '/path/to/dummy/directory'
 
-jest.mock('fs/promises', () => ({
+jest.mock('node:fs/promises', () => ({
   readdir: jest.fn(),
   readFile: jest.fn()
 }))
@@ -20,7 +20,7 @@ describe('#listForms', () => {
   })
 
   test('Should return an empty array if no forms found', async () => {
-    fs.readdir.mockResolvedValue([])
+    readdir.mockResolvedValue([])
 
     const result = await listForms(formDirectory)
 
@@ -32,12 +32,12 @@ describe('#listForms', () => {
     const form1Metadata = '{ "id": "form1", "name": "Form 1" }'
     const form2Metadata = '{ "id": "form2", "name": "Form 2" }'
 
-    fs.readFile.mockResolvedValue(form1Metadata)
-    fs.readFile.mockResolvedValue(form2Metadata)
+    readFile.mockResolvedValue(form1Metadata)
+    readFile.mockResolvedValue(form2Metadata)
 
-    fs.readdir.mockResolvedValue(files)
-    fs.readFile.mockResolvedValueOnce(form1Metadata)
-    fs.readFile.mockResolvedValueOnce(form2Metadata)
+    readdir.mockResolvedValue(files)
+    readFile.mockResolvedValueOnce(form1Metadata)
+    readFile.mockResolvedValueOnce(form2Metadata)
 
     const result = await listForms(formDirectory)
 
@@ -45,11 +45,11 @@ describe('#listForms', () => {
       JSON.parse(form1Metadata),
       JSON.parse(form2Metadata)
     ])
-    expect(fs.readdir).toHaveBeenCalledWith(formDirectory)
-    expect(fs.readFile).toHaveBeenCalledWith(
+    expect(readdir).toHaveBeenCalledWith(formDirectory)
+    expect(readFile).toHaveBeenCalledWith(
       formDirectory + '/form1-metadata.json'
     )
-    expect(fs.readFile).toHaveBeenCalledWith(
+    expect(readFile).toHaveBeenCalledWith(
       formDirectory + '/form2-metadata.json'
     )
   })
@@ -57,17 +57,17 @@ describe('#listForms', () => {
   test('Should ignore files without "-metadata.json" suffix', async () => {
     const files = ['form1-metadata.json', 'form2.json']
 
-    fs.readdir.mockResolvedValue(files)
-    fs.readFile.mockResolvedValue('{ "id": "form1", "name": "Form 1" }')
+    readdir.mockResolvedValue(files)
+    readFile.mockResolvedValue('{ "id": "form1", "name": "Form 1" }')
 
     const result = await listForms(formDirectory)
 
     expect(result).toEqual([{ id: 'form1', name: 'Form 1' }])
-    expect(fs.readdir).toHaveBeenCalledWith(formDirectory)
-    expect(fs.readFile).toHaveBeenCalledWith(
+    expect(readdir).toHaveBeenCalledWith(formDirectory)
+    expect(readFile).toHaveBeenCalledWith(
       formDirectory + '/form1-metadata.json'
     )
-    expect(fs.readFile).not.toHaveBeenCalledWith(
+    expect(readFile).not.toHaveBeenCalledWith(
       formDirectory + '/form2-metadata.json'
     )
   })
