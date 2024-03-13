@@ -20,7 +20,7 @@ const getFormMetadataFilename = (formId) => {
  * Retrieves a file from the form store
  * @returns {Promise<Types.FormConfiguration[]>} form configuration
  */
-const listForms = async () => {
+export async function listForms() {
   return fs.readdir(formDirectory).then(async (files) => {
     const response = []
 
