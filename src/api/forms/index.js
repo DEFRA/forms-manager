@@ -14,6 +14,13 @@ export const forms = {
           handler() {
             return listForms()
           }
+        },
+        {
+          method: 'GET',
+          path: '/forms/{id}',
+          handler: async (request, h) => {
+            return getForm(request.params.id)
+          }
         }
       ])
     }
