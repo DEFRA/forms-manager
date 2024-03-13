@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises'
-import { join } from 'path'
+import { join } from 'node:path'
+import { readdir, readFile } from 'node:fs/promises'
 import { config } from '~/src/config'
 import * as Types from '../types.js'
 
