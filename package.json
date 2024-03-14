@@ -1,9 +1,9 @@
 {
-  "name": "forms-manager",
+  "name": "@defra/forms-manager",
   "version": "0.0.0",
-  "description": "CDP Backend Template",
+  "description": "Defra forms manager",
   "type": "module",
-  "main": "src/index.js",
+  "main": ".server/index.js",
   "engines": {
     "node": "^20.9.0",
     "npm": "^10.1.0"
