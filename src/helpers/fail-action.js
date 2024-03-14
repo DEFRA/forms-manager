@@ -1,11 +1,9 @@
 /**
  * Log and throw and error
- * @param {object} request the hapi request
- * @param {object} h the hapi response toolkit
- * @param {{message: string}} error the error object to be thrown
+ * @type {import('@hapi/hapi').Lifecycle.Method}
  */
 export function failAction(request, h, error) {
-  request.logger.error(error, error.message)
+  request.logger.error(error, error?.message)
 
-  throw error
+  throw error ?? new Error('Unknown error')
 }

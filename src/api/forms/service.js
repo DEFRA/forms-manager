@@ -4,6 +4,6 @@ import { listForms as listFormMetadataEntries } from './form-metadata-repository
 
 /**
  * Lists the available forms
- * @returns {Promise<Types.FormConfiguration>} form configuration
+ * @returns {Promise<Types.FormConfiguration[]>} - form configuration
  */
-export const listForms = async () => await listFormMetadataEntries()
+export const listForms = () => listFormMetadataEntries()

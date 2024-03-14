@@ -1,4 +1,4 @@
-import { Url } from 'url'
+import { URL } from 'url'
 
 import { HttpsProxyAgent } from 'https-proxy-agent'
 
@@ -10,7 +10,7 @@ export const proxyAgent = () => {
   if (!httpsProxy) {
     return null
   } else {
-    const proxyUrl = new Url(httpsProxy)
+    const proxyUrl = new URL(httpsProxy)
     return {
       url: proxyUrl,
       agent: new HttpsProxyAgent(proxyUrl)
