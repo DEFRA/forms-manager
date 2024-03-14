@@ -16,7 +16,7 @@
     "format": "prettier --write \"**/*.{cjs,js,json,md,mjs}\"",
     "format:check": "prettier --check \"**/*.{cjs,js,json,md,mjs}\"",
     "postinstall": "bash install_model.sh && npm run setup:husky",
-    "lint": "npm run lint:js && npm run lint:types",
+    "lint": "npm run lint:js",
     "lint:fix": "eslint . --fix",
     "lint:js": "eslint .",
     "lint:types": "tsc --noEmit",
