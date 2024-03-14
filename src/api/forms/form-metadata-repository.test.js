@@ -68,7 +68,7 @@ describe('#getFormMetadata', () => {
     const formMetadataFilename = formDirectory + '/form1-metadata.json'
     const formMetadata = '{ "id": "form1", "name": "Form 1" }'
 
-    readFile.mockResolvedValueOnce(formMetadata)
+    jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
 
     const result = await getFormMetadata(formId)
 
@@ -82,7 +82,7 @@ describe('#getFormMetadata', () => {
     const formId = 'form1'
     const formMetadata = '{ {{{{'
 
-    readFile.mockResolvedValueOnce(formMetadata)
+    jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
 
     await expect(getFormMetadata(formId)).rejects.toThrow(SyntaxError)
   })
