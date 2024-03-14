@@ -37,6 +37,15 @@ module.exports = {
         'prettier/prettier': 'error',
         'no-console': 'error',
 
+        // Check import or require statements are A-Z ordered
+        'import/order': [
+          'error',
+          {
+            alphabetize: { order: 'asc' },
+            'newlines-between': 'always'
+          }
+        ],
+
         // Check for valid formatting
         'jsdoc/check-line-alignment': [
           'warn',
