@@ -1,11 +1,14 @@
 import { MongoClient } from 'mongodb'
 
-import { config } from '~/src/config'
+import { config } from '~/src/config/index.js'
 
-const mongoPlugin = {
+/**
+ * @satisfies {import('@hapi/hapi').Plugin<void>}
+ */
+export const mongoPlugin = {
   name: 'mongodb',
   version: '1.0.0',
-  register: async function (server) {
+  async register(server) {
     const mongoOptions = {
       retryWrites: false,
       readPreference: 'secondary',
@@ -29,8 +32,10 @@ const mongoPlugin = {
   }
 }
 
+/**
+ * Creates the indexes for the server. Currently creates one on the entities collection.
+ * @param {import('mongodb').Db} db - the mongo database object
+ */
 async function createIndexes(db) {
   await db.collection('entities').createIndex({ id: 1 })
 }
-
-export { mongoPlugin }

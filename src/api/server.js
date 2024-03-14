@@ -1,17 +1,22 @@
 import path from 'path'
+
 import hapi from '@hapi/hapi'
 
-import { config } from '~/src/config'
-import { router } from '~/src/api/router'
-import { requestLogger } from '~/src/helpers/logging/request-logger'
-import { mongoPlugin } from '~/src/helpers/mongodb'
-import { failAction } from '~/src/helpers/fail-action'
-import { populateDb } from '~/src/helpers/db/populate-db'
-import { secureContext } from '~/src/helpers/secure-context'
+import { router } from '~/src/api/router.js'
+import { config } from '~/src/config/index.js'
+import { populateDb } from '~/src/helpers/db/populate-db.js'
+import { failAction } from '~/src/helpers/fail-action.js'
+import { requestLogger } from '~/src/helpers/logging/request-logger.js'
+// Temporarily disabled. Will be restored in task #335165
+// import { mongoPlugin } from '~/src/helpers/mongodb.js'
+import { secureContext } from '~/src/helpers/secure-context/index.js'
 
 const isProduction = config.get('isProduction')
 
-async function createServer() {
+/**
+ * Creates the Hapi server
+ */
+export async function createServer() {
   const server = hapi.server({
     port: config.get('port'),
     routes: {
@@ -46,7 +51,8 @@ async function createServer() {
     await server.register(secureContext)
   }
 
-  await server.register({ plugin: mongoPlugin, options: {} })
+  // Temporarily disabled. Will be restored in task #335165
+  // await server.register({ plugin: mongoPlugin, options: {} })
 
   await server.register(router, {
     routes: { prefix: config.get('appPathPrefix') }
@@ -56,5 +62,3 @@ async function createServer() {
 
   return server
 }
-
-export { createServer }

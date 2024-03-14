@@ -1,13 +1,18 @@
-import { health } from '~/src/api/health'
-import { example } from '~/src/api/example'
+import { forms } from '~/src/api/forms/index.js'
+import { health } from '~/src/api/health/index.js'
 
-const router = {
+/**
+ * @satisfies {ServerRegisterPlugin}
+ */
+export const router = {
   plugin: {
     name: 'Router',
-    register: async (server) => {
-      await server.register([health, example])
+    async register(server) {
+      await server.register([health, forms])
     }
   }
 }
 
-export { router }
+/**
+ * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
+ */

@@ -1,19 +1,19 @@
-import { config } from '~/src/config'
-import { HttpsProxyAgent } from 'https-proxy-agent'
-import { Url } from 'url'
+import { URL } from 'url'
 
-const proxyAgent = () => {
+import { HttpsProxyAgent } from 'https-proxy-agent'
+
+import { config } from '~/src/config/index.js'
+
+export const proxyAgent = () => {
   const httpsProxy = config.get('httpsProxy')
 
   if (!httpsProxy) {
     return null
   } else {
-    const proxyUrl = new Url(httpsProxy)
+    const proxyUrl = new URL(httpsProxy)
     return {
       url: proxyUrl,
       agent: new HttpsProxyAgent(proxyUrl)
     }
   }
 }
-
-export { proxyAgent }

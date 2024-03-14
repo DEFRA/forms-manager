@@ -1,4 +1,7 @@
-async function fetchEntities() {
+/**
+ * Returns a list of dummy entities.
+ */
+export async function fetchEntities() {
   return Promise.resolve([
     {
       entityId: '3a7e15b1-3fb7-4e53-8ece-8eb96c7b6f61',
@@ -16,5 +19,3 @@ async function fetchEntities() {
     }
   ])
 }
-
-export { fetchEntities }

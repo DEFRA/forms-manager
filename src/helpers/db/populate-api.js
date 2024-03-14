@@ -1,9 +1,14 @@
-import { createLogger } from '~/src/helpers/logging/logger'
-import { fetchEntities } from '~/src/helpers/db/fetch-entities'
+import { fetchEntities } from '~/src/helpers/db/fetch-entities.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const logger = createLogger()
 
-async function populateApi(mongo, db) {
+/**
+ * Populate the database with data from the API.
+ * @param {import('mongodb').MongoClient} mongo - The MongoClient
+ * @param {import('mongodb').Db} db - the database from MongoClient.db(..)
+ */
+export async function populateApi(mongo, db) {
   const entitiesCollection = db.collection('entities')
 
   try {
@@ -24,5 +29,3 @@ async function populateApi(mongo, db) {
     logger.error(error)
   }
 }
-
-export { populateApi }

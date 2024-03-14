@@ -1,7 +1,8 @@
-import convict from 'convict'
-import path from 'path'
+import { cwd } from 'process'
 
-const config = convict({
+import convict from 'convict'
+
+export const config = convict({
   env: {
     doc: 'The application environment.',
     format: ['production', 'development', 'test'],
@@ -22,7 +23,7 @@ const config = convict({
   root: {
     doc: 'Project root',
     format: String,
-    default: path.normalize(path.join(__dirname, '..', '..'))
+    default: cwd()
   },
   appPathPrefix: {
     doc: 'Application url path prefix',
@@ -75,9 +76,14 @@ const config = convict({
     nullable: true,
     default: null,
     env: 'CDP_HTTPS_PROXY'
+  },
+  formDirectory: {
+    doc: 'Directory on disk to store the forms',
+    format: String,
+    nullable: false,
+    default: 'forms',
+    env: 'FORMS_DIRECTORY'
   }
 })
 
 config.validate({ allowed: 'strict' })
-
-export { config }
