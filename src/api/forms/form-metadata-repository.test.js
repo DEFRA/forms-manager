@@ -15,7 +15,7 @@ describe('#listForms', () => {
   test('Should return an empty array if no forms found', async () => {
     jest.mocked(readdir).mockResolvedValue([])
 
-    const result = await listForms(formDirectory)
+    const result = await listForms()
 
     expect(result).toEqual([])
   })
@@ -33,7 +33,7 @@ describe('#listForms', () => {
     jest.mocked(readFile).mockResolvedValueOnce(form1Metadata)
     jest.mocked(readFile).mockResolvedValueOnce(form2Metadata)
 
-    const result = await listForms(formDirectory)
+    const result = await listForms()
 
     expect(result.length).toEqual(2)
     expect(result[0].id).toEqual('form1')
@@ -51,7 +51,7 @@ describe('#listForms', () => {
       })
     )
 
-    const result = await listForms(formDirectory)
+    const result = await listForms()
 
     expect(result.length).toEqual(1)
     expect(result[0].id).toEqual('form1')
@@ -73,7 +73,9 @@ describe('#getFormMetadata', () => {
     const result = await getFormMetadata(formId)
 
     expect(result).toEqual(JSON.parse(formMetadata))
-    expect(readFile).toHaveBeenCalledWith(formMetadataFilename)
+    expect(readFile).toHaveBeenCalledWith(formMetadataFilename, {
+      encoding: 'utf8'
+    })
   })
 
   test('Should throw an error if form malformed', async () => {
