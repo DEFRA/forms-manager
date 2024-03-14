@@ -7,14 +7,19 @@ module.exports = {
     {
       extends: [
         'standard',
-        'prettier',
-        'plugin:jsdoc/recommended-typescript-flavor'
+        'eslint:recommended',
+        'plugin:import/recommended',
+        'plugin:jsdoc/recommended-typescript-flavor',
+        'plugin:n/recommended',
+        'plugin:prettier/recommended',
+        'plugin:promise/recommended',
+        'prettier'
       ],
       files: ['**/*.{cjs,js,mjs}'],
       parserOptions: {
         ecmaVersion: 'latest'
       },
-      plugins: ['prettier', 'jsdoc'],
+      plugins: ['import', 'jsdoc', 'n', 'prettier', 'promise'],
       rules: {
         'prettier/prettier': 'error',
         'no-console': 'error',
@@ -63,7 +68,13 @@ module.exports = {
         // JSDoc @returns description is optional
         'jsdoc/require-returns-description': 'off',
         'jsdoc/require-returns-type': 'off',
-        'jsdoc/require-returns': 'off'
+        'jsdoc/require-returns': 'off',
+
+        // Skip rules handled by import plugin
+        'n/no-extraneous-require': 'off',
+        'n/no-extraneous-import': 'off',
+        'n/no-missing-require': 'off',
+        'n/no-missing-import': 'off'
       }
     },
     {
