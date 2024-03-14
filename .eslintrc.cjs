@@ -1,18 +1,33 @@
+/**
+ * @type {import('eslint').ESLint.ConfigData}
+ */
 module.exports = {
-  env: {
-    es2022: true,
-    node: true,
-    jest: true
-  },
-  extends: ['standard', 'prettier', 'plugin:jsdoc/recommended'],
-  overrides: [],
-  parserOptions: {
-    ecmaVersion: 'latest'
-  },
-  plugins: ['prettier', 'jsdoc'],
-  rules: {
-    'prettier/prettier': 'error',
-    'no-console': 'error'
-  },
-  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage']
+  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage'],
+  overrides: [
+    {
+      extends: ['standard', 'prettier', 'plugin:jsdoc/recommended'],
+      files: ['**/*.{cjs,js,mjs}'],
+      parserOptions: {
+        ecmaVersion: 'latest'
+      },
+      plugins: ['prettier', 'jsdoc'],
+      rules: {
+        'prettier/prettier': 'error',
+        'no-console': 'error'
+      }
+    },
+    {
+      files: ['**/*.{js,mjs}'],
+      parserOptions: {
+        sourceType: 'module'
+      }
+    },
+    {
+      env: {
+        jest: true
+      },
+      files: ['**/*.test.{cjs,js,mjs}']
+    }
+  ],
+  root: true
 }
