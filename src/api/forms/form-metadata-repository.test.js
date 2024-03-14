@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
-import { listForms } from './form-metadata-repository'
+
+import { listForms } from './form-metadata-repository.js'
 
 const formDirectory = '/path/to/dummy/directory'
 

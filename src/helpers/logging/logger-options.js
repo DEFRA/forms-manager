@@ -1,8 +1,8 @@
-import ecsFormat from '@elastic/ecs-pino-format'
+import { ecsFormat } from '@elastic/ecs-pino-format'
 
-import { config } from '~/src/config'
+import { config } from '~/src/config/index.js'
 
-const loggerOptions = {
+export const loggerOptions = {
   enabled: !config.get('isTest'),
   redact: {
     paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers'],
@@ -13,5 +13,3 @@ const loggerOptions = {
     ? { transport: { target: 'pino-pretty' } }
     : ecsFormat())
 }
-
-export { loggerOptions }

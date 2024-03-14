@@ -1,14 +1,15 @@
 import path from 'path'
+
 import hapi from '@hapi/hapi'
 
-import { config } from '~/src/config'
-import { router } from '~/src/api/router'
-import { requestLogger } from '~/src/helpers/logging/request-logger'
+import { router } from '~/src/api/router.js'
+import { config } from '~/src/config/index.js'
+import { populateDb } from '~/src/helpers/db/populate-db.js'
+import { failAction } from '~/src/helpers/fail-action.js'
+import { requestLogger } from '~/src/helpers/logging/request-logger.js'
 // Temporarily disabled. Will be restored in task #335165
-// import { mongoPlugin } from '~/src/helpers/mongodb'
-import { failAction } from '~/src/helpers/fail-action'
-import { populateDb } from '~/src/helpers/db/populate-db'
-import { secureContext } from '~/src/helpers/secure-context'
+// import { mongoPlugin } from '~/src/helpers/mongodb.js'
+import { secureContext } from '~/src/helpers/secure-context/index.js'
 
 const isProduction = config.get('isProduction')
 
@@ -16,7 +17,7 @@ const isProduction = config.get('isProduction')
  * Creates the Hapi server
  * @returns {hapi.Server} - The Hapi server
  */
-async function createServer() {
+export async function createServer() {
   const server = hapi.server({
     port: config.get('port'),
     routes: {
@@ -62,5 +63,3 @@ async function createServer() {
 
   return server
 }
-
-export { createServer }

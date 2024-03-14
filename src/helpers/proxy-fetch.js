@@ -1,5 +1,6 @@
-import { config } from '~/src/config'
 import { ProxyAgent, fetch as undiciFetch } from 'undici'
+
+import { config } from '~/src/config/index.js'
 
 const nonProxyFetch = (url, opts) => {
   return undiciFetch(url, {
@@ -7,7 +8,7 @@ const nonProxyFetch = (url, opts) => {
   })
 }
 
-const proxyFetch = (url, opts) => {
+export const proxyFetch = (url, opts) => {
   const httpsProxy = config.get('httpsProxy')
   if (!httpsProxy) {
     return nonProxyFetch(url, opts)
@@ -22,5 +23,3 @@ const proxyFetch = (url, opts) => {
     })
   }
 }
-
-export { proxyFetch }

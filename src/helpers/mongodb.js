@@ -1,8 +1,8 @@
 import { MongoClient } from 'mongodb'
 
-import { config } from '~/src/config'
+import { config } from '~/src/config/index.js'
 
-const mongoPlugin = {
+export const mongoPlugin = {
   name: 'mongodb',
   version: '1.0.0',
   register: async function (server) {
@@ -36,5 +36,3 @@ const mongoPlugin = {
 async function createIndexes(db) {
   await db.collection('entities').createIndex({ id: 1 })
 }
-
-export { mongoPlugin }

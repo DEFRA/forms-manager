@@ -1,6 +1,6 @@
-import { healthController } from '~/src/api/health/controller'
+import { healthController } from '~/src/api/health/controller.js'
 
-const health = {
+export const health = {
   plugin: {
     name: 'health',
     register: async (server) => {
@@ -12,5 +12,3 @@ const health = {
     }
   }
 }
-
-export { health }

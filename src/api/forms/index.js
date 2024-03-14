@@ -1,6 +1,6 @@
-import { listForms } from '~/src/api/forms/service'
+import { listForms } from '~/src/api/forms/service.js'
 
-const forms = {
+export const forms = {
   plugin: {
     name: 'forms',
     register: async (server) => {
@@ -16,5 +16,3 @@ const forms = {
     }
   }
 }
-
-export { forms }

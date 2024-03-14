@@ -1,7 +1,8 @@
-import convict from 'convict'
-import path from 'path'
+import { cwd } from 'process'
 
-const config = convict({
+import convict from 'convict'
+
+export const config = convict({
   env: {
     doc: 'The application environment.',
     format: ['production', 'development', 'test'],
@@ -86,5 +87,3 @@ const config = convict({
 })
 
 config.validate({ allowed: 'strict' })
-
-export { config }

@@ -1,11 +1,11 @@
-import { createLogger } from '~/src/helpers/logging/logger'
-import { populateApi } from '~/src/helpers/db/populate-api'
+import { populateApi } from '~/src/helpers/db/populate-api.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const logger = createLogger()
 
 // Populate the DB in this template on startup of the API.
 // This is an example to show developers an API with a DB, with data in it and endpoints that query the db.
-const populateDb = {
+export const populateDb = {
   plugin: {
     name: 'Populate Db',
     register: async (server) => {
@@ -17,5 +17,3 @@ const populateDb = {
     }
   }
 }
-
-export { populateDb }

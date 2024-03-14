@@ -1,7 +1,9 @@
-import { join } from 'node:path'
 import { readdir, readFile } from 'node:fs/promises'
-import { config } from '~/src/config'
+import { join } from 'node:path'
+
 import * as Types from '../types.js'
+
+import { config } from '~/src/config/index.js'
 
 // TODO look at prisma to generate this
 

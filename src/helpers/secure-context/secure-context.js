@@ -1,8 +1,8 @@
 import tls from 'node:tls'
 
-import { getTrustStoreCerts } from '~/src/helpers/secure-context/get-trust-store-certs'
+import { getTrustStoreCerts } from '~/src/helpers/secure-context/get-trust-store-certs.js'
 
-const secureContext = {
+export const secureContext = {
   plugin: {
     name: 'secure-context',
     register: async (server) => {
@@ -28,5 +28,3 @@ const secureContext = {
     }
   }
 }
-
-export { secureContext }
