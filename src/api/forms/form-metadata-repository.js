@@ -35,7 +35,7 @@ export async function listForms() {
  * @param {string} formId - ID of the form
  * @returns {Promise<FormConfiguration>} - form configuration
  */
-export const getFormMetadata = async (formId) => {
+export async function getFormMetadata(formId) {
   const formMetadataFilename = getFormMetadataFilename(formId)
   const value = await readFile(formMetadataFilename, { encoding: 'utf8' })
   return JSON.parse(value)
