@@ -15,7 +15,6 @@ const isProduction = config.get('isProduction')
 
 /**
  * Creates the Hapi server
- * @returns {hapi.Server} - The Hapi server
  */
 export async function createServer() {
   const server = hapi.server({

@@ -5,8 +5,8 @@ const logger = createLogger()
 
 /**
  * Populate the database with data from the API.
- * @param {object} mongo - The MongoClient
- * @param {object} db - the database from MongoClient.db(..)
+ * @param {import('mongodb').MongoClient} mongo - The MongoClient
+ * @param {import('mongodb').Db} db - the database from MongoClient.db(..)
  */
 export async function populateApi(mongo, db) {
   const entitiesCollection = db.collection('entities')

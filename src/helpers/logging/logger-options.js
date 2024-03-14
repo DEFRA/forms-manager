@@ -2,6 +2,9 @@ import { ecsFormat } from '@elastic/ecs-pino-format'
 
 import { config } from '~/src/config/index.js'
 
+/**
+ * @satisfies {import('pino').LoggerOptions}
+ */
 export const loggerOptions = {
   enabled: !config.get('isTest'),
   redact: {
