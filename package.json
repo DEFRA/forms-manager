@@ -1,13 +1,12 @@
 {
   "name": "@defra/forms-manager",
   "version": "0.0.0",
+  "private": true,
   "description": "Defra forms manager",
+  "license": "OGL-UK-3.0",
+  "author": "Defra DDTS",
   "type": "module",
   "main": ".server/index.js",
-  "engines": {
-    "node": "^20.9.0",
-    "npm": "^10.1.0"
-  },
   "scripts": {
     "build": "npm run build:server",
     "build:server": "babel --delete-dir-on-start --ignore \"**/*.test.js\" --ignore \"src/__fixtures__\" --copy-files --no-copy-ignored --keep-file-extension --out-dir ./.server ./src",
@@ -30,8 +29,6 @@
     "start": "NODE_ENV=production node --enable-source-maps ./.server",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module"
   },
-  "author": "Defra DDTS",
-  "license": "OGL-UK-3.0",
   "dependencies": {
     "@babel/runtime": "7.23.9",
     "@elastic/ecs-pino-format": "1.5.0",
@@ -81,5 +78,9 @@
     "@types/convict": "6.1.6",
     "@types/jest": "29.5.12",
     "@types/node": "20.11.26"
+  },
+  "engines": {
+    "node": "^20.9.0",
+    "npm": "^10.1.0"
   }
 }
