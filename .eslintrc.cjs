@@ -1,23 +1,50 @@
+const pkg = require('./package.json')
+
 /**
  * @type {import('eslint').ESLint.ConfigData}
  */
 module.exports = {
-  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage'],
+  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage', '.eslintrc.cjs'],
   overrides: [
     {
       extends: [
         'standard',
-        'prettier',
-        'plugin:jsdoc/recommended-typescript-flavor'
+        'eslint:recommended',
+        'plugin:import/recommended',
+        'plugin:jsdoc/recommended-typescript-flavor',
+        'plugin:n/recommended',
+        'plugin:prettier/recommended',
+        'plugin:promise/recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/stylistic-type-checked',
+        'prettier'
       ],
       files: ['**/*.{cjs,js,mjs}'],
+      parser: '@typescript-eslint/parser',
       parserOptions: {
-        ecmaVersion: 'latest'
+        ecmaVersion: 'latest',
+        project: './tsconfig.json'
       },
-      plugins: ['prettier', 'jsdoc'],
+      plugins: [
+        '@typescript-eslint',
+        'import',
+        'jsdoc',
+        'n',
+        'prettier',
+        'promise'
+      ],
       rules: {
         'prettier/prettier': 'error',
         'no-console': 'error',
+
+        // Check import or require statements are A-Z ordered
+        'import/order': [
+          'error',
+          {
+            alphabetize: { order: 'asc' },
+            'newlines-between': 'always'
+          }
+        ],
 
         // Check for valid formatting
         'jsdoc/check-line-alignment': [
@@ -63,13 +90,41 @@ module.exports = {
         // JSDoc @returns description is optional
         'jsdoc/require-returns-description': 'off',
         'jsdoc/require-returns-type': 'off',
-        'jsdoc/require-returns': 'off'
+        'jsdoc/require-returns': 'off',
+
+        // Skip rules handled by import plugin
+        'n/no-extraneous-require': 'off',
+        'n/no-extraneous-import': 'off',
+        'n/no-missing-require': 'off',
+        'n/no-missing-import': 'off'
+      },
+      settings: {
+        'import/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ['./tsconfig.json']
+          }
+        }
       }
     },
     {
       files: ['**/*.{js,mjs}'],
       parserOptions: {
         sourceType: 'module'
+      },
+      rules: {
+        'import/extensions': [
+          'error',
+          'always',
+          {
+            ignorePackages: true,
+            pattern: {
+              cjs: 'always',
+              js: 'always',
+              mjs: 'always'
+            }
+          }
+        ]
       }
     },
     {

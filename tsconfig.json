@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "module": "NodeNext",
+    "noEmit": true,
+    "strict": true,
+    "target": "es2022",
+    "baseUrl": "./",
+    "paths": {
+      "~/*": ["./*"]
+    }
+  },
+  "include": ["**/*.cjs", "**/*.js", "**/*.mjs"],
+  "exclude": ["node_modules", "coverage", ".server"]
+}
