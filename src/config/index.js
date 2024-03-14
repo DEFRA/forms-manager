@@ -22,7 +22,7 @@ const config = convict({
   root: {
     doc: 'Project root',
     format: String,
-    default: path.normalize(path.join(__dirname, '..', '..'))
+    default: cwd()
   },
   appPathPrefix: {
     doc: 'Application url path prefix',
