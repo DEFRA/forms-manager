@@ -1,8 +1,10 @@
+const pkg = require('./package.json')
+
 /**
  * @type {import('eslint').ESLint.ConfigData}
  */
 module.exports = {
-  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage'],
+  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage', '.eslintrc.cjs'],
   overrides: [
     {
       extends: [
@@ -13,13 +15,24 @@ module.exports = {
         'plugin:n/recommended',
         'plugin:prettier/recommended',
         'plugin:promise/recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/stylistic-type-checked',
         'prettier'
       ],
       files: ['**/*.{cjs,js,mjs}'],
+      parser: '@typescript-eslint/parser',
       parserOptions: {
-        ecmaVersion: 'latest'
+        ecmaVersion: 'latest',
+        project: './tsconfig.json'
       },
-      plugins: ['import', 'jsdoc', 'n', 'prettier', 'promise'],
+      plugins: [
+        '@typescript-eslint',
+        'import',
+        'jsdoc',
+        'n',
+        'prettier',
+        'promise'
+      ],
       rules: {
         'prettier/prettier': 'error',
         'no-console': 'error',
@@ -75,6 +88,14 @@ module.exports = {
         'n/no-extraneous-import': 'off',
         'n/no-missing-require': 'off',
         'n/no-missing-import': 'off'
+      },
+      settings: {
+        'import/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ['./tsconfig.json']
+          }
+        }
       }
     },
     {
