@@ -38,7 +38,7 @@ export async function listForms() {
 export const getFormMetadata = async (formId) => {
   const formMetadataFilename = getFormMetadataFilename(formId)
   const value = await readFile(formMetadataFilename)
-  return JSON.parse(value)
+  return JSON.parse(value.toString())
 }
 
 /**
