@@ -2,16 +2,8 @@
  * @type {import('@babel/core').TransformOptions}
  */
 module.exports = {
-  presets: [
-    [
-      '@babel/preset-env',
-      {
-        targets: {
-          node: '20'
-        }
-      }
-    ]
-  ],
+  browserslistEnv: 'node',
+  presets: ['@babel/preset-env'],
   plugins: [
     [
       'module-resolver',
