@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
 
-import { listForms } from './form-metadata-repository.js'
+import { listForms, getFormMetadata } from './form-metadata-repository.js'
 
 const formDirectory = '/path/to/dummy/directory'
 
@@ -15,7 +15,7 @@ describe('#listForms', () => {
   test('Should return an empty array if no forms found', async () => {
     jest.mocked(readdir).mockResolvedValue([])
 
-    const result = await listForms(formDirectory)
+    const result = await listForms()
 
     expect(result).toEqual([])
   })
@@ -33,19 +33,11 @@ describe('#listForms', () => {
     jest.mocked(readFile).mockResolvedValueOnce(form1Metadata)
     jest.mocked(readFile).mockResolvedValueOnce(form2Metadata)
 
-    const result = await listForms(formDirectory)
+    const result = await listForms()
 
-    expect(result).toEqual([
-      JSON.parse(form1Metadata),
-      JSON.parse(form2Metadata)
-    ])
-    expect(readdir).toHaveBeenCalledWith(formDirectory)
-    expect(readFile).toHaveBeenCalledWith(
-      formDirectory + '/form1-metadata.json'
-    )
-    expect(readFile).toHaveBeenCalledWith(
-      formDirectory + '/form2-metadata.json'
-    )
+    expect(result.length).toEqual(2)
+    expect(result[0].id).toEqual('form1')
+    expect(result[1].id).toEqual('form2')
   })
 
   test('Should ignore files without "-metadata.json" suffix', async () => {
@@ -59,15 +51,39 @@ describe('#listForms', () => {
       })
     )
 
-    const result = await listForms(formDirectory)
+    const result = await listForms()
 
-    expect(result).toEqual([{ id: 'form1', name: 'Form 1' }])
-    expect(readdir).toHaveBeenCalledWith(formDirectory)
-    expect(readFile).toHaveBeenCalledWith(
-      formDirectory + '/form1-metadata.json'
-    )
-    expect(readFile).not.toHaveBeenCalledWith(
-      formDirectory + '/form2-metadata.json'
-    )
+    expect(result.length).toEqual(1)
+    expect(result[0].id).toEqual('form1')
+  })
+})
+
+describe('#getFormMetadata', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('Should return the form metadata', async () => {
+    const formId = 'form1'
+    const formMetadataFilename = formDirectory + '/form1-metadata.json'
+    const formMetadata = '{ "id": "form1", "name": "Form 1" }'
+
+    jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
+
+    const result = await getFormMetadata(formId)
+
+    expect(result).toEqual(JSON.parse(formMetadata))
+    expect(readFile).toHaveBeenCalledWith(formMetadataFilename, {
+      encoding: 'utf8'
+    })
+  })
+
+  test('Should throw an error if form malformed', async () => {
+    const formId = 'form1'
+    const formMetadata = '{ {{{{'
+
+    jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
+
+    await expect(getFormMetadata(formId)).rejects.toThrow(SyntaxError)
   })
 })
