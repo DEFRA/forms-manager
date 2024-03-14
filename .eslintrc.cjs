@@ -81,6 +81,20 @@ module.exports = {
       files: ['**/*.{js,mjs}'],
       parserOptions: {
         sourceType: 'module'
+      },
+      rules: {
+        'import/extensions': [
+          'error',
+          'always',
+          {
+            ignorePackages: true,
+            pattern: {
+              cjs: 'always',
+              js: 'always',
+              mjs: 'always'
+            }
+          }
+        ]
       }
     },
     {
