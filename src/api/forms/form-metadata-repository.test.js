@@ -3,11 +3,7 @@ import { listForms } from './form-metadata-repository'
 
 const formDirectory = '/path/to/dummy/directory'
 
-jest.mock('node:fs/promises', () => ({
-  readdir: jest.fn(),
-  readFile: jest.fn()
-}))
-
+jest.mock('node:fs/promises')
 jest.mock('~/src/config', () => ({
   config: {
     get: jest.fn(() => formDirectory)
@@ -15,12 +11,8 @@ jest.mock('~/src/config', () => ({
 }))
 
 describe('#listForms', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
   test('Should return an empty array if no forms found', async () => {
-    readdir.mockResolvedValue([])
+    jest.mocked(readdir).mockResolvedValue([])
 
     const result = await listForms(formDirectory)
 
@@ -29,15 +21,16 @@ describe('#listForms', () => {
 
   test('Should return an array of form metadata', async () => {
     const files = ['form1-metadata.json', 'form2-metadata.json']
-    const form1Metadata = '{ "id": "form1", "name": "Form 1" }'
-    const form2Metadata = '{ "id": "form2", "name": "Form 2" }'
 
-    readFile.mockResolvedValue(form1Metadata)
-    readFile.mockResolvedValue(form2Metadata)
+    const form1Metadata = JSON.stringify({ id: 'form1', name: 'Form 1' })
+    const form2Metadata = JSON.stringify({ id: 'form2', name: 'Form 2' })
 
-    readdir.mockResolvedValue(files)
-    readFile.mockResolvedValueOnce(form1Metadata)
-    readFile.mockResolvedValueOnce(form2Metadata)
+    jest.mocked(readFile).mockResolvedValue(form1Metadata)
+    jest.mocked(readFile).mockResolvedValue(form2Metadata)
+
+    jest.mocked(readdir).mockResolvedValue(files)
+    jest.mocked(readFile).mockResolvedValueOnce(form1Metadata)
+    jest.mocked(readFile).mockResolvedValueOnce(form2Metadata)
 
     const result = await listForms(formDirectory)
 
@@ -57,8 +50,13 @@ describe('#listForms', () => {
   test('Should ignore files without "-metadata.json" suffix', async () => {
     const files = ['form1-metadata.json', 'form2.json']
 
-    readdir.mockResolvedValue(files)
-    readFile.mockResolvedValue('{ "id": "form1", "name": "Form 1" }')
+    jest.mocked(readdir).mockResolvedValue(files)
+    jest.mocked(readFile).mockResolvedValue(
+      JSON.stringify({
+        id: 'form1',
+        name: 'Form 1'
+      })
+    )
 
     const result = await listForms(formDirectory)
 
