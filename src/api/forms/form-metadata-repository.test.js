@@ -21,10 +21,10 @@ describe('#listForms', () => {
   })
 
   test('Should return an array of form metadata', async () => {
-    const files = ['form1-metadata.json', 'form2-metadata.json']
+    const files = ['form-1-metadata.json', 'form-2-metadata.json']
 
-    const form1Metadata = JSON.stringify({ id: 'form1', name: 'Form 1' })
-    const form2Metadata = JSON.stringify({ id: 'form2', name: 'Form 2' })
+    const form1Metadata = JSON.stringify({ id: 'form-1', title: 'Form 1' })
+    const form2Metadata = JSON.stringify({ id: 'form-2', title: 'Form 2' })
 
     jest.mocked(readFile).mockResolvedValue(form1Metadata)
     jest.mocked(readFile).mockResolvedValue(form2Metadata)
@@ -36,25 +36,25 @@ describe('#listForms', () => {
     const result = await listForms()
 
     expect(result.length).toEqual(2)
-    expect(result[0].id).toEqual('form1')
-    expect(result[1].id).toEqual('form2')
+    expect(result[0].id).toEqual('form-1')
+    expect(result[1].id).toEqual('form-2')
   })
 
   test('Should ignore files without "-metadata.json" suffix', async () => {
-    const files = ['form1-metadata.json', 'form2.json']
+    const files = ['form-1-metadata.json', 'form-2.json']
 
     jest.mocked(readdir).mockResolvedValue(files)
     jest.mocked(readFile).mockResolvedValue(
       JSON.stringify({
-        id: 'form1',
-        name: 'Form 1'
+        id: 'form-1',
+        title: 'Form 1'
       })
     )
 
     const result = await listForms()
 
     expect(result.length).toEqual(1)
-    expect(result[0].id).toEqual('form1')
+    expect(result[0].id).toEqual('form-1')
   })
 })
 
@@ -64,9 +64,9 @@ describe('#getFormMetadata', () => {
   })
 
   test('Should return the form metadata', async () => {
-    const formId = 'form1'
-    const formMetadataFilename = formDirectory + '/form1-metadata.json'
-    const formMetadata = '{ "id": "form1", "name": "Form 1" }'
+    const formId = 'form-1'
+    const formMetadataFilename = formDirectory + '/form-1-metadata.json'
+    const formMetadata = '{ "id": "form-1", "title": "Form 1" }'
 
     jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
 
@@ -79,7 +79,7 @@ describe('#getFormMetadata', () => {
   })
 
   test('Should throw an error if form malformed', async () => {
-    const formId = 'form1'
+    const formId = 'form-1'
     const formMetadata = '{ {{{{'
 
     jest.mocked(readFile).mockResolvedValueOnce(formMetadata)

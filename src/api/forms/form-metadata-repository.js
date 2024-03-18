@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'node:fs/promises'
+import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { config } from '~/src/config/index.js'
@@ -39,6 +39,28 @@ export async function getFormMetadata(formId) {
   const formMetadataFilename = getFormMetadataFilename(formId)
   const value = await readFile(formMetadataFilename, { encoding: 'utf8' })
   return JSON.parse(value)
+}
+
+/**
+ * @param {string} formId
+ * @returns {Promise<boolean>} - whether the form exists
+ */
+export async function exists(formId) {
+  // crude check as we'll move to mongo ASAP
+  return getFormMetadata(formId)
+    .then(() => true)
+    .catch(() => false)
+}
+
+/**
+ * Adds a form to the Form Store
+ * @param {FormConfiguration} formConfiguration - form configuration
+ * @returns {Promise<void>}
+ */
+export async function createFormMetadata(formConfiguration) {
+  const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
+  const formMetadataString = JSON.stringify(formConfiguration)
+  await writeFile(formMetadataFilename, formMetadataString, 'utf8')
 }
 
 /**

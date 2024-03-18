@@ -1,4 +1,4 @@
-import { listForms, getForm } from '~/src/api/forms/service.js'
+import { listForms, getForm, createForm } from '~/src/api/forms/service.js'
 
 /**
  * @satisfies {ServerRegisterPlugin}
@@ -20,6 +20,17 @@ export const forms = {
           path: '/forms/{id}',
           async handler(request) {
             return getForm(request.params.id)
+          }
+        },
+        {
+          method: 'POST',
+          path: '/forms',
+          handler: async (request) => {
+            const formConfiguration = await createForm(request.payload)
+
+            return {
+              id: formConfiguration.id
+            }
           }
         }
       ])
