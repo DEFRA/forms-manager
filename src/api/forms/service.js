@@ -1,6 +1,9 @@
 import { readFile } from 'node:fs/promises'
 
-import { createFormDefinition } from './form-definition-repository.js'
+import {
+  createFormDefinition,
+  getFormDefinition as getFormDefinitionFromRepository
+} from './form-definition-repository.js'
 import {
   createFormMetadata,
   listForms as listFormMetadataEntries,
@@ -42,17 +45,26 @@ export async function createForm(formConfiguration) {
  * Lists the available forms
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
-export function listForms() {
+export async function listForms() {
   return listFormMetadataEntries()
 }
 
 /**
- * Retrieves a form (metadata + form definition)
+ * Retrieves a form configuration
  * @param {string} formId - ID of the form
  * @returns {Promise<FormConfiguration>} - form configuration
  */
-export function getForm(formId) {
+export async function getForm(formId) {
   return getFormMetadata(formId)
+}
+
+/**
+ * Retrieves the form definition for a given form ID
+ * @param {string} formId - the ID of the form
+ * @returns {Promise<string>} - form definition JSON content
+ */
+export async function getFormDefinition(formId) {
+  return getFormDefinitionFromRepository(formId)
 }
 
 /**

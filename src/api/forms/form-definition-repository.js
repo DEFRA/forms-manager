@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises'
+import { writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { config } from '~/src/config/index.js'
@@ -27,4 +27,15 @@ export async function createFormDefinition(formConfiguration, formDefinition) {
 
   // Write formDefinition to file
   await writeFile(formDefinitionFilename, formDefinitionString)
+}
+
+/**
+ * Retrieves the form definition for a given form ID
+ * @param {string} formId - the ID of the form
+ * @returns {Promise<string>} - form definition JSON content
+ */
+export async function getFormDefinition(formId) {
+  return await readFile(getFormDefinitionFilename(formId), 'utf-8').then(
+    JSON.parse
+  )
 }
