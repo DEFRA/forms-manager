@@ -68,14 +68,16 @@ export async function getFormDefinition(formId) {
 
 /**
  * Given a form title, returns the ID of the form.
+ * E.g. "Hello - world" -> "hello-world".
  * @param {string} formTitle - title of the form
  * @returns {string} - ID of the form
  */
 function formTitleToId(formTitle) {
   return formTitle
     .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, '')
-    .replace(/ /g, '-')
+    .replace(/[^a-z0-9 ]/g, '') // remove any non-alphanumeric characters
+    .replace(/\s+/g, ' ') // replace any whitespaces with a single space
+    .replace(/ /g, '-') // replace any spaces with a hyphen
 }
 
 /**
