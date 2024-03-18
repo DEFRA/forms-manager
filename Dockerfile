@@ -13,7 +13,7 @@ EXPOSE ${PORT} ${PORT_DEBUG}
 
 COPY --chown=node:node package.json install_model.sh ./
 
-RUN npm install --ignore-scripts
+RUN npm ci --ignore-scripts
 RUN npm run postinstall
 
 COPY --chown=node:node . .
