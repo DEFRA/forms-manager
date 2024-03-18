@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs'
 
+import { Schema } from '@defra/forms-model'
+
 import {
   createFormDefinition,
   getFormDefinition as getFormDefinitionFromRepository
@@ -11,9 +13,7 @@ import {
   getFormMetadata
 } from './form-metadata-repository.js'
 
-const emptyForm = JSON.parse(
-  readFileSync(new URL('./empty-form.json', import.meta.url).pathname, 'utf-8')
-)
+const emptyForm = retrieveEmptyForm()
 
 /**
  * Adds an empty form
@@ -78,6 +78,29 @@ function formTitleToId(formTitle) {
     .replace(/[^a-z0-9 ]/g, '') // remove any non-alphanumeric characters
     .replace(/\s+/g, ' ') // replace any whitespaces with a single space
     .replace(/ /g, '-') // replace any spaces with a hyphen
+}
+
+/**
+ * Retrieves the empty form configuration
+ * @returns {object} - the empty form configuration
+ */
+function retrieveEmptyForm() {
+  const emptyForm = JSON.parse(
+    readFileSync(
+      new URL('./empty-form.json', import.meta.url).pathname,
+      'utf-8'
+    )
+  )
+
+  const validationResult = Schema.validate(emptyForm)
+
+  if (validationResult.error) {
+    throw new Error(
+      'Invalid form schema provided. Please check the empty-form.json file.'
+    )
+  }
+
+  return emptyForm
 }
 
 /**
