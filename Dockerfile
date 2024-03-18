@@ -11,10 +11,9 @@ ARG PORT_DEBUG
 ENV PORT ${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
-COPY --chown=node:node package.json install_model.sh ./
+COPY --chown=node:node packag*.json ./
 
-RUN npm install --ignore-scripts
-RUN npm run postinstall
+RUN npm ci
 
 COPY --chown=node:node . .
 RUN npm run build
@@ -35,7 +34,7 @@ USER node
 COPY --from=development /home/node/package*.json ./
 COPY --from=development /home/node/.server ./.server/
 
-RUN npm ci --ignore-scripts --omit=dev
+RUN npm ci --omit=dev
 
 ARG PORT
 ENV PORT ${PORT}
