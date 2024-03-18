@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
 
 import {
   createFormDefinition,
@@ -11,14 +11,13 @@ import {
   getFormMetadata
 } from './form-metadata-repository.js'
 
-const emptyForm = await readFile(
-  new URL('empty-form.json', import.meta.url).pathname,
-  'utf-8'
-).then(JSON.parse) // Fix file path
+const emptyForm = JSON.parse(
+  readFileSync(new URL('./empty-form.json', import.meta.url).pathname, 'utf-8')
+)
 
 /**
  * Adds an empty form
- * @param {FormConfiguration} formConfiguration - the desired form configuration to save
+ * @param {import('../types.js').FormConfigurationInput} formConfiguration - the desired form configuration to save
  * @returns {Promise<FormConfiguration>} - the saved form configuration
  */
 export async function createForm(formConfiguration) {
