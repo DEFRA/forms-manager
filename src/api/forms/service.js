@@ -3,6 +3,10 @@ import { readFileSync } from 'node:fs'
 import { Schema } from '@defra/forms-model'
 
 import {
+  InvalidFormDefinitionError,
+  InvalidFormMetadataError
+} from './errors.js'
+import {
   createFormDefinition,
   getFormDefinition as getFormDefinitionFromRepository
 } from './form-definition-repository.js'
@@ -13,17 +17,17 @@ import {
   getFormMetadata
 } from './form-metadata-repository.js'
 
-const emptyForm = retrieveEmptyForm()
-
 /**
  * Adds an empty form
- * @param {import('../types.js').FormConfigurationInput} formConfiguration - the desired form configuration to save
+ * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
  * @returns {Promise<FormConfiguration>} - the saved form configuration
  */
-export async function createForm(formConfiguration) {
-  const formId = formTitleToId(formConfiguration.title)
+export async function createForm(formConfigurationInput) {
+  const emptyForm = retrieveEmptyForm()
+  const formId = formTitleToId(formConfigurationInput.title)
 
-  if (formConfiguration.id) {
+  // @ts-expect-error safety check
+  if (formConfigurationInput.id) {
     throw new Error(`Form ID cannot be manually set. Please remove this field.`)
   }
 
@@ -31,13 +35,22 @@ export async function createForm(formConfiguration) {
     throw new Error(`Form with ID ${formId} already exists`)
   }
 
-  const shallowCloneForm = { ...emptyForm }
-  formConfiguration.id = formId
-  shallowCloneForm.formId = formId
+  const formConfiguration = { ...formConfigurationInput, id: formId }
+  const shallowCloneForm = { ...emptyForm, name: formConfiguration.title }
 
-  return createFormDefinition(formConfiguration, shallowCloneForm)
-    .then(() => createFormMetadata(formConfiguration))
-    .then(() => formConfiguration)
+  const validationResult = Schema.validate(shallowCloneForm)
+  if (validationResult.error) {
+    throw new InvalidFormDefinitionError(validationResult.error.toString())
+  }
+
+  try {
+    await createFormDefinition(formConfiguration, shallowCloneForm)
+    await createFormMetadata(formConfiguration)
+    return formConfiguration
+  } catch (error) {
+    // @ts-expect-error it's an error
+    throw new InvalidFormMetadataError(error)
+  }
 }
 
 /**
@@ -95,7 +108,7 @@ function retrieveEmptyForm() {
   const validationResult = Schema.validate(emptyForm)
 
   if (validationResult.error) {
-    throw new Error(
+    throw new InvalidFormDefinitionError(
       'Invalid form schema provided. Please check the empty-form.json file.'
     )
   }
@@ -105,4 +118,5 @@ function retrieveEmptyForm() {
 
 /**
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
+ * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
  */

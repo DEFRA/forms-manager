@@ -9,5 +9,5 @@
 /**
  * @typedef {object} FormConfiguration
  * @augments FormConfigurationInput
- * @property {string} id - The unique ID of the form
+ * @property {string} id - The id of the form
  */
