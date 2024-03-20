@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 
 import { Schema } from '@defra/forms-model'
 
@@ -23,7 +23,7 @@ import {
  * @returns {Promise<FormConfiguration>} - the saved form configuration
  */
 export async function createForm(formConfigurationInput) {
-  const emptyForm = retrieveEmptyForm()
+  const emptyForm = await retrieveEmptyForm()
   const formId = formTitleToId(formConfigurationInput.title)
 
   // @ts-expect-error safety check
@@ -95,25 +95,35 @@ function formTitleToId(formTitle) {
 
 /**
  * Retrieves the empty form configuration
- * @returns {object} - the empty form configuration
+ * @returns {Promise<object>} - the empty form configuration
  */
-function retrieveEmptyForm() {
-  const emptyForm = JSON.parse(
-    readFileSync(
-      new URL('./empty-form.json', import.meta.url).pathname,
-      'utf-8'
-    )
+async function retrieveEmptyForm() {
+  const fileContent = await readFile(
+    new URL('./empty-form.json', import.meta.url).pathname,
+    'utf-8'
   )
 
-  const validationResult = Schema.validate(emptyForm)
+  try {
+    const emptyForm = JSON.parse(fileContent)
 
-  if (validationResult.error) {
-    throw new InvalidFormDefinitionError(
-      'Invalid form schema provided. Please check the empty-form.json file.'
-    )
+    const validationResult = Schema.validate(emptyForm)
+
+    if (validationResult.error) {
+      throw new InvalidFormDefinitionError(
+        'Invalid form schema provided. Please check the empty-form.json file.'
+      )
+    }
+
+    return emptyForm
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new InvalidFormDefinitionError(
+        'Failed to parse empty-form.json as JSON. Please validate contents.'
+      )
+    }
+
+    throw error
   }
-
-  return emptyForm
 }
 
 /**
