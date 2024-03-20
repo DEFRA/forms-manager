@@ -1,5 +1,6 @@
 import path from 'path'
 
+import Boom from '@hapi/boom'
 import hapi from '@hapi/hapi'
 
 import { router } from '~/src/api/router.js'
@@ -59,6 +60,34 @@ export async function createServer() {
   })
 
   await server.register(populateDb)
+
+  server.ext('onPreResponse', (request, h) => {
+    const response = request.response
+    let boomError
+
+    if (response instanceof Error) {
+      if (Boom.isBoom(response) && response.isServer) {
+        boomError = Boom.boomify(request.response)
+      } else if (response.isBoom) {
+        boomError = Response
+      }
+    } else {
+      return h.continue
+    }
+
+    if (response.statusCode) {
+      boomError.output.payload.statusCode = response.statusCode
+    }
+
+    if (response.message) {
+      boomError.output.payload.message = response.message
+      delete boomError.output.payload.error
+    }
+
+    return h
+      .response(boomError.output.payload)
+      .code(boomError.output.statusCode)
+  })
 
   return server
 }

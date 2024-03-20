@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { Schema } from '@defra/forms-model'
 
 import {
+  FormAlreadyExistsError,
   InvalidFormDefinitionError,
   InvalidFormMetadataError
 } from './errors.js'
@@ -32,7 +33,7 @@ export async function createForm(formConfigurationInput) {
   }
 
   if (await formMetadataExists(formId)) {
-    throw new Error(`Form with ID ${formId} already exists`)
+    throw new FormAlreadyExistsError(formId)
   }
 
   const formConfiguration = { ...formConfigurationInput, id: formId }
