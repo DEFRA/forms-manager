@@ -27,11 +27,6 @@ export async function createForm(formConfigurationInput) {
   const emptyForm = await retrieveEmptyForm()
   const formId = formTitleToId(formConfigurationInput.title)
 
-  // @ts-expect-error safety check
-  if (formConfigurationInput.id) {
-    throw new Error(`Form ID cannot be manually set. Please remove this field.`)
-  }
-
   if (await formMetadataExists(formId)) {
     throw new FormAlreadyExistsError(formId)
   }

@@ -77,27 +77,6 @@ describe('createForm', () => {
     expect(result).toEqual(expectedFormConfigurationOutput)
   })
 
-  it('should throw an error if form ID is manually set', async () => {
-    jest.mocked(exists).mockResolvedValueOnce(true)
-    jest.mocked(createFormMetadata).mockResolvedValueOnce(Promise.resolve())
-    jest.mocked(createFormDefinition).mockResolvedValueOnce(Promise.resolve())
-    jest
-      .mocked(readFile)
-      .mockResolvedValueOnce(Promise.resolve(getValidFormDefinition()))
-
-    const formConfiguration = {
-      id: 'my-form',
-      title: 'My Form',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
-    }
-
-    await expect(createForm(formConfiguration)).rejects.toThrow(
-      'Form ID cannot be manually set. Please remove this field.'
-    )
-  })
-
   it('should throw an error if form with the same ID already exists', async () => {
     jest.mocked(exists).mockResolvedValueOnce(true)
     jest.mocked(createFormMetadata).mockResolvedValueOnce(Promise.resolve())
