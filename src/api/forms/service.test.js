@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
-import { InvalidFormDefinitionError } from './errors.js'
+import { FormAlreadyExistsError, InvalidFormDefinitionError } from './errors.js'
 import { createFormDefinition } from './form-definition-repository.js'
 import { exists, createFormMetadata } from './form-metadata-repository.js'
 import { createForm } from './service.js'
@@ -93,7 +93,7 @@ describe('createForm', () => {
     }
 
     await expect(createForm(formConfiguration)).rejects.toThrow(
-      `Form with ID my-form already exists`
+      FormAlreadyExistsError
     )
   })
 
