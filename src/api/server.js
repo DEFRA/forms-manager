@@ -70,6 +70,7 @@ export async function createServer() {
       if (Boom.isBoom(response)) {
         response.output.payload.statusCode = response.statusCode
         response.output.payload.message = response.message
+        response.output.payload.error = response.name
       }
     }
 
