@@ -42,12 +42,11 @@ export class InvalidFormMetadataError extends ApplicationError {
    * Constructs the error
    * @param {Error} cause
    */
-  constructor(cause) {
+  constructor() {
     super(
       'InvalidFormMetadataError',
       400,
-      'The requested operation resulted in a JSON schema that failed validation',
-      cause
+      'The requested operation resulted in a JSON schema that failed validation'
     )
   }
 }

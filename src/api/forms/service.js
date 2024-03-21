@@ -31,7 +31,11 @@ export async function createForm(formConfigurationInput) {
     throw new FormAlreadyExistsError(formId)
   }
 
+  // construct the new form config. the ID is always set server-side.
   const formConfiguration = { ...formConfigurationInput, id: formId }
+
+  // create the form object. At this point, we're just creating a blank
+  // form following the one-page template, we just set the title per the user request.
   const shallowCloneForm = { ...emptyForm, name: formConfiguration.title }
 
   const validationResult = Schema.validate(shallowCloneForm)
@@ -44,8 +48,7 @@ export async function createForm(formConfigurationInput) {
     await createFormMetadata(formConfiguration)
     return formConfiguration
   } catch (error) {
-    // @ts-expect-error it's an error
-    throw new InvalidFormMetadataError(error)
+    throw new InvalidFormMetadataError()
   }
 }
 
