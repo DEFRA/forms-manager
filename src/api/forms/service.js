@@ -2,10 +2,11 @@ import { readFile } from 'node:fs/promises'
 
 import { Schema } from '@defra/forms-model'
 
+import { createLogger } from './../../helpers/logging/logger.js'
 import {
+  FailedCreationOperationError,
   FormAlreadyExistsError,
-  InvalidFormDefinitionError,
-  InvalidFormMetadataError
+  InvalidFormDefinitionError
 } from './errors.js'
 import {
   createFormDefinition,
@@ -18,10 +19,15 @@ import {
   getFormMetadata
 } from './form-metadata-repository.js'
 
+const logger = createLogger()
+
 /**
  * Adds an empty form
  * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
  * @returns {Promise<FormConfiguration>} - the saved form configuration
+ * @throws {FormAlreadyExistsError} - if the form already exists
+ * @throws {InvalidFormDefinitionError} - if the form definition is invalid
+ * @throws {FailedCreationOperationError} - if the form metadata/def couldn't be persisted
  */
 export async function createForm(formConfigurationInput) {
   const emptyForm = await retrieveEmptyForm()
@@ -46,10 +52,12 @@ export async function createForm(formConfigurationInput) {
   try {
     await createFormDefinition(formConfiguration, shallowCloneForm)
     await createFormMetadata(formConfiguration)
-    return formConfiguration
   } catch (error) {
-    throw new InvalidFormMetadataError()
+    logger.error(error, "Failed to persist, couldn't create form.")
+    throw new FailedCreationOperationError()
   }
+
+  return formConfiguration
 }
 
 /**
@@ -95,6 +103,7 @@ function formTitleToId(formTitle) {
 /**
  * Retrieves the empty form configuration
  * @returns {Promise<object>} - the empty form configuration
+ * @throws {InvalidFormDefinitionError} - if the base form definition is invalid
  */
 async function retrieveEmptyForm() {
   const fileContent = await readFile(

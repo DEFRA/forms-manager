@@ -37,16 +37,15 @@ export class InvalidFormDefinitionError extends ApplicationError {
 /**
  * Indicates the form provided does not match the Defra Forms JSON schema.
  */
-export class InvalidFormMetadataError extends ApplicationError {
+export class FailedCreationOperationError extends ApplicationError {
   /**
    * Constructs the error
-   * @param {Error} cause
    */
   constructor() {
     super(
-      'InvalidFormMetadataError',
-      400,
-      'The requested operation resulted in a JSON schema that failed validation'
+      'FailedCreationOperationError',
+      500,
+      'Failed to persist the form metadata and/or definition.'
     )
   }
 }

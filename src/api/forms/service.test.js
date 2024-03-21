@@ -1,6 +1,10 @@
 import { readFile } from 'node:fs/promises'
 
-import { FormAlreadyExistsError, InvalidFormDefinitionError } from './errors.js'
+import {
+  FailedCreationOperationError,
+  FormAlreadyExistsError,
+  InvalidFormDefinitionError
+} from './errors.js'
 import { createFormDefinition } from './form-definition-repository.js'
 import { exists, createFormMetadata } from './form-metadata-repository.js'
 import { createForm } from './service.js'
@@ -114,6 +118,49 @@ describe('createForm', () => {
 
     await expect(createForm(formConfiguration)).rejects.toThrow(
       InvalidFormDefinitionError
+    )
+  })
+
+  it('should throw an error when writing for metadata fails', async () => {
+    jest.mocked(exists).mockResolvedValueOnce(false)
+    jest
+      .mocked(readFile)
+      .mockResolvedValueOnce(Promise.resolve(getValidFormDefinition()))
+    jest.mocked(createFormMetadata).mockImplementation(() => {
+      throw new Error()
+    })
+    jest.mocked(createFormDefinition).mockResolvedValueOnce(Promise.resolve())
+
+    const formConfiguration = {
+      title: 'My Form',
+      organisation: '',
+      teamName: '',
+      teamEmail: ''
+    }
+
+    await expect(createForm(formConfiguration)).rejects.toThrow(
+      FailedCreationOperationError
+    )
+  })
+
+  it('should throw an error when writing form def fails', async () => {
+    jest.mocked(exists).mockResolvedValueOnce(false)
+    jest
+      .mocked(readFile)
+      .mockResolvedValueOnce(Promise.resolve(getValidFormDefinition()))
+    jest.mocked(createFormDefinition).mockImplementation(() => {
+      throw new Error()
+    })
+
+    const formConfiguration = {
+      title: 'My Form',
+      organisation: '',
+      teamName: '',
+      teamEmail: ''
+    }
+
+    await expect(createForm(formConfiguration)).rejects.toThrow(
+      FailedCreationOperationError
     )
   })
 })
