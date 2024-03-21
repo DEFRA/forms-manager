@@ -3,6 +3,8 @@ import path from 'path'
 import Boom from '@hapi/boom'
 import hapi from '@hapi/hapi'
 
+import { ApplicationError } from './forms/errors.js'
+
 import { router } from '~/src/api/router.js'
 import { config } from '~/src/config/index.js'
 import { populateDb } from '~/src/helpers/db/populate-db.js'
@@ -63,30 +65,15 @@ export async function createServer() {
 
   server.ext('onPreResponse', (request, h) => {
     const response = request.response
-    let boomError
 
-    if (response instanceof Error) {
-      if (Boom.isBoom(response) && response.isServer) {
-        boomError = Boom.boomify(request.response)
-      } else if (response.isBoom) {
-        boomError = Response
+    if (response instanceof ApplicationError) {
+      if (Boom.isBoom(response)) {
+        response.output.payload.statusCode = response.statusCode
+        response.output.payload.message = response.message
       }
-    } else {
-      return h.continue
     }
 
-    if (response.statusCode) {
-      boomError.output.payload.statusCode = response.statusCode
-    }
-
-    if (response.message) {
-      boomError.output.payload.message = response.message
-      delete boomError.output.payload.error
-    }
-
-    return h
-      .response(boomError.output.payload)
-      .code(boomError.output.statusCode)
+    return h.continue
   })
 
   return server
