@@ -66,12 +66,11 @@ export async function createServer() {
   server.ext('onPreResponse', (request, h) => {
     const response = request.response
 
-    if (response instanceof ApplicationError) {
-      if (Boom.isBoom(response)) {
-        response.output.payload.statusCode = response.statusCode
-        response.output.payload.message = response.message
-        response.output.payload.error = response.name
-      }
+    if (response instanceof ApplicationError && Boom.isBoom(response)) {
+      response.output.statusCode = response.statusCode
+      response.output.payload.statusCode = response.statusCode
+      response.output.payload.message = response.message
+      response.output.payload.error = response.name
     }
 
     return h.continue
