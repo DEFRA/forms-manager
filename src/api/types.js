@@ -7,7 +7,10 @@
  */
 
 /**
- * @typedef {object} FormConfiguration
- * @augments FormConfigurationInput
+ * @typedef {object} IdModifier
  * @property {string} id - The id of the form
+ */
+
+/**
+ * @typedef {FormConfigurationInput & IdModifier} FormConfiguration
  */
