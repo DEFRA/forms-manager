@@ -35,7 +35,5 @@ export async function createFormDefinition(formConfiguration, formDefinition) {
  * @returns {Promise<string>} - form definition JSON content
  */
 export async function getFormDefinition(formId) {
-  return await readFile(getFormDefinitionFilename(formId), 'utf-8').then(
-    JSON.parse
-  )
+  return readFile(getFormDefinitionFilename(formId), 'utf-8').then(JSON.parse)
 }

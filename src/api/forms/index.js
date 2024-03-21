@@ -43,7 +43,7 @@ export const forms = {
           method: 'GET',
           path: '/forms/{id}/definition',
           handler: async (request) => {
-            return await getFormDefinition(request.params.id)
+            return getFormDefinition(request.params.id)
           }
         }
       ])
