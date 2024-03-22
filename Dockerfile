@@ -37,7 +37,7 @@ COPY --from=development /home/node/.server ./.server/
 RUN npm ci --omit=dev
 
 # temporary location for forms
-# TODO remove after ticket 
+# TODO remove after MongoDB implementation
 RUN mkdir /home/node/forms
 
 ARG PORT
