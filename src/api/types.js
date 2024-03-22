@@ -7,10 +7,10 @@
  */
 
 /**
- * @typedef {object} IdModifier
+ * @typedef {object} IdMixin
  * @property {string} id - The id of the form
  */
 
 /**
- * @typedef {FormConfigurationInput & IdModifier} FormConfiguration
+ * @typedef {FormConfigurationInput & IdMixin} FormConfiguration
  */
