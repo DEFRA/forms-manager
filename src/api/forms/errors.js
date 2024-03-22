@@ -2,21 +2,21 @@
  * Base class to support all application errors.
  */
 export class ApplicationError extends Error {
+  name = 'ApplicationError'
+  /**
+   * HTTP status code
+   * @type {number}
+   */
+  statusCode = 500
   /**
    * Constructs an error
-   * @param {string} name - name of the error
-   * @param {number} statusCode - the status code to report
    * @param {string} message - the message to report
-   * @param {Error | undefined} [cause] - a base error, if required
+   * @param {ErrorOptions & { statusCode?: number }} [options] - error options
    */
-  constructor(name, statusCode, message, cause = undefined) {
-    super()
-    this.name = name
-    this.statusCode = statusCode
-    this.message = message
-
-    if (cause) {
-      this.cause = cause
+  constructor(message, options = {}) {
+    super(message, options)
+    if (options?.statusCode) {
+      this.statusCode = options.statusCode
     }
   }
 }
@@ -25,28 +25,20 @@ export class ApplicationError extends Error {
  * Indicates the form provided does not match the Defra Forms JSON schema.
  */
 export class InvalidFormDefinitionError extends ApplicationError {
-  /**
-   * Constructs the error
-   * @param {string} message
-   */
-  constructor(message) {
-    super('InvalidFormDefinitionError', 500, message)
-  }
+  name = 'InvalidFormDefinitionError'
 }
 
 /**
  * Indicates the form provided does not match the Defra Forms JSON schema.
  */
 export class FailedCreationOperationError extends ApplicationError {
+  name = 'FailedCreationOperationError'
   /**
-   * Constructs the error
+   * Constructs an error
+   * @param {ErrorOptions} [options]
    */
-  constructor() {
-    super(
-      'FailedCreationOperationError',
-      500,
-      'Failed to persist the form metadata and/or definition.'
-    )
+  constructor(options) {
+    super('Failed to persist the form metadata and/or definition.', options)
   }
 }
 
@@ -54,15 +46,16 @@ export class FailedCreationOperationError extends ApplicationError {
  * Indicates the form already exists so cannot be created again.
  */
 export class FormAlreadyExistsError extends ApplicationError {
+  name = 'FormAlreadyExistsError'
   /**
-   * Constructs the error
+   * Constructs an error
    * @param {string} formId
+   * @param {ErrorOptions} [options]
    */
-  constructor(formId) {
-    super(
-      'FormAlreadyExistsError',
-      400,
-      `Form with ID ${formId} already exists`
-    )
+  constructor(formId, options = {}) {
+    super(`Form with ID ${formId} already exists`, {
+      ...options,
+      statusCode: 400
+    })
   }
 }
