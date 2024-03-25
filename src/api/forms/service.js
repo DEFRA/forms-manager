@@ -36,9 +36,11 @@ export async function createForm(formConfigurationInput) {
   // form following the one-page template, we just set the title per the user request.
   const shallowCloneForm = { ...emptyForm, name: formConfiguration.title }
 
-  const validationResult = Schema.validate(shallowCloneForm)
-  if (validationResult.error) {
-    throw new InvalidFormDefinitionError(validationResult.error.toString())
+  const { error } = Schema.validate(shallowCloneForm)
+  if (error) {
+    throw new InvalidFormDefinitionError(error.message, {
+      cause: error
+    })
   }
 
   try {
