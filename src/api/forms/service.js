@@ -115,14 +115,11 @@ async function retrieveEmptyForm() {
     }
 
     return emptyForm
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new InvalidFormDefinitionError(
-        'Failed to parse empty-form.json as JSON. Please validate contents.'
-      )
-    }
-
-    throw error
+  } catch (cause) {
+    throw new InvalidFormDefinitionError(
+      'Failed to parse empty-form.json as JSON. Please validate contents.',
+      { cause }
+    )
   }
 }
 
