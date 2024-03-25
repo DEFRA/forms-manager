@@ -15,7 +15,7 @@ module.exports = {
         'plugin:n/recommended',
         'plugin:prettier/recommended',
         'plugin:promise/recommended',
-        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/strict-type-checked',
         'plugin:@typescript-eslint/stylistic-type-checked',
         'prettier'
       ],
@@ -23,7 +23,8 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaVersion: 'latest',
-        project: './tsconfig.json'
+        project: true,
+        tsconfigRootDir: __dirname
       },
       plugins: [
         '@typescript-eslint',
