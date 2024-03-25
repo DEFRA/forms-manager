@@ -35,10 +35,9 @@ export async function list() {
  * @param {string} formId - ID of the form
  * @returns {Promise<FormConfiguration>} - form configuration
  */
-export async function get(formId) {
-  const formMetadataFilename = getFormMetadataFilename(formId)
-  const value = await readFile(formMetadataFilename, { encoding: 'utf8' })
-  return JSON.parse(value)
+export function get(formId) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
+  return readFile(getFormMetadataFilename(formId), 'utf-8').then(JSON.parse)
 }
 
 /**

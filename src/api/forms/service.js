@@ -106,6 +106,7 @@ async function retrieveEmptyForm() {
   )
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow JSON type 'any'
     const emptyForm = /** @type {import('./empty-form.json')} */ (
       JSON.parse(fileContent)
     )

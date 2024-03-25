@@ -73,9 +73,7 @@ describe('#getFormMetadata', () => {
     const result = await get(formId)
 
     expect(result).toEqual(JSON.parse(formMetadata))
-    expect(readFile).toHaveBeenCalledWith(formMetadataFilename, {
-      encoding: 'utf8'
-    })
+    expect(readFile).toHaveBeenCalledWith(formMetadataFilename, 'utf-8')
   })
 
   test('Should throw an error if form malformed', async () => {

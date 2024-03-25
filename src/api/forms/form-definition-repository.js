@@ -35,6 +35,7 @@ export function create(formConfiguration, formDefinition) {
  * @returns {Promise<FormDefinition>} - form definition JSON content
  */
 export function get(formId) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
   return readFile(getFormDefinitionFilename(formId), 'utf-8').then(JSON.parse)
 }
 
