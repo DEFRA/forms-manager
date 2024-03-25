@@ -20,14 +20,14 @@ const getFormMetadataFilename = (formId) => {
  * Retrieves a file from the form store
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
-export async function listForms() {
+export async function list() {
   const files = await readdir(formDirectory)
 
   const formIds = files
     .filter((fileName) => fileName.includes('-metadata.json'))
     .map((fileName) => fileName.replace('-metadata.json', ''))
 
-  return Promise.all(formIds.map(getFormMetadata))
+  return Promise.all(formIds.map(get))
 }
 
 /**
@@ -35,7 +35,7 @@ export async function listForms() {
  * @param {string} formId - ID of the form
  * @returns {Promise<FormConfiguration>} - form configuration
  */
-export async function getFormMetadata(formId) {
+export async function get(formId) {
   const formMetadataFilename = getFormMetadataFilename(formId)
   const value = await readFile(formMetadataFilename, { encoding: 'utf8' })
   return JSON.parse(value)
@@ -47,7 +47,7 @@ export async function getFormMetadata(formId) {
  */
 export async function exists(formId) {
   // crude check as we'll move to mongo ASAP
-  return getFormMetadata(formId)
+  return get(formId)
     .then(() => true)
     .catch(() => false)
 }
@@ -57,10 +57,10 @@ export async function exists(formId) {
  * @param {FormConfiguration} formConfiguration - form configuration
  * @returns {Promise<void>}
  */
-export async function createFormMetadata(formConfiguration) {
+export async function create(formConfiguration) {
   const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
   const formMetadataString = JSON.stringify(formConfiguration)
-  await writeFile(formMetadataFilename, formMetadataString, 'utf8')
+  return writeFile(formMetadataFilename, formMetadataString, 'utf8')
 }
 
 /**

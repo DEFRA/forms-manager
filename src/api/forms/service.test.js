@@ -5,8 +5,11 @@ import {
   FormAlreadyExistsError,
   InvalidFormDefinitionError
 } from './errors.js'
-import { createFormDefinition } from './form-definition-repository.js'
-import { exists, createFormMetadata } from './form-metadata-repository.js'
+import { create as formDefinitionCreate } from './form-definition-repository.js'
+import {
+  exists as formMetadataExists,
+  create as formMetadataCreate
+} from './form-metadata-repository.js'
 import { createForm } from './service.js'
 
 jest.mock('node:fs/promises')
@@ -23,9 +26,9 @@ beforeEach(() => {
  * @returns {Promise<FormConfiguration>} - the output form
  */
 async function runFormCreationTest(formConfigurationInput) {
-  jest.mocked(exists).mockResolvedValueOnce(false)
-  jest.mocked(createFormMetadata).mockResolvedValueOnce(Promise.resolve())
-  jest.mocked(createFormDefinition).mockResolvedValueOnce(Promise.resolve())
+  jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
+  jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+  jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
 
   return createForm(formConfigurationInput)
 }
@@ -82,9 +85,9 @@ describe('createForm', () => {
   })
 
   it('should throw an error if form with the same ID already exists', async () => {
-    jest.mocked(exists).mockResolvedValueOnce(true)
-    jest.mocked(createFormMetadata).mockResolvedValueOnce(Promise.resolve())
-    jest.mocked(createFormDefinition).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(formMetadataExists).mockResolvedValueOnce(true)
+    jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
     jest
       .mocked(readFile)
       .mockResolvedValueOnce(Promise.resolve(getValidFormDefinition()))
@@ -102,9 +105,9 @@ describe('createForm', () => {
   })
 
   it('should throw an error when schema validation fails', async () => {
-    jest.mocked(exists).mockResolvedValueOnce(false)
-    jest.mocked(createFormMetadata).mockResolvedValueOnce(Promise.resolve())
-    jest.mocked(createFormDefinition).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
+    jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
     jest
       .mocked(readFile)
       .mockResolvedValueOnce(Promise.resolve(getInvalidFormDefinition()))
@@ -122,14 +125,14 @@ describe('createForm', () => {
   })
 
   it('should throw an error when writing for metadata fails', async () => {
-    jest.mocked(exists).mockResolvedValueOnce(false)
+    jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
     jest
       .mocked(readFile)
       .mockResolvedValueOnce(Promise.resolve(getValidFormDefinition()))
-    jest.mocked(createFormMetadata).mockImplementation(() => {
+    jest.mocked(formMetadataCreate).mockImplementation(() => {
       throw new Error()
     })
-    jest.mocked(createFormDefinition).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
 
     const formConfiguration = {
       title: 'My Form',
@@ -144,11 +147,11 @@ describe('createForm', () => {
   })
 
   it('should throw an error when writing form def fails', async () => {
-    jest.mocked(exists).mockResolvedValueOnce(false)
+    jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
     jest
       .mocked(readFile)
       .mockResolvedValueOnce(Promise.resolve(getValidFormDefinition()))
-    jest.mocked(createFormDefinition).mockImplementation(() => {
+    jest.mocked(formDefinitionCreate).mockImplementation(() => {
       throw new Error()
     })
 

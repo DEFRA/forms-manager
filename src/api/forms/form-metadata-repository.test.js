@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
 
-import { listForms, getFormMetadata } from './form-metadata-repository.js'
+import { list, get } from './form-metadata-repository.js'
 
 const formDirectory = '/path/to/dummy/directory'
 
@@ -15,7 +15,7 @@ describe('#listForms', () => {
   test('Should return an empty array if no forms found', async () => {
     jest.mocked(readdir).mockResolvedValue([])
 
-    const result = await listForms()
+    const result = await list()
 
     expect(result).toEqual([])
   })
@@ -33,7 +33,7 @@ describe('#listForms', () => {
     jest.mocked(readFile).mockResolvedValueOnce(form1Metadata)
     jest.mocked(readFile).mockResolvedValueOnce(form2Metadata)
 
-    const result = await listForms()
+    const result = await list()
 
     expect(result.length).toEqual(2)
     expect(result[0].id).toEqual('form-1')
@@ -51,7 +51,7 @@ describe('#listForms', () => {
       })
     )
 
-    const result = await listForms()
+    const result = await list()
 
     expect(result.length).toEqual(1)
     expect(result[0].id).toEqual('form-1')
@@ -70,7 +70,7 @@ describe('#getFormMetadata', () => {
 
     jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
 
-    const result = await getFormMetadata(formId)
+    const result = await get(formId)
 
     expect(result).toEqual(JSON.parse(formMetadata))
     expect(readFile).toHaveBeenCalledWith(formMetadataFilename, {
@@ -84,6 +84,6 @@ describe('#getFormMetadata', () => {
 
     jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
 
-    await expect(getFormMetadata(formId)).rejects.toThrow(SyntaxError)
+    await expect(get(formId)).rejects.toThrow(SyntaxError)
   })
 })

@@ -19,7 +19,7 @@ function getFormDefinitionFilename(formId) {
  * @param {import('../types.js').FormConfiguration} formConfiguration - form configuration
  * @param {object} formDefinition - form definition (JSON object)
  */
-export async function createFormDefinition(formConfiguration, formDefinition) {
+export async function create(formConfiguration, formDefinition) {
   const formDefinitionFilename = getFormDefinitionFilename(formConfiguration.id)
 
   // Convert formMetadata to JSON string
@@ -34,6 +34,6 @@ export async function createFormDefinition(formConfiguration, formDefinition) {
  * @param {string} formId - the ID of the form
  * @returns {Promise<string>} - form definition JSON content
  */
-export async function getFormDefinition(formId) {
+export async function get(formId) {
   return readFile(getFormDefinitionFilename(formId), 'utf-8').then(JSON.parse)
 }

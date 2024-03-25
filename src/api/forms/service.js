@@ -8,16 +8,8 @@ import {
   FormAlreadyExistsError,
   InvalidFormDefinitionError
 } from './errors.js'
-import {
-  createFormDefinition,
-  getFormDefinition as getFormDefinitionFromRepository
-} from './form-definition-repository.js'
-import {
-  createFormMetadata,
-  listForms as listFormMetadataEntries,
-  exists as formMetadataExists,
-  getFormMetadata
-} from './form-metadata-repository.js'
+import * as formDefinition from './form-definition-repository.js'
+import * as formMetadata from './form-metadata-repository.js'
 
 const logger = createLogger()
 
@@ -33,7 +25,7 @@ export async function createForm(formConfigurationInput) {
   const emptyForm = await retrieveEmptyForm()
   const formId = formTitleToId(formConfigurationInput.title)
 
-  if (await formMetadataExists(formId)) {
+  if (await formMetadata.exists(formId)) {
     throw new FormAlreadyExistsError(formId)
   }
 
@@ -50,8 +42,8 @@ export async function createForm(formConfigurationInput) {
   }
 
   try {
-    await createFormDefinition(formConfiguration, shallowCloneForm)
-    await createFormMetadata(formConfiguration)
+    await formDefinition.create(formConfiguration, shallowCloneForm)
+    await formMetadata.create(formConfiguration)
   } catch (error) {
     logger.error(error, "Failed to persist, couldn't create form.")
     throw new FailedCreationOperationError()
@@ -65,7 +57,7 @@ export async function createForm(formConfigurationInput) {
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
 export async function listForms() {
-  return listFormMetadataEntries()
+  return formMetadata.list()
 }
 
 /**
@@ -74,7 +66,7 @@ export async function listForms() {
  * @returns {Promise<FormConfiguration>} - form configuration
  */
 export async function getForm(formId) {
-  return getFormMetadata(formId)
+  return formMetadata.get(formId)
 }
 
 /**
@@ -83,7 +75,7 @@ export async function getForm(formId) {
  * @returns {Promise<string>} - form definition JSON content
  */
 export async function getFormDefinition(formId) {
-  return getFormDefinitionFromRepository(formId)
+  return formDefinition.get(formId)
 }
 
 /**
