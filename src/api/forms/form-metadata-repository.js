@@ -59,7 +59,7 @@ export async function exists(formId) {
  */
 export async function create(formConfiguration) {
   const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
-  const formMetadataString = JSON.stringify(formConfiguration)
+  const formMetadataString = JSON.stringify(formConfiguration, undefined, 2)
   return writeFile(formMetadataFilename, formMetadataString, 'utf8')
 }
 
