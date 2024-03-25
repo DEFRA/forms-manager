@@ -58,7 +58,7 @@ export async function createForm(formConfigurationInput) {
  * Lists the available forms
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
-export async function listForms() {
+export function listForms() {
   return formMetadata.list()
 }
 
@@ -67,7 +67,7 @@ export async function listForms() {
  * @param {string} formId - ID of the form
  * @returns {Promise<FormConfiguration>} - form configuration
  */
-export async function getForm(formId) {
+export function getForm(formId) {
   return formMetadata.get(formId)
 }
 
@@ -76,7 +76,7 @@ export async function getForm(formId) {
  * @param {string} formId - the ID of the form
  * @returns {Promise<string>} - form definition JSON content
  */
-export async function getFormDefinition(formId) {
+export function getFormDefinition(formId) {
   return formDefinition.get(formId)
 }
 

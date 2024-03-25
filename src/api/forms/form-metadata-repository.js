@@ -47,9 +47,12 @@ export async function get(formId) {
  */
 export async function exists(formId) {
   // crude check as we'll move to mongo ASAP
-  return get(formId)
-    .then(() => true)
-    .catch(() => false)
+  try {
+    await get(formId)
+    return true
+  } catch {
+    return false
+  }
 }
 
 /**
@@ -57,7 +60,7 @@ export async function exists(formId) {
  * @param {FormConfiguration} formConfiguration - form configuration
  * @returns {Promise<void>}
  */
-export async function create(formConfiguration) {
+export function create(formConfiguration) {
   const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
   const formMetadataString = JSON.stringify(formConfiguration, undefined, 2)
   return writeFile(formMetadataFilename, formMetadataString, 'utf8')
