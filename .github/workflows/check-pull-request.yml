@@ -66,8 +66,8 @@ jobs:
           - description: ESLint
             run: npm run lint:js
 
-          # - description: TypeScript compiler
-          #   run: npm run lint:types
+          - description: TypeScript compiler
+            run: npm run lint:types
 
           - description: Unit tests
             run: npm run test
