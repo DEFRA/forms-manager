@@ -119,6 +119,7 @@ async function retrieveEmptyForm() {
       )
     }
 
+    // @ts-expect-error Allow missing fees, outputs, feeOptions in empty form
     return emptyForm
   } catch (cause) {
     throw new InvalidFormDefinitionError(

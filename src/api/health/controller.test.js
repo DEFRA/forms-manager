@@ -7,6 +7,7 @@ describe('#healthController', () => {
   }
 
   test('Should provide expected response', () => {
+    // @ts-expect-error Allow null value for Hapi request
     healthController.handler(null, mockViewHandler)
 
     expect(mockViewHandler.response).toHaveBeenCalledWith({
