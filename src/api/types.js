@@ -12,5 +12,5 @@
  */
 
 /**
- * @typedef {FormConfigurationInput & IdMixin} FormConfiguration
+ * @typedef {FormConfigurationInput & { id: string }} FormConfiguration
  */
