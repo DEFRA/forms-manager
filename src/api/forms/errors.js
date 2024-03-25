@@ -17,7 +17,7 @@ export class ApplicationError extends Error {
    */
   constructor(message, options = {}) {
     super(message, options)
-    if (options?.statusCode) {
+    if (options.statusCode) {
       this.statusCode = options.statusCode
     }
   }
