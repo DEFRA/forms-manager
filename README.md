@@ -42,6 +42,23 @@ Install application dependencies:
 npm ci
 ```
 
+Install Localstack: https://docs.localstack.cloud/getting-started/installation/
+
+Install awslocal: https://github.com/localstack/awscli-local
+
+Create a new S3 bucket using localstack with the awslocal wrapper:
+
+```bash
+
+awslocal s3api create-bucket --bucket form-definition-storage
+```
+
+Add your bucket name into your .env file:
+
+```text
+FORM_DEF_BUCKET_NAME=form-definition-storage
+```
+
 ### Development
 
 To run the application in `development` mode run:

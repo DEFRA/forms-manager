@@ -63,3 +63,10 @@ export class FormAlreadyExistsError extends ApplicationError {
     })
   }
 }
+
+/**
+ * Indicates the form provided could not be read, but does exist
+ */
+export class FailedToReadFormError extends ApplicationError {
+  name = 'FailedToReadFormError'
+}

@@ -1,5 +1,6 @@
 import { cwd } from 'process'
 
+import 'dotenv/config'
 import convict from 'convict'
 
 export const config = convict({
@@ -83,6 +84,34 @@ export const config = convict({
     nullable: false,
     default: 'forms',
     env: 'FORMS_DIRECTORY'
+  },
+  formDefinitionBucketName: {
+    // confict requires a default value, for some reason. setting as nullable so we can check it at runtime.
+    doc: 'Name of the S3 bucket hosting the form definitions',
+    format: String,
+    nullable: true,
+    default: null,
+    env: 'FORM_DEF_BUCKET_NAME'
+  },
+  s3Region: {
+    doc: 'S3 region for the app on CDP',
+    format: String,
+    nullable: false,
+    default: 'us-west-2',
+    env: 'S3_REGION'
+  },
+  // isUsingCloudEmulation: {
+  //   doc: 'If true, turns on cloud emulation for local development (e.g. Localstack)',
+  //   format: Boolean,
+  //   default: false,
+  //   env: 'EMULATE_CLOUD'
+  // },
+  s3Endpoint: {
+    doc: 'If true, uses an alternative S3 endpoint (e.g. local development)',
+    format: String,
+    default: '',
+    nullable: true,
+    env: 'S3_ENDPOINT'
   }
 })
 

@@ -30,10 +30,12 @@
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.540.0",
     "@defra/forms-model": "^3.0.2",
     "@elastic/ecs-pino-format": "^1.5.0",
     "@hapi/hapi": "^21.3.3",
     "convict": "^6.2.4",
+    "dotenv": "^16.4.5",
     "hapi-pino": "^12.1.0",
     "https-proxy-agent": "^7.0.2",
     "joi": "^17.12.1",
