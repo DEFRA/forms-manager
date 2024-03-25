@@ -74,7 +74,7 @@ export function getForm(formId) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @returns {Promise<string>} - form definition JSON content
+ * @returns {Promise<FormDefinition>} - form definition JSON content
  */
 export function getFormDefinition(formId) {
   return formDefinition.get(formId)
@@ -96,7 +96,7 @@ function formTitleToId(formTitle) {
 
 /**
  * Retrieves the empty form configuration
- * @returns {Promise<object>} - the empty form configuration
+ * @returns {Promise<FormDefinition>} - the empty form configuration
  * @throws {InvalidFormDefinitionError} - if the base form definition is invalid
  */
 async function retrieveEmptyForm() {
@@ -106,7 +106,9 @@ async function retrieveEmptyForm() {
   )
 
   try {
-    const emptyForm = JSON.parse(fileContent)
+    const emptyForm = /** @type {import('./empty-form.json')} */ (
+      JSON.parse(fileContent)
+    )
 
     const validationResult = Schema.validate(emptyForm)
 
@@ -128,4 +130,5 @@ async function retrieveEmptyForm() {
 /**
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  */
