@@ -3,11 +3,13 @@
  */
 export class ApplicationError extends Error {
   name = 'ApplicationError'
+
   /**
    * HTTP status code
    * @type {number}
    */
   statusCode = 500
+
   /**
    * Constructs an error
    * @param {string} message - the message to report
@@ -33,6 +35,7 @@ export class InvalidFormDefinitionError extends ApplicationError {
  */
 export class FailedCreationOperationError extends ApplicationError {
   name = 'FailedCreationOperationError'
+
   /**
    * Constructs an error
    * @param {ErrorOptions} [options]
@@ -47,6 +50,7 @@ export class FailedCreationOperationError extends ApplicationError {
  */
 export class FormAlreadyExistsError extends ApplicationError {
   name = 'FormAlreadyExistsError'
+
   /**
    * Constructs an error
    * @param {string} formId
