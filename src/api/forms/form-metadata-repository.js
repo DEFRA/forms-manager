@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'node:fs/promises'
+import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { config } from '~/src/config/index.js'
@@ -20,14 +20,14 @@ const getFormMetadataFilename = (formId) => {
  * Retrieves a file from the form store
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
-export async function listForms() {
+export async function list() {
   const files = await readdir(formDirectory)
 
   const formIds = files
     .filter((fileName) => fileName.includes('-metadata.json'))
     .map((fileName) => fileName.replace('-metadata.json', ''))
 
-  return Promise.all(formIds.map(getFormMetadata))
+  return Promise.all(formIds.map(get))
 }
 
 /**
@@ -35,10 +35,35 @@ export async function listForms() {
  * @param {string} formId - ID of the form
  * @returns {Promise<FormConfiguration>} - form configuration
  */
-export async function getFormMetadata(formId) {
+export async function get(formId) {
   const formMetadataFilename = getFormMetadataFilename(formId)
   const value = await readFile(formMetadataFilename, { encoding: 'utf8' })
   return JSON.parse(value)
+}
+
+/**
+ * @param {string} formId
+ * @returns {Promise<boolean>} - whether the form exists
+ */
+export async function exists(formId) {
+  // crude check as we'll move to mongo ASAP
+  try {
+    await get(formId)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Adds a form to the Form Store
+ * @param {FormConfiguration} formConfiguration - form configuration
+ * @returns {Promise<void>}
+ */
+export function create(formConfiguration) {
+  const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
+  const formMetadataString = JSON.stringify(formConfiguration, undefined, 2)
+  return writeFile(formMetadataFilename, formMetadataString, 'utf8')
 }
 
 /**

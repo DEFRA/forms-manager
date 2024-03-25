@@ -28,6 +28,9 @@ module.exports = {
     development: {
       sourceMaps: 'inline',
       retainLines: true
+    },
+    test: {
+      plugins: ['babel-plugin-transform-import-meta']
     }
   }
 }

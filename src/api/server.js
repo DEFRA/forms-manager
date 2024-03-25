@@ -1,6 +1,9 @@
 import path from 'path'
 
+import Boom from '@hapi/boom'
 import hapi from '@hapi/hapi'
+
+import { ApplicationError } from './forms/errors.js'
 
 import { router } from '~/src/api/router.js'
 import { config } from '~/src/config/index.js'
@@ -59,6 +62,19 @@ export async function createServer() {
   })
 
   await server.register(populateDb)
+
+  server.ext('onPreResponse', (request, h) => {
+    const response = request.response
+
+    if (response instanceof ApplicationError && Boom.isBoom(response)) {
+      response.output.statusCode = response.statusCode
+      response.output.payload.statusCode = response.statusCode
+      response.output.payload.message = response.message
+      response.output.payload.error = response.name
+    }
+
+    return h.continue
+  })
 
   return server
 }
