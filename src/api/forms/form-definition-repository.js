@@ -16,7 +16,7 @@ function getFormDefinitionFilename(formId) {
 
 /**
  * Adds a form to the Form Store
- * @param {import('../types.js').FormConfiguration} formConfiguration - form configuration
+ * @param {FormConfiguration} formConfiguration - form configuration
  * @param {object} formDefinition - form definition (JSON object)
  */
 export async function create(formConfiguration, formDefinition) {
@@ -37,3 +37,7 @@ export async function create(formConfiguration, formDefinition) {
 export function get(formId) {
   return readFile(getFormDefinitionFilename(formId), 'utf-8').then(JSON.parse)
 }
+
+/**
+ * @typedef {import('../types.js').FormConfiguration} FormConfiguration
+ */

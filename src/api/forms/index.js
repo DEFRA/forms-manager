@@ -61,8 +61,8 @@ export const forms = {
 }
 
 /**
- * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
+ * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
  * @typedef {import('@hapi/hapi').ServerRoute<{ Params: { id: string } }>} RouteFormById
  * @typedef {import('@hapi/hapi').ServerRoute<{ Payload: FormConfigurationInput }>} RouteFormCreation
  */
