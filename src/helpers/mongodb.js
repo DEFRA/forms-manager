@@ -26,9 +26,9 @@ export const mongoPlugin = {
 
     server.logger.info(`mongodb connected to ${databaseName}`)
 
-    server.decorate('server', 'mongoClient', client)
-    server.decorate('server', 'db', db)
-    server.decorate('request', 'db', db)
+    server.decorate('server', 'mongoClient', () => client, { apply: true })
+    server.decorate('server', 'db', () => db, { apply: true })
+    server.decorate('request', 'db', () => db, { apply: true })
   }
 }
 
