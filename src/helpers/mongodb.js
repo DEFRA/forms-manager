@@ -9,18 +9,18 @@ export const mongoPlugin = {
   name: 'mongodb',
   version: '1.0.0',
   async register(server) {
-    const mongoOptions = {
-      retryWrites: false,
-      readPreference: 'secondary',
-      ...(server.secureContext && { secureContext: server.secureContext })
-    }
-
     const mongoUrl = config.get('mongoUri')
     const databaseName = config.get('mongoDatabase')
 
     server.logger.info('Setting up mongodb')
 
-    const client = await MongoClient.connect(mongoUrl.toString(), mongoOptions)
+    const client = await MongoClient.connect(mongoUrl.toString(), {
+      retryWrites: false,
+      readPreference: 'secondary',
+      // @ts-expect-error Allow untyped server properties
+      secureContext: server.secureContext || undefined
+    })
+
     const db = client.db(databaseName)
     await createIndexes(db)
 
