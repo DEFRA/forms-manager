@@ -21,11 +21,13 @@ const getFormMetadataFilename = (formId) => {
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
 export async function list() {
-  const files = await readdir(formDirectory)
+  const files = await readdir(formDirectory, {
+    withFileTypes: true
+  })
 
   const formIds = files
-    .filter((fileName) => fileName.includes('-metadata.json'))
-    .map((fileName) => fileName.replace('-metadata.json', ''))
+    .filter((entry) => entry.name.includes('-metadata.json'))
+    .map((entry) => entry.name.replace('-metadata.json', ''))
 
   return Promise.all(formIds.map(get))
 }
