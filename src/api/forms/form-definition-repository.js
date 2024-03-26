@@ -17,14 +17,6 @@ const formBucketName = /** @type {string | null} */ (
   config.get('formDefinitionBucketName')
 )
 
-const s3Client = new S3Client({
-  region: s3Region,
-  ...(config.get('s3Endpoint') && {
-    endpoint: config.get('s3Endpoint'),
-    forcePathStyle: true
-  })
-})
-
 /**
  * Gets a filename for a given form ID
  * @param {string} formId - the form ID
@@ -52,7 +44,7 @@ export async function create(formConfiguration, formDefinition) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @returns {Promise<string>} - form definition JSON content
+ * @returns {Promise<object>} - form definition JSON content
  */
 export function get(formId) {
   return retrieveFromS3(getFormDefinitionFilename(formId)).then(JSON.parse)
@@ -74,13 +66,14 @@ async function uploadToS3(fileName, fileContent) {
     Body: fileContent.toString()
   })
 
-  return s3Client.send(command)
+  return getS3Client().send(command)
 }
 
 /**
  * Uploads fileContent to an S3 bucket as fileName
  * @param {string} fileName - the file name to read`
  * @returns {Promise<string>} - the content of the file
+ * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 async function retrieveFromS3(fileName) {
   if (!formBucketName) {
@@ -93,7 +86,7 @@ async function retrieveFromS3(fileName) {
   })
 
   try {
-    const response = await s3Client.send(command)
+    const response = await getS3Client().send(command)
 
     if (!response.Body) {
       throw new FailedToReadFormError('Form definition does exist but is empty')
@@ -107,4 +100,18 @@ async function retrieveFromS3(fileName) {
 
     throw error
   }
+}
+
+/**
+ * Retrieves an S3 client instance
+ * @returns {S3Client} - the S3 client instance
+ */
+function getS3Client() {
+  return new S3Client({
+    region: s3Region,
+    ...(config.get('s3Endpoint') && {
+      endpoint: config.get('s3Endpoint'),
+      forcePathStyle: true
+    })
+  })
 }
