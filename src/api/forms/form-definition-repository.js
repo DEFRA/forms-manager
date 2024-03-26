@@ -18,7 +18,7 @@ const formBucketName = /** @type {string | null} */ (
 
 const s3Client = new S3Client({
   region: s3Region,
-  ...(config.get('s3Endpoint') ? { endpoint: config.get('s3Endpoint') } : {})
+  ...(config.get('s3Endpoint') && { endpoint: config.get('s3Endpoint') })
 })
 
 /**
