@@ -21,11 +21,13 @@ const getFormMetadataFilename = (formId) => {
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
 export async function list() {
-  const files = await readdir(formDirectory)
+  const files = await readdir(formDirectory, {
+    withFileTypes: true
+  })
 
   const formIds = files
-    .filter((fileName) => fileName.includes('-metadata.json'))
-    .map((fileName) => fileName.replace('-metadata.json', ''))
+    .filter((entry) => entry.name.includes('-metadata.json'))
+    .map((entry) => entry.name.replace('-metadata.json', ''))
 
   return Promise.all(formIds.map(get))
 }
@@ -35,10 +37,9 @@ export async function list() {
  * @param {string} formId - ID of the form
  * @returns {Promise<FormConfiguration>} - form configuration
  */
-export async function get(formId) {
-  const formMetadataFilename = getFormMetadataFilename(formId)
-  const value = await readFile(formMetadataFilename, { encoding: 'utf8' })
-  return JSON.parse(value)
+export function get(formId) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
+  return readFile(getFormMetadataFilename(formId), 'utf-8').then(JSON.parse)
 }
 
 /**

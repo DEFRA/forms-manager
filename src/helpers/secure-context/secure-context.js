@@ -27,7 +27,9 @@ export const secureContext = {
         return secureContext
       }
 
-      server.decorate('server', 'secureContext', tls.createSecureContext())
+      server.decorate('server', 'secureContext', tls.createSecureContext, {
+        apply: true
+      })
     }
   }
 }

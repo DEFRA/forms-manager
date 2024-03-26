@@ -66,15 +66,13 @@ export const config = convict({
   httpProxy: {
     doc: 'HTTP Proxy',
     format: String,
-    nullable: true,
-    default: null,
+    default: '',
     env: 'CDP_HTTP_PROXY'
   },
   httpsProxy: {
     doc: 'HTTPS Proxy',
     format: String,
-    nullable: true,
-    default: null,
+    default: '',
     env: 'CDP_HTTPS_PROXY'
   },
   formDirectory: {

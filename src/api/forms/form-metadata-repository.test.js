@@ -21,7 +21,10 @@ describe('#listForms', () => {
   })
 
   test('Should return an array of form metadata', async () => {
-    const files = ['form-1-metadata.json', 'form-2-metadata.json']
+    const files = /** @type {import('node:fs').Dirent[]} */ ([
+      { name: 'form-1-metadata.json' },
+      { name: 'form-2-metadata.json' }
+    ])
 
     const form1Metadata = JSON.stringify({ id: 'form-1', title: 'Form 1' })
     const form2Metadata = JSON.stringify({ id: 'form-2', title: 'Form 2' })
@@ -41,7 +44,10 @@ describe('#listForms', () => {
   })
 
   test('Should ignore files without "-metadata.json" suffix', async () => {
-    const files = ['form-1-metadata.json', 'form-2.json']
+    const files = /** @type {import('node:fs').Dirent[]} */ ([
+      { name: 'form-1-metadata.json' },
+      { name: 'form-2.json' }
+    ])
 
     jest.mocked(readdir).mockResolvedValue(files)
     jest.mocked(readFile).mockResolvedValue(
@@ -73,9 +79,7 @@ describe('#getFormMetadata', () => {
     const result = await get(formId)
 
     expect(result).toEqual(JSON.parse(formMetadata))
-    expect(readFile).toHaveBeenCalledWith(formMetadataFilename, {
-      encoding: 'utf8'
-    })
+    expect(readFile).toHaveBeenCalledWith(formMetadataFilename, 'utf-8')
   })
 
   test('Should throw an error if form malformed', async () => {
