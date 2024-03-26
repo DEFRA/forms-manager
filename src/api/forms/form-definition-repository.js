@@ -3,7 +3,8 @@ import { join } from 'node:path'
 import {
   S3Client,
   PutObjectCommand,
-  GetObjectCommand
+  GetObjectCommand,
+  NoSuchKey
 } from '@aws-sdk/client-s3'
 
 import { FailedToReadFormError } from './errors.js'
@@ -18,7 +19,10 @@ const formBucketName = /** @type {string | null} */ (
 
 const s3Client = new S3Client({
   region: s3Region,
-  ...(config.get('s3Endpoint') && { endpoint: config.get('s3Endpoint') })
+  ...(config.get('s3Endpoint') && {
+    endpoint: config.get('s3Endpoint'),
+    forcePathStyle: true
+  })
 })
 
 /**
@@ -88,11 +92,19 @@ async function retrieveFromS3(fileName) {
     Key: fileName
   })
 
-  const response = await s3Client.send(command)
+  try {
+    const response = await s3Client.send(command)
 
-  if (!response.Body) {
-    throw new FailedToReadFormError('Could not read form body from S3')
+    if (!response.Body) {
+      throw new FailedToReadFormError('Form definition does exist but is empty')
+    }
+
+    return response.Body.transformToString()
+  } catch (error) {
+    if (error instanceof NoSuchKey) {
+      throw new FailedToReadFormError('Form definition does not exist on disk')
+    }
+
+    throw error
   }
-
-  return response.Body.transformToString()
 }
