@@ -100,7 +100,7 @@ export const config = convict({
     env: 'S3_REGION'
   },
   s3Endpoint: {
-    doc: 'If true, uses an alternative S3 endpoint (e.g. local development). Activating this will force path style addressing for compatibility with Localstack',
+    doc: 'The S3 HTTP(S) endpoint, if required (e.g. a local development dev service). Activating this will force path style addressing for compatibility with Localstack.',
     format: String,
     default: '',
     nullable: true,
