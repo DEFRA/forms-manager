@@ -99,14 +99,8 @@ export const config = convict({
     default: 'us-west-2',
     env: 'S3_REGION'
   },
-  // isUsingCloudEmulation: {
-  //   doc: 'If true, turns on cloud emulation for local development (e.g. Localstack)',
-  //   format: Boolean,
-  //   default: false,
-  //   env: 'EMULATE_CLOUD'
-  // },
   s3Endpoint: {
-    doc: 'If true, uses an alternative S3 endpoint (e.g. local development)',
+    doc: 'If true, uses an alternative S3 endpoint (e.g. local development). Activating this will force path style addressing for compatibility with Localstack',
     format: String,
     default: '',
     nullable: true,
