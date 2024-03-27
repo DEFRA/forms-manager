@@ -36,27 +36,32 @@ nvm use
 
 ### Setup
 
-Install application dependencies:
+1. Install application dependencies:
 
 ```bash
 npm ci
 ```
 
-Install Localstack: https://docs.localstack.cloud/getting-started/installation/
+2. Install Docker
 
-Install awslocal: https://github.com/localstack/awscli-local
+3. Install Localstack: https://docs.localstack.cloud/getting-started/installation/
 
-Create a new S3 bucket using localstack with the awslocal wrapper:
+4. Install awslocal: https://github.com/localstack/awscli-local
+
+5. Create a new S3 bucket using localstack with the awslocal wrapper:
 
 ```bash
-
+localstack start
 awslocal s3api create-bucket --bucket form-definition-storage
 ```
 
-Add your bucket name into your .env file:
+5. Add your bucket name into your .env file:
 
 ```text
 FORM_DEF_BUCKET_NAME=form-definition-storage
+S3_ENDPOINT=http://localhost:4566
+AWS_ACCESS_KEY_ID=dummy
+AWS_SECRET_ACCESS_KEY=dummy
 ```
 
 ### Development

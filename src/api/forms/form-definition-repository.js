@@ -11,11 +11,10 @@ import { FailedToReadFormError } from './errors.js'
 
 import { config } from '~/src/config/index.js'
 
-const formDirectory = config.get('formDirectory')
 const s3Region = config.get('s3Region')
-const formBucketName = /** @type {string | null} */ (
-  config.get('formDefinitionBucketName')
-)
+const formBucketName = () => {
+  return config.get('formDefinitionBucketName')
+}
 
 /**
  * Gets a filename for a given form ID
@@ -23,6 +22,8 @@ const formBucketName = /** @type {string | null} */ (
  * @returns - the path to the form definition file
  */
 function getFormDefinitionFilename(formId) {
+  const formDirectory = config.get('formDirectory')
+
   return join(formDirectory, `${formId}.json`)
 }
 
@@ -31,14 +32,14 @@ function getFormDefinitionFilename(formId) {
  * @param {import('../types.js').FormConfiguration} formConfiguration - form configuration
  * @param {object} formDefinition - form definition (JSON object)
  */
-export async function create(formConfiguration, formDefinition) {
+export function create(formConfiguration, formDefinition) {
   const formDefinitionFilename = getFormDefinitionFilename(formConfiguration.id)
 
   // Convert formMetadata to JSON string
   const formDefinitionString = JSON.stringify(formDefinition)
 
   // Write formDefinition to file
-  await uploadToS3(formDefinitionFilename, formDefinitionString)
+  return uploadToS3(formDefinitionFilename, formDefinitionString)
 }
 
 /**
@@ -55,13 +56,15 @@ export function get(formId) {
  * @param {string} fileName - the file name to upload
  * @param {string} fileContent - the content to upload
  */
-async function uploadToS3(fileName, fileContent) {
-  if (!formBucketName) {
+function uploadToS3(fileName, fileContent) {
+  const bucket = formBucketName()
+
+  if (!bucket) {
     throw new Error('config.formBucketName cannot be null')
   }
 
   const command = new PutObjectCommand({
-    Bucket: formBucketName,
+    Bucket: formBucketName(),
     Key: fileName,
     Body: fileContent.toString()
   })
@@ -76,12 +79,12 @@ async function uploadToS3(fileName, fileContent) {
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 async function retrieveFromS3(fileName) {
-  if (!formBucketName) {
+  if (!formBucketName()) {
     throw new Error('config.formBucketName cannot be null')
   }
 
   const command = new GetObjectCommand({
-    Bucket: formBucketName,
+    Bucket: formBucketName(),
     Key: fileName
   })
 

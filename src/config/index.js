@@ -89,8 +89,7 @@ export const config = convict({
     // confict requires a default value, for some reason. setting as nullable so we can check it at runtime.
     doc: 'Name of the S3 bucket hosting the form definitions',
     format: String,
-    nullable: true,
-    default: null,
+    default: '',
     env: 'FORM_DEF_BUCKET_NAME'
   },
   s3Region: {
