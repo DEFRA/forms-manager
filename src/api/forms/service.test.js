@@ -28,6 +28,7 @@ beforeEach(() => {
 async function runFormCreationTest(formConfigurationInput) {
   jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
   jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+  // @ts-expect-error unused response type so ignore type for now
   jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
 
   return createForm(formConfigurationInput)
@@ -87,6 +88,7 @@ describe('createForm', () => {
   it('should throw an error if form with the same ID already exists', async () => {
     jest.mocked(formMetadataExists).mockResolvedValueOnce(true)
     jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+    // @ts-expect-error unused response type so ignore type for now
     jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
     jest
       .mocked(readFile)
@@ -107,6 +109,7 @@ describe('createForm', () => {
   it('should throw an error when schema validation fails', async () => {
     jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
     jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+    // @ts-expect-error unused response type so ignore type for now
     jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
     jest
       .mocked(readFile)
@@ -132,6 +135,7 @@ describe('createForm', () => {
     jest.mocked(formMetadataCreate).mockImplementation(() => {
       throw new Error()
     })
+    // @ts-expect-error unused response type so ignore type for now
     jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
 
     const formConfiguration = {

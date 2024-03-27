@@ -58,17 +58,18 @@ describe('Get forms from S3', () => {
       .on(GetObjectCommand)
       .rejectsOnce(new NoSuchKey({ $metadata: {}, message: 'dummy error' }))
 
-    expect(() => get('any-form-id')).rejects.toThrow(FailedToReadFormError)
+    await expect(() => get('any-form-id')).rejects.toThrow(
+      FailedToReadFormError
+    )
   })
 
   test('should throw error if an unexpected error occurs', async () => {
     s3Mock.on(GetObjectCommand).rejectsOnce(new Error())
 
-    expect(() => get('any-form-id')).rejects.toThrow(Error)
+    await expect(() => get('any-form-id')).rejects.toThrow(Error)
   })
 })
 
-// minify the JSON document for string equality checking, leave it full size for readability
 const dummyFormDefinition = `
 {
   "name": "",
