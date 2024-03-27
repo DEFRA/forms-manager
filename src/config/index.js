@@ -86,7 +86,6 @@ export const config = convict({
     env: 'FORMS_DIRECTORY'
   },
   formDefinitionBucketName: {
-    // confict requires a default value, for some reason. setting as nullable so we can check it at runtime.
     doc: 'Name of the S3 bucket hosting the form definitions',
     format: String,
     default: '',
@@ -95,7 +94,6 @@ export const config = convict({
   s3Region: {
     doc: 'S3 region for the app on CDP',
     format: String,
-    nullable: false,
     default: 'us-west-2',
     env: 'S3_REGION'
   },
@@ -103,7 +101,6 @@ export const config = convict({
     doc: 'The S3 HTTP(S) endpoint, if required (e.g. a local development dev service). Activating this will force path style addressing for compatibility with Localstack.',
     format: String,
     default: '',
-    nullable: true,
     env: 'S3_ENDPOINT'
   }
 })
