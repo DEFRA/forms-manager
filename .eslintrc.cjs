@@ -15,7 +15,7 @@ module.exports = {
         'plugin:n/recommended',
         'plugin:prettier/recommended',
         'plugin:promise/recommended',
-        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/strict-type-checked',
         'plugin:@typescript-eslint/stylistic-type-checked',
         'prettier'
       ],
@@ -23,7 +23,8 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaVersion: 'latest',
-        project: './tsconfig.json'
+        project: true,
+        tsconfigRootDir: __dirname
       },
       plugins: [
         '@typescript-eslint',
@@ -36,6 +37,13 @@ module.exports = {
       rules: {
         'prettier/prettier': 'error',
         'no-console': 'error',
+
+        // Only show warnings for missing types
+        '@typescript-eslint/no-unsafe-argument': 'warn',
+        '@typescript-eslint/no-unsafe-assignment': 'warn',
+        '@typescript-eslint/no-unsafe-call': 'warn',
+        '@typescript-eslint/no-unsafe-member-access': 'warn',
+        '@typescript-eslint/no-unsafe-return': 'warn',
 
         // Check import or require statements are A-Z ordered
         'import/order': [

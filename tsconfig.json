@@ -4,6 +4,7 @@
     "checkJs": true,
     "module": "NodeNext",
     "noEmit": true,
+    "resolveJsonModule": true,
     "strict": true,
     "target": "es2022",
     "baseUrl": "./",

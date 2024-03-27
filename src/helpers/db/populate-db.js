@@ -13,6 +13,7 @@ export const populateDb = {
     name: 'Populate Db',
     async register(server) {
       try {
+        // @ts-expect-error Allow untyped server properties
         await populateApi(server.mongoClient, server.db)
       } catch (error) {
         logger.error(error)

@@ -27,7 +27,7 @@ function getFormDefinitionFilename(formId) {
 
 /**
  * Adds a form to the Form Store
- * @param {import('../types.js').FormConfiguration} formConfiguration - form configuration
+ * @param {FormConfiguration} formConfiguration - form configuration
  * @param {object} formDefinition - form definition (JSON object)
  */
 export function create(formConfiguration, formDefinition) {
@@ -43,9 +43,10 @@ export function create(formConfiguration, formDefinition) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @returns {Promise<object>} - form definition JSON content
+ * @returns {Promise<FormDefinition>} - form definition JSON content
  */
 export function get(formId) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
   return retrieveFromS3(getFormDefinitionFilename(formId)).then(JSON.parse)
 }
 
@@ -114,3 +115,8 @@ function getS3Client() {
     })
   })
 }
+
+/**
+ * @typedef {import('../types.js').FormConfiguration} FormConfiguration
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ */
