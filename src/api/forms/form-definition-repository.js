@@ -1,9 +1,18 @@
-import { writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  NoSuchKey
+} from '@aws-sdk/client-s3'
+
+import { FailedToReadFormError } from './errors.js'
 
 import { config } from '~/src/config/index.js'
 
-const formDirectory = config.get('formDirectory')
+const s3Region = config.get('s3Region')
+const formBucketName = config.get('formDefinitionBucketName')
 
 /**
  * Gets a filename for a given form ID
@@ -11,6 +20,8 @@ const formDirectory = config.get('formDirectory')
  * @returns - the path to the form definition file
  */
 function getFormDefinitionFilename(formId) {
+  const formDirectory = config.get('formDirectory')
+
   return join(formDirectory, `${formId}.json`)
 }
 
@@ -26,7 +37,7 @@ export function create(formConfiguration, formDefinition) {
   const formDefinitionString = JSON.stringify(formDefinition)
 
   // Write formDefinition to file
-  return writeFile(formDefinitionFilename, formDefinitionString)
+  return uploadToS3(formDefinitionFilename, formDefinitionString)
 }
 
 /**
@@ -36,7 +47,73 @@ export function create(formConfiguration, formDefinition) {
  */
 export function get(formId) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
-  return readFile(getFormDefinitionFilename(formId), 'utf-8').then(JSON.parse)
+  return retrieveFromS3(getFormDefinitionFilename(formId)).then(JSON.parse)
+}
+
+/**
+ * Uploads fileContent to an S3 bucket as fileName
+ * @param {string} fileName - the file name to upload
+ * @param {string} fileContent - the content to upload
+ */
+function uploadToS3(fileName, fileContent) {
+  if (!formBucketName) {
+    throw new Error('config.formDefinitionBucketName cannot be null')
+  }
+
+  const command = new PutObjectCommand({
+    Bucket: formBucketName,
+    Key: fileName,
+    Body: fileContent.toString()
+  })
+
+  return getS3Client().send(command)
+}
+
+/**
+ * Uploads fileContent to an S3 bucket as fileName
+ * @param {string} fileName - the file name to read`
+ * @returns {Promise<string>} - the content of the file
+ * @throws {FailedToReadFormError} - if the file does not exist or is empty
+ */
+async function retrieveFromS3(fileName) {
+  if (!formBucketName) {
+    throw new Error('config.formDefinitionBucketName cannot be empty')
+  }
+
+  const command = new GetObjectCommand({
+    Bucket: formBucketName,
+    Key: fileName
+  })
+
+  try {
+    const response = await getS3Client().send(command)
+
+    if (!response.Body) {
+      throw new FailedToReadFormError('Form definition does exist but is empty')
+    }
+
+    return response.Body.transformToString()
+  } catch (error) {
+    if (error instanceof NoSuchKey) {
+      throw new FailedToReadFormError('Form definition does not exist on disk')
+    }
+
+    throw error
+  }
+}
+
+/**
+ * Retrieves an S3 client instance
+ * @returns {S3Client} - the S3 client instance
+ */
+function getS3Client() {
+  return new S3Client({
+    region: s3Region,
+    ...(config.get('s3Endpoint') && {
+      endpoint: config.get('s3Endpoint'),
+      forcePathStyle: true
+    })
+  })
 }
 
 /**

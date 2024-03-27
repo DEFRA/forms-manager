@@ -1,5 +1,6 @@
 import { cwd } from 'process'
 
+import 'dotenv/config'
 import convict from 'convict'
 
 export const config = convict({
@@ -81,6 +82,24 @@ export const config = convict({
     nullable: false,
     default: 'forms',
     env: 'FORMS_DIRECTORY'
+  },
+  formDefinitionBucketName: {
+    doc: 'Name of the S3 bucket hosting the form definitions',
+    format: String,
+    default: '',
+    env: 'FORM_DEF_BUCKET_NAME'
+  },
+  s3Region: {
+    doc: 'S3 region for the app on CDP',
+    format: String,
+    default: 'us-west-2',
+    env: 'S3_REGION'
+  },
+  s3Endpoint: {
+    doc: 'The S3 HTTP(S) endpoint, if required (e.g. a local development dev service). Activating this will force path style addressing for compatibility with Localstack.',
+    format: String,
+    default: '',
+    env: 'S3_ENDPOINT'
   }
 })
 
