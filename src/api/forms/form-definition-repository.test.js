@@ -24,6 +24,8 @@ describe('Create forms in S3', () => {
 
     expect(s3Mock.commandCalls(PutObjectCommand)).toHaveLength(1)
   })
+
+  // TODO add a test if config.formDefinitionBucketName is missing
 })
 
 describe('Get forms from S3', () => {
