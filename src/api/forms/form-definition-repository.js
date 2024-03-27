@@ -12,9 +12,7 @@ import { FailedToReadFormError } from './errors.js'
 import { config } from '~/src/config/index.js'
 
 const s3Region = config.get('s3Region')
-const formBucketName = () => {
-  return config.get('formDefinitionBucketName')
-}
+const formBucketName = config.get('formDefinitionBucketName')
 
 /**
  * Gets a filename for a given form ID
@@ -57,14 +55,12 @@ export function get(formId) {
  * @param {string} fileContent - the content to upload
  */
 function uploadToS3(fileName, fileContent) {
-  const bucket = formBucketName()
-
-  if (!bucket) {
+  if (!formBucketName) {
     throw new Error('config.formBucketName cannot be null')
   }
 
   const command = new PutObjectCommand({
-    Bucket: formBucketName(),
+    Bucket: formBucketName,
     Key: fileName,
     Body: fileContent.toString()
   })
@@ -79,12 +75,12 @@ function uploadToS3(fileName, fileContent) {
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 async function retrieveFromS3(fileName) {
-  if (!formBucketName()) {
+  if (!formBucketName) {
     throw new Error('config.formBucketName cannot be null')
   }
 
   const command = new GetObjectCommand({
-    Bucket: formBucketName(),
+    Bucket: formBucketName,
     Key: fileName
   })
 
