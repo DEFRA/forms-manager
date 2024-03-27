@@ -56,7 +56,7 @@ export function get(formId) {
  */
 function uploadToS3(fileName, fileContent) {
   if (!formBucketName) {
-    throw new Error('config.formBucketName cannot be null')
+    throw new Error('config.formDefinitionBucketName cannot be null')
   }
 
   const command = new PutObjectCommand({
@@ -76,7 +76,7 @@ function uploadToS3(fileName, fileContent) {
  */
 async function retrieveFromS3(fileName) {
   if (!formBucketName) {
-    throw new Error('config.formBucketName cannot be null')
+    throw new Error('config.formDefinitionBucketName cannot be empty')
   }
 
   const command = new GetObjectCommand({
