@@ -3,6 +3,7 @@
 .vscode
 .idea
 .server
+src/forms
 node_modules
 npm-debug.log
 coverage
