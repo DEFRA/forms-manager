@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
@@ -21,9 +22,9 @@ const getFormMetadataFilename = (formId) => {
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
 export async function list() {
-  const files = await readdir(formDirectory, {
-    withFileTypes: true
-  })
+  const files = existsSync(formDirectory)
+    ? await readdir(formDirectory, { withFileTypes: true })
+    : []
 
   const formIds = files
     .filter((entry) => entry.name.includes('-metadata.json'))

@@ -1,9 +1,11 @@
+import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 
 import { list, get } from './form-metadata-repository.js'
 
 const formDirectory = '/path/to/dummy/directory'
 
+jest.mock('node:fs')
 jest.mock('node:fs/promises')
 jest.mock('~/src/config', () => ({
   config: {
@@ -12,6 +14,10 @@ jest.mock('~/src/config', () => ({
 }))
 
 describe('#listForms', () => {
+  beforeAll(() => {
+    jest.mocked(existsSync).mockReturnValue(true)
+  })
+
   test('Should return an empty array if no forms found', async () => {
     jest.mocked(readdir).mockResolvedValue([])
 
