@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
-import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 
 import { config } from '~/src/config/index.js'
 
@@ -62,10 +62,12 @@ export async function exists(formId) {
  * @param {FormConfiguration} formConfiguration - form configuration
  * @returns {Promise<void>}
  */
-export function create(formConfiguration) {
+export async function create(formConfiguration) {
   const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
   const formMetadataString = JSON.stringify(formConfiguration, undefined, 2)
-  return writeFile(formMetadataFilename, formMetadataString, 'utf8')
+
+  await mkdir(dirname(formMetadataFilename), { recursive: true })
+  return writeFile(formMetadataFilename, formMetadataString, 'utf-8')
 }
 
 /**
