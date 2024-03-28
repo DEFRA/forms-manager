@@ -7,7 +7,8 @@ import { ApplicationError } from './forms/errors.js'
 
 import { router } from '~/src/api/router.js'
 import { config } from '~/src/config/index.js'
-import { populateDb } from '~/src/helpers/db/populate-db.js'
+// Temporarily disabled. Will be restored in task #335165
+// import { populateDb } from '~/src/helpers/db/populate-db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
 import { requestLogger } from '~/src/helpers/logging/request-logger.js'
 // Temporarily disabled. Will be restored in task #335165
@@ -61,7 +62,8 @@ export async function createServer() {
     routes: { prefix: config.get('appPathPrefix') }
   })
 
-  await server.register(populateDb)
+  // Temporarily disabled. Will be restored in task #335165
+  // await server.register(populateDb)
 
   server.ext('onPreResponse', (request, h) => {
     const response = request.response
