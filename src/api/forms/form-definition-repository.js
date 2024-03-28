@@ -7,8 +7,7 @@ import {
   NoSuchKey
 } from '@aws-sdk/client-s3'
 
-import { FailedToReadFormError } from './errors.js'
-
+import { FailedToReadFormError } from '~/src/api/forms/errors.js'
 import { config } from '~/src/config/index.js'
 
 const s3Region = config.get('s3Region')

@@ -4,17 +4,17 @@ import {
   FailedCreationOperationError,
   FormAlreadyExistsError,
   InvalidFormDefinitionError
-} from './errors.js'
-import { create as formDefinitionCreate } from './form-definition-repository.js'
+} from '~/src/api/forms/errors.js'
+import { create as formDefinitionCreate } from '~/src/api/forms/form-definition-repository.js'
 import {
   exists as formMetadataExists,
   create as formMetadataCreate
-} from './form-metadata-repository.js'
-import { createForm } from './service.js'
+} from '~/src/api/forms/form-metadata-repository.js'
+import { createForm } from '~/src/api/forms/service.js'
 
 jest.mock('node:fs/promises')
-jest.mock('./form-definition-repository.js')
-jest.mock('./form-metadata-repository.js')
+jest.mock('~/src/api/forms/form-definition-repository.js')
+jest.mock('~/src/api/forms/form-metadata-repository.js')
 
 beforeEach(() => {
   jest.resetAllMocks()

@@ -9,8 +9,8 @@ import {
 import { sdkStreamMixin } from '@smithy/util-stream'
 import { mockClient } from 'aws-sdk-client-mock'
 
-import { FailedToReadFormError } from './errors.js'
-import { create, get } from './form-definition-repository.js'
+import { FailedToReadFormError } from '~/src/api/forms/errors.js'
+import { create, get } from '~/src/api/forms/form-definition-repository.js'
 
 const s3Mock = mockClient(S3Client)
 

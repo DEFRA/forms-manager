@@ -3,8 +3,7 @@ import path from 'path'
 import Boom from '@hapi/boom'
 import hapi from '@hapi/hapi'
 
-import { ApplicationError } from './forms/errors.js'
-
+import { ApplicationError } from '~/src/api/forms/errors.js'
 import { router } from '~/src/api/router.js'
 import { config } from '~/src/config/index.js'
 // Temporarily disabled. Will be restored in task #335165

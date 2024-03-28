@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 
-import { list, get } from './form-metadata-repository.js'
+import { list, get } from '~/src/api/forms/form-metadata-repository.js'
 
 const formDirectory = '/path/to/dummy/directory'
 

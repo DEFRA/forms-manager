@@ -2,14 +2,14 @@ import { readFile } from 'node:fs/promises'
 
 import { Schema } from '@defra/forms-model'
 
-import { createLogger } from './../../helpers/logging/logger.js'
 import {
   FailedCreationOperationError,
   FormAlreadyExistsError,
   InvalidFormDefinitionError
-} from './errors.js'
-import * as formDefinition from './form-definition-repository.js'
-import * as formMetadata from './form-metadata-repository.js'
+} from '~/src/api/forms/errors.js'
+import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
+import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const logger = createLogger()
 
