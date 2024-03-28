@@ -1,5 +1,6 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { existsSync } from 'node:fs'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 
 import { config } from '~/src/config/index.js'
 
@@ -21,9 +22,9 @@ const getFormMetadataFilename = (formId) => {
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
 export async function list() {
-  const files = await readdir(formDirectory, {
-    withFileTypes: true
-  })
+  const files = existsSync(formDirectory)
+    ? await readdir(formDirectory, { withFileTypes: true })
+    : []
 
   const formIds = files
     .filter((entry) => entry.name.includes('-metadata.json'))
@@ -61,10 +62,12 @@ export async function exists(formId) {
  * @param {FormConfiguration} formConfiguration - form configuration
  * @returns {Promise<void>}
  */
-export function create(formConfiguration) {
+export async function create(formConfiguration) {
   const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
   const formMetadataString = JSON.stringify(formConfiguration, undefined, 2)
-  return writeFile(formMetadataFilename, formMetadataString, 'utf8')
+
+  await mkdir(dirname(formMetadataFilename), { recursive: true })
+  return writeFile(formMetadataFilename, formMetadataString, 'utf-8')
 }
 
 /**

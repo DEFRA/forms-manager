@@ -9,7 +9,7 @@
   "main": ".server/index.js",
   "scripts": {
     "build": "npm run build:server",
-    "build:server": "babel --delete-dir-on-start --ignore \"**/*.test.js\" --ignore \"src/__fixtures__\" --copy-files --no-copy-ignored --keep-file-extension --out-dir ./.server ./src",
+    "build:server": "babel --delete-dir-on-start --ignore \"**/*.test.js\" --ignore \"src/__fixtures__\" --copy-files --no-copy-ignored --keep-file-extension --source-maps --out-dir ./.server ./src",
     "docker:dev": "NODE_ENV=development npm run server:watch",
     "dev": "npm run server:watch",
     "dev:debug": "npm run server:debug",
@@ -23,8 +23,8 @@
     "postversion": "git add package.json package-lock.json && git commit -m $npm_package_version",
     "test": "jest --coverage --verbose",
     "test:watch": "jest --watch",
-    "server:watch": "nodemon --exec babel-node --enable-source-maps ./src",
-    "server:debug": "nodemon --exec babel-node --enable-source-maps --inspect ./src",
+    "server:watch": "nodemon --exec tsx --enable-source-maps ./src",
+    "server:debug": "nodemon --exec tsx --enable-source-maps --inspect ./src",
     "prestart": "npm run build",
     "start": "NODE_ENV=production node --enable-source-maps ./.server",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module"
@@ -47,7 +47,6 @@
   "devDependencies": {
     "@babel/cli": "^7.23.9",
     "@babel/core": "^7.23.9",
-    "@babel/node": "^7.23.9",
     "@babel/preset-env": "^7.23.9",
     "@smithy/util-stream": "^2.2.0",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
@@ -71,6 +70,7 @@
     "lint-staged": "^15.2.2",
     "nodemon": "^3.0.3",
     "prettier": "^3.2.5",
+    "tsx": "^4.7.1",
     "typescript": "^5.4.2"
   },
   "optionalDependencies": {
