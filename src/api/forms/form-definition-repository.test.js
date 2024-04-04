@@ -89,6 +89,8 @@ function getFormDefinition() {
       {
         path: '/page-one',
         title: 'Page one',
+        controller: 'Controller',
+        section: 'Section',
         components: [
           {
             type: 'TextField',
@@ -103,7 +105,11 @@ function getFormDefinition() {
     ],
     conditions: [],
     sections: [],
-    lists: []
+    lists: [],
+    // @ts-expect-error Allow missing feeOptions
+    feeOptions: {},
+    fees: [],
+    outputs: []
   }
 }
 

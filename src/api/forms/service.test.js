@@ -202,6 +202,8 @@ function getValidFormDefinition() {
       {
         path: '/page-one',
         title: 'Page one',
+        controller: 'Controller',
+        section: 'Section',
         components: [
           {
             type: 'TextField',
@@ -216,7 +218,11 @@ function getValidFormDefinition() {
     ],
     conditions: [],
     sections: [],
-    lists: []
+    lists: [],
+    // @ts-expect-error Allow missing feeOptions
+    feeOptions: {},
+    fees: [],
+    outputs: []
   }
 }
 
