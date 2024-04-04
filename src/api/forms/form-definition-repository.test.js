@@ -20,7 +20,10 @@ describe('Create forms in S3', () => {
   })
 
   test('test upload to s3 works', async () => {
-    await create(dummyFormConfiguration, JSON.parse(dummyFormDefinition))
+    const formConfiguration = getFormConfiguration()
+    const formDefinition = getFormDefinition()
+
+    await create(formConfiguration, formDefinition)
 
     expect(s3Mock.commandCalls(PutObjectCommand)).toHaveLength(1)
   })
@@ -34,15 +37,19 @@ describe('Get forms from S3', () => {
   })
 
   test('should retrieve form definition from S3', async () => {
+    const formDefinitionString = JSON.stringify(getFormDefinition())
+
     const stream = new Readable()
-    stream.push(dummyFormDefinition)
+    stream.push(formDefinitionString)
     stream.push(null) // end of stream
 
     s3Mock.on(GetObjectCommand).resolvesOnce({ Body: sdkStreamMixin(stream) })
 
     const result = get('any-form-id')
 
-    await expect(result).resolves.toStrictEqual(JSON.parse(dummyFormDefinition))
+    await expect(result).resolves.toStrictEqual(
+      JSON.parse(formDefinitionString)
+    )
   })
 
   test('should throw FailedToReadFormError if form definition is empty', async () => {
@@ -70,39 +77,50 @@ describe('Get forms from S3', () => {
   })
 })
 
-const dummyFormDefinition = `
-{
-  "name": "",
-  "startPage": "/page-one",
-  "pages": [
-    {
-      "path": "/page-one",
-      "title": "Page one",
-      "components": [
-        {
-          "type": "TextField",
-          "name": "textField",
-          "title": "This is your first field",
-          "hint": "Help text",
-          "options": {},
-          "schema": {}
-        }
-      ]
-    }
-  ],
-  "conditions": [],
-  "sections": [],
-  "lists": []
+/**
+ * Returns a form definition that is valid
+ * @returns {FormDefinition} - the valid form definition
+ */
+function getFormDefinition() {
+  return {
+    name: '',
+    startPage: '/page-one',
+    pages: [
+      {
+        path: '/page-one',
+        title: 'Page one',
+        components: [
+          {
+            type: 'TextField',
+            name: 'textField',
+            title: 'This is your first field',
+            hint: 'Help text',
+            options: {},
+            schema: {}
+          }
+        ]
+      }
+    ],
+    conditions: [],
+    sections: [],
+    lists: []
+  }
 }
-`
 
 /**
- * @type {import('../types.js').FormConfiguration}
+ * @returns {FormConfiguration}
  */
-const dummyFormConfiguration = {
-  id: 'test',
-  title: 'test',
-  organisation: 'test',
-  teamName: 'test',
-  teamEmail: 'test'
+function getFormConfiguration() {
+  return {
+    id: 'test',
+    title: 'test',
+    organisation: 'test',
+    teamName: 'test',
+    teamEmail: 'test'
+  }
 }
+
+/**
+ * @typedef {import('../types.js').FormConfiguration} FormConfiguration
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ */
