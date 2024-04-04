@@ -45,6 +45,23 @@ module.exports = {
         '@typescript-eslint/no-unsafe-member-access': 'warn',
         '@typescript-eslint/no-unsafe-return': 'warn',
 
+        // Check type support for template string implicit `.toString()`
+        '@typescript-eslint/restrict-template-expressions': [
+          'error',
+          {
+            allowBoolean: true,
+            allowNumber: true
+          }
+        ],
+
+        // Check namespace import members
+        'import/namespace': [
+          'error',
+          {
+            allowComputed: true
+          }
+        ],
+
         // Check import or require statements are A-Z ordered
         'import/order': [
           'error',
@@ -104,7 +121,13 @@ module.exports = {
         'n/no-extraneous-require': 'off',
         'n/no-extraneous-import': 'off',
         'n/no-missing-require': 'off',
-        'n/no-missing-import': 'off'
+        'n/no-missing-import': 'off',
+
+        // Prefer rules that are type aware
+        'no-unused-vars': 'off',
+        'no-use-before-define': 'off',
+        '@typescript-eslint/no-unused-vars': ['error'],
+        '@typescript-eslint/no-use-before-define': ['error', 'nofunc']
       },
       settings: {
         'import/resolver': {
@@ -139,7 +162,9 @@ module.exports = {
       env: {
         jest: true
       },
-      files: ['**/*.test.{cjs,js,mjs}']
+      extends: ['plugin:jest/style'],
+      files: ['**/*.test.{cjs,js,mjs}'],
+      plugins: ['jest']
     }
   ],
   root: true
