@@ -44,9 +44,9 @@ describe('#listForms', () => {
 
     const result = await list()
 
-    expect(result.length).toEqual(2)
-    expect(result[0].id).toEqual('form-1')
-    expect(result[1].id).toEqual('form-2')
+    expect(result).toHaveLength(2)
+    expect(result[0].id).toBe('form-1')
+    expect(result[1].id).toBe('form-2')
   })
 
   test('Should ignore files without "-metadata.json" suffix', async () => {
@@ -65,8 +65,8 @@ describe('#listForms', () => {
 
     const result = await list()
 
-    expect(result.length).toEqual(1)
-    expect(result[0].id).toEqual('form-1')
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('form-1')
   })
 })
 
