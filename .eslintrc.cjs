@@ -162,7 +162,9 @@ module.exports = {
       env: {
         jest: true
       },
-      files: ['**/*.test.{cjs,js,mjs}']
+      extends: ['plugin:jest/style'],
+      files: ['**/*.test.{cjs,js,mjs}'],
+      plugins: ['jest']
     }
   ],
   root: true
