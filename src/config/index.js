@@ -92,7 +92,7 @@ export const config = convict({
   s3Region: {
     doc: 'S3 region for the app on CDP',
     format: String,
-    default: 'us-west-2',
+    default: 'eu-west-2',
     env: 'S3_REGION'
   },
   s3Endpoint: {
