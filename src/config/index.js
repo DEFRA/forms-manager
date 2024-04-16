@@ -26,11 +26,6 @@ export const config = convict({
     format: String,
     default: cwd()
   },
-  appPathPrefix: {
-    doc: 'Application url path prefix',
-    format: String,
-    default: '/forms-manager'
-  },
   isProduction: {
     doc: 'If this application running in the production environment',
     format: Boolean,

@@ -57,9 +57,7 @@ export async function createServer() {
   // Temporarily disabled. Will be restored in task #335165
   // await server.register({ plugin: mongoPlugin, options: {} })
 
-  await server.register(router, {
-    routes: { prefix: config.get('appPathPrefix') }
-  })
+  await server.register(router)
 
   // Temporarily disabled. Will be restored in task #335165
   // await server.register(populateDb)
