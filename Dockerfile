@@ -44,4 +44,4 @@ ARG PORT
 ENV PORT ${PORT}
 EXPOSE ${PORT}
 
-CMD [ "node", "--enable-source-maps", "./.server" ]
+CMD [ "npm", "start", "--ignore-scripts" ]

@@ -53,9 +53,7 @@ export async function createServer() {
   await server.register(mongodb)
   await server.register(logErrors)
 
-  await server.register(router, {
-    routes: { prefix: config.get('appPathPrefix') }
-  })
+  await server.register(router)
 
   return server
 }

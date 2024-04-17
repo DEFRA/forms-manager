@@ -26,11 +26,6 @@ export const config = convict({
     format: String,
     default: cwd()
   },
-  appPathPrefix: {
-    doc: 'Application url path prefix',
-    format: String,
-    default: '/forms-manager'
-  },
   isProduction: {
     doc: 'If this application running in the production environment',
     format: Boolean,
@@ -92,7 +87,7 @@ export const config = convict({
   s3Region: {
     doc: 'S3 region for the app on CDP',
     format: String,
-    default: 'us-west-2',
+    default: 'eu-west-2',
     env: 'S3_REGION'
   },
   s3Endpoint: {
