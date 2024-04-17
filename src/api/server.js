@@ -1,18 +1,14 @@
 import path from 'path'
 
-import Boom from '@hapi/boom'
 import hapi from '@hapi/hapi'
 
-import { ApplicationError } from '~/src/api/forms/errors.js'
-import { router } from '~/src/api/router.js'
 import { config } from '~/src/config/index.js'
-// Temporarily disabled. Will be restored in task #335165
-// import { populateDb } from '~/src/helpers/db/populate-db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
 import { requestLogger } from '~/src/helpers/logging/request-logger.js'
-// Temporarily disabled. Will be restored in task #335165
-// import { mongoPlugin } from '~/src/helpers/mongodb.js'
 import { secureContext } from '~/src/helpers/secure-context/index.js'
+import { logErrors } from '~/src/plugins/log-errors.js'
+import { mongodb } from '~/src/plugins/mongodb.js'
+import { router } from '~/src/plugins/router.js'
 
 const isProduction = config.get('isProduction')
 
@@ -54,27 +50,11 @@ export async function createServer() {
     await server.register(secureContext)
   }
 
-  // Temporarily disabled. Will be restored in task #335165
-  // await server.register({ plugin: mongoPlugin, options: {} })
+  await server.register(mongodb)
+  await server.register(logErrors)
 
   await server.register(router, {
     routes: { prefix: config.get('appPathPrefix') }
-  })
-
-  // Temporarily disabled. Will be restored in task #335165
-  // await server.register(populateDb)
-
-  server.ext('onPreResponse', (request, h) => {
-    const response = request.response
-
-    if (response instanceof ApplicationError && Boom.isBoom(response)) {
-      response.output.statusCode = response.statusCode
-      response.output.payload.statusCode = response.statusCode
-      response.output.payload.message = response.message
-      response.output.payload.error = response.name
-    }
-
-    return h.continue
   })
 
   return server

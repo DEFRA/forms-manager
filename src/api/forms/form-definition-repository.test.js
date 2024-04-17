@@ -13,6 +13,7 @@ import { FailedToReadFormError } from '~/src/api/forms/errors.js'
 import { create, get } from '~/src/api/forms/form-definition-repository.js'
 
 const s3Mock = mockClient(S3Client)
+const id = '661e4ca5039739ef2902b214'
 
 describe('Create forms in S3', () => {
   beforeEach(() => {
@@ -20,12 +21,10 @@ describe('Create forms in S3', () => {
   })
 
   test('test upload to s3 works', async () => {
-    await create(dummyFormConfiguration, JSON.parse(dummyFormDefinition))
+    await create(id, JSON.parse(dummyFormDefinition))
 
     expect(s3Mock.commandCalls(PutObjectCommand)).toHaveLength(1)
   })
-
-  // TODO add a test if config.formDefinitionBucketName is missing
 })
 
 describe('Get forms from S3', () => {
@@ -95,14 +94,3 @@ const dummyFormDefinition = `
   "lists": []
 }
 `
-
-/**
- * @type {import('../types.js').FormConfiguration}
- */
-const dummyFormConfiguration = {
-  id: 'test',
-  title: 'test',
-  organisation: 'test',
-  teamName: 'test',
-  teamEmail: 'test'
-}

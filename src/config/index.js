@@ -86,7 +86,7 @@ export const config = convict({
   formDefinitionBucketName: {
     doc: 'Name of the S3 bucket hosting the form definitions',
     format: String,
-    default: '',
+    default: 'form-definition-storage',
     env: 'FORM_DEF_BUCKET_NAME'
   },
   s3Region: {

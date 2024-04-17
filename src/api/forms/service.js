@@ -1,74 +1,68 @@
-import { readFile } from 'node:fs/promises'
-
 import { Schema } from '@defra/forms-model'
 
-import {
-  FailedCreationOperationError,
-  FormAlreadyExistsError,
-  InvalidFormDefinitionError
-} from '~/src/api/forms/errors.js'
+import { emptyForm } from '~/src/api/forms/empty-form.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
-import { createLogger } from '~/src/helpers/logging/logger.js'
-
-const logger = createLogger()
 
 /**
  * Adds an empty form
  * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
+ * @param {Request} request - the hapi request object
  * @returns {Promise<FormConfiguration>} - the saved form configuration
- * @throws {FormAlreadyExistsError} - if the form already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
- * @throws {FailedCreationOperationError} - if the form metadata/def couldn't be persisted
  */
-export async function createForm(formConfigurationInput) {
-  const emptyForm = await retrieveEmptyForm()
-  const formId = formTitleToId(formConfigurationInput.title)
+export async function createForm(formConfigurationInput, request) {
+  const { db } = request
+  const { title } = formConfigurationInput
 
-  if (await formMetadata.exists(formId)) {
-    throw new FormAlreadyExistsError(formId)
-  }
+  // Create the slug
+  const linkIdentifier = formTitleToSlug(title)
+  const metadata = { ...formConfigurationInput, linkIdentifier }
 
-  // construct the new form config. the ID is always set server-side.
-  const formConfiguration = { ...formConfigurationInput, id: formId }
+  // Create the metadata document
+  const insertResult = await formMetadata.create(metadata, db)
+  const formId = insertResult.insertedId.toString()
 
-  // create the form object. At this point, we're just creating a blank
-  // form following the one-page template, we just set the title per the user request.
-  const shallowCloneForm = { ...emptyForm, name: formConfiguration.title }
+  // Create a blank form definition with the title set
+  const definition = { ...emptyForm(), name: metadata.title }
 
-  const { error } = Schema.validate(shallowCloneForm)
+  // Validate the form definition
+  const { error } = Schema.validate(definition)
   if (error) {
     throw new InvalidFormDefinitionError(error.message, {
       cause: error
     })
   }
 
-  try {
-    await formDefinition.create(formConfiguration, shallowCloneForm)
-    await formMetadata.create(formConfiguration)
-  } catch (error) {
-    logger.error(error, "Failed to persist, couldn't create form.")
-    throw new FailedCreationOperationError()
-  }
+  // Create the form definition
+  await formDefinition.create(formId, definition)
 
-  return formConfiguration
+  return metadata
 }
 
 /**
  * Lists the available forms
+ * @param {Request} request - the hapi request object
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
-export function listForms() {
-  return formMetadata.list()
+export function listForms(request) {
+  const { db } = request
+
+  return formMetadata.list(db)
 }
 
 /**
  * Retrieves a form configuration
  * @param {string} formId - ID of the form
- * @returns {Promise<FormConfiguration>} - form configuration
+ * @param {Request} request - the hapi request object
+ * @returns {Promise<FormConfiguration | undefined>} - form configuration
  */
-export function getForm(formId) {
-  return formMetadata.get(formId)
+export async function getForm(formId, request) {
+  const { db } = request
+  const metadata = await formMetadata.get(formId, db)
+
+  return metadata ?? undefined
 }
 
 /**
@@ -81,13 +75,13 @@ export function getFormDefinition(formId) {
 }
 
 /**
- * Given a form title, returns the ID of the form.
+ * Given a form title, returns the slug of the form.
  * E.g. "Hello - world" -> "hello-world".
- * @param {string} formTitle - title of the form
+ * @param {string} title - title of the form
  * @returns {string} - ID of the form
  */
-function formTitleToId(formTitle) {
-  return formTitle
+function formTitleToSlug(title) {
+  return title
     .toLowerCase()
     .replace(/[^a-z0-9 ]/g, '') // remove any non-alphanumeric characters
     .replace(/\s+/g, ' ') // replace any whitespaces with a single space
@@ -95,41 +89,7 @@ function formTitleToId(formTitle) {
 }
 
 /**
- * Retrieves the empty form configuration
- * @returns {Promise<FormDefinition>} - the empty form configuration
- * @throws {InvalidFormDefinitionError} - if the base form definition is invalid
- */
-async function retrieveEmptyForm() {
-  const fileContent = await readFile(
-    new URL('./empty-form.json', import.meta.url).pathname,
-    'utf-8'
-  )
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow JSON type 'any'
-    const emptyForm = /** @type {import('./empty-form.json')} */ (
-      JSON.parse(fileContent)
-    )
-
-    const validationResult = Schema.validate(emptyForm)
-
-    if (validationResult.error) {
-      throw new InvalidFormDefinitionError(
-        'Invalid form schema provided. Please check the empty-form.json file.'
-      )
-    }
-
-    // @ts-expect-error Allow missing fees, outputs, feeOptions in empty form
-    return emptyForm
-  } catch (cause) {
-    throw new InvalidFormDefinitionError(
-      'Failed to parse empty-form.json as JSON. Please validate contents.',
-      { cause }
-    )
-  }
-}
-
-/**
+ * @typedef {import('@hapi/hapi').Request} Request
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition

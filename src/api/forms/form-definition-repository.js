@@ -26,11 +26,11 @@ function getFormDefinitionFilename(formId) {
 
 /**
  * Adds a form to the Form Store
- * @param {FormConfiguration} formConfiguration - form configuration
+ * @param {string} id - id
  * @param {object} formDefinition - form definition (JSON object)
  */
-export function create(formConfiguration, formDefinition) {
-  const formDefinitionFilename = getFormDefinitionFilename(formConfiguration.id)
+export function create(id, formDefinition) {
+  const formDefinitionFilename = getFormDefinitionFilename(id)
 
   // Convert formMetadata to JSON string
   const formDefinitionString = JSON.stringify(formDefinition)
@@ -44,44 +44,39 @@ export function create(formConfiguration, formDefinition) {
  * @param {string} formId - the ID of the form
  * @returns {Promise<FormDefinition>} - form definition JSON content
  */
-export function get(formId) {
+export async function get(formId) {
+  const filename = getFormDefinitionFilename(formId)
+  const body = await retrieveFromS3(filename)
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
-  return retrieveFromS3(getFormDefinitionFilename(formId)).then(JSON.parse)
+  return JSON.parse(body)
 }
 
 /**
- * Uploads fileContent to an S3 bucket as fileName
- * @param {string} fileName - the file name to upload
+ * Uploads fileContent to an S3 bucket as filename
+ * @param {string} filename - the file name to upload
  * @param {string} fileContent - the content to upload
  */
-function uploadToS3(fileName, fileContent) {
-  if (!formBucketName) {
-    throw new Error('config.formDefinitionBucketName cannot be null')
-  }
-
+function uploadToS3(filename, fileContent) {
   const command = new PutObjectCommand({
     Bucket: formBucketName,
-    Key: fileName,
-    Body: fileContent.toString()
+    Key: filename,
+    Body: fileContent
   })
 
   return getS3Client().send(command)
 }
 
 /**
- * Uploads fileContent to an S3 bucket as fileName
- * @param {string} fileName - the file name to read`
+ * Uploads fileContent to an S3 bucket as filename
+ * @param {string} filename - the file name to read`
  * @returns {Promise<string>} - the content of the file
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
-async function retrieveFromS3(fileName) {
-  if (!formBucketName) {
-    throw new Error('config.formDefinitionBucketName cannot be empty')
-  }
-
+async function retrieveFromS3(filename) {
   const command = new GetObjectCommand({
     Bucket: formBucketName,
-    Key: fileName
+    Key: filename
   })
 
   try {
@@ -92,12 +87,12 @@ async function retrieveFromS3(fileName) {
     }
 
     return response.Body.transformToString()
-  } catch (error) {
-    if (error instanceof NoSuchKey) {
+  } catch (err) {
+    if (err instanceof NoSuchKey) {
       throw new FailedToReadFormError('Form definition does not exist on disk')
     }
 
-    throw error
+    throw err
   }
 }
 

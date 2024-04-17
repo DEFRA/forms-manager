@@ -1,99 +1,89 @@
-import { existsSync } from 'node:fs'
-import { readdir, readFile } from 'node:fs/promises'
+import { BSONError } from 'bson'
 
-import { list, get } from '~/src/api/forms/form-metadata-repository.js'
+import {
+  list,
+  get,
+  COLLECTION_NAME,
+  MAX_RESULTS
+} from '~/src/api/forms/form-metadata-repository.js'
 
-const formDirectory = '/path/to/dummy/directory'
-
-jest.mock('node:fs')
-jest.mock('node:fs/promises')
-jest.mock('~/src/config', () => ({
-  config: {
-    get: jest.fn(() => formDirectory)
-  }
-}))
+const metadata = {
+  _id: '661e4ca5039739ef2902b214',
+  title: 'Test form',
+  organisation: 'Defra',
+  teamName: 'Defra Forms',
+  teamEmail: 'defraforms@defra.gov.uk',
+  linkIdentifier: 'test-form'
+}
 
 describe('#listForms', () => {
-  beforeAll(() => {
-    jest.mocked(existsSync).mockReturnValue(true)
-  })
-
   test('Should return an empty array if no forms found', async () => {
-    jest.mocked(readdir).mockResolvedValue([])
+    const items = []
 
-    const result = await list()
+    const collection = {
+      find: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      toArray: jest.fn(() => items)
+    }
 
-    expect(result).toEqual([])
+    const db = { collection: jest.fn(() => collection) }
+
+    const result = await list(db)
+
+    expect(result).toEqual(items)
+    expect(db.collection).toHaveBeenCalledWith(COLLECTION_NAME)
+    expect(collection.find).toHaveBeenCalled()
+    expect(collection.limit).toHaveBeenCalledWith(MAX_RESULTS)
+    expect(collection.toArray).toHaveBeenCalled()
   })
 
   test('Should return an array of form metadata', async () => {
-    const files = /** @type {import('node:fs').Dirent[]} */ ([
-      { name: 'form-1-metadata.json' },
-      { name: 'form-2-metadata.json' }
-    ])
+    const items = [metadata]
 
-    const form1Metadata = JSON.stringify({ id: 'form-1', title: 'Form 1' })
-    const form2Metadata = JSON.stringify({ id: 'form-2', title: 'Form 2' })
+    const collection = {
+      find: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      toArray: jest.fn(() => items)
+    }
 
-    jest.mocked(readFile).mockResolvedValue(form1Metadata)
-    jest.mocked(readFile).mockResolvedValue(form2Metadata)
+    const db = { collection: jest.fn(() => collection) }
 
-    jest.mocked(readdir).mockResolvedValue(files)
-    jest.mocked(readFile).mockResolvedValueOnce(form1Metadata)
-    jest.mocked(readFile).mockResolvedValueOnce(form2Metadata)
+    const result = await list(db)
 
-    const result = await list()
-
-    expect(result.length).toEqual(2)
-    expect(result[0].id).toEqual('form-1')
-    expect(result[1].id).toEqual('form-2')
-  })
-
-  test('Should ignore files without "-metadata.json" suffix', async () => {
-    const files = /** @type {import('node:fs').Dirent[]} */ ([
-      { name: 'form-1-metadata.json' },
-      { name: 'form-2.json' }
-    ])
-
-    jest.mocked(readdir).mockResolvedValue(files)
-    jest.mocked(readFile).mockResolvedValue(
-      JSON.stringify({
-        id: 'form-1',
-        title: 'Form 1'
-      })
-    )
-
-    const result = await list()
-
-    expect(result.length).toEqual(1)
-    expect(result[0].id).toEqual('form-1')
+    expect(result).toEqual(items)
+    expect(db.collection).toHaveBeenCalledWith(COLLECTION_NAME)
+    expect(collection.find).toHaveBeenCalled()
+    expect(collection.limit).toHaveBeenCalledWith(MAX_RESULTS)
+    expect(collection.toArray).toHaveBeenCalled()
   })
 })
 
 describe('#getFormMetadata', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
   test('Should return the form metadata', async () => {
-    const formId = 'form-1'
-    const formMetadataFilename = formDirectory + '/form-1-metadata.json'
-    const formMetadata = '{ "id": "form-1", "title": "Form 1" }'
+    const formId = metadata.id
+    const collection = {
+      findOne: jest.fn(() => metadata)
+    }
 
-    jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
+    const db = { collection: jest.fn(() => collection) }
 
-    const result = await get(formId)
+    const result = await get(formId, db)
 
-    expect(result).toEqual(JSON.parse(formMetadata))
-    expect(readFile).toHaveBeenCalledWith(formMetadataFilename, 'utf-8')
+    expect(result).toEqual(metadata)
+    expect(db.collection).toHaveBeenCalledWith(COLLECTION_NAME)
+    expect(collection.findOne).toHaveBeenCalled()
   })
 
-  test('Should throw an error if form malformed', async () => {
+  test('Should throw an error if form id malformed', async () => {
     const formId = 'form-1'
-    const formMetadata = '{ {{{{'
+    const collection = {
+      findOne: jest.fn(() => metadata)
+    }
 
-    jest.mocked(readFile).mockResolvedValueOnce(formMetadata)
+    const db = { collection: jest.fn(() => collection) }
 
-    await expect(get(formId)).rejects.toThrow(SyntaxError)
+    await expect(async () => {
+      await get(formId, db)
+    }).rejects.toThrow(BSONError)
   })
 })
