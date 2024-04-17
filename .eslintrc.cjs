@@ -11,6 +11,7 @@ module.exports = {
         'standard',
         'eslint:recommended',
         'plugin:import/recommended',
+        'plugin:import/typescript',
         'plugin:jsdoc/recommended-typescript-flavor',
         'plugin:n/recommended',
         'plugin:prettier/recommended',
@@ -131,6 +132,7 @@ module.exports = {
       },
       settings: {
         'import/resolver': {
+          node: true,
           typescript: {
             alwaysTryTypes: true,
             project: ['./tsconfig.json']
