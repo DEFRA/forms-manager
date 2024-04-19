@@ -31,9 +31,10 @@ export async function prepareDb(server) {
   db = client.db(databaseName)
 
   // Ensure db indexes
-  await db
-    .collection(COLLECTION_NAME)
-    .createIndex({ title: 1, linkIdentifier: 1 })
+  const coll = db.collection(COLLECTION_NAME)
+
+  await coll.createIndex({ title: 1 })
+  await coll.createIndex({ linkIdentifier: 1 }, { unique: true })
 
   server.logger.info(`Mongodb connected to ${databaseName}`)
 
