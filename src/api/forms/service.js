@@ -1,5 +1,8 @@
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import {
+  InvalidFormDefinitionError,
+  ResourceNotFoundError
+} from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { formDefinitionSchema } from '~/src/models/forms.js'
@@ -93,7 +96,13 @@ export function getDraftFormDefinition(formId) {
  * @param {string} formId - ID of the form
  * @param {FormDefinition} formDefinition - full JSON form definition
  */
-export function updateDraftFormDefinition(formId, formDefinition) {
+export async function updateDraftFormDefinition(formId, formDefinition) {
+  if (!(await formMetadata.exists(formId))) {
+    throw new ResourceNotFoundError(
+      `Form ${formId} does not exist, so the definition cannot be updated.`
+    )
+  }
+
   return draftFormDefinition.create(formId, formDefinition)
 }
 

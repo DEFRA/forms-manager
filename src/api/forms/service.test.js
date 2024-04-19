@@ -1,9 +1,16 @@
 import { ObjectId } from 'mongodb'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import {
+  InvalidFormDefinitionError,
+  ResourceNotFoundError
+} from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
-import { createForm } from '~/src/api/forms/service.js'
+import {
+  createForm,
+  getDraftFormDefinition,
+  updateDraftFormDefinition
+} from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 
 jest.mock('~/src/api/forms/draft-form-definition-repository.js')
@@ -113,5 +120,24 @@ describe('createForm', () => {
     }
 
     await expect(createForm(formMetadataInput)).rejects.toThrow(Error)
+  })
+
+  it('should return the form definition', async () => {
+    jest.mocked(formMetadata.exists).mockResolvedValueOnce(true)
+    jest
+      .mocked(draftFormDefinition.get)
+      .mockResolvedValueOnce(actualEmptyForm())
+
+    await expect(getDraftFormDefinition('123')).resolves.toMatchObject(
+      actualEmptyForm()
+    )
+  })
+
+  it('should throw an error if the form associated with the definition does not exist', async () => {
+    jest.mocked(formMetadata.exists).mockResolvedValueOnce(false)
+
+    await expect(
+      updateDraftFormDefinition('123', actualEmptyForm())
+    ).rejects.toThrow(ResourceNotFoundError)
   })
 })

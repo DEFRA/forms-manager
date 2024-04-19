@@ -30,6 +30,15 @@ export function get(formId) {
 }
 
 /**
+ * Retrieves a document from the database
+ * @param {string} formId - ID of the form
+ * @returns {Promise<boolean>} if the ID exists or not
+ */
+export async function exists(formId) {
+  return !!(await get(formId))
+}
+
+/**
  * Create a document in the database
  * @param {FormMetadataDocument} document - form metadata document
  */
