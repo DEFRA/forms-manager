@@ -6,6 +6,22 @@ import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 
 /**
+ * Maps a document to a FormConfiguration
+ * @param {DocumentWithId} document - A mongo document
+ * @returns {FormConfiguration}
+ */
+function mapForm(document) {
+  return {
+    id: document._id.toString(),
+    linkIdentifier: document.linkIdentifier,
+    title: document.title,
+    organisation: document.organisation,
+    teamName: document.teamName,
+    teamEmail: document.teamEmail
+  }
+}
+
+/**
  * Adds an empty form
  * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
  * @returns {Promise<FormConfiguration>} - the saved form configuration
@@ -16,7 +32,7 @@ export async function createForm(formConfigurationInput) {
 
   // Create the slug
   const linkIdentifier = formTitleToSlug(title)
-  const metadata = /** @type {FormConfiguration} */ ({
+  const metadata = /** @type {FormConfigurationDocumentInput} */ ({
     ...formConfigurationInput,
     linkIdentifier
   })
@@ -39,7 +55,8 @@ export async function createForm(formConfigurationInput) {
   // Create the form definition
   await formDefinition.create(formId, definition)
 
-  return metadata
+  // @ts-expect-error - Mongo mutates the document with an _id key
+  return mapForm(/** @type {DocumentWithId} */ (metadata))
 }
 
 /**
@@ -47,7 +64,9 @@ export async function createForm(formConfigurationInput) {
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
 export async function listForms() {
-  return formMetadata.list()
+  const documents = await formMetadata.list()
+
+  return documents.map(mapForm)
 }
 
 /**
@@ -56,9 +75,11 @@ export async function listForms() {
  * @returns {Promise<FormConfiguration | undefined>} - form configuration
  */
 export async function getForm(formId) {
-  const metadata = await formMetadata.get(formId)
+  const document = await formMetadata.get(formId)
 
-  return metadata ?? undefined
+  if (document) {
+    return mapForm(document)
+  }
 }
 
 /**
@@ -86,8 +107,9 @@ function formTitleToSlug(title) {
 }
 
 /**
- * @typedef {import('@hapi/hapi').Request} Request
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @typedef {import('../types.js').FormConfigurationDocumentInput} FormConfigurationDocumentInput
+ * @typedef {import('./form-metadata-repository.js').DocumentWithId} DocumentWithId
  */

@@ -33,7 +33,7 @@ export default [
       const formConfiguration = await createForm(payload)
 
       return {
-        id: formConfiguration._id,
+        id: formConfiguration.id,
         status: 'created'
       }
     },
@@ -85,7 +85,7 @@ export default [
           return Boom.notFound(err.message, err)
         }
 
-        return new Boom.Boom(err)
+        throw err
       }
     },
     options: {

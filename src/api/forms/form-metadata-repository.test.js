@@ -11,7 +11,7 @@
 // jest.mock('~/src/db.js')
 
 // const metadata = {
-//   _id: '661e4ca5039739ef2902b214',
+//   id: '661e4ca5039739ef2902b214',
 //   title: 'Test form',
 //   organisation: 'Defra',
 //   teamName: 'Defra Forms',
@@ -74,7 +74,7 @@
 
 // describe('#getFormMetadata', () => {
 //   test('Should return the form metadata', async () => {
-//     const formId = metadata._id
+//     const formId = metadata.id
 //     const collection = {
 //       findOne: jest.fn(() => metadata)
 //     }

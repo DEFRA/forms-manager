@@ -41,7 +41,7 @@ describe('Forms route', () => {
     teamEmail: 'defraforms@defra.gov.uk'
   }
   const stubFormOutput = {
-    _id: id,
+    id,
     linkIdentifier: 'test-form',
     title: 'Test form',
     organisation: 'Defra',
@@ -111,7 +111,7 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual({
-        id: stubFormOutput._id,
+        id: stubFormOutput.id,
         status: 'created'
       })
     })
