@@ -4,6 +4,8 @@ services:
   mongo:
     image: mongo:6.0
     restart: always
+    ports:
+      - 27017:27017
     environment:
       MONGO_INITDB_DATABASE: forms-manager
       MONGO_INITDB_ROOT_USERNAME: defra
