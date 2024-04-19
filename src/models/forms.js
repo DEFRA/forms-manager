@@ -22,9 +22,9 @@ export const idParamSchema = Joi.object()
 // Create form payload schema
 export const createFormSchema = Joi.object()
   .keys({
-    title: Joi.string().required(),
-    organisation: Joi.string().required(),
-    teamName: Joi.string().required(),
-    teamEmail: Joi.string().email().required()
+    title: Joi.string().max(250).trim().required(),
+    organisation: Joi.string().max(100).trim().required(),
+    teamName: Joi.string().max(100).trim().required(),
+    teamEmail: Joi.string().email().trim().required()
   })
   .required()

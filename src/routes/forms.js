@@ -17,20 +17,20 @@ export default [
   {
     method: 'GET',
     path: '/forms',
-    handler(request) {
-      return listForms(request)
+    handler() {
+      return listForms()
     }
   },
   {
     method: 'POST',
     path: '/forms',
     /**
-     * @type {RouteFormCreation["handler"]}
+     * @param {RequestFormCreation} request
      */
     async handler(request) {
       const { payload } = request
 
-      const formConfiguration = await createForm(payload, request)
+      const formConfiguration = await createForm(payload)
 
       return {
         id: formConfiguration._id,
@@ -47,12 +47,12 @@ export default [
     method: 'GET',
     path: '/forms/{id}',
     /**
-     * @type {RouteFormById["handler"]}
+     * @param {RequestFormById} request
      */
     async handler(request) {
       const { params } = request
       const { id } = params
-      const form = await getForm(id, request)
+      const form = await getForm(id)
 
       if (!form) {
         return Boom.notFound(`Form with id '${id}' not found`)
@@ -70,7 +70,7 @@ export default [
     method: 'GET',
     path: '/forms/{id}/definition',
     /**
-     * @type {RouteFormById["handler"]}
+     * @param {RequestFormById} request
      */
     async handler(request) {
       const { params } = request
@@ -98,8 +98,7 @@ export default [
 
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
+ * @typedef {import('../api/types.js').RequestFormById} RequestFormById
+ * @typedef {import('../api/types.js').RequestFormCreation} RequestFormCreation
  * @typedef {import('../api/types.js').FormConfigurationInput} FormConfigurationInput
- * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
- * @typedef {import('@hapi/hapi').ServerRoute<{ Params: { id: string } }>} RouteFormById
- * @typedef {import('@hapi/hapi').ServerRoute<{ Payload: FormConfigurationInput }>} RouteFormCreation
  */

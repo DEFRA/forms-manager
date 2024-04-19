@@ -8,20 +8,21 @@ import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 /**
  * Adds an empty form
  * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
- * @param {Request} request - the hapi request object
  * @returns {Promise<FormConfiguration>} - the saved form configuration
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
-export async function createForm(formConfigurationInput, request) {
-  const { db } = request
+export async function createForm(formConfigurationInput) {
   const { title } = formConfigurationInput
 
   // Create the slug
   const linkIdentifier = formTitleToSlug(title)
-  const metadata = { ...formConfigurationInput, linkIdentifier }
+  const metadata = /** @type {FormConfiguration} */ ({
+    ...formConfigurationInput,
+    linkIdentifier
+  })
 
   // Create the metadata document
-  const insertResult = await formMetadata.create(metadata, db)
+  const insertResult = await formMetadata.create(metadata)
   const formId = insertResult.insertedId.toString()
 
   // Create a blank form definition with the title set
@@ -43,24 +44,19 @@ export async function createForm(formConfigurationInput, request) {
 
 /**
  * Lists the available forms
- * @param {Request} request - the hapi request object
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
-export function listForms(request) {
-  const { db } = request
-
-  return formMetadata.list(db)
+export async function listForms() {
+  return formMetadata.list()
 }
 
 /**
  * Retrieves a form configuration
  * @param {string} formId - ID of the form
- * @param {Request} request - the hapi request object
  * @returns {Promise<FormConfiguration | undefined>} - form configuration
  */
-export async function getForm(formId, request) {
-  const { db } = request
-  const metadata = await formMetadata.get(formId, db)
+export async function getForm(formId) {
+  const metadata = await formMetadata.get(formId)
 
   return metadata ?? undefined
 }
@@ -69,6 +65,7 @@ export async function getForm(formId, request) {
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
  * @returns {Promise<FormDefinition>} - form definition JSON content
+ * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 export function getFormDefinition(formId) {
   return formDefinition.get(formId)

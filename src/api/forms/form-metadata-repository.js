@@ -1,26 +1,27 @@
 import { ObjectId } from 'mongodb'
 
+import { db, COLLECTION_NAME } from '~/src/db.js'
+
 export const MAX_RESULTS = 500
-export const COLLECTION_NAME = 'form-metadata'
 
 /**
  * Retrieves the list of documents from the database
- * @param {Db} db - the mongo database object
  * @returns {Promise<DocumentWithId[]>}
  */
-export function list(db) {
+export function list() {
   const coll = db.collection(COLLECTION_NAME)
 
-  return coll.find().limit(MAX_RESULTS).toArray()
+  const res = coll.find().limit(MAX_RESULTS).toArray()
+
+  return res
 }
 
 /**
  * Retrieves a document from the database
  * @param {string} formId - ID of the form
- * @param {Db} db - the mongo database object
  * @returns {Promise<DocumentWithId | null>}
  */
-export function get(formId, db) {
+export function get(formId) {
   const coll = db.collection(COLLECTION_NAME)
 
   return coll.findOne({ _id: new ObjectId(formId) })
@@ -29,20 +30,23 @@ export function get(formId, db) {
 /**
  * Create a document in the database
  * @param {FormConfigurationInput} formConfigurationInput - form configuration
- * @param {Db} db - the mongo database object
  * @returns {Promise<InsertOneResult>}
  */
-export async function create(formConfigurationInput, db) {
+export async function create(formConfigurationInput) {
   const coll = db.collection(COLLECTION_NAME)
 
   return coll.insertOne(formConfigurationInput)
 }
 
 /**
- * @typedef {import('mongodb').Db} Db
  * @typedef {import('mongodb').Document} Document
  * @typedef {import('mongodb').WithId<Document>} DocumentWithId
  * @typedef {import('mongodb').InsertOneResult} InsertOneResult
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
+ */
+
+/**
+ * @template {object} Schema
+ * @typedef {import('mongodb').WithId<Schema> | null} WithId
  */

@@ -15,6 +15,32 @@ import { create, get } from '~/src/api/forms/form-definition-repository.js'
 const s3Mock = mockClient(S3Client)
 const id = '661e4ca5039739ef2902b214'
 
+const dummyFormDefinition = `
+{
+  "name": "",
+  "startPage": "/page-one",
+  "pages": [
+    {
+      "path": "/page-one",
+      "title": "Page one",
+      "components": [
+        {
+          "type": "TextField",
+          "name": "textField",
+          "title": "This is your first field",
+          "hint": "Help text",
+          "options": {},
+          "schema": {}
+        }
+      ]
+    }
+  ],
+  "conditions": [],
+  "sections": [],
+  "lists": []
+}
+`
+
 describe('Create forms in S3', () => {
   beforeEach(() => {
     s3Mock.reset()
@@ -68,29 +94,3 @@ describe('Get forms from S3', () => {
     await expect(() => get('any-form-id')).rejects.toThrow(Error)
   })
 })
-
-const dummyFormDefinition = `
-{
-  "name": "",
-  "startPage": "/page-one",
-  "pages": [
-    {
-      "path": "/page-one",
-      "title": "Page one",
-      "components": [
-        {
-          "type": "TextField",
-          "name": "textField",
-          "title": "This is your first field",
-          "hint": "Help text",
-          "options": {},
-          "schema": {}
-        }
-      ]
-    }
-  ],
-  "conditions": [],
-  "sections": [],
-  "lists": []
-}
-`

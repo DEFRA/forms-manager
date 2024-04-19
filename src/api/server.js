@@ -3,12 +3,12 @@ import path from 'path'
 import hapi from '@hapi/hapi'
 
 import { config } from '~/src/config/index.js'
+import { prepareDb } from '~/src/db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
 import { requestLogger } from '~/src/helpers/logging/request-logger.js'
-import { secureContext } from '~/src/helpers/secure-context/index.js'
 import { logErrors } from '~/src/plugins/log-errors.js'
-import { mongodb } from '~/src/plugins/mongodb.js'
 import { router } from '~/src/plugins/router.js'
+import { prepareSecureContext } from '~/src/secure-context.js'
 
 const isProduction = config.get('isProduction')
 
@@ -47,10 +47,11 @@ export async function createServer() {
   await server.register(requestLogger)
 
   if (isProduction) {
-    await server.register(secureContext)
+    prepareSecureContext(server)
   }
 
-  await server.register(mongodb)
+  await prepareDb(server)
+
   await server.register(logErrors)
 
   await server.register(router)

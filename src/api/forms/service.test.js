@@ -11,11 +11,13 @@ jest.mock('~/src/api/forms/form-metadata-repository.js')
 jest.mock('~/src/api/forms/empty-form.js')
 
 const id = '661e4ca5039739ef2902b214'
-const mockRequest = { db: {} }
 const actualEmptyForm = jest.requireActual('~/src/api/forms/empty-form.js')
-const mockFormMetadataImpl = (input) => {
+const mockFormMetadataImpl = (/** @type {FormConfigurationInput} */ input) => {
   const objId = new ObjectId(id)
-  input._id = id
+
+  // Assign an _id property to the
+  // input like the MongoClient would
+  Object.assign(input, { _id: id })
 
   return Promise.resolve({
     acknowledged: true,
@@ -39,7 +41,7 @@ async function runFormCreationTest(formConfigurationInput) {
   // @ts-expect-error unused response type so ignore type for now
   jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
 
-  return createForm(formConfigurationInput, mockRequest)
+  return createForm(formConfigurationInput)
 }
 
 describe('createForm', () => {
@@ -100,7 +102,7 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration, mockRequest)).rejects.toThrow(
+    await expect(createForm(formConfiguration)).rejects.toThrow(
       InvalidFormDefinitionError
     )
   })
@@ -120,9 +122,7 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration, mockRequest)).rejects.toThrow(
-      Error
-    )
+    await expect(createForm(formConfiguration)).rejects.toThrow(Error)
   })
 
   it('should throw an error when writing form def fails', async () => {
@@ -139,9 +139,7 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration, mockRequest)).rejects.toThrow(
-      Error
-    )
+    await expect(createForm(formConfiguration)).rejects.toThrow(Error)
   })
 })
 
