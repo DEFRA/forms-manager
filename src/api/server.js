@@ -5,9 +5,9 @@ import hapi from '@hapi/hapi'
 import { config } from '~/src/config/index.js'
 import { prepareDb } from '~/src/db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
-import { requestLogger } from '~/src/helpers/logging/request-logger.js'
-import { logErrors } from '~/src/plugins/log-errors.js'
+import { logRequests } from '~/src/plugins/log-requests.js'
 import { router } from '~/src/plugins/router.js'
+import { transformErrors } from '~/src/plugins/transform-errors.js'
 import { prepareSecureContext } from '~/src/secure-context.js'
 
 const isProduction = config.get('isProduction')
@@ -44,16 +44,14 @@ export async function createServer() {
     }
   })
 
-  await server.register(requestLogger)
+  await server.register(logRequests)
 
   if (isProduction) {
     prepareSecureContext(server)
   }
 
   await prepareDb(server)
-
-  await server.register(logErrors)
-
+  await server.register(transformErrors)
   await server.register(router)
 
   return server
