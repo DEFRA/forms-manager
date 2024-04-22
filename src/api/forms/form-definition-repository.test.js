@@ -13,6 +13,33 @@ import { FailedToReadFormError } from '~/src/api/forms/errors.js'
 import { create, get } from '~/src/api/forms/form-definition-repository.js'
 
 const s3Mock = mockClient(S3Client)
+const id = '661e4ca5039739ef2902b214'
+
+const dummyFormDefinition = `
+{
+  "name": "",
+  "startPage": "/page-one",
+  "pages": [
+    {
+      "path": "/page-one",
+      "title": "Page one",
+      "components": [
+        {
+          "type": "TextField",
+          "name": "textField",
+          "title": "This is your first field",
+          "hint": "Help text",
+          "options": {},
+          "schema": {}
+        }
+      ]
+    }
+  ],
+  "conditions": [],
+  "sections": [],
+  "lists": []
+}
+`
 
 describe('Create forms in S3', () => {
   beforeEach(() => {
@@ -20,15 +47,10 @@ describe('Create forms in S3', () => {
   })
 
   test('test upload to s3 works', async () => {
-    const formConfiguration = getFormConfiguration()
-    const formDefinition = getFormDefinition()
-
-    await create(formConfiguration, formDefinition)
+    await create(id, JSON.parse(dummyFormDefinition))
 
     expect(s3Mock.commandCalls(PutObjectCommand)).toHaveLength(1)
   })
-
-  // TODO add a test if config.formDefinitionBucketName is missing
 })
 
 describe('Get forms from S3', () => {
@@ -37,19 +59,15 @@ describe('Get forms from S3', () => {
   })
 
   test('should retrieve form definition from S3', async () => {
-    const formDefinitionString = JSON.stringify(getFormDefinition())
-
     const stream = new Readable()
-    stream.push(formDefinitionString)
+    stream.push(dummyFormDefinition)
     stream.push(null) // end of stream
 
     s3Mock.on(GetObjectCommand).resolvesOnce({ Body: sdkStreamMixin(stream) })
 
     const result = get('any-form-id')
 
-    await expect(result).resolves.toStrictEqual(
-      JSON.parse(formDefinitionString)
-    )
+    await expect(result).resolves.toStrictEqual(JSON.parse(dummyFormDefinition))
   })
 
   test('should throw FailedToReadFormError if form definition is empty', async () => {
@@ -76,57 +94,3 @@ describe('Get forms from S3', () => {
     await expect(() => get('any-form-id')).rejects.toThrow(Error)
   })
 })
-
-/**
- * Returns a form definition that is valid
- * @returns {FormDefinition} - the valid form definition
- */
-function getFormDefinition() {
-  return {
-    name: '',
-    startPage: '/page-one',
-    pages: [
-      {
-        path: '/page-one',
-        title: 'Page one',
-        controller: 'Controller',
-        section: 'Section',
-        components: [
-          {
-            type: 'TextField',
-            name: 'textField',
-            title: 'This is your first field',
-            hint: 'Help text',
-            options: {},
-            schema: {}
-          }
-        ]
-      }
-    ],
-    conditions: [],
-    sections: [],
-    lists: [],
-    // @ts-expect-error Allow missing feeOptions
-    feeOptions: {},
-    fees: [],
-    outputs: []
-  }
-}
-
-/**
- * @returns {FormConfiguration}
- */
-function getFormConfiguration() {
-  return {
-    id: 'test',
-    title: 'test',
-    organisation: 'test',
-    teamName: 'test',
-    teamEmail: 'test'
-  }
-}
-
-/**
- * @typedef {import('../types.js').FormConfiguration} FormConfiguration
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- */

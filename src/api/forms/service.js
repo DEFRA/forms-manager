@@ -1,93 +1,106 @@
-import { readFile } from 'node:fs/promises'
-
 import { Schema } from '@defra/forms-model'
 
-import {
-  FailedCreationOperationError,
-  FormAlreadyExistsError,
-  InvalidFormDefinitionError
-} from '~/src/api/forms/errors.js'
+import { emptyForm } from '~/src/api/forms/empty-form.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
-import { createLogger } from '~/src/helpers/logging/logger.js'
 
-const logger = createLogger()
+/**
+ * Maps a document to a FormConfiguration
+ * @param {DocumentWithId} document - A mongo document
+ * @returns {FormConfiguration}
+ */
+function mapForm(document) {
+  return {
+    id: document._id.toString(),
+    slug: document.slug,
+    title: document.title,
+    organisation: document.organisation,
+    teamName: document.teamName,
+    teamEmail: document.teamEmail
+  }
+}
 
 /**
  * Adds an empty form
  * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
  * @returns {Promise<FormConfiguration>} - the saved form configuration
- * @throws {FormAlreadyExistsError} - if the form already exists
+ * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
- * @throws {FailedCreationOperationError} - if the form metadata/def couldn't be persisted
  */
 export async function createForm(formConfigurationInput) {
-  const emptyForm = await retrieveEmptyForm()
-  const formId = formTitleToId(formConfigurationInput.title)
+  const { title } = formConfigurationInput
 
-  if (await formMetadata.exists(formId)) {
-    throw new FormAlreadyExistsError(formId)
-  }
+  // Create the slug
+  const slug = formTitleToSlug(title)
+  const metadata = /** @type {FormConfigurationDocumentInput} */ ({
+    ...formConfigurationInput,
+    slug
+  })
 
-  // construct the new form config. the ID is always set server-side.
-  const formConfiguration = { ...formConfigurationInput, id: formId }
+  // Create the metadata document
+  const insertResult = await formMetadata.create(metadata)
+  const formId = insertResult.insertedId.toString()
 
-  // create the form object. At this point, we're just creating a blank
-  // form following the one-page template, we just set the title per the user request.
-  const shallowCloneForm = { ...emptyForm, name: formConfiguration.title }
+  // Create a blank form definition with the title set
+  const definition = { ...emptyForm(), name: metadata.title }
 
-  const { error } = Schema.validate(shallowCloneForm)
+  // Validate the form definition
+  const { error } = Schema.validate(definition)
   if (error) {
     throw new InvalidFormDefinitionError(error.message, {
       cause: error
     })
   }
 
-  try {
-    await formDefinition.create(formConfiguration, shallowCloneForm)
-    await formMetadata.create(formConfiguration)
-  } catch (error) {
-    logger.error(error, "Failed to persist, couldn't create form.")
-    throw new FailedCreationOperationError()
-  }
+  // Create the form definition
+  await formDefinition.create(formId, definition)
 
-  return formConfiguration
+  // @ts-expect-error - Mongo mutates the document with an _id key
+  return mapForm(/** @type {DocumentWithId} */ (metadata))
 }
 
 /**
  * Lists the available forms
  * @returns {Promise<FormConfiguration[]>} - form configuration
  */
-export function listForms() {
-  return formMetadata.list()
+export async function listForms() {
+  const documents = await formMetadata.list()
+
+  return documents.map(mapForm)
 }
 
 /**
  * Retrieves a form configuration
  * @param {string} formId - ID of the form
- * @returns {Promise<FormConfiguration>} - form configuration
+ * @returns {Promise<FormConfiguration | undefined>} - form configuration
  */
-export function getForm(formId) {
-  return formMetadata.get(formId)
+export async function getForm(formId) {
+  const document = await formMetadata.get(formId)
+
+  if (document) {
+    return mapForm(document)
+  }
 }
 
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
  * @returns {Promise<FormDefinition>} - form definition JSON content
+ * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 export function getFormDefinition(formId) {
   return formDefinition.get(formId)
 }
 
 /**
- * Given a form title, returns the ID of the form.
+ * Given a form title, returns the slug of the form.
  * E.g. "Hello - world" -> "hello-world".
- * @param {string} formTitle - title of the form
+ * @param {string} title - title of the form
  * @returns {string} - ID of the form
  */
-function formTitleToId(formTitle) {
-  return formTitle
+function formTitleToSlug(title) {
+  return title
     .toLowerCase()
     .replace(/[^a-z0-9 ]/g, '') // remove any non-alphanumeric characters
     .replace(/\s+/g, ' ') // replace any whitespaces with a single space
@@ -95,42 +108,10 @@ function formTitleToId(formTitle) {
 }
 
 /**
- * Retrieves the empty form configuration
- * @returns {Promise<FormDefinition>} - the empty form configuration
- * @throws {InvalidFormDefinitionError} - if the base form definition is invalid
- */
-async function retrieveEmptyForm() {
-  const fileContent = await readFile(
-    new URL('./empty-form.json', import.meta.url).pathname,
-    'utf-8'
-  )
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow JSON type 'any'
-    const emptyForm = /** @type {import('./empty-form.json')} */ (
-      JSON.parse(fileContent)
-    )
-
-    const validationResult = Schema.validate(emptyForm)
-
-    if (validationResult.error) {
-      throw new InvalidFormDefinitionError(
-        'Invalid form schema provided. Please check the empty-form.json file.'
-      )
-    }
-
-    // @ts-expect-error Allow missing fees, outputs, feeOptions in empty form
-    return emptyForm
-  } catch (cause) {
-    throw new InvalidFormDefinitionError(
-      'Failed to parse empty-form.json as JSON. Please validate contents.',
-      { cause }
-    )
-  }
-}
-
-/**
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @typedef {import('./errors.js').FormAlreadyExistsError} FormAlreadyExistsError
+ * @typedef {import('./form-metadata-repository.js').DocumentWithId} DocumentWithId
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @typedef {import('../types.js').FormConfigurationDocumentInput} FormConfigurationDocumentInput
  */

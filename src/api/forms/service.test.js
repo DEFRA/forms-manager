@@ -1,20 +1,29 @@
-import { readFile } from 'node:fs/promises'
+import { ObjectId } from 'mongodb'
 
-import {
-  FailedCreationOperationError,
-  FormAlreadyExistsError,
-  InvalidFormDefinitionError
-} from '~/src/api/forms/errors.js'
+import { emptyForm } from '~/src/api/forms/empty-form.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import { create as formDefinitionCreate } from '~/src/api/forms/form-definition-repository.js'
-import {
-  exists as formMetadataExists,
-  create as formMetadataCreate
-} from '~/src/api/forms/form-metadata-repository.js'
+import { create as formMetadataCreate } from '~/src/api/forms/form-metadata-repository.js'
 import { createForm } from '~/src/api/forms/service.js'
 
-jest.mock('node:fs/promises')
 jest.mock('~/src/api/forms/form-definition-repository.js')
 jest.mock('~/src/api/forms/form-metadata-repository.js')
+jest.mock('~/src/api/forms/empty-form.js')
+
+const id = '661e4ca5039739ef2902b214'
+const actualEmptyForm = jest.requireActual('~/src/api/forms/empty-form.js')
+const mockFormMetadataImpl = (/** @type {FormConfigurationInput} */ input) => {
+  const objId = new ObjectId(id)
+
+  // Assign an _id property to the
+  // input like the MongoClient would
+  Object.assign(input, { _id: id })
+
+  return Promise.resolve({
+    acknowledged: true,
+    insertedId: objId
+  })
+}
 
 beforeEach(() => {
   jest.resetAllMocks()
@@ -26,8 +35,9 @@ beforeEach(() => {
  * @returns {Promise<FormConfiguration>} - the output form
  */
 async function runFormCreationTest(formConfigurationInput) {
-  jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
-  jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+  jest.mocked(emptyForm).mockReturnValueOnce(actualEmptyForm.emptyForm())
+  jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
+
   // @ts-expect-error unused response type so ignore type for now
   jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
 
@@ -36,26 +46,20 @@ async function runFormCreationTest(formConfigurationInput) {
 
 describe('createForm', () => {
   test('should create a new form', async () => {
-    const formDefinitionBuffer = Buffer.from(
-      JSON.stringify(getValidFormDefinition()),
-      'utf-8'
-    )
-
-    jest.mocked(readFile).mockResolvedValueOnce(formDefinitionBuffer)
-
     const formConfigurationInput = {
-      title: 'My Form',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
+      title: 'Test form',
+      organisation: 'Defra',
+      teamName: 'Defra Forms',
+      teamEmail: 'defraforms@defra.gov.uk'
     }
 
     const expectedFormConfigurationOutput = {
-      id: 'my-form',
-      title: 'My Form',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
+      id,
+      slug: 'test-form',
+      title: 'Test form',
+      organisation: 'Defra',
+      teamName: 'Defra Forms',
+      teamEmail: 'defraforms@defra.gov.uk'
     }
 
     const result = await runFormCreationTest(formConfigurationInput)
@@ -64,26 +68,20 @@ describe('createForm', () => {
   })
 
   test('should create a new form without special characters in the name', async () => {
-    const formDefinitionBuffer = Buffer.from(
-      JSON.stringify(getValidFormDefinition()),
-      'utf-8'
-    )
-
-    jest.mocked(readFile).mockResolvedValueOnce(formDefinitionBuffer)
-
     const formConfigurationInput = {
       title: 'A !Super! Duper Form -    from Defra...',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
+      organisation: 'Defra',
+      teamName: 'Defra Forms',
+      teamEmail: 'defraforms@defra.gov.uk'
     }
 
     const expectedFormConfigurationOutput = {
-      id: 'a-super-duper-form-from-defra',
+      id,
+      slug: 'a-super-duper-form-from-defra',
       title: 'A !Super! Duper Form -    from Defra...',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
+      organisation: 'Defra',
+      teamName: 'Defra Forms',
+      teamEmail: 'defraforms@defra.gov.uk'
     }
 
     const result = await runFormCreationTest(formConfigurationInput)
@@ -91,41 +89,11 @@ describe('createForm', () => {
     expect(result).toEqual(expectedFormConfigurationOutput)
   })
 
-  it('should throw an error if form with the same ID already exists', async () => {
-    const formDefinitionBuffer = Buffer.from(
-      JSON.stringify(getValidFormDefinition()),
-      'utf-8'
-    )
-
-    jest.mocked(formMetadataExists).mockResolvedValueOnce(true)
-    jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
-    // @ts-expect-error unused response type so ignore type for now
-    jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
-    jest.mocked(readFile).mockResolvedValueOnce(formDefinitionBuffer)
-
-    const formConfiguration = {
-      title: 'My Form',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
-    }
-
-    await expect(createForm(formConfiguration)).rejects.toThrow(
-      FormAlreadyExistsError
-    )
-  })
-
   it('should throw an error when schema validation fails', async () => {
-    const formDefinitionBuffer = Buffer.from(
-      JSON.stringify(getInvalidFormDefinition()),
-      'utf-8'
-    )
-
-    jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
-    jest.mocked(formMetadataCreate).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(emptyForm).mockReturnValueOnce({})
+    jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
     // @ts-expect-error unused response type so ignore type for now
     jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
-    jest.mocked(readFile).mockResolvedValueOnce(formDefinitionBuffer)
 
     const formConfiguration = {
       title: 'My Form',
@@ -140,13 +108,7 @@ describe('createForm', () => {
   })
 
   it('should throw an error when writing for metadata fails', async () => {
-    const formDefinitionBuffer = Buffer.from(
-      JSON.stringify(getValidFormDefinition()),
-      'utf-8'
-    )
-
-    jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
-    jest.mocked(readFile).mockResolvedValueOnce(formDefinitionBuffer)
+    jest.mocked(emptyForm).mockReturnValueOnce(actualEmptyForm.emptyForm())
     jest.mocked(formMetadataCreate).mockImplementation(() => {
       throw new Error()
     })
@@ -160,19 +122,12 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration)).rejects.toThrow(
-      FailedCreationOperationError
-    )
+    await expect(createForm(formConfiguration)).rejects.toThrow(Error)
   })
 
   it('should throw an error when writing form def fails', async () => {
-    const formDefinitionBuffer = Buffer.from(
-      JSON.stringify(getValidFormDefinition()),
-      'utf-8'
-    )
-
-    jest.mocked(formMetadataExists).mockResolvedValueOnce(false)
-    jest.mocked(readFile).mockResolvedValueOnce(formDefinitionBuffer)
+    jest.mocked(emptyForm).mockReturnValueOnce(actualEmptyForm.emptyForm())
+    jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
     jest.mocked(formDefinitionCreate).mockImplementation(() => {
       throw new Error()
     })
@@ -184,60 +139,11 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration)).rejects.toThrow(
-      FailedCreationOperationError
-    )
+    await expect(createForm(formConfiguration)).rejects.toThrow(Error)
   })
 })
 
 /**
- * Returns a form definition that is valid
- * @returns {FormDefinition} - the valid form definition
- */
-function getValidFormDefinition() {
-  return {
-    name: '',
-    startPage: '/page-one',
-    pages: [
-      {
-        path: '/page-one',
-        title: 'Page one',
-        controller: 'Controller',
-        section: 'Section',
-        components: [
-          {
-            type: 'TextField',
-            name: 'textField',
-            title: 'This is your first field',
-            hint: 'Help text',
-            options: {},
-            schema: {}
-          }
-        ]
-      }
-    ],
-    conditions: [],
-    sections: [],
-    lists: [],
-    // @ts-expect-error Allow missing feeOptions
-    feeOptions: {},
-    fees: [],
-    outputs: []
-  }
-}
-
-/**
- * Returns a form definition that is not valid
- * @returns {Partial<FormDefinition>} - the invalid form definition
- */
-function getInvalidFormDefinition() {
-  return {
-    name: ''
-  }
-}
-
-/**
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  */

@@ -1,75 +1,63 @@
-import { existsSync } from 'node:fs'
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { MongoServerError, ObjectId } from 'mongodb'
 
-import { config } from '~/src/config/index.js'
+import { FormAlreadyExistsError } from './errors.js'
 
-// TODO look at prisma to generate this
+import { db, COLLECTION_NAME } from '~/src/db.js'
 
-const formDirectory = config.get('formDirectory')
+export const MAX_RESULTS = 500
 
 /**
- * Returns the filename for a form metadata entry, given a form ID.
- * @param {string} formId - ID of the form
- * @returns {string} - file path
+ * Retrieves the list of documents from the database
+ * @returns {Promise<DocumentWithId[]>}
  */
-const getFormMetadataFilename = (formId) => {
-  return join(formDirectory, `${formId}-metadata.json`)
+export function list() {
+  const coll = db.collection(COLLECTION_NAME)
+
+  const res = coll.find().limit(MAX_RESULTS).toArray()
+
+  return res
 }
 
 /**
- * Retrieves a file from the form store
- * @returns {Promise<FormConfiguration[]>} - form configuration
- */
-export async function list() {
-  const files = existsSync(formDirectory)
-    ? await readdir(formDirectory, { withFileTypes: true })
-    : []
-
-  const formIds = files
-    .filter((entry) => entry.name.includes('-metadata.json'))
-    .map((entry) => entry.name.replace('-metadata.json', ''))
-
-  return Promise.all(formIds.map(get))
-}
-
-/**
- * Retrieves a file from the form store
+ * Retrieves a document from the database
  * @param {string} formId - ID of the form
- * @returns {Promise<FormConfiguration>} - form configuration
+ * @returns {Promise<DocumentWithId | null>}
  */
 export function get(formId) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
-  return readFile(getFormMetadataFilename(formId), 'utf-8').then(JSON.parse)
+  const coll = db.collection(COLLECTION_NAME)
+
+  return coll.findOne({ _id: new ObjectId(formId) })
 }
 
 /**
- * @param {string} formId
- * @returns {Promise<boolean>} - whether the form exists
+ * Create a document in the database
+ * @param {FormConfigurationDocumentInput} form - form configuration
+ * @returns {Promise<InsertOneResult>}
  */
-export async function exists(formId) {
-  // crude check as we'll move to mongo ASAP
+export async function create(form) {
   try {
-    await get(formId)
-    return true
-  } catch {
-    return false
+    const coll = db.collection(COLLECTION_NAME)
+    const result = await coll.insertOne(form)
+
+    return result
+  } catch (err) {
+    if (err instanceof MongoServerError && err.code === 11000) {
+      throw new FormAlreadyExistsError(form.slug)
+    }
+
+    throw err
   }
 }
 
 /**
- * Adds a form to the Form Store
- * @param {FormConfiguration} formConfiguration - form configuration
- * @returns {Promise<void>}
+ * @typedef {import('mongodb').Document} Document
+ * @typedef {import('mongodb').WithId<Document>} DocumentWithId
+ * @typedef {import('mongodb').InsertOneResult} InsertOneResult
+ * @typedef {import('../types.js').FormConfiguration} FormConfiguration
+ * @typedef {import('../types.js').FormConfigurationDocumentInput} FormConfigurationDocumentInput
  */
-export async function create(formConfiguration) {
-  const formMetadataFilename = getFormMetadataFilename(formConfiguration.id)
-  const formMetadataString = JSON.stringify(formConfiguration, undefined, 2)
-
-  await mkdir(dirname(formMetadataFilename), { recursive: true })
-  return writeFile(formMetadataFilename, formMetadataString, 'utf-8')
-}
 
 /**
- * @typedef {import('../types.js').FormConfiguration} FormConfiguration
+ * @template {object} Schema
+ * @typedef {import('mongodb').WithId<Schema> | null} WithId
  */

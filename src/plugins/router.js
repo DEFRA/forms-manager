@@ -1,14 +1,13 @@
-import { forms } from '~/src/api/forms/index.js'
-import { health } from '~/src/api/health/index.js'
+import routes from '~/src/routes/index.js'
 
 /**
  * @satisfies {ServerRegisterPlugin}
  */
 export const router = {
   plugin: {
-    name: 'Router',
-    async register(server) {
-      await server.register([health, forms])
+    name: 'router',
+    register(server) {
+      server.route(routes)
     }
   }
 }

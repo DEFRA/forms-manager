@@ -1,18 +1,14 @@
 import path from 'path'
 
-import Boom from '@hapi/boom'
 import hapi from '@hapi/hapi'
 
-import { ApplicationError } from '~/src/api/forms/errors.js'
-import { router } from '~/src/api/router.js'
 import { config } from '~/src/config/index.js'
-// Temporarily disabled. Will be restored in task #335165
-// import { populateDb } from '~/src/helpers/db/populate-db.js'
+import { prepareDb } from '~/src/db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
-import { requestLogger } from '~/src/helpers/logging/request-logger.js'
-// Temporarily disabled. Will be restored in task #335165
-// import { mongoPlugin } from '~/src/helpers/mongodb.js'
-import { secureContext } from '~/src/helpers/secure-context/index.js'
+import { logRequests } from '~/src/plugins/log-requests.js'
+import { router } from '~/src/plugins/router.js'
+import { transformErrors } from '~/src/plugins/transform-errors.js'
+import { prepareSecureContext } from '~/src/secure-context.js'
 
 const isProduction = config.get('isProduction')
 
@@ -48,32 +44,15 @@ export async function createServer() {
     }
   })
 
-  await server.register(requestLogger)
+  await server.register(logRequests)
 
   if (isProduction) {
-    await server.register(secureContext)
+    prepareSecureContext(server)
   }
 
-  // Temporarily disabled. Will be restored in task #335165
-  // await server.register({ plugin: mongoPlugin, options: {} })
-
+  await prepareDb(server)
+  await server.register(transformErrors)
   await server.register(router)
-
-  // Temporarily disabled. Will be restored in task #335165
-  // await server.register(populateDb)
-
-  server.ext('onPreResponse', (request, h) => {
-    const response = request.response
-
-    if (response instanceof ApplicationError && Boom.isBoom(response)) {
-      response.output.statusCode = response.statusCode
-      response.output.payload.statusCode = response.statusCode
-      response.output.payload.message = response.message
-      response.output.payload.error = response.name
-    }
-
-    return h.continue
-  })
 
   return server
 }

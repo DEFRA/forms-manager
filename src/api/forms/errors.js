@@ -53,11 +53,11 @@ export class FormAlreadyExistsError extends ApplicationError {
 
   /**
    * Constructs an error
-   * @param {string} formId
+   * @param {string} slug
    * @param {ErrorOptions} [options]
    */
-  constructor(formId, options = {}) {
-    super(`Form with ID ${formId} already exists`, {
+  constructor(slug, options = {}) {
+    super(`Form with slug ${slug} already exists`, {
       ...options,
       statusCode: 400
     })
