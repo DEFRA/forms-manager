@@ -34,7 +34,7 @@ export async function prepareDb(server) {
   const coll = db.collection(COLLECTION_NAME)
 
   await coll.createIndex({ title: 1 })
-  await coll.createIndex({ linkIdentifier: 1 }, { unique: true })
+  await coll.createIndex({ slug: 1 }, { unique: true })
 
   server.logger.info(`Mongodb connected to ${databaseName}`)
 

@@ -55,7 +55,7 @@ describe('createForm', () => {
 
     const expectedFormConfigurationOutput = {
       id,
-      linkIdentifier: 'test-form',
+      slug: 'test-form',
       title: 'Test form',
       organisation: 'Defra',
       teamName: 'Defra Forms',
@@ -77,7 +77,7 @@ describe('createForm', () => {
 
     const expectedFormConfigurationOutput = {
       id,
-      linkIdentifier: 'a-super-duper-form-from-defra',
+      slug: 'a-super-duper-form-from-defra',
       title: 'A !Super! Duper Form -    from Defra...',
       organisation: 'Defra',
       teamName: 'Defra Forms',

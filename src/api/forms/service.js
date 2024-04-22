@@ -13,7 +13,7 @@ import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 function mapForm(document) {
   return {
     id: document._id.toString(),
-    linkIdentifier: document.linkIdentifier,
+    slug: document.slug,
     title: document.title,
     organisation: document.organisation,
     teamName: document.teamName,
@@ -31,10 +31,10 @@ export async function createForm(formConfigurationInput) {
   const { title } = formConfigurationInput
 
   // Create the slug
-  const linkIdentifier = formTitleToSlug(title)
+  const slug = formTitleToSlug(title)
   const metadata = /** @type {FormConfigurationDocumentInput} */ ({
     ...formConfigurationInput,
-    linkIdentifier
+    slug
   })
 
   // Create the metadata document

@@ -42,7 +42,7 @@ describe('Forms route', () => {
   }
   const stubFormOutput = {
     id,
-    linkIdentifier: 'test-form',
+    slug: 'test-form',
     title: 'Test form',
     organisation: 'Defra',
     teamName: 'Defra Forms',
