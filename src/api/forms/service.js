@@ -25,6 +25,7 @@ function mapForm(document) {
  * Adds an empty form
  * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
  * @returns {Promise<FormConfiguration>} - the saved form configuration
+ * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
 export async function createForm(formConfigurationInput) {
@@ -108,8 +109,9 @@ function formTitleToSlug(title) {
 
 /**
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @typedef {import('./errors.js').FormAlreadyExistsError} FormAlreadyExistsError
+ * @typedef {import('./form-metadata-repository.js').DocumentWithId} DocumentWithId
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
  * @typedef {import('../types.js').FormConfigurationDocumentInput} FormConfigurationDocumentInput
- * @typedef {import('./form-metadata-repository.js').DocumentWithId} DocumentWithId
  */

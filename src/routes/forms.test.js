@@ -1,4 +1,7 @@
-import { FailedToReadFormError } from '../api/forms/errors.js'
+import {
+  FailedToReadFormError,
+  FormAlreadyExistsError
+} from '../api/forms/errors.js'
 
 import {
   listForms,
@@ -328,6 +331,31 @@ describe('Forms route', () => {
           keys: ['teamName'],
           source: 'payload'
         }
+      })
+    })
+
+    test('Testing POST /forms route with an slug that already exists returns 400 FormAlreadyExistsError', async () => {
+      jest
+        .mocked(createForm)
+        .mockRejectedValue(new FormAlreadyExistsError('my-title'))
+
+      const response = await server.inject({
+        method: 'POST',
+        url: '/forms',
+        payload: {
+          title: 'My Title',
+          organisation: 'orgname',
+          teamName: 'teamname',
+          teamEmail: 'test@example.com'
+        }
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        statusCode: 400,
+        error: 'FormAlreadyExistsError',
+        message: 'Form with slug my-title already exists'
       })
     })
 

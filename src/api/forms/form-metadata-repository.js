@@ -1,4 +1,6 @@
-import { ObjectId } from 'mongodb'
+import { MongoServerError, ObjectId } from 'mongodb'
+
+import { FormAlreadyExistsError } from './errors.js'
 
 import { db, COLLECTION_NAME } from '~/src/db.js'
 
@@ -29,13 +31,22 @@ export function get(formId) {
 
 /**
  * Create a document in the database
- * @param {FormConfigurationInput} formConfigurationInput - form configuration
+ * @param {FormConfigurationDocumentInput} form - form configuration
  * @returns {Promise<InsertOneResult>}
  */
-export async function create(formConfigurationInput) {
-  const coll = db.collection(COLLECTION_NAME)
+export async function create(form) {
+  try {
+    const coll = db.collection(COLLECTION_NAME)
+    const result = await coll.insertOne(form)
 
-  return coll.insertOne(formConfigurationInput)
+    return result
+  } catch (err) {
+    if (err instanceof MongoServerError && err.code === 11000) {
+      throw new FormAlreadyExistsError(form.slug)
+    }
+
+    throw err
+  }
 }
 
 /**
@@ -43,7 +54,7 @@ export async function create(formConfigurationInput) {
  * @typedef {import('mongodb').WithId<Document>} DocumentWithId
  * @typedef {import('mongodb').InsertOneResult} InsertOneResult
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
- * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
+ * @typedef {import('../types.js').FormConfigurationDocumentInput} FormConfigurationDocumentInput
  */
 
 /**
