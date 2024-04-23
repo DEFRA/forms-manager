@@ -14,7 +14,7 @@ const s3Region = config.get('s3Region')
 const formBucketName = config.get('formDefinitionBucketName')
 
 /**
- * Gets a filename for a given form ID
+ * Gets the path to a form definition file for a given form ID
  * @param {string} formId - the form ID
  */
 function getFormDefinitionFilename(formId) {
@@ -66,7 +66,7 @@ function uploadToS3(filename, fileContent) {
 }
 
 /**
- * Uploads fileContent to an S3 bucket as filename
+ * Retrieves filename content from an S3 bucket
  * @param {string} filename - the file name to read`
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */

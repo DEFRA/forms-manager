@@ -81,7 +81,7 @@ export async function getForm(formId) {
 }
 
 /**
- * Retrieves the form definition for a given form ID
+ * Retrieves the form definition JSON content for a given form ID
  * @param {string} formId - the ID of the form
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
