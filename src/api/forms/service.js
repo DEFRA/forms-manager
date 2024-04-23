@@ -24,7 +24,6 @@ function mapForm(document) {
 /**
  * Adds an empty form
  * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
- * @returns {Promise<FormConfiguration>} - the saved form configuration
  * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
@@ -61,8 +60,7 @@ export async function createForm(formConfigurationInput) {
 }
 
 /**
- * Lists the available forms
- * @returns {Promise<FormConfiguration[]>} - form configuration
+ * Lists the available form configurations
  */
 export async function listForms() {
   const documents = await formMetadata.list()
@@ -73,7 +71,6 @@ export async function listForms() {
 /**
  * Retrieves a form configuration
  * @param {string} formId - ID of the form
- * @returns {Promise<FormConfiguration | undefined>} - form configuration
  */
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
@@ -86,7 +83,6 @@ export async function getForm(formId) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @returns {Promise<FormDefinition>} - form definition JSON content
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 export function getFormDefinition(formId) {
@@ -97,7 +93,6 @@ export function getFormDefinition(formId) {
  * Given a form title, returns the slug of the form.
  * E.g. "Hello - world" -> "hello-world".
  * @param {string} title - title of the form
- * @returns {string} - ID of the form
  */
 function formTitleToSlug(title) {
   return title
