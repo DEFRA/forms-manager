@@ -38,7 +38,7 @@
     "convict": "^6.2.4",
     "dotenv": "^16.4.5",
     "hapi-pino": "^12.1.0",
-    "https-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.4",
     "joi": "^17.13.0",
     "mongodb": "^6.3.0",
     "pino": "^8.20.0",
