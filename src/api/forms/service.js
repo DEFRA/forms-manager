@@ -1,9 +1,9 @@
 import { Schema } from '@defra/forms-model'
 
-import { emptyForm } from '~/src/api/forms/empty-form.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
+import * as formTemplates from '~/src/api/forms/templates.js'
 
 /**
  * Maps a document to a FormConfiguration
@@ -43,7 +43,7 @@ export async function createForm(formConfigurationInput) {
   const { insertedId: _id } = await formMetadata.create(document)
 
   // Create a blank form definition with the title set
-  const definition = { ...emptyForm(), name: title }
+  const definition = { ...formTemplates.empty(), name: title }
 
   // Validate the form definition
   const { error } = Schema.validate(definition)
