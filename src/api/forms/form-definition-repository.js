@@ -31,7 +31,7 @@ function getFormDefinitionFilename(formId) {
 export async function create(id, formDefinition) {
   const formDefinitionFilename = getFormDefinitionFilename(id)
 
-  // Convert formMetadata to JSON string
+  // Convert form definition to JSON string
   const formDefinitionString = JSON.stringify(formDefinition)
 
   // Write formDefinition to file

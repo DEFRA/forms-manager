@@ -4,7 +4,7 @@
  */
 
 /**
- * Form configuration type
+ * Form metadata type
  * @typedef {object} FormMetadata
  * @property {string} id - The id of the form
  * @property {string} slug - The human-readable slug id of the form

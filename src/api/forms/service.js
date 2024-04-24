@@ -5,8 +5,8 @@ import * as formTemplates from '~/src/api/forms/templates.js'
 import { formDefinitionSchema } from '~/src/models/forms.js'
 
 /**
- * Maps a document to form metadata
- * @param {WithId<FormMetadataDocument>} document - A mongo document
+ * Maps a form metadata document from MongoDB to form metadata
+ * @param {WithId<FormMetadataDocument>} document - form metadata document (with ID)
  * @returns {FormMetadata}
  */
 function mapForm(document) {
@@ -22,7 +22,7 @@ function mapForm(document) {
 
 /**
  * Adds an empty form
- * @param {FormMetadataInput} formMetadataInput - the desired form configuration to save
+ * @param {FormMetadataInput} formMetadataInput - the desired form metadata to save
  * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
@@ -44,7 +44,7 @@ export async function createForm(formMetadataInput) {
   const slug = formTitleToSlug(title)
 
   /**
-   * Create the configuration document
+   * Create the metadata document
    * @satisfies {FormMetadataDocument}
    */
   const document = { ...formMetadataInput, slug }
@@ -59,7 +59,7 @@ export async function createForm(formMetadataInput) {
 }
 
 /**
- * Lists the available form configurations
+ * Lists the available form metadata
  */
 export async function listForms() {
   const documents = await formMetadata.list()
@@ -68,7 +68,7 @@ export async function listForms() {
 }
 
 /**
- * Retrieves a form configuration
+ * Retrieves form metadata
  * @param {string} formId - ID of the form
  */
 export async function getForm(formId) {
