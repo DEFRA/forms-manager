@@ -100,5 +100,4 @@ export default [
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
  * @typedef {import('../api/types.js').RequestCreateForm} RequestCreateForm
  * @typedef {import('../api/types.js').RequestFormById} RequestFormById
- * @typedef {import('../api/types.js').FormConfigurationInput} FormConfigurationInput
  */

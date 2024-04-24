@@ -10,11 +10,11 @@ export const MAX_RESULTS = 500
  * Retrieves the list of documents from the database
  */
 export function list() {
-  const coll = db.collection(COLLECTION_NAME)
+  const coll = /** @satisfies {Collection<FormConfigurationDocument>} */ (
+    db.collection(COLLECTION_NAME)
+  )
 
-  const res = coll.find().limit(MAX_RESULTS).toArray()
-
-  return res
+  return coll.find().limit(MAX_RESULTS).toArray()
 }
 
 /**
@@ -22,18 +22,23 @@ export function list() {
  * @param {string} formId - ID of the form
  */
 export function get(formId) {
-  const coll = db.collection(COLLECTION_NAME)
+  const coll = /** @satisfies {Collection<FormConfigurationDocument>} */ (
+    db.collection(COLLECTION_NAME)
+  )
 
   return coll.findOne({ _id: new ObjectId(formId) })
 }
 
 /**
  * Create a document in the database
- * @param {FormConfigurationDocumentInput} form - form configuration
+ * @param {FormConfigurationDocument} form - form configuration
  */
 export async function create(form) {
+  const coll = /** @satisfies {Collection<FormConfigurationDocument>} */ (
+    db.collection(COLLECTION_NAME)
+  )
+
   try {
-    const coll = db.collection(COLLECTION_NAME)
     const result = await coll.insertOne(form)
 
     return result
@@ -47,14 +52,11 @@ export async function create(form) {
 }
 
 /**
- * @typedef {import('mongodb').Document} Document
- * @typedef {import('mongodb').WithId<Document>} DocumentWithId
- * @typedef {import('mongodb').InsertOneResult} InsertOneResult
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
- * @typedef {import('../types.js').FormConfigurationDocumentInput} FormConfigurationDocumentInput
+ * @typedef {import('../types.js').FormConfigurationDocument} FormConfigurationDocument
  */
 
 /**
  * @template {object} Schema
- * @typedef {import('mongodb').WithId<Schema> | null} WithId
+ * @typedef {import('mongodb').Collection<Schema>} Collection
  */
