@@ -1,7 +1,7 @@
 /**
  * Function to return an empty form
  */
-export function emptyForm() {
+export function empty() {
   return /** @satisfies {FormDefinition} */ ({
     name: '',
     startPage: '/page-one',
