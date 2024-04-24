@@ -1,8 +1,8 @@
 import { ObjectId } from 'mongodb'
 
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
-import { create as formDefinitionCreate } from '~/src/api/forms/form-definition-repository.js'
-import { create as formMetadataCreate } from '~/src/api/forms/form-metadata-repository.js'
+import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
+import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import { createForm } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 
@@ -10,36 +10,25 @@ jest.mock('~/src/api/forms/form-definition-repository.js')
 jest.mock('~/src/api/forms/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 
-const id = '661e4ca5039739ef2902b214'
-const actualFormTemplates = jest.requireActual('~/src/api/forms/templates.js')
-const mockFormMetadataImpl = (/** @type {FormConfigurationInput} */ input) => {
-  const objId = new ObjectId(id)
-
-  // Assign an _id property to the
-  // input like the MongoClient would
-  Object.assign(input, { _id: id })
-
-  return Promise.resolve({
-    acknowledged: true,
-    insertedId: objId
-  })
-}
-
-/**
- * Creates a new test form
- * @param {FormConfigurationInput} formConfigurationInput - the input request
- */
-async function runFormCreationTest(formConfigurationInput) {
-  jest
-    .mocked(formTemplates.empty)
-    .mockReturnValueOnce(actualFormTemplates.empty())
-  jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
-  jest.mocked(formDefinitionCreate).mockResolvedValueOnce()
-
-  return createForm(formConfigurationInput)
-}
+const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
+  jest.requireActual('~/src/api/forms/templates.js')
+)
 
 describe('createForm', () => {
+  /** @type {string} */
+  let id
+
+  beforeEach(() => {
+    id = '661e4ca5039739ef2902b214'
+
+    jest.mocked(formTemplates.empty).mockReturnValue(actualEmptyForm())
+    jest.mocked(formDefinition.create).mockResolvedValue()
+    jest.mocked(formMetadata.create).mockResolvedValue({
+      acknowledged: true,
+      insertedId: new ObjectId(id)
+    })
+  })
+
   test('should create a new form', async () => {
     const formConfigurationInput = {
       title: 'Test form',
@@ -57,9 +46,9 @@ describe('createForm', () => {
       teamEmail: 'defraforms@defra.gov.uk'
     }
 
-    const result = await runFormCreationTest(formConfigurationInput)
-
-    expect(result).toEqual(expectedFormConfigurationOutput)
+    await expect(createForm(formConfigurationInput)).resolves.toEqual(
+      expectedFormConfigurationOutput
+    )
   })
 
   test('should create a new form without special characters in the name', async () => {
@@ -79,16 +68,14 @@ describe('createForm', () => {
       teamEmail: 'defraforms@defra.gov.uk'
     }
 
-    const result = await runFormCreationTest(formConfigurationInput)
-
-    expect(result).toEqual(expectedFormConfigurationOutput)
+    await expect(createForm(formConfigurationInput)).resolves.toEqual(
+      expectedFormConfigurationOutput
+    )
   })
 
   it('should throw an error when schema validation fails', async () => {
     // @ts-expect-error - Allow invalid form definition for test
     jest.mocked(formTemplates.empty).mockReturnValueOnce({})
-    jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
-    jest.mocked(formDefinitionCreate).mockResolvedValueOnce()
 
     const formConfiguration = {
       title: 'My Form',
@@ -103,9 +90,7 @@ describe('createForm', () => {
   })
 
   it('should throw an error when writing for metadata fails', async () => {
-    jest.mocked(emptyForm).mockReturnValueOnce(actualFormTemplates.empty())
-    jest.mocked(formMetadataCreate).mockRejectedValueOnce(new Error())
-    jest.mocked(formDefinitionCreate).mockResolvedValueOnce()
+    jest.mocked(formMetadata.create).mockRejectedValueOnce(new Error())
 
     const formConfiguration = {
       title: 'My Form',
@@ -118,9 +103,7 @@ describe('createForm', () => {
   })
 
   it('should throw an error when writing form def fails', async () => {
-    jest.mocked(emptyForm).mockReturnValueOnce(actualFormTemplates.empty())
-    jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
-    jest.mocked(formDefinitionCreate).mockRejectedValueOnce(new Error())
+    jest.mocked(formDefinition.create).mockRejectedValueOnce(new Error())
 
     const formConfiguration = {
       title: 'My Form',
