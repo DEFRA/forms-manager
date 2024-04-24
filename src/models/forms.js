@@ -16,3 +16,6 @@ export const createFormSchema = Joi.object()
     teamEmail: Joi.string().email().trim().required()
   })
   .required()
+
+// Form definition schema
+export { Schema as formDefinitionSchema } from '@defra/forms-model'

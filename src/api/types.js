@@ -1,4 +1,10 @@
 /**
+ * Form definition type
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ */
+
+/**
+ * Form configuration type
  * @typedef {object} FormConfiguration
  * @property {string} id - The id of the form
  * @property {string} slug - The human-readable slug id of the form
