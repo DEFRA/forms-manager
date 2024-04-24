@@ -30,14 +30,14 @@ describe('createForm', () => {
   })
 
   test('should create a new form', async () => {
-    const formConfigurationInput = {
+    const formMetadataInput = {
       title: 'Test form',
       organisation: 'Defra',
       teamName: 'Defra Forms',
       teamEmail: 'defraforms@defra.gov.uk'
     }
 
-    const expectedFormConfigurationOutput = {
+    const formMetadataOutput = {
       id,
       slug: 'test-form',
       title: 'Test form',
@@ -46,20 +46,20 @@ describe('createForm', () => {
       teamEmail: 'defraforms@defra.gov.uk'
     }
 
-    await expect(createForm(formConfigurationInput)).resolves.toEqual(
-      expectedFormConfigurationOutput
+    await expect(createForm(formMetadataInput)).resolves.toEqual(
+      formMetadataOutput
     )
   })
 
   test('should create a new form without special characters in the name', async () => {
-    const formConfigurationInput = {
+    const formMetadataInput = {
       title: 'A !Super! Duper Form -    from Defra...',
       organisation: 'Defra',
       teamName: 'Defra Forms',
       teamEmail: 'defraforms@defra.gov.uk'
     }
 
-    const expectedFormConfigurationOutput = {
+    const formMetadataOutput = {
       id,
       slug: 'a-super-duper-form-from-defra',
       title: 'A !Super! Duper Form -    from Defra...',
@@ -68,8 +68,8 @@ describe('createForm', () => {
       teamEmail: 'defraforms@defra.gov.uk'
     }
 
-    await expect(createForm(formConfigurationInput)).resolves.toEqual(
-      expectedFormConfigurationOutput
+    await expect(createForm(formMetadataInput)).resolves.toEqual(
+      formMetadataOutput
     )
   })
 
@@ -77,14 +77,14 @@ describe('createForm', () => {
     // @ts-expect-error - Allow invalid form definition for test
     jest.mocked(formTemplates.empty).mockReturnValueOnce({})
 
-    const formConfiguration = {
+    const formMetadataInput = {
       title: 'My Form',
       organisation: '',
       teamName: '',
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration)).rejects.toThrow(
+    await expect(createForm(formMetadataInput)).rejects.toThrow(
       InvalidFormDefinitionError
     )
   })
@@ -92,26 +92,26 @@ describe('createForm', () => {
   it('should throw an error when writing for metadata fails', async () => {
     jest.mocked(formMetadata.create).mockRejectedValueOnce(new Error())
 
-    const formConfiguration = {
+    const formMetadataInput = {
       title: 'My Form',
       organisation: '',
       teamName: '',
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration)).rejects.toThrow(Error)
+    await expect(createForm(formMetadataInput)).rejects.toThrow(Error)
   })
 
   it('should throw an error when writing form def fails', async () => {
     jest.mocked(formDefinition.create).mockRejectedValueOnce(new Error())
 
-    const formConfiguration = {
+    const formMetadataInput = {
       title: 'My Form',
       organisation: '',
       teamName: '',
       teamEmail: ''
     }
 
-    await expect(createForm(formConfiguration)).rejects.toThrow(Error)
+    await expect(createForm(formMetadataInput)).rejects.toThrow(Error)
   })
 })

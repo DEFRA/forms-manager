@@ -30,10 +30,10 @@ export default [
     async handler(request) {
       const { payload } = request
 
-      const formConfiguration = await createForm(payload)
+      const formMetadata = await createForm(payload)
 
       return {
-        id: formConfiguration.id,
+        id: formMetadata.id,
         status: 'created'
       }
     },
