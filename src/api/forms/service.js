@@ -22,12 +22,12 @@ function mapForm(document) {
 
 /**
  * Adds an empty form
- * @param {FormMetadataInput} formConfigurationInput - the desired form configuration to save
+ * @param {FormMetadataInput} formMetadataInput - the desired form configuration to save
  * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
-export async function createForm(formConfigurationInput) {
-  const { title } = formConfigurationInput
+export async function createForm(formMetadataInput) {
+  const { title } = formMetadataInput
 
   // Create a blank form definition with the title set
   const definition = { ...formTemplates.empty(), name: title }
@@ -47,7 +47,7 @@ export async function createForm(formConfigurationInput) {
    * Create the configuration document
    * @satisfies {FormMetadataDocument}
    */
-  const document = { ...formConfigurationInput, slug }
+  const document = { ...formMetadataInput, slug }
 
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
