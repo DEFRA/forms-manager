@@ -1,12 +1,12 @@
 import { ObjectId } from 'mongodb'
 
+import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
-import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import { createForm } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 
-jest.mock('~/src/api/forms/form-definition-repository.js')
+jest.mock('~/src/api/forms/draft-form-definition-repository.js')
 jest.mock('~/src/api/forms/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 
@@ -21,8 +21,8 @@ describe('createForm', () => {
   beforeEach(() => {
     id = '661e4ca5039739ef2902b214'
 
+    jest.mocked(draftFormDefinition.create).mockResolvedValue()
     jest.mocked(formTemplates.empty).mockReturnValue(actualEmptyForm())
-    jest.mocked(formDefinition.create).mockResolvedValue()
     jest.mocked(formMetadata.create).mockResolvedValue({
       acknowledged: true,
       insertedId: new ObjectId(id)
@@ -103,7 +103,7 @@ describe('createForm', () => {
   })
 
   it('should throw an error when writing form def fails', async () => {
-    jest.mocked(formDefinition.create).mockRejectedValueOnce(new Error())
+    jest.mocked(draftFormDefinition.create).mockRejectedValueOnce(new Error())
 
     const formMetadataInput = {
       title: 'My Form',

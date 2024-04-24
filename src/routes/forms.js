@@ -6,9 +6,14 @@ import {
   listForms,
   getForm,
   createForm,
-  getFormDefinition
+  updateDraftFormDefinition,
+  getDraftFormDefinition
 } from '~/src/api/forms/service.js'
-import { formMetadataSchema, formByIdSchema } from '~/src/models/forms.js'
+import {
+  formMetadataSchema,
+  formByIdSchema,
+  formDefinitionSchema
+} from '~/src/models/forms.js'
 
 /**
  * @type {ServerRoute[]}
@@ -68,7 +73,7 @@ export default [
   },
   {
     method: 'GET',
-    path: '/forms/{id}/definition',
+    path: '/forms/{id}/definition/draft',
     /**
      * @param {RequestFormById} request
      */
@@ -77,7 +82,7 @@ export default [
       const { id } = params
 
       try {
-        const definition = await getFormDefinition(id)
+        const definition = await getDraftFormDefinition(id)
 
         return definition
       } catch (err) {
@@ -93,11 +98,34 @@ export default [
         params: formByIdSchema
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft',
+    /**
+     * @param {RequestFormDefinition} request
+     */
+    async handler(request) {
+      const { params, payload } = request
+
+      await updateDraftFormDefinition(params.id, payload)
+
+      return {
+        id: params.id,
+        status: 'updated'
+      }
+    },
+    options: {
+      validate: {
+        payload: formDefinitionSchema
+      }
+    }
   }
 ]
 
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
  * @typedef {import('../api/types.js').RequestFormById} RequestFormById
+ * @typedef {import('../api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('../api/types.js').RequestFormMetadata} RequestFormMetadata
  */
