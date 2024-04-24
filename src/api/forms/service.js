@@ -30,6 +30,17 @@ function mapForm(document) {
 export async function createForm(formConfigurationInput) {
   const { title } = formConfigurationInput
 
+  // Create a blank form definition with the title set
+  const definition = { ...formTemplates.empty(), name: title }
+
+  // Validate the form definition
+  const { error } = Schema.validate(definition)
+  if (error) {
+    throw new InvalidFormDefinitionError(error.message, {
+      cause: error
+    })
+  }
+
   // Create the slug
   const slug = formTitleToSlug(title)
 
@@ -41,17 +52,6 @@ export async function createForm(formConfigurationInput) {
 
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
-
-  // Create a blank form definition with the title set
-  const definition = { ...formTemplates.empty(), name: title }
-
-  // Validate the form definition
-  const { error } = Schema.validate(definition)
-  if (error) {
-    throw new InvalidFormDefinitionError(error.message, {
-      cause: error
-    })
-  }
 
   // Create the form definition
   await formDefinition.create(_id.toString(), definition)
