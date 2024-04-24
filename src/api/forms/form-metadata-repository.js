@@ -10,7 +10,7 @@ export const MAX_RESULTS = 500
  * Retrieves the list of documents from the database
  */
 export function list() {
-  const coll = /** @satisfies {Collection<FormConfigurationDocument>} */ (
+  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
@@ -22,7 +22,7 @@ export function list() {
  * @param {string} formId - ID of the form
  */
 export function get(formId) {
-  const coll = /** @satisfies {Collection<FormConfigurationDocument>} */ (
+  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
@@ -31,10 +31,10 @@ export function get(formId) {
 
 /**
  * Create a document in the database
- * @param {FormConfigurationDocument} form - form configuration
+ * @param {FormMetadataDocument} form - form configuration
  */
 export async function create(form) {
-  const coll = /** @satisfies {Collection<FormConfigurationDocument>} */ (
+  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
@@ -52,8 +52,8 @@ export async function create(form) {
 }
 
 /**
- * @typedef {import('../types.js').FormConfiguration} FormConfiguration
- * @typedef {import('../types.js').FormConfigurationDocument} FormConfigurationDocument
+ * @typedef {import('../types.js').FormMetadata} FormMetadata
+ * @typedef {import('../types.js').FormMetadataDocument} FormMetadataDocument
  */
 
 /**

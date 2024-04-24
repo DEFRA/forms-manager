@@ -5,9 +5,9 @@ import * as formTemplates from '~/src/api/forms/templates.js'
 import { formDefinitionSchema } from '~/src/models/forms.js'
 
 /**
- * Maps a document to a FormConfiguration
- * @param {WithId<FormConfigurationDocument>} document - A mongo document
- * @returns {FormConfiguration}
+ * Maps a document to form metadata
+ * @param {WithId<FormMetadataDocument>} document - A mongo document
+ * @returns {FormMetadata}
  */
 function mapForm(document) {
   return {
@@ -22,7 +22,7 @@ function mapForm(document) {
 
 /**
  * Adds an empty form
- * @param {FormConfigurationInput} formConfigurationInput - the desired form configuration to save
+ * @param {FormMetadataInput} formConfigurationInput - the desired form configuration to save
  * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
@@ -45,7 +45,7 @@ export async function createForm(formConfigurationInput) {
 
   /**
    * Create the configuration document
-   * @satisfies {FormConfigurationDocument}
+   * @satisfies {FormMetadataDocument}
    */
   const document = { ...formConfigurationInput, slug }
 
@@ -103,9 +103,9 @@ function formTitleToSlug(title) {
 
 /**
  * @typedef {import('./errors.js').FormAlreadyExistsError} FormAlreadyExistsError
- * @typedef {import('../types.js').FormConfiguration} FormConfiguration
- * @typedef {import('../types.js').FormConfigurationDocument} FormConfigurationDocument
- * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
+ * @typedef {import('../types.js').FormMetadata} FormMetadata
+ * @typedef {import('../types.js').FormMetadataDocument} FormMetadataDocument
+ * @typedef {import('../types.js').FormMetadataInput} FormMetadataInput
  */
 
 /**
