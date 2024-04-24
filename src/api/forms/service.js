@@ -7,7 +7,7 @@ import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 
 /**
  * Maps a document to a FormConfiguration
- * @param {DocumentWithId} document - A mongo document
+ * @param {WithId<FormConfigurationDocument>} document - A mongo document
  * @returns {FormConfiguration}
  */
 function mapForm(document) {
@@ -32,17 +32,18 @@ export async function createForm(formConfigurationInput) {
 
   // Create the slug
   const slug = formTitleToSlug(title)
-  const metadata = /** @type {FormConfigurationDocumentInput} */ ({
-    ...formConfigurationInput,
-    slug
-  })
+
+  /**
+   * Create the configuration document
+   * @satisfies {FormConfigurationDocument}
+   */
+  const document = { ...formConfigurationInput, slug }
 
   // Create the metadata document
-  const insertResult = await formMetadata.create(metadata)
-  const formId = insertResult.insertedId.toString()
+  const { insertedId: _id } = await formMetadata.create(document)
 
   // Create a blank form definition with the title set
-  const definition = { ...emptyForm(), name: metadata.title }
+  const definition = { ...emptyForm(), name: title }
 
   // Validate the form definition
   const { error } = Schema.validate(definition)
@@ -53,10 +54,9 @@ export async function createForm(formConfigurationInput) {
   }
 
   // Create the form definition
-  await formDefinition.create(formId, definition)
+  await formDefinition.create(_id.toString(), definition)
 
-  // @ts-expect-error - Mongo mutates the document with an _id key
-  return mapForm(/** @type {DocumentWithId} */ (metadata))
+  return mapForm({ ...document, _id })
 }
 
 /**
@@ -103,10 +103,13 @@ function formTitleToSlug(title) {
 }
 
 /**
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('./errors.js').FormAlreadyExistsError} FormAlreadyExistsError
- * @typedef {import('./form-metadata-repository.js').DocumentWithId} DocumentWithId
  * @typedef {import('../types.js').FormConfiguration} FormConfiguration
+ * @typedef {import('../types.js').FormConfigurationDocument} FormConfigurationDocument
  * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
- * @typedef {import('../types.js').FormConfigurationDocumentInput} FormConfigurationDocumentInput
+ */
+
+/**
+ * @template {object} Schema
+ * @typedef {import('mongodb').WithId<Schema>} WithId
  */

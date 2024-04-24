@@ -9,11 +9,11 @@
  */
 
 /**
- * @typedef {Omit<FormConfiguration, 'id'>} FormConfigurationDocumentInput
- * @typedef {Omit<FormConfigurationDocumentInput, 'slug'>} FormConfigurationInput
- * @typedef {Request<{ Server: { db: import('mongodb').Db } }>} RequestDefaults
- * @typedef {RequestDefaults & Request<{ Params: { id: string } }>} RequestFormById
- * @typedef {RequestDefaults & Request<{ Payload: FormConfigurationInput }>} RequestCreateForm
+ * @typedef {Omit<FormConfiguration, 'id'>} FormConfigurationDocument
+ * @typedef {Omit<FormConfiguration, 'id' | 'slug'>} FormConfigurationInput
+ * @typedef {Request<{ Server: { db: Db }, Params: Pick<FormConfiguration, 'id'> }>} RequestFormById
+ * @typedef {Request<{ Server: { db: Db }, Payload: FormConfigurationInput }>} RequestCreateForm
+ * @typedef {import('mongodb').Db} Db
  */
 
 /**

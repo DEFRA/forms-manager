@@ -107,6 +107,5 @@ function getS3Client() {
 }
 
 /**
- * @typedef {import('../types.js').FormConfiguration} FormConfiguration
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  */
