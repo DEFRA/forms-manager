@@ -1,21 +1,9 @@
 import Joi from 'joi'
 
-// Mongo id
-export const idStringSchema = Joi.string().hex().length(24)
-
-// Mongo id object
-export const idObjectSchema = Joi.object().keys({
-  id: Joi.any(),
-  _bsontype: Joi.allow('ObjectId')
-})
-
-// Alternative Mongo id object
-export const idSchema = Joi.alternatives(idStringSchema, idObjectSchema)
-
-// Mongo id object params schema
-export const idParamSchema = Joi.object()
+// Retrieve form by ID schema
+export const formByIdSchema = Joi.object()
   .keys({
-    id: idStringSchema
+    id: Joi.string().hex().length(24)
   })
   .required()
 

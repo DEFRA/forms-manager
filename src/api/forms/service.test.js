@@ -90,6 +90,7 @@ describe('createForm', () => {
   })
 
   it('should throw an error when schema validation fails', async () => {
+    // @ts-expect-error - Allow invalid form definition for test
     jest.mocked(emptyForm).mockReturnValueOnce({})
     jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
     // @ts-expect-error unused response type so ignore type for now

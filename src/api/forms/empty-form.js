@@ -1,15 +1,16 @@
 /**
  * Function to return an empty form
- * @returns {object} - the empty form
  */
 export function emptyForm() {
-  return {
+  return /** @satisfies {FormDefinition} */ ({
     name: '',
     startPage: '/page-one',
     pages: [
       {
         path: '/page-one',
         title: 'Page one',
+        controller: './pages/summary.js',
+        section: 'section',
         components: [
           {
             type: 'TextField',
@@ -23,7 +24,24 @@ export function emptyForm() {
       }
     ],
     conditions: [],
-    sections: [],
-    lists: []
-  }
+    sections: [
+      {
+        name: 'section',
+        title: 'Section title',
+        hideTitle: false
+      }
+    ],
+    lists: [],
+    feeOptions: {
+      maxAttempts: 1,
+      showPaymentSkippedWarningPage: false,
+      allowSubmissionWithoutPayment: true
+    },
+    fees: [],
+    outputs: []
+  })
 }
+
+/**
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ */

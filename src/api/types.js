@@ -13,7 +13,7 @@
  * @typedef {Omit<FormConfigurationDocumentInput, 'slug'>} FormConfigurationInput
  * @typedef {Request<{ Server: { db: import('mongodb').Db } }>} RequestDefaults
  * @typedef {RequestDefaults & Request<{ Params: { id: string } }>} RequestFormById
- * @typedef {RequestDefaults & Request<{ Payload: FormConfigurationInput }>} RequestFormCreation
+ * @typedef {RequestDefaults & Request<{ Payload: FormConfigurationInput }>} RequestCreateForm
  */
 
 /**

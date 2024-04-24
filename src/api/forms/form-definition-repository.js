@@ -27,7 +27,7 @@ function getFormDefinitionFilename(formId) {
 /**
  * Adds a form to the Form Store
  * @param {string} id - id
- * @param {object} formDefinition - form definition (JSON object)
+ * @param {FormDefinition} formDefinition - form definition (JSON object)
  */
 export function create(id, formDefinition) {
   const formDefinitionFilename = getFormDefinitionFilename(id)
