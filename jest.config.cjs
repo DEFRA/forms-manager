@@ -1,11 +1,15 @@
+/**
+ * Jest config
+ * @type {import('@jest/types').Config.InitialOptions}
+ */
 module.exports = {
-  rootDir: '.',
-  testEnvironment: 'node',
   verbose: true,
+  resetMocks: true,
   resetModules: true,
+  restoreMocks: true,
   clearMocks: true,
   silent: true,
-  testMatch: ['**/src/**/*.test.js'],
+  testMatch: ['**/*.test.{cjs,js}'],
   reporters: ['default', ['github-actions', { silent: false }], 'summary'],
   collectCoverageFrom: ['src/**/*.js'],
   coveragePathIgnorePatterns: [
