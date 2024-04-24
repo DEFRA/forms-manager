@@ -12,8 +12,8 @@ export const idObjectSchema = Joi.object().keys({
 // Alternative Mongo id object
 export const idSchema = Joi.alternatives(idStringSchema, idObjectSchema)
 
-// Mongo id object params schema
-export const idParamSchema = Joi.object()
+// Retrieve form by ID schema
+export const formByIdSchema = Joi.object()
   .keys({
     id: idStringSchema
   })
