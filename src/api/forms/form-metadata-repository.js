@@ -31,20 +31,20 @@ export function get(formId) {
 
 /**
  * Create a document in the database
- * @param {FormMetadataDocument} form - form configuration
+ * @param {FormMetadataDocument} document - form metadata document
  */
-export async function create(form) {
+export async function create(document) {
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
   try {
-    const result = await coll.insertOne(form)
+    const result = await coll.insertOne(document)
 
     return result
   } catch (err) {
     if (err instanceof MongoServerError && err.code === 11000) {
-      throw new FormAlreadyExistsError(form.slug)
+      throw new FormAlreadyExistsError(document.slug)
     }
 
     throw err
