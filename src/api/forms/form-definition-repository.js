@@ -28,14 +28,14 @@ function getFormDefinitionFilename(formId) {
  * @param {string} id - id
  * @param {FormDefinition} formDefinition - form definition (JSON object)
  */
-export function create(id, formDefinition) {
+export async function create(id, formDefinition) {
   const formDefinitionFilename = getFormDefinitionFilename(id)
 
   // Convert formMetadata to JSON string
   const formDefinitionString = JSON.stringify(formDefinition)
 
   // Write formDefinition to file
-  return uploadToS3(formDefinitionFilename, formDefinitionString)
+  await uploadToS3(formDefinitionFilename, formDefinitionString)
 }
 
 /**

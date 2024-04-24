@@ -32,9 +32,7 @@ const mockFormMetadataImpl = (/** @type {FormConfigurationInput} */ input) => {
 async function runFormCreationTest(formConfigurationInput) {
   jest.mocked(emptyForm).mockReturnValueOnce(actualEmptyForm.emptyForm())
   jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
-
-  // @ts-expect-error unused response type so ignore type for now
-  jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
+  jest.mocked(formDefinitionCreate).mockResolvedValueOnce()
 
   return createForm(formConfigurationInput)
 }
@@ -88,8 +86,7 @@ describe('createForm', () => {
     // @ts-expect-error - Allow invalid form definition for test
     jest.mocked(emptyForm).mockReturnValueOnce({})
     jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
-    // @ts-expect-error unused response type so ignore type for now
-    jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(formDefinitionCreate).mockResolvedValueOnce()
 
     const formConfiguration = {
       title: 'My Form',
@@ -105,11 +102,8 @@ describe('createForm', () => {
 
   it('should throw an error when writing for metadata fails', async () => {
     jest.mocked(emptyForm).mockReturnValueOnce(actualEmptyForm.emptyForm())
-    jest.mocked(formMetadataCreate).mockImplementation(() => {
-      throw new Error()
-    })
-    // @ts-expect-error unused response type so ignore type for now
-    jest.mocked(formDefinitionCreate).mockResolvedValueOnce(Promise.resolve())
+    jest.mocked(formMetadataCreate).mockRejectedValueOnce(new Error())
+    jest.mocked(formDefinitionCreate).mockResolvedValueOnce()
 
     const formConfiguration = {
       title: 'My Form',
@@ -124,9 +118,7 @@ describe('createForm', () => {
   it('should throw an error when writing form def fails', async () => {
     jest.mocked(emptyForm).mockReturnValueOnce(actualEmptyForm.emptyForm())
     jest.mocked(formMetadataCreate).mockImplementationOnce(mockFormMetadataImpl)
-    jest.mocked(formDefinitionCreate).mockImplementation(() => {
-      throw new Error()
-    })
+    jest.mocked(formDefinitionCreate).mockRejectedValueOnce(new Error())
 
     const formConfiguration = {
       title: 'My Form',
