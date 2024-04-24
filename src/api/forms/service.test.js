@@ -115,7 +115,3 @@ describe('createForm', () => {
     await expect(createForm(formConfiguration)).rejects.toThrow(Error)
   })
 })
-
-/**
- * @typedef {import('../types.js').FormConfigurationInput} FormConfigurationInput
- */

@@ -7,8 +7,8 @@ export const formByIdSchema = Joi.object()
   })
   .required()
 
-// Create form payload schema
-export const createFormSchema = Joi.object()
+// Form metadata schema
+export const formMetadataSchema = Joi.object()
   .keys({
     title: Joi.string().max(250).trim().required(),
     organisation: Joi.string().max(100).trim().required(),
@@ -16,3 +16,6 @@ export const createFormSchema = Joi.object()
     teamEmail: Joi.string().email().trim().required()
   })
   .required()
+
+// Form definition schema
+export { Schema as formDefinitionSchema } from '@defra/forms-model'

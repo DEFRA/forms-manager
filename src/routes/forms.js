@@ -8,7 +8,7 @@ import {
   createForm,
   getFormDefinition
 } from '~/src/api/forms/service.js'
-import { createFormSchema, formByIdSchema } from '~/src/models/forms.js'
+import { formMetadataSchema, formByIdSchema } from '~/src/models/forms.js'
 
 /**
  * @type {ServerRoute[]}
@@ -25,7 +25,7 @@ export default [
     method: 'POST',
     path: '/forms',
     /**
-     * @param {RequestCreateForm} request
+     * @param {RequestFormMetadata} request
      */
     async handler(request) {
       const { payload } = request
@@ -39,7 +39,7 @@ export default [
     },
     options: {
       validate: {
-        payload: createFormSchema
+        payload: formMetadataSchema
       }
     }
   },
@@ -98,6 +98,6 @@ export default [
 
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
- * @typedef {import('../api/types.js').RequestCreateForm} RequestCreateForm
  * @typedef {import('../api/types.js').RequestFormById} RequestFormById
+ * @typedef {import('../api/types.js').RequestFormMetadata} RequestFormMetadata
  */
