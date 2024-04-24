@@ -14,9 +14,8 @@ const s3Region = config.get('s3Region')
 const formBucketName = config.get('formDefinitionBucketName')
 
 /**
- * Gets a filename for a given form ID
+ * Gets the path to a form definition file for a given form ID
  * @param {string} formId - the form ID
- * @returns - the path to the form definition file
  */
 function getFormDefinitionFilename(formId) {
   const formDirectory = config.get('formDirectory')
@@ -42,14 +41,13 @@ export function create(id, formDefinition) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @returns {Promise<FormDefinition>} - form definition JSON content
  */
 export async function get(formId) {
   const filename = getFormDefinitionFilename(formId)
   const body = await retrieveFromS3(filename)
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
-  return JSON.parse(body)
+  return /** @type {FormDefinition} */ (JSON.parse(body))
 }
 
 /**
@@ -68,9 +66,8 @@ function uploadToS3(filename, fileContent) {
 }
 
 /**
- * Uploads fileContent to an S3 bucket as filename
+ * Retrieves filename content from an S3 bucket
  * @param {string} filename - the file name to read`
- * @returns {Promise<string>} - the content of the file
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 async function retrieveFromS3(filename) {
@@ -98,7 +95,6 @@ async function retrieveFromS3(filename) {
 
 /**
  * Retrieves an S3 client instance
- * @returns {S3Client} - the S3 client instance
  */
 function getS3Client() {
   return new S3Client({

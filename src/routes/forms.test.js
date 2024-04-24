@@ -23,10 +23,6 @@ describe('Forms route', () => {
     await server.initialize()
   })
 
-  beforeEach(() => {
-    jest.resetAllMocks()
-  })
-
   afterAll(() => {
     return server.stop()
   })

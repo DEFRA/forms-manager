@@ -8,7 +8,6 @@ export const MAX_RESULTS = 500
 
 /**
  * Retrieves the list of documents from the database
- * @returns {Promise<DocumentWithId[]>}
  */
 export function list() {
   const coll = db.collection(COLLECTION_NAME)
@@ -21,7 +20,6 @@ export function list() {
 /**
  * Retrieves a document from the database
  * @param {string} formId - ID of the form
- * @returns {Promise<DocumentWithId | null>}
  */
 export function get(formId) {
   const coll = db.collection(COLLECTION_NAME)
@@ -32,7 +30,6 @@ export function get(formId) {
 /**
  * Create a document in the database
  * @param {FormConfigurationDocumentInput} form - form configuration
- * @returns {Promise<InsertOneResult>}
  */
 export async function create(form) {
   try {

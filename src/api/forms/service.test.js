@@ -25,14 +25,9 @@ const mockFormMetadataImpl = (/** @type {FormConfigurationInput} */ input) => {
   })
 }
 
-beforeEach(() => {
-  jest.resetAllMocks()
-})
-
 /**
  * Creates a new test form
  * @param {FormConfigurationInput} formConfigurationInput - the input request
- * @returns {Promise<FormConfiguration>} - the output form
  */
 async function runFormCreationTest(formConfigurationInput) {
   jest.mocked(emptyForm).mockReturnValueOnce(actualEmptyForm.emptyForm())
