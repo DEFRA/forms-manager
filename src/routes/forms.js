@@ -1,3 +1,4 @@
+import { formDefinitionSchema, formMetadataSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { FailedToReadFormError } from '../api/forms/errors.js'
@@ -9,11 +10,7 @@ import {
   updateDraftFormDefinition,
   getDraftFormDefinition
 } from '~/src/api/forms/service.js'
-import {
-  formMetadataSchema,
-  formByIdSchema,
-  formDefinitionSchema
-} from '~/src/models/forms.js'
+import { formByIdSchema } from '~/src/models/forms.js'
 
 /**
  * @type {ServerRoute[]}
@@ -125,7 +122,7 @@ export default [
 
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
- * @typedef {import('../api/types.js').RequestFormById} RequestFormById
- * @typedef {import('../api/types.js').RequestFormDefinition} RequestFormDefinition
- * @typedef {import('../api/types.js').RequestFormMetadata} RequestFormMetadata
+ * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
+ * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
+ * @typedef {import('~/src/api/types.js').RequestFormMetadata} RequestFormMetadata
  */
