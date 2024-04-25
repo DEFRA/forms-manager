@@ -97,7 +97,9 @@ export function getDraftFormDefinition(formId) {
  * @param {FormDefinition} formDefinition - full JSON form definition
  */
 export async function updateDraftFormDefinition(formId, formDefinition) {
-  if (!(await formMetadata.exists(formId))) {
+  const existingForm = await getForm(formId)
+
+  if (!existingForm) {
     throw new ResourceNotFoundError(
       `Form ${formId} does not exist, so the definition cannot be updated.`
     )

@@ -123,10 +123,9 @@ describe('createForm', () => {
   })
 
   it('should return the form definition', async () => {
-    jest.mocked(formMetadata.exists).mockResolvedValueOnce(true)
-    jest
-      .mocked(draftFormDefinition.get)
-      .mockResolvedValueOnce(actualEmptyForm())
+    const formDef = actualEmptyForm()
+
+    jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(formDef)
 
     await expect(getDraftFormDefinition('123')).resolves.toMatchObject(
       actualEmptyForm()
@@ -134,7 +133,7 @@ describe('createForm', () => {
   })
 
   it('should throw an error if the form associated with the definition does not exist', async () => {
-    jest.mocked(formMetadata.exists).mockResolvedValueOnce(false)
+    jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(null)
 
     await expect(
       updateDraftFormDefinition('123', actualEmptyForm())
