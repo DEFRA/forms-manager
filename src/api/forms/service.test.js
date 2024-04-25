@@ -133,7 +133,7 @@ describe('createForm', () => {
   })
 
   it('should throw an error if the form associated with the definition does not exist', async () => {
-    jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(null)
+    jest.mocked(draftFormDefinition.get).mockRejectedValue(new Error())
 
     await expect(
       updateDraftFormDefinition('123', actualEmptyForm())
