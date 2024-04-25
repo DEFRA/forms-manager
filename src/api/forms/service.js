@@ -121,8 +121,8 @@ function formTitleToSlug(title) {
 }
 
 /**
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- * @typedef {import('./errors.js').FormAlreadyExistsError} FormAlreadyExistsError
+ * @typedef {import('~/src/api/forms/errors.js').FormAlreadyExistsError} FormAlreadyExistsError
+ * @typedef {import('~/src/api/types.js').FormDefinition} FormDefinition
  * @typedef {import('../types.js').FormMetadata} FormMetadata
  * @typedef {import('../types.js').FormMetadataDocument} FormMetadataDocument
  * @typedef {import('../types.js').FormMetadataInput} FormMetadataInput
