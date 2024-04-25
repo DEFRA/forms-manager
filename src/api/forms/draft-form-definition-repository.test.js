@@ -9,10 +9,7 @@ import {
 import { sdkStreamMixin } from '@smithy/util-stream'
 import { mockClient } from 'aws-sdk-client-mock'
 
-import {
-  create,
-  get
-} from '~/src/api/forms/draft-form-definition-repository.js'
+import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
 import { FailedToReadFormError } from '~/src/api/forms/errors.js'
 
 const s3Mock = mockClient(S3Client)
@@ -66,7 +63,7 @@ describe('Create forms in S3', () => {
   })
 
   test('test upload to s3 works', async () => {
-    await create(id, dummyFormDefinition)
+    await draftFormDefinition.create(id, dummyFormDefinition)
 
     expect(s3Mock.commandCalls(PutObjectCommand)).toHaveLength(1)
   })
@@ -84,7 +81,7 @@ describe('Get forms from S3', () => {
 
     s3Mock.on(GetObjectCommand).resolvesOnce({ Body: sdkStreamMixin(stream) })
 
-    const result = get('any-form-id')
+    const result = draftFormDefinition.get('any-form-id')
 
     await expect(result).resolves.toStrictEqual(dummyFormDefinition)
   })
@@ -92,7 +89,7 @@ describe('Get forms from S3', () => {
   test('should throw FailedToReadFormError if form definition is empty', async () => {
     s3Mock.on(GetObjectCommand).resolvesOnce({ Body: undefined })
 
-    await expect(() => get('any-form-id')).rejects.toThrow(
+    await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
       FailedToReadFormError
     )
   })
@@ -102,7 +99,7 @@ describe('Get forms from S3', () => {
       .on(GetObjectCommand)
       .rejectsOnce(new NoSuchKey({ $metadata: {}, message: 'dummy error' }))
 
-    await expect(() => get('any-form-id')).rejects.toThrow(
+    await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
       FailedToReadFormError
     )
   })
@@ -110,7 +107,9 @@ describe('Get forms from S3', () => {
   test('should throw error if an unexpected error occurs', async () => {
     s3Mock.on(GetObjectCommand).rejectsOnce(new Error())
 
-    await expect(() => get('any-form-id')).rejects.toThrow(Error)
+    await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
+      Error
+    )
   })
 })
 
