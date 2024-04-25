@@ -52,8 +52,8 @@ export async function create(document) {
 }
 
 /**
- * @typedef {import('../types.js').FormMetadata} FormMetadata
- * @typedef {import('../types.js').FormMetadataDocument} FormMetadataDocument
+ * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
+ * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  */
 
 /**
