@@ -18,7 +18,7 @@ export function list() {
 }
 
 /**
- * Retrieves a document from the database
+ * Retrieves a form metadata
  * @param {string} formId - ID of the form
  */
 export function get(formId) {

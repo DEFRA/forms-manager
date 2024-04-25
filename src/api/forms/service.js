@@ -1,5 +1,8 @@
-import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
-import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
+import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
+import {
+  InvalidFormDefinitionError,
+  ResourceNotFoundError
+} from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { formDefinitionSchema } from '~/src/models/forms.js'
@@ -53,7 +56,7 @@ export async function createForm(formMetadataInput) {
   const { insertedId: _id } = await formMetadata.create(document)
 
   // Create the form definition
-  await formDefinition.create(_id.toString(), definition)
+  await draftFormDefinition.create(_id.toString(), definition)
 
   return mapForm({ ...document, _id })
 }
@@ -84,8 +87,24 @@ export async function getForm(formId) {
  * @param {string} formId - the ID of the form
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
-export function getFormDefinition(formId) {
-  return formDefinition.get(formId)
+export function getDraftFormDefinition(formId) {
+  return draftFormDefinition.get(formId)
+}
+
+/**
+ * @param {string} formId - ID of the form
+ * @param {FormDefinition} formDefinition - full JSON form definition
+ */
+export async function updateDraftFormDefinition(formId, formDefinition) {
+  const existingForm = await getForm(formId)
+
+  if (!existingForm) {
+    throw new ResourceNotFoundError(
+      `Form ${formId} does not exist, so the definition cannot be updated.`
+    )
+  }
+
+  return draftFormDefinition.create(formId, formDefinition)
 }
 
 /**
@@ -102,7 +121,8 @@ function formTitleToSlug(title) {
 }
 
 /**
- * @typedef {import('./errors.js').FormAlreadyExistsError} FormAlreadyExistsError
+ * @typedef {import('~/src/api/forms/errors.js').FormAlreadyExistsError} FormAlreadyExistsError
+ * @typedef {import('~/src/api/types.js').FormDefinition} FormDefinition
  * @typedef {import('../types.js').FormMetadata} FormMetadata
  * @typedef {import('../types.js').FormMetadataDocument} FormMetadataDocument
  * @typedef {import('../types.js').FormMetadataInput} FormMetadataInput

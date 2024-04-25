@@ -20,7 +20,7 @@ const formBucketName = config.get('formDefinitionBucketName')
 function getFormDefinitionFilename(formId) {
   const formDirectory = config.get('formDirectory')
 
-  return join(formDirectory, `${formId}.json`)
+  return join(formDirectory, 'draft', `${formId}.json`)
 }
 
 /**

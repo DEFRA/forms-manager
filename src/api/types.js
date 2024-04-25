@@ -24,6 +24,7 @@
 /**
  * Form API request types
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput }>} RequestFormById
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormDefinition }>} RequestFormDefinition
  * @typedef {Request<{ Server: { db: Db }, Payload: FormMetadataInput }>} RequestFormMetadata
  */
 
