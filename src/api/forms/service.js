@@ -92,7 +92,6 @@ export function getDraftFormDefinition(formId) {
 }
 
 /**
- *
  * @param {string} formId - ID of the form
  * @param {FormDefinition} formDefinition - full JSON form definition
  */
