@@ -92,7 +92,7 @@ npm run dev
 To mimic the application running in `production` mode locally run:
 
 ```bash
-
+npm start
 ```
 
 ### Npm scripts
