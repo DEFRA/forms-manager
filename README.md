@@ -50,6 +50,11 @@ npm ci
 
 5. Create a new S3 bucket using localstack with the awslocal wrapper:
 
+Or if you are on Mac
+
+1. brew install awscli
+2. brew install awscli-local
+
 ```bash
 localstack start
 awslocal s3api create-bucket \
@@ -58,7 +63,7 @@ awslocal s3api create-bucket \
   --create-bucket-configuration LocationConstraint=eu-west-2
 ```
 
-5. Add your bucket name into your .env file:
+5. Add your bucket name into your .env file at project root level:
 
 ```text
 FORM_DEF_BUCKET_NAME=form-definition-storage
@@ -66,6 +71,12 @@ S3_ENDPOINT=http://localhost:4566
 AWS_ACCESS_KEY_ID=dummy
 AWS_SECRET_ACCESS_KEY=dummy
 MONGO_URI='mongodb://defra:changeme@localhost:27017/'
+```
+
+6. Bring up runtime dependencies
+
+```bash
+docker compose up
 ```
 
 ### Development
@@ -81,7 +92,7 @@ npm run dev
 To mimic the application running in `production` mode locally run:
 
 ```bash
-npm start
+
 ```
 
 ### Npm scripts
