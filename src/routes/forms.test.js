@@ -33,13 +33,21 @@ describe('Forms route', () => {
   const internalErrorStatusCode = 500
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
-  const stubFormInput = {
+
+  /**
+   * @satisfies {FormMetadataInput}
+   */
+  const stubFormMetadataInput = {
     title: 'Test form',
     organisation: 'Defra',
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk'
   }
-  const stubFormOutput = {
+
+  /**
+   * @satisfies {FormMetadata}
+   */
+  const stubFormMetadataOutput = {
     id,
     slug: 'test-form',
     title: 'Test form',
@@ -47,6 +55,10 @@ describe('Forms route', () => {
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk'
   }
+
+  /**
+   * @satisfies {FormDefinition}
+   */
   const stubFormDefinition = {
     name: '',
     startPage: '/page-one',
@@ -81,7 +93,7 @@ describe('Forms route', () => {
     })
 
     test('Testing GET /forms route returns a list of forms', async () => {
-      jest.mocked(listForms).mockResolvedValue([stubFormOutput])
+      jest.mocked(listForms).mockResolvedValue([stubFormMetadataOutput])
 
       const response = await server.inject({
         method: 'GET',
@@ -90,28 +102,28 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual([stubFormOutput])
+      expect(response.result).toEqual([stubFormMetadataOutput])
     })
 
     test('Testing POST /forms route returns a new form', async () => {
-      jest.mocked(createForm).mockResolvedValue(stubFormOutput)
+      jest.mocked(createForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
         method: 'POST',
         url: '/forms',
-        payload: stubFormInput
+        payload: stubFormMetadataInput
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        id: stubFormOutput.id,
+        id: stubFormMetadataOutput.id,
         status: 'created'
       })
     })
 
     test('Testing GET /forms/{id} route returns a form', async () => {
-      jest.mocked(getForm).mockResolvedValue(stubFormOutput)
+      jest.mocked(getForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
         method: 'GET',
@@ -120,7 +132,7 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(stubFormOutput)
+      expect(response.result).toEqual(stubFormMetadataOutput)
     })
 
     test('Testing GET /forms/{id}/definition/draft route returns a form definition', async () => {
@@ -409,4 +421,6 @@ describe('Forms route', () => {
 /**
  * @typedef {import('@hapi/hapi').Server} Server
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
+ * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
  */
