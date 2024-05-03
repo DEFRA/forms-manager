@@ -1,3 +1,5 @@
+import { organisations } from '@defra/forms-model'
+
 import {
   FailedToReadFormError,
   FormAlreadyExistsError
@@ -189,9 +191,16 @@ describe('Forms route', () => {
           teamEmail: ''
         },
         error: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
+          keys: [
+            'title',
+            'organisation',
+            'organisation',
+            'teamName',
+            'teamEmail'
+          ],
           messages: [
             '"title" is not allowed to be empty.',
+            `"organisation" must be one of [${organisations.join(', ')}].`,
             '"organisation" is not allowed to be empty.',
             '"teamName" is not allowed to be empty.',
             '"teamEmail" is not allowed to be empty'
@@ -215,14 +224,14 @@ describe('Forms route', () => {
       {
         payload: {
           title: 'title',
-          organisation: 'x'.repeat(101),
+          organisation: 'Cyberdyne Systems',
           teamName: 'teamname',
           teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
           keys: ['organisation'],
           messages: [
-            '"organisation" length must be less than or equal to 100 characters long'
+            `"organisation" must be one of [${organisations.join(', ')}]`
           ]
         }
       },
