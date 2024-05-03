@@ -201,7 +201,7 @@ describe('Forms route', () => {
       {
         payload: {
           title: 'x'.repeat(251),
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'teamname',
           teamEmail: 'test@example.com'
         },
@@ -229,7 +229,7 @@ describe('Forms route', () => {
       {
         payload: {
           title: 'title',
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'x'.repeat(101),
           teamEmail: 'test@example.com'
         },
@@ -243,7 +243,7 @@ describe('Forms route', () => {
       {
         payload: {
           title: 'title',
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'teamname',
           teamEmail: `x`
         },
@@ -284,7 +284,7 @@ describe('Forms route', () => {
         url: '/forms',
         payload: {
           title: 'My Title',
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'teamname',
           teamEmail: 'test@example.com'
         }
