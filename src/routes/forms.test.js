@@ -203,7 +203,7 @@ describe('Forms route', () => {
           title: 'x'.repeat(251),
           organisation: 'Defra',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
+          teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
           keys: ['title'],
@@ -217,7 +217,7 @@ describe('Forms route', () => {
           title: 'title',
           organisation: 'x'.repeat(101),
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
+          teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
           keys: ['organisation'],
@@ -231,7 +231,7 @@ describe('Forms route', () => {
           title: 'title',
           organisation: 'Defra',
           teamName: 'x'.repeat(101),
-          teamEmail: 'test@example.com'
+          teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
           keys: ['teamName'],
@@ -286,7 +286,7 @@ describe('Forms route', () => {
           title: 'My Title',
           organisation: 'Defra',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
+          teamEmail: 'defraforms@defra.gov.uk'
         }
       })
 
