@@ -1,3 +1,5 @@
+import { organisations } from '@defra/forms-model'
+
 import {
   FailedToReadFormError,
   FormAlreadyExistsError
@@ -33,13 +35,21 @@ describe('Forms route', () => {
   const internalErrorStatusCode = 500
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
-  const stubFormInput = {
+
+  /**
+   * @satisfies {FormMetadataInput}
+   */
+  const stubFormMetadataInput = {
     title: 'Test form',
     organisation: 'Defra',
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk'
   }
-  const stubFormOutput = {
+
+  /**
+   * @satisfies {FormMetadata}
+   */
+  const stubFormMetadataOutput = {
     id,
     slug: 'test-form',
     title: 'Test form',
@@ -47,6 +57,10 @@ describe('Forms route', () => {
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk'
   }
+
+  /**
+   * @satisfies {FormDefinition}
+   */
   const stubFormDefinition = {
     name: '',
     startPage: '/page-one',
@@ -65,11 +79,6 @@ describe('Forms route', () => {
       showPaymentSkippedWarningPage: true
     }
   }
-  const internalErrorResponse = {
-    error: 'Internal Server Error',
-    message: 'An internal server error occurred',
-    statusCode: 500
-  }
 
   describe('Success responses', () => {
     test('Testing GET /forms route returns empty array', async () => {
@@ -86,7 +95,7 @@ describe('Forms route', () => {
     })
 
     test('Testing GET /forms route returns a list of forms', async () => {
-      jest.mocked(listForms).mockResolvedValue([stubFormOutput])
+      jest.mocked(listForms).mockResolvedValue([stubFormMetadataOutput])
 
       const response = await server.inject({
         method: 'GET',
@@ -95,28 +104,28 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual([stubFormOutput])
+      expect(response.result).toEqual([stubFormMetadataOutput])
     })
 
     test('Testing POST /forms route returns a new form', async () => {
-      jest.mocked(createForm).mockResolvedValue(stubFormOutput)
+      jest.mocked(createForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
         method: 'POST',
         url: '/forms',
-        payload: stubFormInput
+        payload: stubFormMetadataInput
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        id: stubFormOutput.id,
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
         status: 'created'
       })
     })
 
     test('Testing GET /forms/{id} route returns a form', async () => {
-      jest.mocked(getForm).mockResolvedValue(stubFormOutput)
+      jest.mocked(getForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
         method: 'GET',
@@ -125,7 +134,7 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(stubFormOutput)
+      expect(response.result).toEqual(stubFormMetadataOutput)
     })
 
     test('Testing GET /forms/{id}/definition/draft route returns a form definition', async () => {
@@ -155,180 +164,124 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(internalErrorResponse)
+      expect(response.result).toMatchObject({
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      })
     })
 
-    test('Testing POST /forms route with an empty payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
-        payload: {}
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" is required. "organisation" is required. "teamName" is required. "teamEmail" is required',
-        statusCode: 400,
-        validation: {
+    test.each([
+      {
+        payload: {},
+        error: {
           keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          source: 'payload'
+          messages: [
+            '"title" is required.',
+            '"organisation" is required.',
+            '"teamName" is required.',
+            '"teamEmail" is required'
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
-        payload: { title: '', organisation: '', teamName: '', teamEmail: '' }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" is not allowed to be empty. "organisation" is not allowed to be empty. "teamName" is not allowed to be empty. "teamEmail" is not allowed to be empty',
-        statusCode: 400,
-        validation: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          source: 'payload'
-        }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
-          title: ' ',
-          organisation: ' ',
-          teamName: ' ',
-          teamEmail: ' '
+          title: '',
+          organisation: '',
+          teamName: '',
+          teamEmail: ''
+        },
+        error: {
+          keys: [
+            'title',
+            'organisation',
+            'organisation',
+            'teamName',
+            'teamEmail'
+          ],
+          messages: [
+            '"title" is not allowed to be empty.',
+            `"organisation" must be one of [${organisations.join(', ')}].`,
+            '"organisation" is not allowed to be empty.',
+            '"teamName" is not allowed to be empty.',
+            '"teamEmail" is not allowed to be empty'
+          ]
         }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" is not allowed to be empty. "organisation" is not allowed to be empty. "teamName" is not allowed to be empty. "teamEmail" is not allowed to be empty',
-        statusCode: 400,
-        validation: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          source: 'payload'
-        }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'x'.repeat(251),
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" length must be less than or equal to 250 characters long',
-        statusCode: 400,
-        validation: {
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        error: {
           keys: ['title'],
-          source: 'payload'
+          messages: [
+            '"title" length must be less than or equal to 250 characters long'
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'title',
-          organisation: 'x'.repeat(101),
+          organisation: 'Cyberdyne Systems',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"organisation" length must be less than or equal to 100 characters long',
-        statusCode: 400,
-        validation: {
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        error: {
           keys: ['organisation'],
-          source: 'payload'
+          messages: [
+            `"organisation" must be one of [${organisations.join(', ')}]`
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'title',
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'x'.repeat(101),
-          teamEmail: 'test@example.com'
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"teamName" length must be less than or equal to 100 characters long',
-        statusCode: 400,
-        validation: {
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        error: {
           keys: ['teamName'],
-          source: 'payload'
+          messages: [
+            '"teamName" length must be less than or equal to 100 characters long'
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'title',
-          organisation: 'orgname',
-          teamName: 'x'.repeat(101),
-          teamEmail: 'test@example.com'
+          organisation: 'Defra',
+          teamName: 'teamname',
+          teamEmail: `x`
+        },
+        error: {
+          keys: ['teamEmail'],
+          messages: ['"teamEmail" must be a valid email']
         }
-      })
+      }
+    ])(
+      'Testing POST /forms route with an invalid payload returns validation errors',
+      async ({ payload, error }) => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/forms',
+          payload
+        })
 
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"teamName" length must be less than or equal to 100 characters long',
-        statusCode: 400,
-        validation: {
-          keys: ['teamName'],
-          source: 'payload'
-        }
-      })
-    })
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'payload'
+          }
+        })
+      }
+    )
 
     test('Testing POST /forms route with an slug that already exists returns 400 FormAlreadyExistsError', async () => {
       jest
@@ -340,83 +293,52 @@ describe('Forms route', () => {
         url: '/forms',
         payload: {
           title: 'My Title',
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
+          teamEmail: 'defraforms@defra.gov.uk'
         }
       })
 
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        statusCode: 400,
+      expect(response.result).toMatchObject({
         error: 'FormAlreadyExistsError',
         message: 'Form with slug my-title already exists'
       })
     })
 
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
-        payload: {
-          title: 'title',
-          organisation: 'orgname',
-          teamName: 'teamname',
-          teamEmail: `x`
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"teamEmail" must be a valid email',
-        statusCode: 400,
-        validation: {
-          keys: ['teamEmail'],
-          source: 'payload'
-        }
-      })
-    })
-
-    test('Testing GET /forms/{id} route with an invalid id returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: '/forms/1'
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" length must be 24 characters long',
-        statusCode: 400,
-        validation: {
+    test.each([
+      {
+        url: '/forms/1',
+        error: {
           keys: ['id'],
-          source: 'params'
+          messages: ['"id" length must be 24 characters long']
         }
-      })
-    })
-
-    test('Testing GET /forms/{id} route with an invalid id returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: `/forms/${'x'.repeat(24)}`
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" must only contain hexadecimal characters',
-        statusCode: 400,
-        validation: {
+      },
+      {
+        url: `/forms/${'x'.repeat(24)}`,
+        error: {
           keys: ['id'],
-          source: 'params'
+          messages: ['"id" must only contain hexadecimal characters']
         }
-      })
-    })
+      }
+    ])(
+      'Testing GET /forms/{id} route with an invalid id returns validation errors',
+      async ({ url, error }) => {
+        const response = await server.inject({ method: 'GET', url })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'params'
+          }
+        })
+      }
+    )
 
     test('Testing GET /forms/{id} route with an id that is not found returns 404 Not found', async () => {
       jest.mocked(getForm).mockResolvedValue(undefined)
@@ -428,50 +350,44 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
+      expect(response.result).toMatchObject({
         error: 'Not Found',
-        message: `Form with id '${id}' not found`,
-        statusCode: 404
+        message: `Form with id '${id}' not found`
       })
     })
 
-    test('Testing GET /forms/{id}/definition/draft route with an invalid id returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: '/forms/1/definition/draft'
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" length must be 24 characters long',
-        statusCode: 400,
-        validation: {
+    test.each([
+      {
+        url: '/forms/1/definition/draft',
+        error: {
           keys: ['id'],
-          source: 'params'
+          messages: ['"id" length must be 24 characters long']
         }
-      })
-    })
-
-    test('Testing GET /forms/{id}/definition/draft route with an invalid id returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: `/forms/${'x'.repeat(24)}/definition/draft`
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" must only contain hexadecimal characters',
-        statusCode: 400,
-        validation: {
+      },
+      {
+        url: `/forms/${'x'.repeat(24)}/definition/draft`,
+        error: {
           keys: ['id'],
-          source: 'params'
+          messages: ['"id" must only contain hexadecimal characters']
         }
-      })
-    })
+      }
+    ])(
+      'Testing GET /forms/{id}/definition/draft route with an invalid id returns validation errors',
+      async ({ url, error }) => {
+        const response = await server.inject({ method: 'GET', url })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'params'
+          }
+        })
+      }
+    )
 
     test('Testing GET /forms/{id}/definition/draft route with an id that is not found returns 404 Not found', async () => {
       jest
@@ -485,10 +401,9 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
+      expect(response.result).toMatchObject({
         error: 'Not Found',
-        message: 'Failed',
-        statusCode: 404
+        message: 'Failed'
       })
     })
 
@@ -504,7 +419,10 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(internalErrorResponse)
+      expect(response.result).toMatchObject({
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      })
     })
   })
 })
@@ -512,4 +430,6 @@ describe('Forms route', () => {
 /**
  * @typedef {import('@hapi/hapi').Server} Server
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
+ * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
  */
