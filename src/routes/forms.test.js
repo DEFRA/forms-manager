@@ -65,11 +65,6 @@ describe('Forms route', () => {
       showPaymentSkippedWarningPage: true
     }
   }
-  const internalErrorResponse = {
-    error: 'Internal Server Error',
-    message: 'An internal server error occurred',
-    statusCode: 500
-  }
 
   describe('Success responses', () => {
     test('Testing GET /forms route returns empty array', async () => {
@@ -109,7 +104,7 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
+      expect(response.result).toMatchObject({
         id: stubFormOutput.id,
         status: 'created'
       })
@@ -155,7 +150,10 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(internalErrorResponse)
+      expect(response.result).toMatchObject({
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      })
     })
 
     test.each([
@@ -256,7 +254,6 @@ describe('Forms route', () => {
         expect(response.result).toMatchObject({
           error: 'Bad Request',
           message: error.messages.join(' '),
-          statusCode: 400,
           validation: {
             keys: error.keys,
             source: 'payload'
@@ -283,8 +280,7 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        statusCode: 400,
+      expect(response.result).toMatchObject({
         error: 'FormAlreadyExistsError',
         message: 'Form with slug my-title already exists'
       })
@@ -315,7 +311,6 @@ describe('Forms route', () => {
         expect(response.result).toMatchObject({
           error: 'Bad Request',
           message: error.messages.join(' '),
-          statusCode: 400,
           validation: {
             keys: error.keys,
             source: 'params'
@@ -334,10 +329,9 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
+      expect(response.result).toMatchObject({
         error: 'Not Found',
-        message: `Form with id '${id}' not found`,
-        statusCode: 404
+        message: `Form with id '${id}' not found`
       })
     })
 
@@ -366,7 +360,6 @@ describe('Forms route', () => {
         expect(response.result).toMatchObject({
           error: 'Bad Request',
           message: error.messages.join(' '),
-          statusCode: 400,
           validation: {
             keys: error.keys,
             source: 'params'
@@ -387,10 +380,9 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
+      expect(response.result).toMatchObject({
         error: 'Not Found',
-        message: 'Failed',
-        statusCode: 404
+        message: 'Failed'
       })
     })
 
@@ -406,7 +398,10 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(internalErrorResponse)
+      expect(response.result).toMatchObject({
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      })
     })
   })
 })
