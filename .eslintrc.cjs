@@ -4,7 +4,7 @@ const pkg = require('./package.json')
  * @type {import('eslint').ESLint.ConfigData}
  */
 module.exports = {
-  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage', '.eslintrc.cjs'],
+  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage'],
   overrides: [
     {
       extends: [
