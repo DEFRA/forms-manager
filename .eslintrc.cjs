@@ -100,11 +100,12 @@ module.exports = {
           }
         ],
 
-        // JSDoc @param description is optional
+        // JSDoc @param types are mandatory for JavaScript
         'jsdoc/require-param-description': 'off',
-        'jsdoc/require-param': 'error',
+        'jsdoc/require-param-type': 'error',
+        'jsdoc/require-param': 'off',
 
-        // JSDoc @returns description is optional
+        // JSDoc @returns is optional
         'jsdoc/require-returns-description': 'off',
         'jsdoc/require-returns-type': 'off',
         'jsdoc/require-returns': 'off',
