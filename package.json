@@ -43,7 +43,7 @@
     "mongodb": "^6.5.0",
     "pino": "^9.0.0",
     "pino-pretty": "^11.0.0",
-    "undici": "^6.14.1"
+    "undici": "^6.15.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.1",
