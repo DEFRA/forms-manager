@@ -1,5 +1,3 @@
-const pkg = require('./package.json')
-
 /**
  * @type {import('eslint').ESLint.ConfigData}
  */

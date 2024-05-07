@@ -62,7 +62,7 @@ describe('Create forms in S3', () => {
     s3Mock.reset()
   })
 
-  test('test upload to s3 works', async () => {
+  test('upload to s3 works', async () => {
     await draftFormDefinition.create(id, dummyFormDefinition)
 
     expect(s3Mock.commandCalls(PutObjectCommand)).toHaveLength(1)
