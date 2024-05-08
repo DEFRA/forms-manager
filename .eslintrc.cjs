@@ -1,10 +1,8 @@
-const pkg = require('./package.json')
-
 /**
  * @type {import('eslint').ESLint.ConfigData}
  */
 module.exports = {
-  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage', '.eslintrc.cjs'],
+  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage'],
   overrides: [
     {
       extends: [
@@ -100,11 +98,12 @@ module.exports = {
           }
         ],
 
-        // JSDoc @param description is optional
+        // JSDoc @param types are mandatory for JavaScript
         'jsdoc/require-param-description': 'off',
-        'jsdoc/require-param': 'error',
+        'jsdoc/require-param-type': 'error',
+        'jsdoc/require-param': 'off',
 
-        // JSDoc @returns description is optional
+        // JSDoc @returns is optional
         'jsdoc/require-returns-description': 'off',
         'jsdoc/require-returns-type': 'off',
         'jsdoc/require-returns': 'off',
@@ -150,15 +149,19 @@ module.exports = {
     },
     {
       env: {
-        jest: true
+        'jest/globals': true
       },
-      extends: ['plugin:jest/style'],
+      extends: ['plugin:jest/recommended', 'plugin:jest/style'],
       files: ['**/*.test.{cjs,js,mjs}'],
       plugins: ['jest'],
       rules: {
         // Turn off warnings for jest.Expect 'any' types
         '@typescript-eslint/no-unsafe-assignment': 'off',
-        '@typescript-eslint/no-unsafe-argument': 'off'
+        '@typescript-eslint/no-unsafe-argument': 'off',
+
+        // Allow Jest to assert on mocked unbound methods
+        '@typescript-eslint/unbound-method': 'off',
+        'jest/unbound-method': 'error'
       }
     }
   ],
