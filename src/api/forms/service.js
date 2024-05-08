@@ -79,7 +79,7 @@ export async function listForms() {
 }
 
 /**
- * Retrieves form metadata by id
+ * Retrieves form metadata by ID
  * @param {string} formId - ID of the form
  */
 export async function getForm(formId) {
