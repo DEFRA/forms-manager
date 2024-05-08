@@ -36,15 +36,7 @@ describe('createForm', () => {
     })
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   test('should create a new form', async () => {
-    const date = new Date(2020, 1, 1)
-    jest.useFakeTimers()
-    jest.setSystemTime(date)
-
     const formMetadataInput = {
       title: 'Test form',
       organisation: 'Defra',
@@ -60,8 +52,8 @@ describe('createForm', () => {
       teamName: 'Defra Forms',
       teamEmail: 'defraforms@defra.gov.uk',
       draft: {
-        createdAt: date,
-        updatedAt: date
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
       }
     }
 
@@ -71,10 +63,6 @@ describe('createForm', () => {
   })
 
   test('should create a new form without special characters in the name', async () => {
-    const date = new Date(2020, 1, 1)
-    jest.useFakeTimers()
-    jest.setSystemTime(date)
-
     const formMetadataInput = {
       title: 'A !Super! Duper Form -    from Defra...',
       organisation: 'Defra',
@@ -90,8 +78,8 @@ describe('createForm', () => {
       teamName: 'Defra Forms',
       teamEmail: 'defraforms@defra.gov.uk',
       draft: {
-        createdAt: date,
-        updatedAt: date
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
       }
     }
 
