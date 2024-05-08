@@ -1,4 +1,7 @@
-import { formDefinitionSchema, formMetadataSchema } from '@defra/forms-model'
+import {
+  formDefinitionSchema,
+  formMetadataInputSchema
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { FailedToReadFormError } from '../api/forms/errors.js'
@@ -6,11 +9,12 @@ import { FailedToReadFormError } from '../api/forms/errors.js'
 import {
   listForms,
   getForm,
+  getFormBySlug,
   createForm,
   updateDraftFormDefinition,
   getDraftFormDefinition
 } from '~/src/api/forms/service.js'
-import { formByIdSchema } from '~/src/models/forms.js'
+import { formByIdSchema, formBySlugSchema } from '~/src/models/forms.js'
 
 /**
  * @type {ServerRoute[]}
@@ -41,7 +45,7 @@ export default [
     },
     options: {
       validate: {
-        payload: formMetadataSchema
+        payload: formMetadataInputSchema
       }
     }
   },
@@ -65,6 +69,29 @@ export default [
     options: {
       validate: {
         params: formByIdSchema
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/forms/slug/{slug}',
+    /**
+     * @param {RequestFormBySlug} request
+     */
+    async handler(request) {
+      const { params } = request
+      const { slug } = params
+      const form = await getFormBySlug(slug)
+
+      if (!form) {
+        return Boom.notFound(`Form with slug '${slug}' not found`)
+      }
+
+      return form
+    },
+    options: {
+      validate: {
+        params: formBySlugSchema
       }
     }
   },
@@ -123,6 +150,7 @@ export default [
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
+ * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadata} RequestFormMetadata
  */

@@ -9,7 +9,8 @@ import {
   listForms,
   createForm,
   getForm,
-  getDraftFormDefinition
+  getDraftFormDefinition,
+  getFormBySlug
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 
@@ -35,6 +36,7 @@ describe('Forms route', () => {
   const internalErrorStatusCode = 500
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
+  const now = new Date()
 
   /**
    * @satisfies {FormMetadataInput}
@@ -55,7 +57,11 @@ describe('Forms route', () => {
     title: 'Test form',
     organisation: 'Defra',
     teamName: 'Defra Forms',
-    teamEmail: 'defraforms@defra.gov.uk'
+    teamEmail: 'defraforms@defra.gov.uk',
+    draft: {
+      createdAt: now,
+      updatedAt: now
+    }
   }
 
   /**
@@ -79,6 +85,8 @@ describe('Forms route', () => {
       showPaymentSkippedWarningPage: true
     }
   }
+
+  const slug = stubFormMetadataOutput.slug
 
   describe('Success responses', () => {
     test('Testing GET /forms route returns empty array', async () => {
@@ -130,6 +138,19 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'GET',
         url: `/forms/${id}`
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormMetadataOutput)
+    })
+
+    test('Testing GET /forms/slug/{slug} route returns a form', async () => {
+      jest.mocked(getFormBySlug).mockResolvedValue(stubFormMetadataOutput)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/slug/${slug}`
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -353,6 +374,22 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         error: 'Not Found',
         message: `Form with id '${id}' not found`
+      })
+    })
+
+    test('Testing GET /forms/{slug} route with an id that is not found returns 404 Not found', async () => {
+      jest.mocked(getFormBySlug).mockResolvedValue(undefined)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/slug/${slug}`
+      })
+
+      expect(response.statusCode).toEqual(notFoundStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Not Found',
+        message: `Form with slug '${slug}' not found`
       })
     })
 

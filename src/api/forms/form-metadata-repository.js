@@ -18,7 +18,7 @@ export function list() {
 }
 
 /**
- * Retrieves a form metadata
+ * Retrieves a form metadata by ID
  * @param {string} formId - ID of the form
  */
 export function get(formId) {
@@ -27,6 +27,18 @@ export function get(formId) {
   )
 
   return coll.findOne({ _id: new ObjectId(formId) })
+}
+
+/**
+ * Retrieves a form metadata by slug
+ * @param {string} slug - The slug of the form
+ */
+export function getBySlug(slug) {
+  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
+    db.collection(COLLECTION_NAME)
+  )
+
+  return coll.findOne({ slug })
 }
 
 /**

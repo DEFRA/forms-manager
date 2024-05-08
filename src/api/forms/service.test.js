@@ -50,7 +50,11 @@ describe('createForm', () => {
       title: 'Test form',
       organisation: 'Defra',
       teamName: 'Defra Forms',
-      teamEmail: 'defraforms@defra.gov.uk'
+      teamEmail: 'defraforms@defra.gov.uk',
+      draft: {
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
     }
 
     await expect(createForm(formMetadataInput)).resolves.toEqual(
@@ -72,7 +76,11 @@ describe('createForm', () => {
       title: 'A !Super! Duper Form -    from Defra...',
       organisation: 'Defra',
       teamName: 'Defra Forms',
-      teamEmail: 'defraforms@defra.gov.uk'
+      teamEmail: 'defraforms@defra.gov.uk',
+      draft: {
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
     }
 
     await expect(createForm(formMetadataInput)).resolves.toEqual(
