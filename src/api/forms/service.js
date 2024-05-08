@@ -20,7 +20,9 @@ function mapForm(document) {
     title: document.title,
     organisation: document.organisation,
     teamName: document.teamName,
-    teamEmail: document.teamEmail
+    teamEmail: document.teamEmail,
+    draft: document.draft,
+    live: document.live
   }
 }
 
@@ -46,17 +48,22 @@ export async function createForm(formMetadataInput) {
 
   // Create the slug
   const slug = formTitleToSlug(title)
+  const now = new Date()
 
   /**
    * Create the metadata document
    * @satisfies {FormMetadataDocument}
    */
-  const document = { ...formMetadataInput, slug }
+  const document = {
+    ...formMetadataInput,
+    slug,
+    draft: { createdAt: now, updatedAt: now }
+  }
 
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
 
-  // Create the form definition
+  // Create the draft form definition
   await draftFormDefinition.create(_id.toString(), definition)
 
   return mapForm({ ...document, _id })
@@ -72,11 +79,23 @@ export async function listForms() {
 }
 
 /**
- * Retrieves form metadata
+ * Retrieves form metadata by id
  * @param {string} formId - ID of the form
  */
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
+
+  if (document) {
+    return mapForm(document)
+  }
+}
+
+/**
+ * Retrieves form metadata by slug
+ * @param {string} slug - The slug of the form
+ */
+export async function getFormBySlug(slug) {
+  const document = await formMetadata.getBySlug(slug)
 
   if (document) {
     return mapForm(document)
