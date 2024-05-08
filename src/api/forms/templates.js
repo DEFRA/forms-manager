@@ -9,7 +9,6 @@ export function empty() {
       {
         path: '/page-one',
         title: 'Page one',
-        controller: './pages/summary.js',
         section: 'section',
         components: [
           {
@@ -20,7 +19,14 @@ export function empty() {
             options: {},
             schema: {}
           }
-        ]
+        ],
+        next: [{ path: '/summary' }]
+      },
+      {
+        title: 'Summary',
+        path: '/summary',
+        controller: './pages/summary.js',
+        components: []
       }
     ],
     conditions: [],
