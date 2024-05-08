@@ -1,6 +1,6 @@
 import {
   formDefinitionSchema,
-  formMetadataCreateSchema
+  formMetadataInputSchema
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -45,7 +45,7 @@ export default [
     },
     options: {
       validate: {
-        payload: formMetadataCreateSchema
+        payload: formMetadataInputSchema
       }
     }
   },
