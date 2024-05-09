@@ -28,12 +28,13 @@ function mapForm(document) {
 
 /**
  * Adds an empty form
- * @param {FormMetadataInput} formMetadataInput - the desired form metadata to save
+ * @param {FormMetadataAuthorInput} input - the desired form metadata including the author details to save
  * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
-export async function createForm(formMetadataInput) {
-  const { title } = formMetadataInput
+export async function createForm(input) {
+  const { metadata, author } = input
+  const { title } = metadata
 
   // Create a blank form definition with the title set
   const definition = { ...formTemplates.empty(), name: title }
@@ -55,9 +56,14 @@ export async function createForm(formMetadataInput) {
    * @satisfies {FormMetadataDocument}
    */
   const document = {
-    ...formMetadataInput,
+    ...metadata,
     slug,
-    draft: { createdAt: now, updatedAt: now }
+    draft: {
+      createdAt: now,
+      createdBy: author,
+      updatedAt: now,
+      updatedBy: author
+    }
   }
 
   // Create the metadata document
@@ -145,7 +151,7 @@ function formTitleToSlug(title) {
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
- * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ * @typedef {import('@defra/forms-model').FormMetadataAuthorInput} FormMetadataAuthorInput
  */
 
 /**
