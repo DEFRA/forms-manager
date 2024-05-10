@@ -4,7 +4,8 @@ import {
   NoSuchKey,
   GetObjectCommand,
   S3Client,
-  PutObjectCommand
+  PutObjectCommand,
+  CopyObjectCommand
 } from '@aws-sdk/client-s3'
 import { sdkStreamMixin } from '@smithy/util-stream'
 import { mockClient } from 'aws-sdk-client-mock'
@@ -66,6 +67,18 @@ describe('Create forms in S3', () => {
     await draftFormDefinition.create(id, dummyFormDefinition)
 
     expect(s3Mock.commandCalls(PutObjectCommand)).toHaveLength(1)
+  })
+})
+
+describe('Copy forms in S3', () => {
+  beforeEach(() => {
+    s3Mock.reset()
+  })
+
+  test('copy object in s3 works', async () => {
+    await draftFormDefinition.promote(id)
+
+    expect(s3Mock.commandCalls(CopyObjectCommand)).toHaveLength(1)
   })
 })
 

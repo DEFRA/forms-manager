@@ -10,7 +10,8 @@ import {
   createForm,
   getForm,
   getDraftFormDefinition,
-  getFormBySlug
+  getFormBySlug,
+  promoteForm
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 
@@ -178,6 +179,23 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual(stubFormDefinition)
+    })
+
+    test('Testing POST /forms/{id}/promote route returns a new form', async () => {
+      jest.mocked(promoteForm).mockResolvedValue(true)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/promote`,
+        payload: author
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        status: 'promoted'
+      })
     })
   })
 
@@ -478,6 +496,59 @@ describe('Forms route', () => {
         message: 'An internal server error occurred'
       })
     })
+
+    test.each([
+      {
+        payload: {},
+        error: {
+          keys: ['id', 'displayName'],
+          messages: ['"id" is required.', '"displayName" is required']
+        }
+      },
+      {
+        payload: {
+          id: '',
+          displayName: ''
+        },
+        error: {
+          keys: ['id', 'displayName'],
+          messages: [
+            '"id" is not allowed to be empty.',
+            '"displayName" is not allowed to be empty'
+          ]
+        }
+      },
+      {
+        payload: {
+          id: 'x'.repeat(36),
+          displayName: authorDisplayName
+        },
+        error: {
+          keys: ['id'],
+          messages: ['"id" must be a valid GUID']
+        }
+      }
+    ])(
+      'Testing POST /forms/{id}/promote route with an invalid payload returns validation errors',
+      async ({ payload, error }) => {
+        const response = await server.inject({
+          method: 'POST',
+          url: `/forms/${id}/promote`,
+          payload
+        })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'payload'
+          }
+        })
+      }
+    )
   })
 })
 

@@ -9,12 +9,14 @@ import {
   getFormBySlug,
   createForm,
   updateDraftFormDefinition,
-  getDraftFormDefinition
+  getDraftFormDefinition,
+  promoteForm
 } from '~/src/api/forms/service.js'
 import {
+  createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  createFormSchema
+  promoteFormSchema
 } from '~/src/models/forms.js'
 
 /**
@@ -146,6 +148,35 @@ export default [
         payload: formDefinitionSchema
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/promote',
+    /**
+     * @param {RequestFormMetadataPromote} request
+     */
+    async handler(request) {
+      const { params, payload } = request
+      const { id } = params
+
+      // Promote the form to live using the author in the payload
+      const result = await promoteForm(id, payload)
+
+      if (!result) {
+        return Boom.badRequest('Form not promoted to live.')
+      }
+
+      return {
+        id,
+        status: 'promoted'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        payload: promoteFormSchema
+      }
+    }
   }
 ]
 
@@ -155,4 +186,5 @@ export default [
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
+ * @typedef {import('~/src/api/types.js').RequestFormMetadataPromote} RequestFormMetadataPromote
  */

@@ -64,6 +64,24 @@ export async function create(document) {
 }
 
 /**
+ * Update a document in the database
+ * @param {string} formId - ID of the form
+ * @param {object} patch - form metadata document
+ */
+export async function update(formId, patch) {
+  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
+    db.collection(COLLECTION_NAME)
+  )
+
+  const result = await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    { $set: patch }
+  )
+
+  return result
+}
+
+/**
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  */

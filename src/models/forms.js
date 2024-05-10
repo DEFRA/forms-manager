@@ -27,3 +27,6 @@ export const createFormSchema = Joi.object()
     author: formMetadataAuthorSchema
   })
   .required()
+
+// Promote form schema
+export const promoteFormSchema = formMetadataAuthorSchema

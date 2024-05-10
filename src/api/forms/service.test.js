@@ -9,6 +9,7 @@ import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import {
   createForm,
   getDraftFormDefinition,
+  promoteForm,
   updateDraftFormDefinition
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
@@ -28,6 +29,42 @@ jest.mock('~/src/api/forms/templates.js')
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
+describe('promoteForm', () => {
+  /** @type {string} */
+  let id
+
+  beforeEach(() => {
+    id = '661e4ca5039739ef2902b214'
+
+    const formMetadataOutput = {
+      _id: new ObjectId(id),
+      slug: 'test-form',
+      title: 'Test form',
+      organisation: 'Defra',
+      teamName: 'Defra Forms',
+      teamEmail: 'defraforms@defra.gov.uk',
+      draft: {
+        createdAt: expect.any(Date),
+        createdBy: author,
+        updatedAt: expect.any(Date),
+        updatedBy: author
+      }
+    }
+    jest.mocked(draftFormDefinition.promote).mockResolvedValue()
+    jest.mocked(formMetadata.update).mockResolvedValue({
+      acknowledged: true,
+      modifiedCount: 1,
+      matchedCount: 1,
+      upsertedCount: 0,
+      upsertedId: null
+    })
+    jest.mocked(formMetadata.get).mockResolvedValue(formMetadataOutput)
+  })
+
+  test('should promote an existing form', async () => {
+    await expect(promoteForm(id, author)).resolves.toBe(true)
+  })
+})
 
 describe('createForm', () => {
   /** @type {string} */

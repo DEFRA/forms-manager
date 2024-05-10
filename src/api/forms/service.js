@@ -1,4 +1,5 @@
 import { formDefinitionSchema } from '@defra/forms-model'
+import Boom from '@hapi/boom'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
 import {
@@ -131,6 +132,46 @@ export async function updateDraftFormDefinition(formId, formDefinition) {
   }
 
   return draftFormDefinition.create(formId, formDefinition)
+}
+
+/**
+ * Promotes a form from draft to live
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataAuthor} author - the author of the promotion
+ */
+export async function promoteForm(formId, author) {
+  // Get the form metadata from the db
+  const form = await getForm(formId)
+
+  if (!form) {
+    throw Boom.notFound(`Form with id '${formId}' not found`)
+  }
+
+  // Build the live state
+  const now = new Date()
+  const state = {
+    updatedAt: now,
+    updatedBy: author
+  }
+
+  // Set the "created" state if this is the
+  // first time the form has been made live
+  if (!form.live) {
+    Object.assign(state, {
+      createdAt: now,
+      createdBy: author
+    })
+  }
+
+  // Copy the draft form definition
+  await draftFormDefinition.promote(formId)
+
+  // Patch the form with the live state
+  const patch = { live: state }
+  const result = await formMetadata.update(formId, patch)
+
+  // Return true if updated record count is 1
+  return result.modifiedCount === 1
 }
 
 /**
