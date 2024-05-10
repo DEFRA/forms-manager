@@ -37,6 +37,13 @@ describe('Forms route', () => {
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
   const now = new Date()
+  const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+  const authorDisplayName = 'Enrique Chase'
+
+  /**
+   * @satisfies {FormMetadataAuthor}
+   */
+  const author = { id: authorId, displayName: authorDisplayName }
 
   /**
    * @satisfies {FormMetadataInput}
@@ -60,7 +67,9 @@ describe('Forms route', () => {
     teamEmail: 'defraforms@defra.gov.uk',
     draft: {
       createdAt: now,
-      updatedAt: now
+      createdBy: author,
+      updatedAt: now,
+      updatedBy: author
     }
   }
 
@@ -121,7 +130,7 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'POST',
         url: '/forms',
-        payload: stubFormMetadataInput
+        payload: { metadata: stubFormMetadataInput, author }
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -195,12 +204,17 @@ describe('Forms route', () => {
       {
         payload: {},
         error: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
+          keys: [
+            'metadata.title',
+            'metadata.organisation',
+            'metadata.teamName',
+            'metadata.teamEmail'
+          ],
           messages: [
-            '"title" is required.',
-            '"organisation" is required.',
-            '"teamName" is required.',
-            '"teamEmail" is required'
+            '"metadata.title" is required.',
+            '"metadata.organisation" is required.',
+            '"metadata.teamName" is required.',
+            '"metadata.teamEmail" is required'
           ]
         }
       },
@@ -213,18 +227,18 @@ describe('Forms route', () => {
         },
         error: {
           keys: [
-            'title',
-            'organisation',
-            'organisation',
-            'teamName',
-            'teamEmail'
+            'metadata.title',
+            'metadata.organisation',
+            'metadata.organisation',
+            'metadata.teamName',
+            'metadata.teamEmail'
           ],
           messages: [
-            '"title" is not allowed to be empty.',
-            `"organisation" must be one of [${organisations.join(', ')}].`,
-            '"organisation" is not allowed to be empty.',
-            '"teamName" is not allowed to be empty.',
-            '"teamEmail" is not allowed to be empty'
+            '"metadata.title" is not allowed to be empty.',
+            `"metadata.organisation" must be one of [${organisations.join(', ')}].`,
+            '"metadata.organisation" is not allowed to be empty.',
+            '"metadata.teamName" is not allowed to be empty.',
+            '"metadata.teamEmail" is not allowed to be empty'
           ]
         }
       },
@@ -236,9 +250,9 @@ describe('Forms route', () => {
           teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
-          keys: ['title'],
+          keys: ['metadata.title'],
           messages: [
-            '"title" length must be less than or equal to 250 characters long'
+            '"metadata.title" length must be less than or equal to 250 characters long'
           ]
         }
       },
@@ -250,9 +264,9 @@ describe('Forms route', () => {
           teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
-          keys: ['organisation'],
+          keys: ['metadata.organisation'],
           messages: [
-            `"organisation" must be one of [${organisations.join(', ')}]`
+            `"metadata.organisation" must be one of [${organisations.join(', ')}]`
           ]
         }
       },
@@ -264,9 +278,9 @@ describe('Forms route', () => {
           teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
-          keys: ['teamName'],
+          keys: ['metadata.teamName'],
           messages: [
-            '"teamName" length must be less than or equal to 100 characters long'
+            '"metadata.teamName" length must be less than or equal to 100 characters long'
           ]
         }
       },
@@ -278,17 +292,17 @@ describe('Forms route', () => {
           teamEmail: `x`
         },
         error: {
-          keys: ['teamEmail'],
-          messages: ['"teamEmail" must be a valid email']
+          keys: ['metadata.teamEmail'],
+          messages: ['"metadata.teamEmail" must be a valid email']
         }
       }
     ])(
       'Testing POST /forms route with an invalid payload returns validation errors',
-      async ({ payload, error }) => {
+      async ({ payload: metadata, error }) => {
         const response = await server.inject({
           method: 'POST',
           url: '/forms',
-          payload
+          payload: { metadata, author }
         })
 
         expect(response.statusCode).toEqual(badRequestStatusCode)
@@ -313,10 +327,13 @@ describe('Forms route', () => {
         method: 'POST',
         url: '/forms',
         payload: {
-          title: 'My Title',
-          organisation: 'Defra',
-          teamName: 'teamname',
-          teamEmail: 'defraforms@defra.gov.uk'
+          metadata: {
+            title: 'My Title',
+            organisation: 'Defra',
+            teamName: 'teamname',
+            teamEmail: 'defraforms@defra.gov.uk'
+          },
+          author
         }
       })
 
@@ -469,4 +486,5 @@ describe('Forms route', () => {
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  */
