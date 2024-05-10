@@ -125,7 +125,7 @@ describe('Forms route', () => {
       expect(response.result).toEqual([stubFormMetadataOutput])
     })
 
-    test('Testing POST /forms route returns a new form', async () => {
+    test('Testing POST /forms route returns a "created" status', async () => {
       jest.mocked(createForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
@@ -181,7 +181,7 @@ describe('Forms route', () => {
       expect(response.result).toEqual(stubFormDefinition)
     })
 
-    test('Testing POST /forms/{id}/promote route returns a new form', async () => {
+    test('Testing POST /forms/{id}/promote route returns a "promoted" status', async () => {
       jest.mocked(promoteForm).mockResolvedValue(true)
 
       const response = await server.inject({
