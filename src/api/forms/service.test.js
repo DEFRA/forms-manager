@@ -17,7 +17,7 @@ const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
 const authorDisplayName = 'Enrique Chase'
 
 /**
- * @satisfies {FormMetadataStateAuthor}
+ * @satisfies {FormMetadataAuthor}
  */
 const author = { id: authorId, displayName: authorDisplayName }
 
@@ -67,9 +67,9 @@ describe('createForm', () => {
       }
     }
 
-    await expect(
-      createForm({ metadata: formMetadataInput, author })
-    ).resolves.toEqual(formMetadataOutput)
+    await expect(createForm(formMetadataInput, author)).resolves.toEqual(
+      formMetadataOutput
+    )
   })
 
   test('should create a new form without special characters in the name', async () => {
@@ -95,9 +95,9 @@ describe('createForm', () => {
       }
     }
 
-    await expect(
-      createForm({ metadata: formMetadataInput, author })
-    ).resolves.toEqual(formMetadataOutput)
+    await expect(createForm(formMetadataInput, author)).resolves.toEqual(
+      formMetadataOutput
+    )
   })
 
   it('should throw an error when schema validation fails', async () => {
@@ -111,9 +111,9 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(
-      createForm({ metadata: formMetadataInput, author })
-    ).rejects.toThrow(InvalidFormDefinitionError)
+    await expect(createForm(formMetadataInput, author)).rejects.toThrow(
+      InvalidFormDefinitionError
+    )
   })
 
   it('should throw an error when writing for metadata fails', async () => {
@@ -126,9 +126,7 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(
-      createForm({ metadata: formMetadataInput, author })
-    ).rejects.toThrow(Error)
+    await expect(createForm(formMetadataInput, author)).rejects.toThrow(Error)
   })
 
   it('should throw an error when writing form def fails', async () => {
@@ -141,9 +139,7 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(
-      createForm({ metadata: formMetadataInput, author })
-    ).rejects.toThrow(Error)
+    await expect(createForm(formMetadataInput, author)).rejects.toThrow(Error)
   })
 
   it('should return the form definition', async () => {
@@ -166,5 +162,5 @@ describe('createForm', () => {
 })
 
 /**
- * @typedef {import('@defra/forms-model').FormMetadataStateAuthor} FormMetadataStateAuthor
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  */

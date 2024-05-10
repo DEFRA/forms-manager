@@ -3,7 +3,7 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput }>} RequestFormById
  * @typedef {Request<{ Server: { db: Db }, Params: FormBySlugInput }>} RequestFormBySlug
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormDefinition }>} RequestFormDefinition
- * @typedef {Request<{ Server: { db: Db }, Payload: FormMetadataAuthorInput }>} RequestFormMetadata
+ * @typedef {Request<{ Server: { db: Db }, Payload: { metadata: FormMetadataInput, author: FormMetadataAuthor } }>} RequestFormMetadataCreate
  */
 
 /**
@@ -15,6 +15,7 @@
  * @typedef {import('@defra/forms-model').FormByIdInput} FormByIdInput
  * @typedef {import('@defra/forms-model').FormBySlugInput} FormBySlugInput
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- * @typedef {import('@defra/forms-model').FormMetadataAuthorInput} FormMetadataAuthorInput
+ * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('mongodb').Db} Db
  */

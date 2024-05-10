@@ -1,7 +1,4 @@
-import {
-  formDefinitionSchema,
-  formMetadataAuthorInputSchema
-} from '@defra/forms-model'
+import { formDefinitionSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { FailedToReadFormError } from '../api/forms/errors.js'
@@ -14,7 +11,11 @@ import {
   updateDraftFormDefinition,
   getDraftFormDefinition
 } from '~/src/api/forms/service.js'
-import { formByIdSchema, formBySlugSchema } from '~/src/models/forms.js'
+import {
+  formByIdSchema,
+  formBySlugSchema,
+  createFormSchema
+} from '~/src/models/forms.js'
 
 /**
  * @type {ServerRoute[]}
@@ -31,12 +32,13 @@ export default [
     method: 'POST',
     path: '/forms',
     /**
-     * @param {RequestFormMetadata} request
+     * @param {RequestFormMetadataCreate} request
      */
     async handler(request) {
       const { payload } = request
+      const { metadata, author } = payload
 
-      const formMetadata = await createForm(payload)
+      const formMetadata = await createForm(metadata, author)
 
       return {
         id: formMetadata.id,
@@ -45,7 +47,7 @@ export default [
     },
     options: {
       validate: {
-        payload: formMetadataAuthorInputSchema
+        payload: createFormSchema
       }
     }
   },
@@ -152,5 +154,5 @@ export default [
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
- * @typedef {import('~/src/api/types.js').RequestFormMetadata} RequestFormMetadata
+ * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
  */

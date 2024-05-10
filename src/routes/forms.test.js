@@ -41,7 +41,7 @@ describe('Forms route', () => {
   const authorDisplayName = 'Enrique Chase'
 
   /**
-   * @satisfies {FormMetadataStateAuthor}
+   * @satisfies {FormMetadataAuthor}
    */
   const author = { id: authorId, displayName: authorDisplayName }
 
@@ -486,5 +486,5 @@ describe('Forms route', () => {
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- * @typedef {import('@defra/forms-model').FormMetadataStateAuthor} FormMetadataStateAuthor
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  */
