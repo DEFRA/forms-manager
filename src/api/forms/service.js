@@ -149,26 +149,30 @@ export async function promoteForm(formId, author) {
 
   // Build the live state
   const now = new Date()
-  const state = {
-    updatedAt: now,
-    updatedBy: author
-  }
-
-  // Set the "created" state if this is the
-  // first time the form has been made live
-  if (!form.live) {
-    Object.assign(state, {
-      createdAt: now,
-      createdBy: author
-    })
-  }
+  const set = !form.live
+    ? {
+        // Initialise the live state
+        live: {
+          updatedAt: now,
+          updatedBy: author,
+          createdAt: now,
+          createdBy: author
+        }
+      }
+    : {
+        // Partially update the live state
+        'live.updatedAt': now,
+        'live.updatedBy': author
+      }
 
   // Copy the draft form definition
   await draftFormDefinition.promote(formId)
 
-  // Patch the form with the live state
-  const patch = { live: state }
-  const result = await formMetadata.update(formId, patch)
+  // Update the form with the live state and clear the draft
+  const result = await formMetadata.update(formId, {
+    $set: set,
+    $unset: { draft: '' }
+  })
 
   // Return true if updated record count is 1
   return result.modifiedCount === 1

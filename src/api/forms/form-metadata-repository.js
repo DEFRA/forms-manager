@@ -66,17 +66,14 @@ export async function create(document) {
 /**
  * Update a document in the database
  * @param {string} formId - ID of the form
- * @param {object} patch - form metadata document
+ * @param {import('mongodb').UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
  */
-export async function update(formId, patch) {
+export async function update(formId, update) {
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
-  const result = await coll.updateOne(
-    { _id: new ObjectId(formId) },
-    { $set: patch }
-  )
+  const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
 
   return result
 }
