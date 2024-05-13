@@ -187,6 +187,44 @@ export async function createLiveFromDraft(formId, author) {
 }
 
 /**
+ * Recreates the draft form from the current live state
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataAuthor} author - the author of the new draft
+ */
+export async function createDraftFromLive(formId, author) {
+  // Get the form metadata from the db
+  const form = await getForm(formId)
+
+  if (!form) {
+    throw Boom.notFound(`Form with id '${formId}' not found`)
+  }
+
+  if (!form.live) {
+    throw Boom.badRequest(`Form with id '${formId}' not in a live state`)
+  }
+
+  // Build the draft state
+  const now = new Date()
+  const set = {
+    draft: {
+      updatedAt: now,
+      updatedBy: author,
+      createdAt: now,
+      createdBy: author
+    }
+  }
+
+  // Copy the draft form definition
+  await draftFormDefinition.createDraftFromLive(formId)
+
+  // Update the form with the new draft state
+  const result = await formMetadata.update(formId, { $set: set })
+
+  // Return true if updated record count is 1
+  return result.modifiedCount === 1
+}
+
+/**
  * @typedef {import('~/src/api/forms/errors.js').FormAlreadyExistsError} FormAlreadyExistsError
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata

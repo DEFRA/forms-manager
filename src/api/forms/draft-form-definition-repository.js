@@ -53,6 +53,18 @@ export async function createLiveFromDraft(id) {
 }
 
 /**
+ * Copy the live form to draft in the Form Store
+ * @param {string} id - id
+ */
+export async function createDraftFromLive(id) {
+  const draftDefinitionFilename = getFormDefinitionFilename(id)
+  const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
+
+  // Copy live definition to draft
+  await copyObject(liveDefinitionFilename, draftDefinitionFilename)
+}
+
+/**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
  */

@@ -5,6 +5,7 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormDefinition }>} RequestFormDefinition
  * @typedef {Request<{ Server: { db: Db }, Payload: { metadata: FormMetadataInput, author: FormMetadataAuthor } }>} RequestFormMetadataCreate
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormMetadataAuthor }>} RequestFormMetadataCreateLive
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormMetadataAuthor }>} RequestFormMetadataCreateDraft
  */
 
 /**
