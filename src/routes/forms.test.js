@@ -11,7 +11,7 @@ import {
   getForm,
   getDraftFormDefinition,
   getFormBySlug,
-  promoteForm
+  createLiveFromDraft
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 
@@ -181,12 +181,12 @@ describe('Forms route', () => {
       expect(response.result).toEqual(stubFormDefinition)
     })
 
-    test('Testing POST /forms/{id}/promote route returns a "promoted" status', async () => {
-      jest.mocked(promoteForm).mockResolvedValue(true)
+    test('Testing POST /forms/{id}/create-live route returns a "created-live" status', async () => {
+      jest.mocked(createLiveFromDraft).mockResolvedValue(true)
 
       const response = await server.inject({
         method: 'POST',
-        url: `/forms/${id}/promote`,
+        url: `/forms/${id}/create-live`,
         payload: author
       })
 
@@ -194,7 +194,7 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         id: stubFormMetadataOutput.id,
-        status: 'promoted'
+        status: 'created-live'
       })
     })
   })
@@ -529,11 +529,11 @@ describe('Forms route', () => {
         }
       }
     ])(
-      'Testing POST /forms/{id}/promote route with an invalid payload returns validation errors',
+      'Testing POST /forms/{id}/create-live route with an invalid payload returns validation errors',
       async ({ payload, error }) => {
         const response = await server.inject({
           method: 'POST',
-          url: `/forms/${id}/promote`,
+          url: `/forms/${id}/create-live`,
           payload
         })
 

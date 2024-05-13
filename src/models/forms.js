@@ -28,5 +28,5 @@ export const createFormSchema = Joi.object()
   })
   .required()
 
-// Promote form schema
-export const promoteFormSchema = formMetadataAuthorSchema
+// Create live state from draft form schema
+export const createLiveSchema = formMetadataAuthorSchema

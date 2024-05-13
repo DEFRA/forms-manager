@@ -41,10 +41,10 @@ export async function create(id, formDefinition) {
 }
 
 /**
- * Promote a draft form to live in the Form Store
+ * Copy the draft form to live in the Form Store
  * @param {string} id - id
  */
-export async function promote(id) {
+export async function createLiveFromDraft(id) {
   const draftDefinitionFilename = getFormDefinitionFilename(id)
   const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
 

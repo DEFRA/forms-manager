@@ -76,7 +76,7 @@ describe('Copy forms in S3', () => {
   })
 
   test('copy object in s3 works', async () => {
-    await draftFormDefinition.promote(id)
+    await draftFormDefinition.createLiveFromDraft(id)
 
     expect(s3Mock.commandCalls(CopyObjectCommand)).toHaveLength(1)
   })

@@ -135,16 +135,20 @@ export async function updateDraftFormDefinition(formId, formDefinition) {
 }
 
 /**
- * Promotes a form from draft to live
+ * Creates the live form from the current draft state
  * @param {string} formId - ID of the form
- * @param {FormMetadataAuthor} author - the author of the promotion
+ * @param {FormMetadataAuthor} author - the author of the new live state
  */
-export async function promoteForm(formId, author) {
+export async function createLiveFromDraft(formId, author) {
   // Get the form metadata from the db
   const form = await getForm(formId)
 
   if (!form) {
     throw Boom.notFound(`Form with id '${formId}' not found`)
+  }
+
+  if (!form.draft) {
+    throw Boom.notFound(`Form with id '${formId}' has no draft state`)
   }
 
   // Build the live state
@@ -166,7 +170,7 @@ export async function promoteForm(formId, author) {
       }
 
   // Copy the draft form definition
-  await draftFormDefinition.promote(formId)
+  await draftFormDefinition.createLiveFromDraft(formId)
 
   // Update the form with the live state and clear the draft
   const result = await formMetadata.update(formId, {

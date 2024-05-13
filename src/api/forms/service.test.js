@@ -9,7 +9,7 @@ import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import {
   createForm,
   getDraftFormDefinition,
-  promoteForm,
+  createLiveFromDraft,
   updateDraftFormDefinition
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
@@ -29,7 +29,7 @@ jest.mock('~/src/api/forms/templates.js')
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
-describe('promoteForm', () => {
+describe('createLiveFromDraft', () => {
   /** @type {string} */
   let id
 
@@ -50,7 +50,7 @@ describe('promoteForm', () => {
         updatedBy: author
       }
     }
-    jest.mocked(draftFormDefinition.promote).mockResolvedValue()
+    jest.mocked(draftFormDefinition.createLiveFromDraft).mockResolvedValue()
     jest.mocked(formMetadata.update).mockResolvedValue({
       acknowledged: true,
       modifiedCount: 1,
@@ -61,8 +61,8 @@ describe('promoteForm', () => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataOutput)
   })
 
-  test('should promote an existing form', async () => {
-    await expect(promoteForm(id, author)).resolves.toBe(true)
+  test('should create a live from from draft existing form', async () => {
+    await expect(createLiveFromDraft(id, author)).resolves.toBe(true)
   })
 })
 
