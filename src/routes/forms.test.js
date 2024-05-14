@@ -10,7 +10,8 @@ import {
   createForm,
   getForm,
   getDraftFormDefinition,
-  getFormBySlug
+  getFormBySlug,
+  createLiveFromDraft
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 
@@ -124,7 +125,7 @@ describe('Forms route', () => {
       expect(response.result).toEqual([stubFormMetadataOutput])
     })
 
-    test('Testing POST /forms route returns a new form', async () => {
+    test('Testing POST /forms route returns a "created" status', async () => {
       jest.mocked(createForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
@@ -178,6 +179,23 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual(stubFormDefinition)
+    })
+
+    test('Testing POST /forms/{id}/create-live route returns a "created-live" status', async () => {
+      jest.mocked(createLiveFromDraft).mockResolvedValue(true)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/create-live`,
+        payload: author
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        status: 'created-live'
+      })
     })
   })
 
@@ -478,6 +496,59 @@ describe('Forms route', () => {
         message: 'An internal server error occurred'
       })
     })
+
+    test.each([
+      {
+        payload: {},
+        error: {
+          keys: ['id', 'displayName'],
+          messages: ['"id" is required.', '"displayName" is required']
+        }
+      },
+      {
+        payload: {
+          id: '',
+          displayName: ''
+        },
+        error: {
+          keys: ['id', 'displayName'],
+          messages: [
+            '"id" is not allowed to be empty.',
+            '"displayName" is not allowed to be empty'
+          ]
+        }
+      },
+      {
+        payload: {
+          id: 'x'.repeat(36),
+          displayName: authorDisplayName
+        },
+        error: {
+          keys: ['id'],
+          messages: ['"id" must be a valid GUID']
+        }
+      }
+    ])(
+      'Testing POST /forms/{id}/create-live route with an invalid payload returns validation errors',
+      async ({ payload, error }) => {
+        const response = await server.inject({
+          method: 'POST',
+          url: `/forms/${id}/create-live`,
+          payload
+        })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'payload'
+          }
+        })
+      }
+    )
   })
 })
 

@@ -64,6 +64,21 @@ export async function create(document) {
 }
 
 /**
+ * Update a document in the database
+ * @param {string} formId - ID of the form
+ * @param {UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
+ */
+export async function update(formId, update) {
+  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
+    db.collection(COLLECTION_NAME)
+  )
+
+  const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
+
+  return result
+}
+
+/**
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  */
@@ -71,4 +86,9 @@ export async function create(document) {
 /**
  * @template {object} Schema
  * @typedef {import('mongodb').Collection<Schema>} Collection
+ */
+
+/**
+ * @template {object} Schema
+ * @typedef {import('mongodb').UpdateFilter<Schema>} UpdateFilter
  */

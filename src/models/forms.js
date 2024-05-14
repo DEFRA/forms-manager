@@ -27,3 +27,6 @@ export const createFormSchema = Joi.object()
     author: formMetadataAuthorSchema
   })
   .required()
+
+// Create live state from draft form schema
+export const createLiveSchema = formMetadataAuthorSchema

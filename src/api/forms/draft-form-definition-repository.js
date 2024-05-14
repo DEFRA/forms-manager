@@ -4,7 +4,8 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
-  NoSuchKey
+  NoSuchKey,
+  CopyObjectCommand
 } from '@aws-sdk/client-s3'
 
 import { FailedToReadFormError } from '~/src/api/forms/errors.js'
@@ -16,11 +17,12 @@ const formBucketName = config.get('formDefinitionBucketName')
 /**
  * Gets the path to a form definition file for a given form ID
  * @param {string} formId - the form ID
+ * @param {'draft' | 'live'} state - the form state
  */
-function getFormDefinitionFilename(formId) {
+function getFormDefinitionFilename(formId, state = 'draft') {
   const formDirectory = config.get('formDirectory')
 
-  return join(formDirectory, 'draft', `${formId}.json`)
+  return join(formDirectory, state, `${formId}.json`)
 }
 
 /**
@@ -36,6 +38,18 @@ export async function create(id, formDefinition) {
 
   // Write formDefinition to file
   await uploadToS3(formDefinitionFilename, formDefinitionString)
+}
+
+/**
+ * Copy the draft form to live in the Form Store
+ * @param {string} id - id
+ */
+export async function createLiveFromDraft(id) {
+  const draftDefinitionFilename = getFormDefinitionFilename(id)
+  const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
+
+  // Copy draft definition to live
+  await copyObject(draftDefinitionFilename, liveDefinitionFilename)
 }
 
 /**
@@ -60,6 +74,21 @@ function uploadToS3(filename, fileContent) {
     Bucket: formBucketName,
     Key: filename,
     Body: fileContent
+  })
+
+  return getS3Client().send(command)
+}
+
+/**
+ * Copy an S3 object
+ * @param {string} source - the source file key
+ * @param {string} destination - the destination file key
+ */
+function copyObject(source, destination) {
+  const command = new CopyObjectCommand({
+    Bucket: formBucketName,
+    Key: destination,
+    CopySource: `${formBucketName}/${source}`
   })
 
   return getS3Client().send(command)

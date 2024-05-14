@@ -1,4 +1,5 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
+import Boom from '@hapi/boom'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
 import {
@@ -131,6 +132,58 @@ export async function updateDraftFormDefinition(formId, formDefinition) {
   }
 
   return draftFormDefinition.create(formId, formDefinition)
+}
+
+/**
+ * Creates the live form from the current draft state
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataAuthor} author - the author of the new live state
+ */
+export async function createLiveFromDraft(formId, author) {
+  // Get the form metadata from the db
+  const form = await getForm(formId)
+
+  if (!form) {
+    throw Boom.notFound(`Form with id '${formId}' not found`)
+  }
+
+  if (!form.draft) {
+    throw Boom.notFound(`Form with id '${formId}' has no draft state`)
+  }
+
+  // Build the live state
+  const now = new Date()
+  const set = !form.live
+    ? {
+        // Initialise the live state
+        live: {
+          updatedAt: now,
+          updatedBy: author,
+          createdAt: now,
+          createdBy: author
+        }
+      }
+    : {
+        // Partially update the live state
+        'live.updatedAt': now,
+        'live.updatedBy': author
+      }
+
+  // Copy the draft form definition
+  await draftFormDefinition.createLiveFromDraft(formId)
+
+  // Update the form with the live state and clear the draft
+  const result = await formMetadata.update(formId, {
+    $set: set,
+    $unset: { draft: '' }
+  })
+
+  // Throw if updated record count is not 1
+  if (result.modifiedCount !== 1) {
+    throw Boom.badRequest(
+      `Live form not created from draft. Modified count ${result.modifiedCount}`
+    )
+  }
 }
 
 /**
