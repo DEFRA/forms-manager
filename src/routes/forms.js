@@ -160,11 +160,7 @@ export default [
       const { id } = params
 
       // Create the live form from draft using the author in the payload
-      const result = await createLiveFromDraft(id, payload)
-
-      if (!result) {
-        return Boom.badRequest('Live form not created from draft.')
-      }
+      await createLiveFromDraft(id, payload)
 
       return {
         id,

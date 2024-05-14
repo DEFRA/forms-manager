@@ -178,8 +178,12 @@ export async function createLiveFromDraft(formId, author) {
     $unset: { draft: '' }
   })
 
-  // Return true if updated record count is 1
-  return result.modifiedCount === 1
+  // Throw if updated record count is not 1
+  if (result.modifiedCount !== 1) {
+    throw Boom.badRequest(
+      `Live form not created from draft. result. Modified count ${result.modifiedCount}`
+    )
+  }
 }
 
 /**

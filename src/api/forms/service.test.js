@@ -61,8 +61,8 @@ describe('createLiveFromDraft', () => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataOutput)
   })
 
-  test('should create a live from from draft existing form', async () => {
-    await expect(createLiveFromDraft(id, author)).resolves.toBe(true)
+  test('should create a live state from existing draft form', async () => {
+    await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
   })
 })
 
