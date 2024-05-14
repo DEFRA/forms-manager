@@ -1,4 +1,4 @@
-import { formDefinitionSchema } from '@defra/forms-model'
+import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
@@ -49,7 +49,7 @@ export async function createForm(metadata, author) {
   }
 
   // Create the slug
-  const slug = formTitleToSlug(title)
+  const slug = slugify(title)
   const now = new Date()
 
   /**
@@ -184,19 +184,6 @@ export async function createLiveFromDraft(formId, author) {
       `Live form not created from draft. Modified count ${result.modifiedCount}`
     )
   }
-}
-
-/**
- * Given a form title, returns the slug of the form.
- * E.g. "Hello - world" -> "hello-world".
- * @param {string} title - title of the form
- */
-function formTitleToSlug(title) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, '') // remove any non-alphanumeric characters
-    .replace(/\s+/g, ' ') // replace any whitespaces with a single space
-    .replace(/ /g, '-') // replace any spaces with a hyphen
 }
 
 /**
