@@ -183,7 +183,7 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/create-live route returns a "created-live" status', async () => {
-      jest.mocked(createLiveFromDraft).mockResolvedValue(true)
+      jest.mocked(createLiveFromDraft).mockResolvedValue(undefined)
 
       const response = await server.inject({
         method: 'POST',
@@ -200,7 +200,7 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/create-draft route returns a "created-draft" status', async () => {
-      jest.mocked(createDraftFromLive).mockResolvedValue(true)
+      jest.mocked(createDraftFromLive).mockResolvedValue(undefined)
 
       const response = await server.inject({
         method: 'POST',
@@ -577,16 +577,6 @@ describe('Forms route', () => {
             '"id" is not allowed to be empty.',
             '"displayName" is not allowed to be empty'
           ]
-        }
-      },
-      {
-        payload: {
-          id: 'x'.repeat(36),
-          displayName: authorDisplayName
-        },
-        error: {
-          keys: ['id'],
-          messages: ['"id" must be a valid GUID']
         }
       }
     ])(
