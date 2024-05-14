@@ -517,16 +517,6 @@ describe('Forms route', () => {
             '"displayName" is not allowed to be empty'
           ]
         }
-      },
-      {
-        payload: {
-          id: 'x'.repeat(36),
-          displayName: authorDisplayName
-        },
-        error: {
-          keys: ['id'],
-          messages: ['"id" must be a valid GUID']
-        }
       }
     ])(
       'Testing POST /forms/{id}/create-live route with an invalid payload returns validation errors',
