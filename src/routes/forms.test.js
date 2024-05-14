@@ -183,7 +183,7 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/create-live route returns a "created-live" status', async () => {
-      jest.mocked(createLiveFromDraft).mockResolvedValue(true)
+      jest.mocked(createLiveFromDraft).mockResolvedValue(undefined)
 
       const response = await server.inject({
         method: 'POST',
@@ -200,7 +200,7 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/create-draft route returns a "created-draft" status', async () => {
-      jest.mocked(createDraftFromLive).mockResolvedValue(true)
+      jest.mocked(createDraftFromLive).mockResolvedValue(undefined)
 
       const response = await server.inject({
         method: 'POST',
