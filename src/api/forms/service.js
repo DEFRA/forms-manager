@@ -131,7 +131,26 @@ export async function updateDraftFormDefinition(formId, formDefinition) {
     )
   }
 
-  return draftFormDefinition.create(formId, formDefinition)
+  // Throw if there's no current draft state
+  if (!existingForm.draft) {
+    throw Boom.badRequest(`No 'draft' state found for form metadata ${formId}`)
+  }
+
+  // Update the form definition
+  await draftFormDefinition.create(formId, formDefinition)
+
+  // Update the `updatedAt` field of the draft state
+  const now = new Date()
+  const result = await formMetadata.update(formId, {
+    $set: { 'draft.updatedAt': now }
+  })
+
+  // Throw if updated record count is not 1
+  if (result.modifiedCount !== 1) {
+    throw Boom.badRequest(
+      `Draft state not updated. Modified count ${result.modifiedCount}`
+    )
+  }
 }
 
 /**
