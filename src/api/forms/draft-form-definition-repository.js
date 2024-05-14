@@ -17,7 +17,7 @@ const formBucketName = config.get('formDefinitionBucketName')
 /**
  * Gets the path to a form definition file for a given form ID
  * @param {string} formId - the form ID
- * @param {'draft'|'live'} state - the form state
+ * @param {'draft' | 'live'} state - the form state
  */
 function getFormDefinitionFilename(formId, state = 'draft') {
   const formDirectory = config.get('formDirectory')

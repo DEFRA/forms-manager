@@ -66,7 +66,7 @@ export async function create(document) {
 /**
  * Update a document in the database
  * @param {string} formId - ID of the form
- * @param {import('mongodb').UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
+ * @param {UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
  */
 export async function update(formId, update) {
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
@@ -86,4 +86,9 @@ export async function update(formId, update) {
 /**
  * @template {object} Schema
  * @typedef {import('mongodb').Collection<Schema>} Collection
+ */
+
+/**
+ * @template {object} Schema
+ * @typedef {import('mongodb').UpdateFilter<Schema>} UpdateFilter
  */
