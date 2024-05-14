@@ -10,7 +10,8 @@ import {
   createForm,
   updateDraftFormDefinition,
   getDraftFormDefinition,
-  createLiveFromDraft
+  createLiveFromDraft,
+  createDraftFromLive
 } from '~/src/api/forms/service.js'
 import {
   createFormSchema,
@@ -159,12 +160,37 @@ export default [
       const { params, payload } = request
       const { id } = params
 
-      // Create the live form from draft using the author in the payload
+      // Create the live state from draft using the author in the payload
       await createLiveFromDraft(id, payload)
 
       return {
         id,
         status: 'created-live'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        payload: createLiveSchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/create-draft',
+    /**
+     * @param {RequestFormMetadataCreateDraft} request
+     */
+    async handler(request) {
+      const { params, payload } = request
+      const { id } = params
+
+      // Recreate the draft state from live using the author in the payload
+      await createDraftFromLive(id, payload)
+
+      return {
+        id,
+        status: 'created-draft'
       }
     },
     options: {
@@ -183,4 +209,5 @@ export default [
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreateLive} RequestFormMetadataCreateLive
+ * @typedef {import('~/src/api/types.js').RequestFormMetadataCreateDraft} RequestFormMetadataCreateDraft
  */
