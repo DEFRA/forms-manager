@@ -9,7 +9,7 @@ import {
   listForms,
   createForm,
   getForm,
-  getDraftFormDefinition,
+  getFormDefinition,
   getFormBySlug,
   createLiveFromDraft,
   createDraftFromLive
@@ -169,8 +169,21 @@ describe('Forms route', () => {
       expect(response.result).toEqual(stubFormMetadataOutput)
     })
 
+    test('Testing GET /forms/{id}/definition route returns a form definition', async () => {
+      jest.mocked(getFormDefinition).mockResolvedValue(stubFormDefinition)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/definition`
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
+    })
+
     test('Testing GET /forms/{id}/definition/draft route returns a form definition', async () => {
-      jest.mocked(getDraftFormDefinition).mockResolvedValue(stubFormDefinition)
+      jest.mocked(getFormDefinition).mockResolvedValue(stubFormDefinition)
 
       const response = await server.inject({
         method: 'GET',
@@ -481,7 +494,7 @@ describe('Forms route', () => {
 
     test('Testing GET /forms/{id}/definition/draft route with an id that is not found returns 404 Not found', async () => {
       jest
-        .mocked(getDraftFormDefinition)
+        .mocked(getFormDefinition)
         .mockRejectedValue(new FailedToReadFormError('Failed'))
 
       const response = await server.inject({
@@ -499,7 +512,7 @@ describe('Forms route', () => {
 
     test('Testing GET /forms/{id}/definition/draft route throws unknown error', async () => {
       jest
-        .mocked(getDraftFormDefinition)
+        .mocked(getFormDefinition)
         .mockRejectedValue(new Error('Unknown error'))
 
       const response = await server.inject({

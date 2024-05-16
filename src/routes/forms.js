@@ -9,7 +9,7 @@ import {
   getFormBySlug,
   createForm,
   updateDraftFormDefinition,
-  getDraftFormDefinition,
+  getFormDefinition,
   createLiveFromDraft,
   createDraftFromLive
 } from '~/src/api/forms/service.js'
@@ -111,7 +111,7 @@ export default [
       const { id } = params
 
       try {
-        const definition = await getDraftFormDefinition(id)
+        const definition = await getFormDefinition(id)
 
         return definition
       } catch (err) {
@@ -147,6 +147,34 @@ export default [
     options: {
       validate: {
         payload: formDefinitionSchema
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/forms/{id}/definition',
+    /**
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { params } = request
+      const { id } = params
+
+      try {
+        const definition = await getFormDefinition(id, 'live')
+
+        return definition
+      } catch (err) {
+        if (err instanceof FailedToReadFormError) {
+          return Boom.notFound(err.message, err)
+        }
+
+        throw err
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema
       }
     }
   },

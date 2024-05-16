@@ -112,10 +112,11 @@ export async function getFormBySlug(slug) {
 /**
  * Retrieves the form definition JSON content for a given form ID
  * @param {string} formId - the ID of the form
+ * @param {'draft' | 'live'} state - the form state
  * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
-export function getDraftFormDefinition(formId) {
-  return draftFormDefinition.get(formId)
+export function getFormDefinition(formId, state = 'draft') {
+  return draftFormDefinition.get(formId, state)
 }
 
 /**
