@@ -141,7 +141,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
   // Update the form definition
   await draftFormDefinition.create(formId, definition)
 
-  // Update the `updatedAt` field of the draft state
+  // Update the `updatedAt/By` fields of the draft state
   const now = new Date()
   const result = await formMetadata.update(formId, {
     $set: {
