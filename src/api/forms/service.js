@@ -30,7 +30,7 @@ function mapForm(document) {
 /**
  * Creates a new empty form
  * @param {FormMetadataInput} metadata - the form metadata to save
- * @param {FormMetadataAuthor} author - the the author details
+ * @param {FormMetadataAuthor} author - the author details
  * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
@@ -121,9 +121,10 @@ export function getFormDefinition(formId, state = 'draft') {
 
 /**
  * @param {string} formId - ID of the form
- * @param {FormDefinition} formDefinition - full JSON form definition
+ * @param {FormDefinition} definition - full JSON form definition
+ * @param {FormMetadataAuthor} author - the author details
  */
-export async function updateDraftFormDefinition(formId, formDefinition) {
+export async function updateDraftFormDefinition(formId, definition, author) {
   const existingForm = await getForm(formId)
 
   if (!existingForm) {
@@ -138,12 +139,15 @@ export async function updateDraftFormDefinition(formId, formDefinition) {
   }
 
   // Update the form definition
-  await draftFormDefinition.create(formId, formDefinition)
+  await draftFormDefinition.create(formId, definition)
 
   // Update the `updatedAt` field of the draft state
   const now = new Date()
   const result = await formMetadata.update(formId, {
-    $set: { 'draft.updatedAt': now }
+    $set: {
+      'draft.updatedAt': now,
+      'draft.updatedBy': author
+    }
   })
 
   // Throw if updated record count is not 1
