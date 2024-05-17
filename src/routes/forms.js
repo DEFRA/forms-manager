@@ -1,4 +1,3 @@
-import { formDefinitionSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { FailedToReadFormError } from '../api/forms/errors.js'
@@ -17,7 +16,8 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  createLiveSchema
+  createStateSchema,
+  updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
 /**
@@ -136,8 +136,9 @@ export default [
      */
     async handler(request) {
       const { params, payload } = request
+      const { definition, author } = payload
 
-      await updateDraftFormDefinition(params.id, payload)
+      await updateDraftFormDefinition(params.id, definition, author)
 
       return {
         id: params.id,
@@ -146,7 +147,7 @@ export default [
     },
     options: {
       validate: {
-        payload: formDefinitionSchema
+        payload: updateFormDefinitionSchema
       }
     }
   },
@@ -199,7 +200,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: createLiveSchema
+        payload: createStateSchema
       }
     }
   },
@@ -224,7 +225,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: createLiveSchema
+        payload: createStateSchema
       }
     }
   }

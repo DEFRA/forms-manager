@@ -193,7 +193,7 @@ describe('createForm', () => {
     jest.mocked(draftFormDefinition.get).mockRejectedValue(new Error())
 
     await expect(
-      updateDraftFormDefinition('123', actualEmptyForm())
+      updateDraftFormDefinition('123', actualEmptyForm(), author)
     ).rejects.toThrow(ResourceNotFoundError)
   })
 })
