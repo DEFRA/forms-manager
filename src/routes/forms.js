@@ -16,7 +16,7 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  createLiveSchema,
+  createStateSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
@@ -200,7 +200,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: createLiveSchema
+        payload: createStateSchema
       }
     }
   },
@@ -225,7 +225,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: createLiveSchema
+        payload: createStateSchema
       }
     }
   }
