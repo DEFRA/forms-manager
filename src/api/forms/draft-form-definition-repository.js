@@ -67,9 +67,10 @@ export async function createDraftFromLive(id) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
+ * @param {'draft' | 'live'} state - the form state
  */
-export async function get(formId) {
-  const filename = getFormDefinitionFilename(formId)
+export async function get(formId, state = 'draft') {
+  const filename = getFormDefinitionFilename(formId, state)
   const body = await retrieveFromS3(filename)
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'

@@ -8,7 +8,7 @@ import {
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import {
   createForm,
-  getDraftFormDefinition,
+  getFormDefinition,
   createLiveFromDraft,
   updateDraftFormDefinition
 } from '~/src/api/forms/service.js'
@@ -184,7 +184,7 @@ describe('createForm', () => {
 
     jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(formDef)
 
-    await expect(getDraftFormDefinition('123')).resolves.toMatchObject(
+    await expect(getFormDefinition('123')).resolves.toMatchObject(
       actualEmptyForm()
     )
   })
