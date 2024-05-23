@@ -95,6 +95,24 @@ export const config = convict({
     format: String,
     default: '',
     env: 'S3_ENDPOINT'
+  },
+  oidcJwksUri: {
+    doc: 'The URI that defines the OIDC json web key set',
+    format: String,
+    default: null,
+    env: 'OIDC_JWKS_URI'
+  },
+  oidcVerifyAud: {
+    doc: 'The audience used for verifying the OIDC JWT',
+    format: String,
+    default: null,
+    env: 'OIDC_VERIFY_AUD'
+  },
+  oidcVerifyIss: {
+    doc: 'The issuer used for verifying the OIDC JWT',
+    format: String,
+    default: null,
+    env: 'OIDC_VERIFY_ISS'
   }
 })
 

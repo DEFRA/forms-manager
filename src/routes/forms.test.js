@@ -3,8 +3,7 @@ import { organisations } from '@defra/forms-model' /*  */
 import {
   FailedToReadFormError,
   FormAlreadyExistsError
-} from '../api/forms/errors.js'
-
+} from '~/src/api/forms/errors.js'
 import {
   listForms,
   createForm,
@@ -15,6 +14,7 @@ import {
   createDraftFromLive
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
+import { auth } from '~/test/auth.js'
 
 jest.mock('~/src/db.js')
 jest.mock('~/src/api/forms/service.js')
@@ -105,7 +105,8 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -118,7 +119,8 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -132,13 +134,15 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'POST',
         url: '/forms',
-        payload: { metadata: stubFormMetadataInput, author }
+        payload: { metadata: stubFormMetadataInput, author },
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         id: stubFormMetadataOutput.id,
+        slug: 'test-form',
         status: 'created'
       })
     })
@@ -201,7 +205,8 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'POST',
         url: `/forms/${id}/create-live`,
-        payload: author
+        payload: author,
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -218,7 +223,8 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'POST',
         url: `/forms/${id}/create-draft`,
-        payload: author
+        payload: author,
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -238,7 +244,8 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
@@ -351,7 +358,8 @@ describe('Forms route', () => {
         const response = await server.inject({
           method: 'POST',
           url: '/forms',
-          payload: { metadata, author }
+          payload: { metadata, author },
+          auth
         })
 
         expect(response.statusCode).toEqual(badRequestStatusCode)
@@ -383,7 +391,8 @@ describe('Forms route', () => {
             teamEmail: 'defraforms@defra.gov.uk'
           },
           author
-        }
+        },
+        auth
       })
 
       expect(response.statusCode).toEqual(badRequestStatusCode)
@@ -555,7 +564,8 @@ describe('Forms route', () => {
         const response = await server.inject({
           method: 'POST',
           url: `/forms/${id}/create-live`,
-          payload
+          payload,
+          auth
         })
 
         expect(response.statusCode).toEqual(badRequestStatusCode)
@@ -598,7 +608,8 @@ describe('Forms route', () => {
         const response = await server.inject({
           method: 'POST',
           url: `/forms/${id}/create-draft`,
-          payload
+          payload,
+          auth
         })
 
         expect(response.statusCode).toEqual(badRequestStatusCode)

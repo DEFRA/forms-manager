@@ -1,10 +1,8 @@
+import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import {
-  InvalidFormDefinitionError,
-  ResourceNotFoundError
-} from '~/src/api/forms/errors.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import {
   createForm,
@@ -194,7 +192,11 @@ describe('createForm', () => {
 
     await expect(
       updateDraftFormDefinition('123', actualEmptyForm(), author)
-    ).rejects.toThrow(ResourceNotFoundError)
+    ).rejects.toThrow(
+      Boom.notFound(
+        'Form 123 does not exist, so the definition cannot be updated.'
+      )
+    )
   })
 })
 

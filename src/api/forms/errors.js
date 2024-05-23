@@ -46,21 +46,6 @@ export class FailedCreationOperationError extends ApplicationError {
 }
 
 /**
- * Indicates that the requested resource was not found.
- */
-export class ResourceNotFoundError extends ApplicationError {
-  name = 'ResourceNotFoundError'
-
-  /**
-   * Constructs the error
-   * @param {string} message - the message to report
-   */
-  constructor(message) {
-    super(message, { statusCode: 404 })
-  }
-}
-
-/**
  * Indicates the form already exists so cannot be created again.
  */
 export class FormAlreadyExistsError extends ApplicationError {

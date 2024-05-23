@@ -45,6 +45,7 @@ export default [
 
       return {
         id: formMetadata.id,
+        slug: formMetadata.slug,
         status: 'created'
       }
     },
@@ -72,6 +73,7 @@ export default [
       return form
     },
     options: {
+      auth: false,
       validate: {
         params: formByIdSchema
       }
@@ -95,6 +97,7 @@ export default [
       return form
     },
     options: {
+      auth: false,
       validate: {
         params: formBySlugSchema
       }
@@ -123,6 +126,7 @@ export default [
       }
     },
     options: {
+      auth: false,
       validate: {
         params: formByIdSchema
       }
@@ -174,6 +178,7 @@ export default [
       }
     },
     options: {
+      auth: false,
       validate: {
         params: formByIdSchema
       }
