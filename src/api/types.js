@@ -2,10 +2,8 @@
  * Form API request types
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput }>} RequestFormById
  * @typedef {Request<{ Server: { db: Db }, Params: FormBySlugInput }>} RequestFormBySlug
- * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: { definition: FormDefinition, author: FormMetadataAuthor } }>} RequestFormDefinition
- * @typedef {Request<{ Server: { db: Db }, Payload: { metadata: FormMetadataInput, author: FormMetadataAuthor } }>} RequestFormMetadataCreate
- * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormMetadataAuthor }>} RequestFormMetadataCreateLive
- * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormMetadataAuthor }>} RequestFormMetadataCreateDraft
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormDefinition }>} RequestFormDefinition
+ * @typedef {Request<{ Server: { db: Db }, Payload: FormMetadataInput }>} RequestFormMetadataCreate
  */
 
 /**

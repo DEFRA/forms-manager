@@ -16,9 +16,22 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  createStateSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
+
+/**
+ * Get the author from the auth credentials
+ * @param {RequestAuth} auth
+ * @returns {FormMetadataAuthor}
+ */
+function getAuthor(auth) {
+  const user = auth.credentials.user
+
+  return {
+    id: user.sub,
+    displayName: `${user.given_name} ${user.family_name}`
+  }
+}
 
 /**
  * @type {ServerRoute[]}
@@ -38,10 +51,10 @@ export default [
      * @param {RequestFormMetadataCreate} request
      */
     async handler(request) {
-      const { payload } = request
-      const { metadata, author } = payload
+      const { auth, payload } = request
+      const author = getAuthor(auth)
 
-      const formMetadata = await createForm(metadata, author)
+      const formMetadata = await createForm(payload, author)
 
       return {
         id: formMetadata.id,
@@ -139,10 +152,10 @@ export default [
      * @param {RequestFormDefinition} request
      */
     async handler(request) {
-      const { params, payload } = request
-      const { definition, author } = payload
+      const { auth, params, payload } = request
+      const author = getAuthor(auth)
 
-      await updateDraftFormDefinition(params.id, definition, author)
+      await updateDraftFormDefinition(params.id, payload, author)
 
       return {
         id: params.id,
@@ -188,14 +201,15 @@ export default [
     method: 'POST',
     path: '/forms/{id}/create-live',
     /**
-     * @param {RequestFormMetadataCreateLive} request
+     * @param {RequestFormById} request
      */
     async handler(request) {
-      const { params, payload } = request
+      const { auth, params } = request
       const { id } = params
+      const author = getAuthor(auth)
 
-      // Create the live state from draft using the author in the payload
-      await createLiveFromDraft(id, payload)
+      // Create the live state from draft using the author in the credentials
+      await createLiveFromDraft(id, author)
 
       return {
         id,
@@ -204,8 +218,7 @@ export default [
     },
     options: {
       validate: {
-        params: formByIdSchema,
-        payload: createStateSchema
+        params: formByIdSchema
       }
     }
   },
@@ -213,14 +226,15 @@ export default [
     method: 'POST',
     path: '/forms/{id}/create-draft',
     /**
-     * @param {RequestFormMetadataCreateDraft} request
+     * @param {RequestFormById} request
      */
     async handler(request) {
-      const { params, payload } = request
+      const { auth, params } = request
       const { id } = params
+      const author = getAuthor(auth)
 
-      // Recreate the draft state from live using the author in the payload
-      await createDraftFromLive(id, payload)
+      // Recreate the draft state from live using the author in the credentials
+      await createDraftFromLive(id, author)
 
       return {
         id,
@@ -229,8 +243,7 @@ export default [
     },
     options: {
       validate: {
-        params: formByIdSchema,
-        payload: createStateSchema
+        params: formByIdSchema
       }
     }
   }
@@ -238,10 +251,11 @@ export default [
 
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
- * @typedef {import('~/src/api/types.js').RequestFormMetadataCreateLive} RequestFormMetadataCreateLive
- * @typedef {import('~/src/api/types.js').RequestFormMetadataCreateDraft} RequestFormMetadataCreateDraft
+ * @typedef {import('@hapi/hapi').AuthCredentials} AuthCredentials
+ * @typedef {import('@hapi/hapi').RequestAuth} RequestAuth
  */

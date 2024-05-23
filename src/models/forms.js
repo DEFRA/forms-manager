@@ -1,7 +1,6 @@
 import {
   idSchema,
   slugSchema,
-  formMetadataAuthorSchema,
   formMetadataInputSchema,
   formDefinitionSchema
 } from '@defra/forms-model'
@@ -22,20 +21,7 @@ export const formBySlugSchema = Joi.object()
   .required()
 
 // Create form schema
-export const createFormSchema = Joi.object()
-  .keys({
-    metadata: formMetadataInputSchema,
-    author: formMetadataAuthorSchema
-  })
-  .required()
-
-// Create state schema (draft from live, live from draft)
-export const createStateSchema = formMetadataAuthorSchema
+export const createFormSchema = formMetadataInputSchema
 
 // Update form definition schema
-export const updateFormDefinitionSchema = Joi.object()
-  .keys({
-    definition: formDefinitionSchema,
-    author: formMetadataAuthorSchema
-  })
-  .required()
+export const updateFormDefinitionSchema = formDefinitionSchema
