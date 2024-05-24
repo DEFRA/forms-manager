@@ -110,13 +110,14 @@ export const config = convict({
   oidcVerifyAud: {
     doc: 'The audience used for verifying the OIDC JWT',
     format: String,
-    default: 'api://ec32e5c5-75fa-460a-a359-e3e5a4a8f10e',
+    default: 'ec32e5c5-75fa-460a-a359-e3e5a4a8f10e',
     env: 'OIDC_VERIFY_AUD'
   },
   oidcVerifyIss: {
     doc: 'The issuer used for verifying the OIDC JWT',
     format: String,
-    default: 'https://sts.windows.net/770a2450-0227-4c62-90c7-4e38537f1102/',
+    default:
+      'https://login.microsoftonline.com/770a2450-0227-4c62-90c7-4e38537f1102/v2.0',
     env: 'OIDC_VERIFY_ISS'
   },
   roleEditorGroupId: {
