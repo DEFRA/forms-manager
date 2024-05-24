@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-base-to-string */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import Jwt from '@hapi/jwt'
 
 import { config } from '../config/index.js'
@@ -5,8 +7,7 @@ import { config } from '../config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const oidcJwksUri = config.get('oidcJwksUri')
-const oidcVerifyAud = config.get('oidcVerifyAud')
-const oidcVerifyIss = config.get('oidcVerifyIss')
+
 const roleEditorGroupId = config.get('roleEditorGroupId')
 
 const logger = createLogger()
@@ -24,19 +25,23 @@ export const auth = {
         keys: {
           uri: oidcJwksUri
         },
-        verify: {
-          aud: oidcVerifyAud,
-          iss: oidcVerifyIss,
-          sub: false,
-          nbf: true,
-          exp: true
-        },
+        verify: false,
         /**
          * @param {Artifacts<UserProfile>} artifacts
          */
         validate: (artifacts) => {
           const user = artifacts.decoded.payload
           const groups = Array.isArray(user?.groups) ? user.groups : []
+
+          // TODO remove
+          logger.debug(
+            `Token header: ${JSON.stringify(artifacts.decoded.header, null, 2)}`
+          )
+          // @ts-expect-error TODO remove
+          logger.debug(`Token payload aud: ${artifacts.decoded.payload.aud}`)
+          // @ts-expect-error TODO remove
+          logger.debug(`Token payload iss: ${artifacts.decoded.payload.iss}`)
+
           logger.debug(`Validating user against groups: ${groups.join(', ')}`)
 
           if (!groups.includes(roleEditorGroupId)) {
