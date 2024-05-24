@@ -2,6 +2,11 @@ import Jwt from '@hapi/jwt'
 
 import { config } from '../config/index.js'
 
+const oidcJwksUri = config.get('oidcJwksUri')
+const oidcVerifyAud = config.get('oidcVerifyAud')
+const oidcVerifyIss = config.get('oidcVerifyIss')
+const roleEditorGroupId = config.get('roleEditorGroupId')
+
 /**
  * @satisfies {ServerRegisterPlugin}
  */
@@ -11,35 +16,48 @@ export const auth = {
     async register(server) {
       await server.register(Jwt)
 
-      server.auth.strategy('jwt_token', 'jwt', {
+      server.auth.strategy('azure-oidc-token', 'jwt', {
         keys: {
-          uri: config.get('oidcJwksUri')
+          uri: oidcJwksUri
         },
         verify: {
-          aud: config.get('oidcVerifyAud'),
-          iss: config.get('oidcVerifyIss'),
+          aud: oidcVerifyAud,
+          iss: oidcVerifyIss,
           sub: false,
           nbf: true,
           exp: true
         },
         /**
-         * @param {Artifacts} artifacts
+         * @param {Artifacts<UserProfile>} artifacts
          */
         validate: (artifacts) => {
+          const user = artifacts.decoded.payload
+          const groups = Array.isArray(user?.groups) ? user.groups : []
+
+          if (!groups.includes(roleEditorGroupId)) {
+            return {
+              isValid: false
+            }
+          }
+
           return {
             isValid: true,
-            credentials: { user: artifacts.decoded.payload }
+            credentials: { user }
           }
         }
       })
 
       // Set as the default strategy
-      server.auth.default('jwt_token')
+      server.auth.default('azure-oidc-token')
     }
   }
 }
 
 /**
  * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
- * @typedef {import('@hapi/jwt').HapiJwt.Artifacts} Artifacts
+ * @typedef {import('oidc-client-ts').UserProfile & { groups?: string[] }} UserProfile
+ */
+/**
+ * @template {object} Payload
+ * @typedef {import('@hapi/jwt').HapiJwt.Artifacts<{ JwtPayload?: Payload }>} Artifacts
  */

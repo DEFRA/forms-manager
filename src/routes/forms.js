@@ -21,11 +21,15 @@ import {
 
 /**
  * Get the author from the auth credentials
- * @param {RequestAuth} auth
+ * @param {UserCredentials & OidcStandardClaims} [user]
  * @returns {FormMetadataAuthor}
  */
-function getAuthor(auth) {
-  const user = auth.credentials.user
+function getAuthor(user) {
+  if (!user || !user.sub) {
+    throw Boom.unauthorized(
+      'Failed to get the author, user is undefined or has no id (sub)'
+    )
+  }
 
   return {
     id: user.sub,
@@ -52,7 +56,7 @@ export default [
      */
     async handler(request) {
       const { auth, payload } = request
-      const author = getAuthor(auth)
+      const author = getAuthor(auth.credentials.user)
 
       const formMetadata = await createForm(payload, author)
 
@@ -153,7 +157,7 @@ export default [
      */
     async handler(request) {
       const { auth, params, payload } = request
-      const author = getAuthor(auth)
+      const author = getAuthor(auth.credentials.user)
 
       await updateDraftFormDefinition(params.id, payload, author)
 
@@ -206,7 +210,7 @@ export default [
     async handler(request) {
       const { auth, params } = request
       const { id } = params
-      const author = getAuthor(auth)
+      const author = getAuthor(auth.credentials.user)
 
       // Create the live state from draft using the author in the credentials
       await createLiveFromDraft(id, author)
@@ -231,7 +235,7 @@ export default [
     async handler(request) {
       const { auth, params } = request
       const { id } = params
-      const author = getAuthor(auth)
+      const author = getAuthor(auth.credentials.user)
 
       // Recreate the draft state from live using the author in the credentials
       await createDraftFromLive(id, author)
@@ -257,5 +261,7 @@ export default [
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
  * @typedef {import('@hapi/hapi').AuthCredentials} AuthCredentials
+ * @typedef {import('@hapi/hapi').UserCredentials} UserCredentials
  * @typedef {import('@hapi/hapi').RequestAuth} RequestAuth
+ * @typedef {import('oidc-client-ts').OidcStandardClaims} OidcStandardClaims
  */

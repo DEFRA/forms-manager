@@ -14,7 +14,7 @@ import {
   createDraftFromLive
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
-import { auth } from '~/test/auth.js'
+import { auth } from '~/test/fixtures/auth.js'
 
 jest.mock('~/src/db.js')
 jest.mock('~/src/api/forms/service.js')
