@@ -7,7 +7,8 @@ import { config } from '../config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const oidcJwksUri = config.get('oidcJwksUri')
-
+const oidcVerifyAud = config.get('oidcVerifyAud')
+const oidcVerifyIss = config.get('oidcVerifyIss')
 const roleEditorGroupId = config.get('roleEditorGroupId')
 
 const logger = createLogger()
@@ -25,7 +26,13 @@ export const auth = {
         keys: {
           uri: oidcJwksUri
         },
-        verify: false,
+        verify: {
+          aud: oidcVerifyAud,
+          iss: oidcVerifyIss,
+          sub: false,
+          nbf: true,
+          exp: true
+        },
         /**
          * @param {Artifacts<UserProfile>} artifacts
          */
