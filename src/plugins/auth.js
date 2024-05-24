@@ -24,7 +24,13 @@ export const auth = {
         keys: {
           uri: oidcJwksUri
         },
-        verify: false,
+        verify: {
+          aud: oidcVerifyAud,
+          iss: oidcVerifyIss,
+          sub: false,
+          nbf: true,
+          exp: true
+        },
         /**
          * @param {Artifacts<UserProfile>} artifacts
          */
