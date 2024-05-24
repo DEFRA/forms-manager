@@ -2,10 +2,7 @@ import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import {
-  InvalidFormDefinitionError,
-  ResourceNotFoundError
-} from '~/src/api/forms/errors.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 
@@ -128,7 +125,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
   const existingForm = await getForm(formId)
 
   if (!existingForm) {
-    throw new ResourceNotFoundError(
+    throw Boom.notFound(
       `Form ${formId} does not exist, so the definition cannot be updated.`
     )
   }

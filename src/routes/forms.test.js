@@ -3,8 +3,7 @@ import { organisations } from '@defra/forms-model' /*  */
 import {
   FailedToReadFormError,
   FormAlreadyExistsError
-} from '../api/forms/errors.js'
-
+} from '~/src/api/forms/errors.js'
 import {
   listForms,
   createForm,
@@ -15,6 +14,7 @@ import {
   createDraftFromLive
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
+import { auth } from '~/test/fixtures/auth.js'
 
 jest.mock('~/src/db.js')
 jest.mock('~/src/api/forms/service.js')
@@ -105,7 +105,8 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -118,7 +119,8 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -132,13 +134,15 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'POST',
         url: '/forms',
-        payload: { metadata: stubFormMetadataInput, author }
+        payload: stubFormMetadataInput,
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         id: stubFormMetadataOutput.id,
+        slug: 'test-form',
         status: 'created'
       })
     })
@@ -201,7 +205,7 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'POST',
         url: `/forms/${id}/create-live`,
-        payload: author
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -218,7 +222,7 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'POST',
         url: `/forms/${id}/create-draft`,
-        payload: author
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -238,7 +242,8 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
@@ -253,17 +258,12 @@ describe('Forms route', () => {
       {
         payload: {},
         error: {
-          keys: [
-            'metadata.title',
-            'metadata.organisation',
-            'metadata.teamName',
-            'metadata.teamEmail'
-          ],
+          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
           messages: [
-            '"metadata.title" is required.',
-            '"metadata.organisation" is required.',
-            '"metadata.teamName" is required.',
-            '"metadata.teamEmail" is required'
+            '"title" is required.',
+            '"organisation" is required.',
+            '"teamName" is required.',
+            '"teamEmail" is required'
           ]
         }
       },
@@ -276,18 +276,18 @@ describe('Forms route', () => {
         },
         error: {
           keys: [
-            'metadata.title',
-            'metadata.organisation',
-            'metadata.organisation',
-            'metadata.teamName',
-            'metadata.teamEmail'
+            'title',
+            'organisation',
+            'organisation',
+            'teamName',
+            'teamEmail'
           ],
           messages: [
-            '"metadata.title" is not allowed to be empty.',
-            `"metadata.organisation" must be one of [${organisations.join(', ')}].`,
-            '"metadata.organisation" is not allowed to be empty.',
-            '"metadata.teamName" is not allowed to be empty.',
-            '"metadata.teamEmail" is not allowed to be empty'
+            '"title" is not allowed to be empty.',
+            `"organisation" must be one of [${organisations.join(', ')}].`,
+            '"organisation" is not allowed to be empty.',
+            '"teamName" is not allowed to be empty.',
+            '"teamEmail" is not allowed to be empty'
           ]
         }
       },
@@ -299,9 +299,9 @@ describe('Forms route', () => {
           teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
-          keys: ['metadata.title'],
+          keys: ['title'],
           messages: [
-            '"metadata.title" length must be less than or equal to 250 characters long'
+            '"title" length must be less than or equal to 250 characters long'
           ]
         }
       },
@@ -313,9 +313,9 @@ describe('Forms route', () => {
           teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
-          keys: ['metadata.organisation'],
+          keys: ['organisation'],
           messages: [
-            `"metadata.organisation" must be one of [${organisations.join(', ')}]`
+            `"organisation" must be one of [${organisations.join(', ')}]`
           ]
         }
       },
@@ -327,9 +327,9 @@ describe('Forms route', () => {
           teamEmail: 'defraforms@defra.gov.uk'
         },
         error: {
-          keys: ['metadata.teamName'],
+          keys: ['teamName'],
           messages: [
-            '"metadata.teamName" length must be less than or equal to 100 characters long'
+            '"teamName" length must be less than or equal to 100 characters long'
           ]
         }
       },
@@ -341,8 +341,8 @@ describe('Forms route', () => {
           teamEmail: `x`
         },
         error: {
-          keys: ['metadata.teamEmail'],
-          messages: ['"metadata.teamEmail" must be a valid email']
+          keys: ['teamEmail'],
+          messages: ['"teamEmail" must be a valid email']
         }
       }
     ])(
@@ -351,7 +351,8 @@ describe('Forms route', () => {
         const response = await server.inject({
           method: 'POST',
           url: '/forms',
-          payload: { metadata, author }
+          payload: metadata,
+          auth
         })
 
         expect(response.statusCode).toEqual(badRequestStatusCode)
@@ -376,14 +377,12 @@ describe('Forms route', () => {
         method: 'POST',
         url: '/forms',
         payload: {
-          metadata: {
-            title: 'My Title',
-            organisation: 'Defra',
-            teamName: 'teamname',
-            teamEmail: 'defraforms@defra.gov.uk'
-          },
-          author
-        }
+          title: 'My Title',
+          organisation: 'Defra',
+          teamName: 'teamname',
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        auth
       })
 
       expect(response.statusCode).toEqual(badRequestStatusCode)
@@ -527,92 +526,6 @@ describe('Forms route', () => {
         message: 'An internal server error occurred'
       })
     })
-
-    test.each([
-      {
-        payload: {},
-        error: {
-          keys: ['id', 'displayName'],
-          messages: ['"id" is required.', '"displayName" is required']
-        }
-      },
-      {
-        payload: {
-          id: '',
-          displayName: ''
-        },
-        error: {
-          keys: ['id', 'displayName'],
-          messages: [
-            '"id" is not allowed to be empty.',
-            '"displayName" is not allowed to be empty'
-          ]
-        }
-      }
-    ])(
-      'Testing POST /forms/{id}/create-live route with an invalid payload returns validation errors',
-      async ({ payload, error }) => {
-        const response = await server.inject({
-          method: 'POST',
-          url: `/forms/${id}/create-live`,
-          payload
-        })
-
-        expect(response.statusCode).toEqual(badRequestStatusCode)
-        expect(response.headers['content-type']).toContain(jsonContentType)
-        expect(response.result).toMatchObject({
-          error: 'Bad Request',
-          message: error.messages.join(' '),
-          validation: {
-            keys: error.keys,
-            source: 'payload'
-          }
-        })
-      }
-    )
-
-    test.each([
-      {
-        payload: {},
-        error: {
-          keys: ['id', 'displayName'],
-          messages: ['"id" is required.', '"displayName" is required']
-        }
-      },
-      {
-        payload: {
-          id: '',
-          displayName: ''
-        },
-        error: {
-          keys: ['id', 'displayName'],
-          messages: [
-            '"id" is not allowed to be empty.',
-            '"displayName" is not allowed to be empty'
-          ]
-        }
-      }
-    ])(
-      'Testing POST /forms/{id}/create-draft route with an invalid payload returns validation errors',
-      async ({ payload, error }) => {
-        const response = await server.inject({
-          method: 'POST',
-          url: `/forms/${id}/create-draft`,
-          payload
-        })
-
-        expect(response.statusCode).toEqual(badRequestStatusCode)
-        expect(response.headers['content-type']).toContain(jsonContentType)
-        expect(response.result).toMatchObject({
-          error: 'Bad Request',
-          message: error.messages.join(' '),
-          validation: {
-            keys: error.keys,
-            source: 'payload'
-          }
-        })
-      }
-    )
   })
 })
 

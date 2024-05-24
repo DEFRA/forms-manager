@@ -5,6 +5,7 @@ import hapi from '@hapi/hapi'
 import { config } from '~/src/config/index.js'
 import { prepareDb } from '~/src/db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
+import { auth } from '~/src/plugins/auth.js'
 import { logRequests } from '~/src/plugins/log-requests.js'
 import { router } from '~/src/plugins/router.js'
 import { transformErrors } from '~/src/plugins/transform-errors.js'
@@ -19,6 +20,9 @@ export async function createServer() {
   const server = hapi.server({
     port: config.get('port'),
     routes: {
+      auth: {
+        mode: 'required'
+      },
       validate: {
         options: {
           abortEarly: false
@@ -44,6 +48,7 @@ export async function createServer() {
     }
   })
 
+  await server.register(auth)
   await server.register(logRequests)
 
   if (isProduction) {

@@ -16,9 +16,26 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  createStateSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
+
+/**
+ * Get the author from the auth credentials
+ * @param {UserCredentials & OidcStandardClaims} [user]
+ * @returns {FormMetadataAuthor}
+ */
+function getAuthor(user) {
+  if (!user || !user.sub) {
+    throw Boom.unauthorized(
+      'Failed to get the author, user is undefined or has no id (sub)'
+    )
+  }
+
+  return {
+    id: user.sub,
+    displayName: `${user.given_name} ${user.family_name}`
+  }
+}
 
 /**
  * @type {ServerRoute[]}
@@ -38,13 +55,14 @@ export default [
      * @param {RequestFormMetadataCreate} request
      */
     async handler(request) {
-      const { payload } = request
-      const { metadata, author } = payload
+      const { auth, payload } = request
+      const author = getAuthor(auth.credentials.user)
 
-      const formMetadata = await createForm(metadata, author)
+      const formMetadata = await createForm(payload, author)
 
       return {
         id: formMetadata.id,
+        slug: formMetadata.slug,
         status: 'created'
       }
     },
@@ -72,6 +90,7 @@ export default [
       return form
     },
     options: {
+      auth: false,
       validate: {
         params: formByIdSchema
       }
@@ -95,6 +114,7 @@ export default [
       return form
     },
     options: {
+      auth: false,
       validate: {
         params: formBySlugSchema
       }
@@ -123,6 +143,7 @@ export default [
       }
     },
     options: {
+      auth: false,
       validate: {
         params: formByIdSchema
       }
@@ -135,10 +156,10 @@ export default [
      * @param {RequestFormDefinition} request
      */
     async handler(request) {
-      const { params, payload } = request
-      const { definition, author } = payload
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
 
-      await updateDraftFormDefinition(params.id, definition, author)
+      await updateDraftFormDefinition(params.id, payload, author)
 
       return {
         id: params.id,
@@ -174,6 +195,7 @@ export default [
       }
     },
     options: {
+      auth: false,
       validate: {
         params: formByIdSchema
       }
@@ -183,14 +205,15 @@ export default [
     method: 'POST',
     path: '/forms/{id}/create-live',
     /**
-     * @param {RequestFormMetadataCreateLive} request
+     * @param {RequestFormById} request
      */
     async handler(request) {
-      const { params, payload } = request
+      const { auth, params } = request
       const { id } = params
+      const author = getAuthor(auth.credentials.user)
 
-      // Create the live state from draft using the author in the payload
-      await createLiveFromDraft(id, payload)
+      // Create the live state from draft using the author in the credentials
+      await createLiveFromDraft(id, author)
 
       return {
         id,
@@ -199,8 +222,7 @@ export default [
     },
     options: {
       validate: {
-        params: formByIdSchema,
-        payload: createStateSchema
+        params: formByIdSchema
       }
     }
   },
@@ -208,14 +230,15 @@ export default [
     method: 'POST',
     path: '/forms/{id}/create-draft',
     /**
-     * @param {RequestFormMetadataCreateDraft} request
+     * @param {RequestFormById} request
      */
     async handler(request) {
-      const { params, payload } = request
+      const { auth, params } = request
       const { id } = params
+      const author = getAuthor(auth.credentials.user)
 
-      // Recreate the draft state from live using the author in the payload
-      await createDraftFromLive(id, payload)
+      // Recreate the draft state from live using the author in the credentials
+      await createDraftFromLive(id, author)
 
       return {
         id,
@@ -224,8 +247,7 @@ export default [
     },
     options: {
       validate: {
-        params: formByIdSchema,
-        payload: createStateSchema
+        params: formByIdSchema
       }
     }
   }
@@ -233,10 +255,13 @@ export default [
 
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
- * @typedef {import('~/src/api/types.js').RequestFormMetadataCreateLive} RequestFormMetadataCreateLive
- * @typedef {import('~/src/api/types.js').RequestFormMetadataCreateDraft} RequestFormMetadataCreateDraft
+ * @typedef {import('@hapi/hapi').AuthCredentials} AuthCredentials
+ * @typedef {import('@hapi/hapi').UserCredentials} UserCredentials
+ * @typedef {import('@hapi/hapi').RequestAuth} RequestAuth
+ * @typedef {import('oidc-client-ts').OidcStandardClaims} OidcStandardClaims
  */

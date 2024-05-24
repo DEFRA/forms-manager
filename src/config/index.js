@@ -95,6 +95,35 @@ export const config = convict({
     format: String,
     default: '',
     env: 'S3_ENDPOINT'
+  },
+  /**
+   * @todo We plan to replace `node-convict` with `joi` and remove all defaults.
+   * These OIDC/roles are for the DEV application in the DEFRA tenant.
+   */
+  oidcJwksUri: {
+    doc: 'The URI that defines the OIDC json web key set',
+    format: String,
+    default:
+      'https://login.microsoftonline.com/770a2450-0227-4c62-90c7-4e38537f1102/discovery/v2.0/keys',
+    env: 'OIDC_JWKS_URI'
+  },
+  oidcVerifyAud: {
+    doc: 'The audience used for verifying the OIDC JWT',
+    format: String,
+    default: 'api://ec32e5c5-75fa-460a-a359-e3e5a4a8f10e',
+    env: 'OIDC_VERIFY_AUD'
+  },
+  oidcVerifyIss: {
+    doc: 'The issuer used for verifying the OIDC JWT',
+    format: String,
+    default: 'https://sts.windows.net/770a2450-0227-4c62-90c7-4e38537f1102/',
+    env: 'OIDC_VERIFY_ISS'
+  },
+  roleEditorGroupId: {
+    doc: 'The AD security group the access token needs to claim membership of',
+    format: String,
+    default: '9af646c4-fa14-4606-8ebf-ec187ac03386',
+    env: 'ROLE_EDITOR_GROUP_ID'
   }
 })
 
