@@ -95,7 +95,7 @@ describe('Get forms from S3', () => {
     s3Mock.on(GetObjectCommand).resolvesOnce({ Body: undefined })
 
     await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
-      /Form definition does exist but is empty.*$/
+      'Form definition does exist but is empty at path forms/draft/any-form-id.json'
     )
   })
 
