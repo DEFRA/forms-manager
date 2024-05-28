@@ -41,7 +41,9 @@ export const auth = {
           logger.debug(`Validating user against groups: ${groups.join(', ')}`)
 
           if (!groups.includes(roleEditorGroupId)) {
-            logger.debug('User failed authorisation')
+            logger.warn(
+              `User failed authorisation. "${roleEditorGroupId}" not in groups.`
+            )
             return {
               isValid: false
             }
