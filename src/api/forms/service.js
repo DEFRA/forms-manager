@@ -43,7 +43,7 @@ export async function createForm(metadataInput, author) {
   // Validate the form definition
   const { error } = formDefinitionSchema.validate(definition)
   if (error) {
-    logger.warn(`Form failed validation: "${metadataInput.title}"`)
+    logger.warn(`Form failed validation: '${metadataInput.title}'`)
     throw new InvalidFormDefinitionError(metadataInput.title, {
       cause: error
     })
@@ -71,7 +71,7 @@ export async function createForm(metadataInput, author) {
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
   const metadata = mapForm({ ...document, _id })
-  logger.info(`Form ${metadata.id} created for form "${metadataInput.title}"`)
+  logger.info(`Form ${metadata.id} created for form '${metadataInput.title}'`)
 
   // Create the draft form definition
   await draftFormDefinition.create(metadata.id, definition)
