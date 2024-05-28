@@ -109,9 +109,11 @@ export async function getForm(formId) {
 export async function getFormBySlug(slug) {
   const document = await formMetadata.getBySlug(slug)
 
-  if (document) {
-    return mapForm(document)
+  if (!document) {
+    throw Boom.notFound(`Form with slug '${slug}' not found`)
   }
+
+  return mapForm(document)
 }
 
 /**

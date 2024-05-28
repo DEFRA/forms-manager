@@ -192,11 +192,7 @@ describe('createForm', () => {
 
     await expect(
       updateDraftFormDefinition('123', actualEmptyForm(), author)
-    ).rejects.toThrow(
-      Boom.notFound(
-        'Form 123 does not exist, so the definition cannot be updated.'
-      )
-    )
+    ).rejects.toThrow(Boom.notFound("Form with ID '123' not found"))
   })
 })
 

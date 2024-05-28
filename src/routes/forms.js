@@ -95,16 +95,11 @@ export default [
     /**
      * @param {RequestFormBySlug} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { slug } = params
-      const form = await getFormBySlug(slug)
 
-      if (!form) {
-        return Boom.notFound(`Form with slug '${slug}' not found`)
-      }
-
-      return form
+      return getFormBySlug(slug)
     },
     options: {
       auth: false,
