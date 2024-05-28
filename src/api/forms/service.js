@@ -143,7 +143,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
   // Update the form definition
   await draftFormDefinition.create(formId, definition)
-  logger.info('Form metadata updated')
+  logger.info(`Draft form definition updated for ${formId}`)
 
   // Update the `updatedAt/By` fields of the draft state
   const now = new Date()
@@ -161,7 +161,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     )
   }
 
-  logger.info('Form definition updated')
+  logger.info(`Draft form metadata updated for ${formId}`)
 }
 
 /**
