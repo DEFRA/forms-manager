@@ -43,7 +43,7 @@ export async function createForm(metadata, author) {
   // Validate the form definition
   const { error } = formDefinitionSchema.validate(definition)
   if (error) {
-    logger.warn(`Form failed validation: ${metadata.title}`)
+    logger.warn(`Form failed validation: "${metadata.title}"`)
     throw new InvalidFormDefinitionError(error.message, {
       cause: error
     })
@@ -70,13 +70,14 @@ export async function createForm(metadata, author) {
 
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
+  const createdForm = mapForm({ ...document, _id })
+  logger.info(`Form ${createdForm.id} created for form "${metadata.title}"`)
 
   // Create the draft form definition
   await draftFormDefinition.create(_id.toString(), definition)
+  logger.info(`Draft form definition updated for form ID ${createdForm.id}`)
 
-  logger.info(`Form ${_id.toString()} created: ${metadata.title}`)
-
-  return mapForm({ ...document, _id })
+  return createdForm
 }
 
 /**
@@ -143,7 +144,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
   // Update the form definition
   await draftFormDefinition.create(formId, definition)
-  logger.info(`Draft form definition updated for ${formId}`)
+  logger.info(`Draft form definition updated for form ID ${formId}`)
 
   // Update the `updatedAt/By` fields of the draft state
   const now = new Date()
@@ -161,7 +162,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     )
   }
 
-  logger.info(`Draft form metadata updated for ${formId}`)
+  logger.info(`Draft form metadata updated for form ID ${formId}`)
 }
 
 /**
