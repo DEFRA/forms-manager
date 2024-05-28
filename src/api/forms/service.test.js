@@ -161,7 +161,7 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(createForm(formMetadataInput, author)).rejects.toThrow(Error)
+    await expect(createForm(formMetadataInput, author)).rejects.toThrow()
   })
 
   it('should throw an error when writing form def fails', async () => {
@@ -174,7 +174,7 @@ describe('createForm', () => {
       teamEmail: ''
     }
 
-    await expect(createForm(formMetadataInput, author)).rejects.toThrow(Error)
+    await expect(createForm(formMetadataInput, author)).rejects.toThrow()
   })
 
   it('should return the form definition', async () => {

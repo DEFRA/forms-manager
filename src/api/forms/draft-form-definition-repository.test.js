@@ -112,9 +112,7 @@ describe('Get forms from S3', () => {
   test('should throw error if an unexpected error occurs', async () => {
     s3Mock.on(GetObjectCommand).rejectsOnce(new Error())
 
-    await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
-      Error
-    )
+    await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow()
   })
 })
 
