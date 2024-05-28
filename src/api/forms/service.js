@@ -96,9 +96,13 @@ export async function listForms() {
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
 
-  if (document) {
-    return mapForm(document)
+  if (!document) {
+    throw Boom.notFound(
+      `Form ${formId} does not exist, so the definition cannot be updated.`
+    )
   }
+
+  return mapForm(document)
 }
 
 /**
@@ -117,7 +121,6 @@ export async function getFormBySlug(slug) {
  * Retrieves the form definition JSON content for a given form ID
  * @param {string} formId - the ID of the form
  * @param {'draft' | 'live'} state - the form state
- * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 export function getFormDefinition(formId, state = 'draft') {
   return draftFormDefinition.get(formId, state)
@@ -130,12 +133,6 @@ export function getFormDefinition(formId, state = 'draft') {
  */
 export async function updateDraftFormDefinition(formId, definition, author) {
   const existingForm = await getForm(formId)
-
-  if (!existingForm) {
-    throw Boom.notFound(
-      `Form ${formId} does not exist, so the definition cannot be updated.`
-    )
-  }
 
   // Throw if there's no current draft state
   if (!existingForm.draft) {
@@ -173,10 +170,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 export async function createLiveFromDraft(formId, author) {
   // Get the form metadata from the db
   const form = await getForm(formId)
-
-  if (!form) {
-    throw Boom.notFound(`Form with id '${formId}' not found`)
-  }
 
   if (!form.draft) {
     throw Boom.badRequest(`Form with id '${formId}' has no draft state`)
@@ -228,10 +221,6 @@ export async function createLiveFromDraft(formId, author) {
 export async function createDraftFromLive(formId, author) {
   // Get the form metadata from the db
   const form = await getForm(formId)
-
-  if (!form) {
-    throw Boom.notFound(`Form with id '${formId}' not found`)
-  }
 
   if (!form.live) {
     throw Boom.badRequest(`Form with id '${formId}' not in a live state`)

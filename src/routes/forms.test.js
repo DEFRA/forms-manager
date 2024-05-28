@@ -1,9 +1,7 @@
 import { organisations } from '@defra/forms-model' /*  */
+import Boom from '@hapi/boom'
 
-import {
-  FailedToReadFormError,
-  FormAlreadyExistsError
-} from '~/src/api/forms/errors.js'
+import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   listForms,
   createForm,
@@ -418,7 +416,7 @@ describe('Forms route', () => {
     )
 
     test('Testing GET /forms/{id} route with an id that is not found returns 404 Not found', async () => {
-      jest.mocked(getForm).mockResolvedValue(undefined)
+      jest.mocked(getForm).mockRejectedValue(Boom.notFound())
 
       const response = await server.inject({
         method: 'GET',
@@ -427,10 +425,6 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toMatchObject({
-        error: 'Not Found',
-        message: `Form with id '${id}' not found`
-      })
     })
 
     test('Testing GET /forms/{slug} route with an id that is not found returns 404 Not found', async () => {
@@ -483,9 +477,7 @@ describe('Forms route', () => {
     )
 
     test('Testing GET /forms/{id}/definition/draft route with an id that is not found returns 404 Not found', async () => {
-      jest
-        .mocked(getFormDefinition)
-        .mockRejectedValue(new FailedToReadFormError('Failed'))
+      jest.mocked(getFormDefinition).mockRejectedValue(Boom.notFound())
 
       const response = await server.inject({
         method: 'GET',
@@ -494,10 +486,6 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toMatchObject({
-        error: 'Not Found',
-        message: 'Failed'
-      })
     })
 
     test('Testing GET /forms/{id}/definition/draft route throws unknown error', async () => {

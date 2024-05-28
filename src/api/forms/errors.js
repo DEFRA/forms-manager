@@ -63,22 +63,3 @@ export class FormAlreadyExistsError extends ApplicationError {
     })
   }
 }
-
-/**
- * Indicates the form provided does not exist or was empty
- */
-export class FailedToReadFormError extends ApplicationError {
-  name = 'FailedToReadFormError'
-
-  /**
-   * Constructs an error
-   * @param {string} message
-   * @param {ErrorOptions} [options]
-   */
-  constructor(message, options = {}) {
-    super(message, {
-      ...options,
-      statusCode: 404
-    })
-  }
-}

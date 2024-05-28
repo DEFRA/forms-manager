@@ -3,12 +3,12 @@ import { join } from 'node:path'
 import {
   S3Client,
   PutObjectCommand,
-  GetObjectCommand,
   NoSuchKey,
-  CopyObjectCommand
+  CopyObjectCommand,
+  GetObjectCommand
 } from '@aws-sdk/client-s3'
+import Boom from '@hapi/boom'
 
-import { FailedToReadFormError } from '~/src/api/forms/errors.js'
 import { config } from '~/src/config/index.js'
 
 const s3Region = config.get('s3Region')
@@ -110,7 +110,6 @@ function copyObject(source, destination) {
 /**
  * Retrieves filename content from an S3 bucket
  * @param {string} filename - the file name to read`
- * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 async function retrieveFromS3(filename) {
   const command = new GetObjectCommand({
@@ -122,7 +121,7 @@ async function retrieveFromS3(filename) {
     const response = await getS3Client().send(command)
 
     if (!response.Body) {
-      throw new FailedToReadFormError(
+      throw Boom.notFound(
         `Form definition does exist but is empty at path ${filename}`
       )
     }
@@ -130,9 +129,8 @@ async function retrieveFromS3(filename) {
     return response.Body.transformToString()
   } catch (cause) {
     if (cause instanceof NoSuchKey) {
-      throw new FailedToReadFormError(
-        `Form definition does not exist on disk at path ${filename}`,
-        { cause }
+      throw Boom.notFound(
+        `Form definition does not exist on disk at path ${filename}`
       )
     }
 
