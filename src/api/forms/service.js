@@ -75,7 +75,6 @@ export async function createForm(metadataInput, author) {
 
   // Create the draft form definition
   await draftFormDefinition.create(metadata.id, definition)
-  logger.info(`Draft form definition updated for form ID ${metadata.id}`)
 
   return metadata
 }
@@ -97,9 +96,7 @@ export async function getForm(formId) {
   const document = await formMetadata.get(formId)
 
   if (!document) {
-    throw Boom.notFound(
-      `Form ${formId} does not exist, so the definition cannot be updated.`
-    )
+    throw Boom.notFound(`Form with ID '${formId}' not found`)
   }
 
   return mapForm(document)
@@ -141,7 +138,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
   // Update the form definition
   await draftFormDefinition.create(formId, definition)
-  logger.info(`Draft form definition updated for form ID ${formId}`)
 
   // Update the `updatedAt/By` fields of the draft state
   const now = new Date()

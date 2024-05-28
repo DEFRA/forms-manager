@@ -10,6 +10,9 @@ import {
 import Boom from '@hapi/boom'
 
 import { config } from '~/src/config/index.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 const s3Region = config.get('s3Region')
 const formBucketName = config.get('formDefinitionBucketName')
@@ -38,6 +41,8 @@ export async function create(id, formDefinition) {
 
   // Write formDefinition to file
   await uploadToS3(formDefinitionFilename, formDefinitionString)
+
+  logger.info(`Draft form definition updated for form ID ${id}`)
 }
 
 /**
