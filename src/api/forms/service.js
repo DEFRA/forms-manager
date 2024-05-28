@@ -5,6 +5,9 @@ import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repo
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 /**
  * Maps a form metadata document from MongoDB to form metadata
@@ -40,6 +43,7 @@ export async function createForm(metadata, author) {
   // Validate the form definition
   const { error } = formDefinitionSchema.validate(definition)
   if (error) {
+    logger.warn(`Form failed validation: ${metadata.title}`)
     throw new InvalidFormDefinitionError(error.message, {
       cause: error
     })
@@ -69,6 +73,8 @@ export async function createForm(metadata, author) {
 
   // Create the draft form definition
   await draftFormDefinition.create(_id.toString(), definition)
+
+  logger.info(`Form ${_id.toString()} created: ${metadata.title}`)
 
   return mapForm({ ...document, _id })
 }
@@ -137,6 +143,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
   // Update the form definition
   await draftFormDefinition.create(formId, definition)
+  logger.info('Form metadata updated')
 
   // Update the `updatedAt/By` fields of the draft state
   const now = new Date()
@@ -153,6 +160,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       `Draft state not updated. Modified count ${result.modifiedCount}`
     )
   }
+
+  logger.info('Form definition updated')
 }
 
 /**
@@ -192,6 +201,7 @@ export async function createLiveFromDraft(formId, author) {
 
   // Copy the draft form definition
   await draftFormDefinition.createLiveFromDraft(formId)
+  logger.info(`Live form created for form ID ${formId}`)
 
   // Update the form with the live state and clear the draft
   const result = await formMetadata.update(formId, {
@@ -205,6 +215,8 @@ export async function createLiveFromDraft(formId, author) {
       `Live state not created from draft. Modified count ${result.modifiedCount}`
     )
   }
+
+  logger.info(`Live form created and draft form removed for form ID ${formId}`)
 }
 
 /**
@@ -237,6 +249,7 @@ export async function createDraftFromLive(formId, author) {
 
   // Copy the draft form definition
   await draftFormDefinition.createDraftFromLive(formId)
+  logger.info(`Draft form definition created for form ID ${formId}`)
 
   // Update the form with the new draft state
   const result = await formMetadata.update(formId, { $set: set })
@@ -247,6 +260,8 @@ export async function createDraftFromLive(formId, author) {
       `Draft state not created from draft. Modified count ${result.modifiedCount}`
     )
   }
+
+  logger.info(`Draft form metadata updated for form ID ${formId}`)
 }
 
 /**
