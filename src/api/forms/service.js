@@ -44,7 +44,7 @@ export async function createForm(metadata, author) {
   const { error } = formDefinitionSchema.validate(definition)
   if (error) {
     logger.warn(`Form failed validation: "${metadata.title}"`)
-    throw new InvalidFormDefinitionError(error.message, {
+    throw new InvalidFormDefinitionError(metadata.title, {
       cause: error
     })
   }
