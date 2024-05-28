@@ -161,12 +161,11 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id } = params
-      const definition = await getFormDefinition(id, 'live')
 
-      return definition
+      return getFormDefinition(id, 'live')
     },
     options: {
       auth: false,
