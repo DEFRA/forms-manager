@@ -105,7 +105,7 @@ describe('Get forms from S3', () => {
       .rejectsOnce(new NoSuchKey({ $metadata: {}, message: 'dummy error' }))
 
     await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
-      /Form definition does not exist on disk.*$/
+      'Form definition does not exist on disk at path forms/draft/any-form-id.json'
     )
   })
 
