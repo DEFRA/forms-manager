@@ -416,7 +416,9 @@ describe('Forms route', () => {
     )
 
     test('Testing GET /forms/{id} route with an id that is not found returns 404 Not found', async () => {
-      jest.mocked(getForm).mockRejectedValue(Boom.notFound())
+      jest
+        .mocked(getForm)
+        .mockRejectedValue(Boom.notFound(`Form with slug '${slug}' not found`))
 
       const response = await server.inject({
         method: 'GET',
@@ -425,6 +427,10 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Not Found',
+        message: `Form with slug '${slug}' not found`
+      })
     })
 
     test('Testing GET /forms/{slug} route with an id that is not found returns 404 Not found', async () => {
