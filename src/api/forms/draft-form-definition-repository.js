@@ -122,16 +122,21 @@ async function retrieveFromS3(filename) {
     const response = await getS3Client().send(command)
 
     if (!response.Body) {
-      throw new FailedToReadFormError('Form definition does exist but is empty')
+      throw new FailedToReadFormError(
+        `Form definition does exist but is empty at path ${filename}`
+      )
     }
 
     return response.Body.transformToString()
-  } catch (err) {
-    if (err instanceof NoSuchKey) {
-      throw new FailedToReadFormError('Form definition does not exist on disk')
+  } catch (cause) {
+    if (cause instanceof NoSuchKey) {
+      throw new FailedToReadFormError(
+        `Form definition does not exist on disk at path ${filename}`,
+        { cause }
+      )
     }
 
-    throw err
+    throw cause
   }
 }
 

@@ -1,7 +1,6 @@
 import Boom from '@hapi/boom'
 
-import { FailedToReadFormError } from '../api/forms/errors.js'
-
+import { FailedToReadFormError } from '~/src/api/forms/errors.js'
 import {
   listForms,
   getForm,
@@ -126,21 +125,11 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id } = params
 
-      try {
-        const definition = await getFormDefinition(id)
-
-        return definition
-      } catch (err) {
-        if (err instanceof FailedToReadFormError) {
-          return Boom.notFound(err.message, err)
-        }
-
-        throw err
-      }
+      return getFormDefinition(id)
     },
     options: {
       auth: false,
