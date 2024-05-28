@@ -168,7 +168,7 @@ export async function createLiveFromDraft(formId, author) {
   const form = await getForm(formId)
 
   if (!form.draft) {
-    throw Boom.badRequest(`Form with id '${formId}' has no draft state`)
+    throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
   }
 
   // Build the live state
@@ -221,7 +221,7 @@ export async function createDraftFromLive(formId, author) {
   const form = await getForm(formId)
 
   if (!form.live) {
-    throw Boom.badRequest(`Form with id '${formId}' not in a live state`)
+    throw Boom.badRequest(`Form with ID '${formId}' not in a live state`)
   }
 
   // Build the draft state
