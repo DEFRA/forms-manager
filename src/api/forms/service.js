@@ -195,7 +195,7 @@ export async function createLiveFromDraft(formId, author) {
 
   // Copy the draft form definition
   await draftFormDefinition.createLiveFromDraft(formId)
-  logger.info(`Live form created for form ID ${formId}`)
+  logger.info(`Live form definition created for form ID ${formId}`)
 
   // Update the form with the live state and clear the draft
   const result = await formMetadata.update(formId, {
@@ -210,7 +210,9 @@ export async function createLiveFromDraft(formId, author) {
     )
   }
 
-  logger.info(`Live form created and draft form removed for form ID ${formId}`)
+  logger.info(
+    `Live form metadata created and draft form metadata removed for form ID ${formId}`
+  )
 }
 
 /**
