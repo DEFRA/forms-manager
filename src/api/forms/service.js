@@ -29,13 +29,13 @@ function mapForm(document) {
 
 /**
  * Creates a new empty form
- * @param {FormMetadataInput} metadata - the form metadata to save
+ * @param {FormMetadataInput} metadataInput - the form metadata to save
  * @param {FormMetadataAuthor} author - the author details
  * @throws {FormAlreadyExistsError} - if the form slug already exists
  * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
-export async function createForm(metadata, author) {
-  const { title } = metadata
+export async function createForm(metadataInput, author) {
+  const { title } = metadataInput
 
   // Create a blank form definition with the title set
   const definition = { ...formTemplates.empty(), name: title }
@@ -43,8 +43,8 @@ export async function createForm(metadata, author) {
   // Validate the form definition
   const { error } = formDefinitionSchema.validate(definition)
   if (error) {
-    logger.warn(`Form failed validation: "${metadata.title}"`)
-    throw new InvalidFormDefinitionError(metadata.title, {
+    logger.warn(`Form failed validation: "${metadataInput.title}"`)
+    throw new InvalidFormDefinitionError(metadataInput.title, {
       cause: error
     })
   }
@@ -58,7 +58,7 @@ export async function createForm(metadata, author) {
    * @satisfies {FormMetadataDocument}
    */
   const document = {
-    ...metadata,
+    ...metadataInput,
     slug,
     draft: {
       createdAt: now,
@@ -70,14 +70,14 @@ export async function createForm(metadata, author) {
 
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
-  const createdForm = mapForm({ ...document, _id })
-  logger.info(`Form ${createdForm.id} created for form "${metadata.title}"`)
+  const metadata = mapForm({ ...document, _id })
+  logger.info(`Form ${metadata.id} created for form "${metadataInput.title}"`)
 
   // Create the draft form definition
-  await draftFormDefinition.create(_id.toString(), definition)
-  logger.info(`Draft form definition updated for form ID ${createdForm.id}`)
+  await draftFormDefinition.create(metadata.id, definition)
+  logger.info(`Draft form definition updated for form ID ${metadata.id}`)
 
-  return createdForm
+  return metadata
 }
 
 /**
