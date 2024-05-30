@@ -43,7 +43,7 @@
     "https-proxy-agent": "^7.0.4",
     "joi": "^17.13.1",
     "mongodb": "^6.6.2",
-    "pino": "^9.0.0",
+    "pino": "^9.1.0",
     "pino-pretty": "^11.1.0",
     "undici": "^6.18.2"
   },
