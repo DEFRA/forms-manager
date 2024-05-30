@@ -85,16 +85,7 @@ describe('Forms route', () => {
     conditions: [],
     sections: [],
     lists: [],
-    fees: [],
-    outputs: [],
-    feeOptions: {
-      paymentReferenceFormat: 'string',
-      payReturnUrl: 'string',
-      allowSubmissionWithoutPayment: true,
-      maxAttempts: 1,
-      customPayErrorMessage: 'string',
-      showPaymentSkippedWarningPage: true
-    }
+    outputs: []
   }
 
   const slug = stubFormMetadataOutput.slug

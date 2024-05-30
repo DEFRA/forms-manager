@@ -38,12 +38,6 @@ export function empty() {
       }
     ],
     lists: [],
-    feeOptions: {
-      maxAttempts: 1,
-      showPaymentSkippedWarningPage: false,
-      allowSubmissionWithoutPayment: true
-    },
-    fees: [],
     outputs: []
   })
 }
