@@ -24,6 +24,13 @@ updates:
           - 'lint-staged'
           - 'prettier'
 
+      logging:
+        patterns:
+          - '*-pino'
+          - '*-pino-format'
+          - 'pino'
+          - 'pino-*'
+
       tools:
         patterns:
           - 'jest'
