@@ -31,9 +31,9 @@ export class InvalidFormDefinitionError extends ApplicationError {
 }
 
 /**
- * Indicates the form provided does not match the Defra Forms JSON schema.
+ * Indicates the form metadata and/or definition could not be persisted.
  */
-export class FailedCreationOperationError extends ApplicationError {
+export class FormOperationFailedError extends ApplicationError {
   name = 'FailedCreationOperationError'
 
   /**
