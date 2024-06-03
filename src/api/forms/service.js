@@ -31,8 +31,6 @@ function mapForm(document) {
  * Creates a new empty form
  * @param {FormMetadataInput} metadataInput - the form metadata to save
  * @param {FormMetadataAuthor} author - the author details
- * @throws {FormAlreadyExistsError} - if the form slug already exists
- * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
 export async function createForm(metadataInput, author) {
   const { title } = metadataInput
