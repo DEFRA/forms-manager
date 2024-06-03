@@ -357,7 +357,7 @@ describe('Forms route', () => {
       }
     )
 
-    test('Testing POST /forms route with an slug that already exists returns 400 FormAlreadyExistsError', async () => {
+    test('Testing POST /forms route with a slug that already exists returns 400 FormAlreadyExistsError', async () => {
       jest
         .mocked(createForm)
         .mockRejectedValue(new FormAlreadyExistsError('my-title'))
@@ -415,10 +415,10 @@ describe('Forms route', () => {
       }
     )
 
-    test('Testing GET /forms/{id} route with an id that is not found returns 404 Not found', async () => {
+    test('Testing GET /forms/{id} route with an ID that is not found returns 404 Not found', async () => {
       jest
         .mocked(getForm)
-        .mockRejectedValue(Boom.notFound(`Form with slug '${id}' not found`))
+        .mockRejectedValue(Boom.notFound(`Form with ID '${id}' not found`))
 
       const response = await server.inject({
         method: 'GET',
@@ -429,11 +429,11 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Not Found',
-        message: `Form with slug '${id}' not found`
+        message: `Form with ID '${id}' not found`
       })
     })
 
-    test('Testing GET /forms/{slug} route with an id that is not found returns 404 Not found', async () => {
+    test('Testing GET /forms/{slug} route with a slug that is not found returns 404 Not found', async () => {
       jest
         .mocked(getFormBySlug)
         .mockRejectedValue(Boom.notFound(`Form with slug '${slug}' not found`))
