@@ -55,6 +55,8 @@ export async function createLiveFromDraft(id) {
 
   // Copy draft definition to live
   await copyObject(draftDefinitionFilename, liveDefinitionFilename)
+
+  logger.info(`Created live form definition for form ID ${id}`)
 }
 
 /**
@@ -67,6 +69,8 @@ export async function createDraftFromLive(id) {
 
   // Copy live definition to draft
   await copyObject(liveDefinitionFilename, draftDefinitionFilename)
+
+  logger.info(`Created draft form definition for form ID ${id}`)
 }
 
 /**

@@ -69,7 +69,6 @@ export async function createForm(metadataInput, author) {
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
   const metadata = mapForm({ ...document, _id })
-  logger.info(`Form ${metadata.id} created for form '${metadataInput.title}'`)
 
   // Create the draft form definition
   await draftFormDefinition.create(metadata.id, definition)
@@ -191,7 +190,6 @@ export async function createLiveFromDraft(formId, author) {
 
   // Copy the draft form definition
   await draftFormDefinition.createLiveFromDraft(formId)
-  logger.info(`Live form definition created for form ID ${formId}`)
 
   // Update the form with the live state and clear the draft
   const result = await formMetadata.update(formId, {
@@ -237,7 +235,6 @@ export async function createDraftFromLive(formId, author) {
 
   // Copy the draft form definition
   await draftFormDefinition.createDraftFromLive(formId)
-  logger.info(`Draft form definition created for form ID ${formId}`)
 
   // Update the form with the new draft state
   const result = await formMetadata.update(formId, { $set: set })

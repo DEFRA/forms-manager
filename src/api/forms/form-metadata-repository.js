@@ -3,8 +3,11 @@ import { MongoServerError, ObjectId } from 'mongodb'
 import { FormAlreadyExistsError } from './errors.js'
 
 import { db, COLLECTION_NAME } from '~/src/db.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
 
 export const MAX_RESULTS = 500
+
+const logger = createLogger()
 
 /**
  * Retrieves the list of documents from the database
@@ -52,6 +55,9 @@ export async function create(document) {
 
   try {
     const result = await coll.insertOne(document)
+    const formId = result.insertedId.toString()
+
+    logger.info(`Form with slug ${document.slug} created as form ID ${formId}`)
 
     return result
   } catch (err) {
