@@ -156,6 +156,10 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       `Updating form definition (draft) for form ID ${formId} failed`
     )
 
+    if (!Boom.isBoom(cause)) {
+      throw Boom.internal(error)
+    }
+
     throw error
   }
 }
@@ -212,6 +216,10 @@ export async function createLiveFromDraft(formId, author) {
 
     logger.error(error, `Make draft live for form ID ${formId} failed`)
 
+    if (!Boom.isBoom(cause)) {
+      throw Boom.internal(error)
+    }
+
     throw error
   }
 }
@@ -257,6 +265,10 @@ export async function createDraftFromLive(formId, author) {
     const error = new FormOperationFailedError({ cause })
 
     logger.error(error, `Create draft to edit for form ID ${formId} failed`)
+
+    if (!Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
 
     throw error
   }

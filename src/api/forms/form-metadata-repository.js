@@ -45,6 +45,10 @@ export async function get(formId) {
   } catch (error) {
     logger.error(error, `Getting form with ID ${formId} failed`)
 
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.badRequest(error)
+    }
+
     throw error
   }
 }
@@ -72,6 +76,10 @@ export async function getBySlug(slug) {
     return document
   } catch (error) {
     logger.error(error, `Getting form with slug ${slug} failed`)
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
 
     throw error
   }
@@ -137,6 +145,10 @@ export async function update(formId, update) {
     return result
   } catch (error) {
     logger.error(error, `Updating form with ID ${formId} failed`)
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
 
     throw error
   }

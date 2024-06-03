@@ -82,6 +82,10 @@ export async function createDraftFromLive(id) {
       `Copying form definition (live to draft) for form ID ${id} failed`
     )
 
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
+
     throw error
   }
 
@@ -111,6 +115,10 @@ export async function get(formId, state = 'draft') {
       error,
       `Getting form definition (${state}) for form ID ${formId} failed`
     )
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
 
     throw error
   }
