@@ -106,6 +106,13 @@ export async function update(formId, update) {
 
   const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
 
+  // Throw if updated record count is not 1
+  if (result.modifiedCount !== 1) {
+    throw Boom.badRequest(
+      `Form with ID ${formId} not updated. Modified count ${result.modifiedCount}`
+    )
+  }
+
   logger.info(`Form with ID ${formId} updated`)
 
   return result

@@ -136,19 +136,12 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
   // Update the `updatedAt/By` fields of the draft state
   const now = new Date()
-  const result = await formMetadata.update(formId, {
+  await formMetadata.update(formId, {
     $set: {
       'draft.updatedAt': now,
       'draft.updatedBy': author
     }
   })
-
-  // Throw if updated record count is not 1
-  if (result.modifiedCount !== 1) {
-    throw Boom.badRequest(
-      `Draft state not updated. Modified count ${result.modifiedCount}`
-    )
-  }
 
   logger.info(`Updated form metadata (draft) for form ID ${formId}`)
 }
@@ -192,17 +185,10 @@ export async function createLiveFromDraft(formId, author) {
   logger.info(`Removing form metadata (draft) for form ID ${formId}`)
 
   // Update the form with the live state and clear the draft
-  const result = await formMetadata.update(formId, {
+  await formMetadata.update(formId, {
     $set: set,
     $unset: { draft: '' }
   })
-
-  // Throw if updated record count is not 1
-  if (result.modifiedCount !== 1) {
-    throw Boom.badRequest(
-      `Live state not created from draft. Modified count ${result.modifiedCount}`
-    )
-  }
 
   logger.info(`Removed form metadata (draft) for form ID ${formId}`)
   logger.info(`Made draft live for form ID ${formId}`)
@@ -240,14 +226,7 @@ export async function createDraftFromLive(formId, author) {
   logger.info(`Adding form metadata (draft) for form ID ${formId}`)
 
   // Update the form with the new draft state
-  const result = await formMetadata.update(formId, { $set: set })
-
-  // Throw if updated record count is not 1
-  if (result.modifiedCount !== 1) {
-    throw Boom.badRequest(
-      `Draft state not created from draft. Modified count ${result.modifiedCount}`
-    )
-  }
+  await formMetadata.update(formId, { $set: set })
 
   logger.info(`Added form metadata (draft) for form ID ${formId}`)
   logger.info(`Created draft to edit for form ID ${formId}`)
