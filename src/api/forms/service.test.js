@@ -2,7 +2,10 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import {
+  FormOperationFailedError,
+  InvalidFormDefinitionError
+} from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import {
   createForm,
@@ -178,7 +181,7 @@ describe('Forms service', () => {
 
       await expect(
         updateDraftFormDefinition('123', formDefinition, author)
-      ).rejects.toThrow(error)
+      ).rejects.toThrow(new FormOperationFailedError({ cause: error }))
     })
   })
 })
