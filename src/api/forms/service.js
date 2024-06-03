@@ -122,11 +122,11 @@ export function getFormDefinition(formId, state = 'draft') {
 export async function updateDraftFormDefinition(formId, definition, author) {
   logger.info(`Updating form definition (draft) for form ID ${formId}`)
 
-  const existingForm = await getForm(formId)
+  // Get the form metadata from the db
+  const form = await getForm(formId)
 
-  // Throw if there's no current draft state
-  if (!existingForm.draft) {
-    throw Boom.badRequest(`No 'draft' state found for form metadata ${formId}`)
+  if (!form.draft) {
+    throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
   }
 
   // Update the form definition
@@ -206,7 +206,7 @@ export async function createDraftFromLive(formId, author) {
   const form = await getForm(formId)
 
   if (!form.live) {
-    throw Boom.badRequest(`Form with ID '${formId}' not in a live state`)
+    throw Boom.badRequest(`Form with ID '${formId}' has no live state`)
   }
 
   // Build the draft state
