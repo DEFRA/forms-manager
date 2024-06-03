@@ -92,10 +92,6 @@ export async function listForms() {
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
 
-  if (!document) {
-    throw Boom.notFound(`Form with ID '${formId}' not found`)
-  }
-
   return mapForm(document)
 }
 
@@ -105,10 +101,6 @@ export async function getForm(formId) {
  */
 export async function getFormBySlug(slug) {
   const document = await formMetadata.getBySlug(slug)
-
-  if (!document) {
-    throw Boom.notFound(`Form with slug '${slug}' not found`)
-  }
 
   return mapForm(document)
 }

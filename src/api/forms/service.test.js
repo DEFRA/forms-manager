@@ -172,11 +172,13 @@ describe('Forms service', () => {
     })
 
     it('should throw an error if the form associated with the definition does not exist', async () => {
-      jest.mocked(draftFormDefinition.get).mockRejectedValue(new Error())
+      const error = Boom.notFound("Form with ID '123' not found")
+
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
 
       await expect(
         updateDraftFormDefinition('123', formDefinition, author)
-      ).rejects.toThrow(Boom.notFound("Form with ID '123' not found"))
+      ).rejects.toThrow(error)
     })
   })
 })

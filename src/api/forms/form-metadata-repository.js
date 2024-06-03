@@ -1,3 +1,4 @@
+import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from './errors.js'
@@ -33,6 +34,10 @@ export async function get(formId) {
 
   const document = await coll.findOne({ _id: new ObjectId(formId) })
 
+  if (!document) {
+    throw Boom.notFound(`Form with ID '${formId}' not found`)
+  }
+
   logger.info(`Form with ID ${formId} found`)
 
   return document
@@ -50,6 +55,10 @@ export async function getBySlug(slug) {
   )
 
   const document = await coll.findOne({ slug })
+
+  if (!document) {
+    throw Boom.notFound(`Form with slug '${slug}' not found`)
+  }
 
   logger.info(`Form with slug ${slug} found`)
 
