@@ -70,11 +70,20 @@ export async function createLiveFromDraft(id) {
 export async function createDraftFromLive(id) {
   logger.info(`Copying form definition (live to draft) for form ID ${id}`)
 
-  const draftDefinitionFilename = getFormDefinitionFilename(id)
-  const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
+  try {
+    const draftDefinitionFilename = getFormDefinitionFilename(id)
+    const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
 
-  // Copy live definition to draft
-  await copyObject(liveDefinitionFilename, draftDefinitionFilename)
+    // Copy live definition to draft
+    await copyObject(liveDefinitionFilename, draftDefinitionFilename)
+  } catch (error) {
+    logger.error(
+      error,
+      `Copying form definition (live to draft) for form ID ${id} failed`
+    )
+
+    throw error
+  }
 
   logger.info(`Copied form definition (live to draft) for form ID ${id}`)
 }
@@ -87,15 +96,24 @@ export async function createDraftFromLive(id) {
 export async function get(formId, state = 'draft') {
   logger.info(`Getting form definition (${state}) for form ID ${formId}`)
 
-  const filename = getFormDefinitionFilename(formId, state)
-  const body = await retrieveFromS3(filename)
+  try {
+    const filename = getFormDefinitionFilename(formId, state)
+    const body = await retrieveFromS3(filename)
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow JSON type 'any'
-  const definition = /** @type {FormDefinition} */ (JSON.parse(body))
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow JSON type 'any'
+    const definition = /** @type {FormDefinition} */ (JSON.parse(body))
 
-  logger.info(`Form definition (${state}) for form ID ${formId} found`)
+    logger.info(`Form definition (${state}) for form ID ${formId} found`)
 
-  return definition
+    return definition
+  } catch (error) {
+    logger.error(
+      error,
+      `Getting form definition (${state}) for form ID ${formId} failed`
+    )
+
+    throw error
+  }
 }
 
 /**
