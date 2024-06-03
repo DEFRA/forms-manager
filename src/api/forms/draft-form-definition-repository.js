@@ -115,17 +115,29 @@ function uploadToS3(filename, fileContent) {
 
 /**
  * Copy an S3 object
- * @param {string} source - the source file key
- * @param {string} destination - the destination file key
+ * @param {string} filename - the source filename
+ * @param {string} destination - the destination filename
  */
-function copyObject(source, destination) {
+async function copyObject(filename, destination) {
+  const source = `${formBucketName}/${filename}`
+
+  logger.info(`Copying from '${source}' to '${destination}'`)
+
   const command = new CopyObjectCommand({
     Bucket: formBucketName,
     Key: destination,
-    CopySource: `${formBucketName}/${source}`
+    CopySource: `${formBucketName}/${filename}`
   })
 
-  return getS3Client().send(command)
+  try {
+    const response = await getS3Client().send(command)
+    logger.info(`Copied from '${source}' to '${destination}'`)
+
+    return response
+  } catch (error) {
+    logger.error(error, `Copying from '${source}' to '${destination}' failed`)
+    throw error
+  }
 }
 
 /**
@@ -133,6 +145,10 @@ function copyObject(source, destination) {
  * @param {string} filename - the file name to read`
  */
 async function retrieveFromS3(filename) {
+  const source = `${formBucketName}/${filename}`
+
+  logger.info(`Retrieving from '${source}'`)
+
   const command = new GetObjectCommand({
     Bucket: formBucketName,
     Key: filename
@@ -147,14 +163,23 @@ async function retrieveFromS3(filename) {
       )
     }
 
+    logger.info(`Retrieved from '${source}'`)
+
     return response.Body.transformToString()
   } catch (cause) {
+    const message = `Retrieving from '${source}' failed`
+
     if (cause instanceof NoSuchKey) {
-      throw Boom.notFound(
-        `Form definition does not exist on disk at path ${filename}`
+      const error = new Error(
+        `Form definition does not exist on disk at path ${filename}`,
+        { cause }
       )
+
+      logger.error(error, message)
+      throw Boom.notFound(error)
     }
 
+    logger.error(cause, message)
     throw cause
   }
 }
