@@ -32,15 +32,21 @@ export async function get(formId) {
     db.collection(COLLECTION_NAME)
   )
 
-  const document = await coll.findOne({ _id: new ObjectId(formId) })
+  try {
+    const document = await coll.findOne({ _id: new ObjectId(formId) })
 
-  if (!document) {
-    throw Boom.notFound(`Form with ID '${formId}' not found`)
+    if (!document) {
+      throw Boom.notFound(`Form with ID '${formId}' not found`)
+    }
+
+    logger.info(`Form with ID ${formId} found`)
+
+    return document
+  } catch (error) {
+    logger.error(error, `Getting form with ID ${formId} failed`)
+
+    throw error
   }
-
-  logger.info(`Form with ID ${formId} found`)
-
-  return document
 }
 
 /**
@@ -54,15 +60,21 @@ export async function getBySlug(slug) {
     db.collection(COLLECTION_NAME)
   )
 
-  const document = await coll.findOne({ slug })
+  try {
+    const document = await coll.findOne({ slug })
 
-  if (!document) {
-    throw Boom.notFound(`Form with slug '${slug}' not found`)
+    if (!document) {
+      throw Boom.notFound(`Form with slug '${slug}' not found`)
+    }
+
+    logger.info(`Form with slug ${slug} found`)
+
+    return document
+  } catch (error) {
+    logger.error(error, `Getting form with slug ${slug} failed`)
+
+    throw error
   }
-
-  logger.info(`Form with slug ${slug} found`)
-
-  return document
 }
 
 /**
@@ -84,6 +96,8 @@ export async function create(document) {
 
     return result
   } catch (err) {
+    logger.error(err, `Creating form with slug ${document.slug} failed`)
+
     if (err instanceof MongoServerError && err.code === 11000) {
       throw new FormAlreadyExistsError(document.slug)
     }
@@ -104,18 +118,24 @@ export async function update(formId, update) {
     db.collection(COLLECTION_NAME)
   )
 
-  const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
+  try {
+    const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
 
-  // Throw if updated record count is not 1
-  if (result.modifiedCount !== 1) {
-    throw Boom.badRequest(
-      `Form with ID ${formId} not updated. Modified count ${result.modifiedCount}`
-    )
+    // Throw if updated record count is not 1
+    if (result.modifiedCount !== 1) {
+      throw Boom.badRequest(
+        `Form with ID ${formId} not updated. Modified count ${result.modifiedCount}`
+      )
+    }
+
+    logger.info(`Form with ID ${formId} updated`)
+
+    return result
+  } catch (error) {
+    logger.error(error, `Updating form with ID ${formId} failed`)
+
+    throw error
   }
-
-  logger.info(`Form with ID ${formId} updated`)
-
-  return result
 }
 
 /**
