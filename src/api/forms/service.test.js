@@ -12,14 +12,6 @@ import {
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 
-const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-const authorDisplayName = 'Enrique Chase'
-
-/**
- * @satisfies {FormMetadataAuthor}
- */
-const author = { id: authorId, displayName: authorDisplayName }
-
 jest.mock('~/src/api/forms/draft-form-definition-repository.js')
 jest.mock('~/src/api/forms/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
@@ -27,175 +19,176 @@ jest.mock('~/src/api/forms/templates.js')
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
-describe('createLiveFromDraft', () => {
-  /** @type {string} */
-  let id
+
+describe('Forms service', () => {
+  const id = '661e4ca5039739ef2902b214'
+  const slug = 'test-form'
+
+  /**
+   * @satisfies {FormMetadataAuthor}
+   */
+  const author = {
+    id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc',
+    displayName: 'Enrique Chase'
+  }
+
+  /**
+   * @satisfies {FormMetadataInput}
+   */
+  const formMetadataInput = {
+    title: 'Test form',
+    organisation: 'Defra',
+    teamName: 'Defra Forms',
+    teamEmail: 'defraforms@defra.gov.uk'
+  }
+
+  /**
+   * @satisfies {FormMetadata}
+   */
+  const formMetadataOutput = {
+    ...formMetadataInput,
+    id,
+    slug,
+    draft: {
+      createdAt: expect.any(Date),
+      createdBy: author,
+      updatedAt: expect.any(Date),
+      updatedBy: author
+    }
+  }
+
+  /**
+   * @satisfies {WithId<FormMetadataDocument>}
+   */
+  const formMetadataDocument = {
+    ...formMetadataInput,
+    _id: new ObjectId(id),
+    slug: formMetadataOutput.slug,
+    draft: formMetadataOutput.draft
+  }
+
+  const formDefinition = actualEmptyForm()
 
   beforeEach(() => {
-    id = '661e4ca5039739ef2902b214'
+    jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+  })
 
-    const formMetadataOutput = {
-      _id: new ObjectId(id),
-      slug: 'test-form',
-      title: 'Test form',
-      organisation: 'Defra',
-      teamName: 'Defra Forms',
-      teamEmail: 'defraforms@defra.gov.uk',
-      draft: {
-        createdAt: expect.any(Date),
-        createdBy: author,
-        updatedAt: expect.any(Date),
-        updatedBy: author
-      }
-    }
-    jest.mocked(draftFormDefinition.createLiveFromDraft).mockResolvedValue()
-    jest.mocked(formMetadata.update).mockResolvedValue({
-      acknowledged: true,
-      modifiedCount: 1,
-      matchedCount: 1,
-      upsertedCount: 0,
-      upsertedId: null
+  describe('createLiveFromDraft', () => {
+    beforeEach(() => {
+      jest.mocked(draftFormDefinition.createLiveFromDraft).mockResolvedValue()
+      jest.mocked(formMetadata.update).mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null
+      })
     })
-    jest.mocked(formMetadata.get).mockResolvedValue(formMetadataOutput)
-  })
 
-  test('should create a live state from existing draft form', async () => {
-    await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
-  })
-})
-
-describe('createForm', () => {
-  /** @type {string} */
-  let id
-
-  beforeEach(() => {
-    id = '661e4ca5039739ef2902b214'
-
-    jest.mocked(draftFormDefinition.create).mockResolvedValue()
-    jest.mocked(formTemplates.empty).mockReturnValue(actualEmptyForm())
-    jest.mocked(formMetadata.create).mockResolvedValue({
-      acknowledged: true,
-      insertedId: new ObjectId(id)
+    test('should create a live state from existing draft form', async () => {
+      await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
   })
 
-  test('should create a new form', async () => {
-    const formMetadataInput = {
-      title: 'Test form',
-      organisation: 'Defra',
-      teamName: 'Defra Forms',
-      teamEmail: 'defraforms@defra.gov.uk'
-    }
+  describe('createForm', () => {
+    beforeEach(() => {
+      jest.mocked(draftFormDefinition.create).mockResolvedValue()
+      jest.mocked(formTemplates.empty).mockReturnValue(formDefinition)
+      jest.mocked(formMetadata.create).mockResolvedValue({
+        acknowledged: true,
+        insertedId: new ObjectId(id)
+      })
+    })
 
-    const formMetadataOutput = {
-      id,
-      slug: 'test-form',
-      title: 'Test form',
-      organisation: 'Defra',
-      teamName: 'Defra Forms',
-      teamEmail: 'defraforms@defra.gov.uk',
-      draft: {
-        createdAt: expect.any(Date),
-        createdBy: author,
-        updatedAt: expect.any(Date),
-        updatedBy: author
+    test('should create a new form', async () => {
+      await expect(createForm(formMetadataInput, author)).resolves.toEqual(
+        formMetadataOutput
+      )
+    })
+
+    test('should create a new form without special characters in the name', async () => {
+      const input = {
+        ...formMetadataInput,
+        title: 'A !Super! Duper Form -    from Defra...'
       }
-    }
 
-    await expect(createForm(formMetadataInput, author)).resolves.toEqual(
-      formMetadataOutput
-    )
-  })
-
-  test('should create a new form without special characters in the name', async () => {
-    const formMetadataInput = {
-      title: 'A !Super! Duper Form -    from Defra...',
-      organisation: 'Defra',
-      teamName: 'Defra Forms',
-      teamEmail: 'defraforms@defra.gov.uk'
-    }
-
-    const formMetadataOutput = {
-      id,
-      slug: 'a-super-duper-form-from-defra',
-      title: 'A !Super! Duper Form -    from Defra...',
-      organisation: 'Defra',
-      teamName: 'Defra Forms',
-      teamEmail: 'defraforms@defra.gov.uk',
-      draft: {
-        createdAt: expect.any(Date),
-        createdBy: author,
-        updatedAt: expect.any(Date),
-        updatedBy: author
+      const output = {
+        ...formMetadataOutput,
+        slug: 'a-super-duper-form-from-defra',
+        title: 'A !Super! Duper Form -    from Defra...'
       }
-    }
 
-    await expect(createForm(formMetadataInput, author)).resolves.toEqual(
-      formMetadataOutput
-    )
-  })
+      await expect(createForm(input, author)).resolves.toEqual(output)
+    })
 
-  it('should throw an error when schema validation fails', async () => {
-    // @ts-expect-error - Allow invalid form definition for test
-    jest.mocked(formTemplates.empty).mockReturnValueOnce({})
+    it('should throw an error when schema validation fails', async () => {
+      // @ts-expect-error - Allow invalid form definition for test
+      jest.mocked(formTemplates.empty).mockReturnValueOnce({})
 
-    const formMetadataInput = {
-      title: 'My Form',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
-    }
+      const input = {
+        ...formMetadataInput,
+        organisation: '',
+        teamName: '',
+        teamEmail: ''
+      }
 
-    await expect(createForm(formMetadataInput, author)).rejects.toThrow(
-      InvalidFormDefinitionError
-    )
-  })
+      await expect(createForm(input, author)).rejects.toThrow(
+        InvalidFormDefinitionError
+      )
+    })
 
-  it('should throw an error when writing for metadata fails', async () => {
-    jest.mocked(formMetadata.create).mockRejectedValueOnce(new Error())
+    it('should throw an error when writing for metadata fails', async () => {
+      jest.mocked(formMetadata.create).mockRejectedValueOnce(new Error())
 
-    const formMetadataInput = {
-      title: 'My Form',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
-    }
+      const input = {
+        ...formMetadataInput,
+        organisation: '',
+        teamName: '',
+        teamEmail: ''
+      }
 
-    await expect(createForm(formMetadataInput, author)).rejects.toThrow()
-  })
+      await expect(createForm(input, author)).rejects.toThrow()
+    })
 
-  it('should throw an error when writing form def fails', async () => {
-    jest.mocked(draftFormDefinition.create).mockRejectedValueOnce(new Error())
+    it('should throw an error when writing form def fails', async () => {
+      jest.mocked(draftFormDefinition.create).mockRejectedValueOnce(new Error())
 
-    const formMetadataInput = {
-      title: 'My Form',
-      organisation: '',
-      teamName: '',
-      teamEmail: ''
-    }
+      const input = {
+        ...formMetadataInput,
+        organisation: '',
+        teamName: '',
+        teamEmail: ''
+      }
 
-    await expect(createForm(formMetadataInput, author)).rejects.toThrow()
-  })
+      await expect(createForm(input, author)).rejects.toThrow()
+    })
 
-  it('should return the form definition', async () => {
-    const formDef = actualEmptyForm()
+    it('should return the form definition', async () => {
+      jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(formDefinition)
 
-    jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(formDef)
+      await expect(getFormDefinition('123')).resolves.toMatchObject(
+        formDefinition
+      )
+    })
 
-    await expect(getFormDefinition('123')).resolves.toMatchObject(
-      actualEmptyForm()
-    )
-  })
+    it('should throw an error if the form associated with the definition does not exist', async () => {
+      jest.mocked(draftFormDefinition.get).mockRejectedValue(new Error())
 
-  it('should throw an error if the form associated with the definition does not exist', async () => {
-    jest.mocked(draftFormDefinition.get).mockRejectedValue(new Error())
-
-    await expect(
-      updateDraftFormDefinition('123', actualEmptyForm(), author)
-    ).rejects.toThrow(Boom.notFound("Form with ID '123' not found"))
+      await expect(
+        updateDraftFormDefinition('123', formDefinition, author)
+      ).rejects.toThrow(Boom.notFound("Form with ID '123' not found"))
+    })
   })
 })
 
 /**
+ * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
+ * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
+ * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ */
+
+/**
+ * @template {object} Schema
+ * @typedef {import('mongodb').WithId<Schema>} WithId
  */
