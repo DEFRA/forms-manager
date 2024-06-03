@@ -34,6 +34,8 @@ function getFormDefinitionFilename(formId, state = 'draft') {
  * @param {FormDefinition} formDefinition - form definition (JSON object)
  */
 export async function create(id, formDefinition) {
+  logger.info(`Creating form definition (draft) for form ID ${id}`)
+
   const formDefinitionFilename = getFormDefinitionFilename(id)
 
   // Convert form definition to JSON string
@@ -42,7 +44,7 @@ export async function create(id, formDefinition) {
   // Write formDefinition to file
   await uploadToS3(formDefinitionFilename, formDefinitionString)
 
-  logger.info(`Draft form definition updated for form ID ${id}`)
+  logger.info(`Created form definition (draft) for form ID ${id}`)
 }
 
 /**
@@ -50,13 +52,15 @@ export async function create(id, formDefinition) {
  * @param {string} id - id
  */
 export async function createLiveFromDraft(id) {
+  logger.info(`Copying form definition (draft to live) for form ID ${id}`)
+
   const draftDefinitionFilename = getFormDefinitionFilename(id)
   const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
 
   // Copy draft definition to live
   await copyObject(draftDefinitionFilename, liveDefinitionFilename)
 
-  logger.info(`Created live form definition for form ID ${id}`)
+  logger.info(`Copied form definition (draft to live) for form ID ${id}`)
 }
 
 /**
@@ -64,13 +68,15 @@ export async function createLiveFromDraft(id) {
  * @param {string} id - id
  */
 export async function createDraftFromLive(id) {
+  logger.info(`Copying form definition (live to draft) for form ID ${id}`)
+
   const draftDefinitionFilename = getFormDefinitionFilename(id)
   const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
 
   // Copy live definition to draft
   await copyObject(liveDefinitionFilename, draftDefinitionFilename)
 
-  logger.info(`Created draft form definition for form ID ${id}`)
+  logger.info(`Copied form definition (live to draft) for form ID ${id}`)
 }
 
 /**
@@ -79,11 +85,17 @@ export async function createDraftFromLive(id) {
  * @param {'draft' | 'live'} state - the form state
  */
 export async function get(formId, state = 'draft') {
+  logger.info(`Getting form definition (${state}) for form ID ${formId}`)
+
   const filename = getFormDefinitionFilename(formId, state)
   const body = await retrieveFromS3(filename)
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
-  return /** @type {FormDefinition} */ (JSON.parse(body))
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow JSON type 'any'
+  const definition = /** @type {FormDefinition} */ (JSON.parse(body))
+
+  logger.info(`Form definition (${state}) for form ID ${formId} found`)
+
+  return definition
 }
 
 /**

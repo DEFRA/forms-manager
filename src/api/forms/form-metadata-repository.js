@@ -24,24 +24,36 @@ export function list() {
  * Retrieves a form metadata by ID
  * @param {string} formId - ID of the form
  */
-export function get(formId) {
+export async function get(formId) {
+  logger.info(`Getting form with ID ${formId}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
-  return coll.findOne({ _id: new ObjectId(formId) })
+  const document = await coll.findOne({ _id: new ObjectId(formId) })
+
+  logger.info(`Form with ID ${formId} found`)
+
+  return document
 }
 
 /**
  * Retrieves a form metadata by slug
  * @param {string} slug - The slug of the form
  */
-export function getBySlug(slug) {
+export async function getBySlug(slug) {
+  logger.info(`Getting form with slug ${slug}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
-  return coll.findOne({ slug })
+  const document = await coll.findOne({ slug })
+
+  logger.info(`Form with slug ${slug} found`)
+
+  return document
 }
 
 /**
@@ -49,6 +61,8 @@ export function getBySlug(slug) {
  * @param {FormMetadataDocument} document - form metadata document
  */
 export async function create(document) {
+  logger.info(`Creating form with slug ${document.slug}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
@@ -75,11 +89,15 @@ export async function create(document) {
  * @param {UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
  */
 export async function update(formId, update) {
+  logger.info(`Updating form with ID ${formId}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
   const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
+
+  logger.info(`Form with ID ${formId} updated`)
 
   return result
 }

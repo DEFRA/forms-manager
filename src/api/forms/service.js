@@ -128,6 +128,8 @@ export function getFormDefinition(formId, state = 'draft') {
  * @param {FormMetadataAuthor} author - the author details
  */
 export async function updateDraftFormDefinition(formId, definition, author) {
+  logger.info(`Updating form definition (draft) for form ID ${formId}`)
+
   const existingForm = await getForm(formId)
 
   // Throw if there's no current draft state
@@ -137,6 +139,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
   // Update the form definition
   await draftFormDefinition.create(formId, definition)
+
+  logger.info(`Updating form metadata (draft) for form ID ${formId}`)
 
   // Update the `updatedAt/By` fields of the draft state
   const now = new Date()
@@ -154,7 +158,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     )
   }
 
-  logger.info(`Draft form metadata updated for form ID ${formId}`)
+  logger.info(`Updated form metadata (draft) for form ID ${formId}`)
 }
 
 /**
@@ -163,6 +167,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
  * @param {FormMetadataAuthor} author - the author of the new live state
  */
 export async function createLiveFromDraft(formId, author) {
+  logger.info(`Make draft live for form ID ${formId}`)
+
   // Get the form metadata from the db
   const form = await getForm(formId)
 
@@ -191,6 +197,8 @@ export async function createLiveFromDraft(formId, author) {
   // Copy the draft form definition
   await draftFormDefinition.createLiveFromDraft(formId)
 
+  logger.info(`Removing form metadata (draft) for form ID ${formId}`)
+
   // Update the form with the live state and clear the draft
   const result = await formMetadata.update(formId, {
     $set: set,
@@ -204,9 +212,8 @@ export async function createLiveFromDraft(formId, author) {
     )
   }
 
-  logger.info(
-    `Live form metadata created and draft form metadata removed for form ID ${formId}`
-  )
+  logger.info(`Removed form metadata (draft) for form ID ${formId}`)
+  logger.info(`Made draft live for form ID ${formId}`)
 }
 
 /**
@@ -215,6 +222,8 @@ export async function createLiveFromDraft(formId, author) {
  * @param {FormMetadataAuthor} author - the author of the new draft
  */
 export async function createDraftFromLive(formId, author) {
+  logger.info(`Create draft to edit for form ID ${formId}`)
+
   // Get the form metadata from the db
   const form = await getForm(formId)
 
@@ -236,6 +245,8 @@ export async function createDraftFromLive(formId, author) {
   // Copy the draft form definition
   await draftFormDefinition.createDraftFromLive(formId)
 
+  logger.info(`Adding form metadata (draft) for form ID ${formId}`)
+
   // Update the form with the new draft state
   const result = await formMetadata.update(formId, { $set: set })
 
@@ -246,7 +257,8 @@ export async function createDraftFromLive(formId, author) {
     )
   }
 
-  logger.info(`Draft form metadata created for form ID ${formId}`)
+  logger.info(`Added form metadata (draft) for form ID ${formId}`)
+  logger.info(`Created draft to edit for form ID ${formId}`)
 }
 
 /**
