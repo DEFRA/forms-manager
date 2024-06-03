@@ -95,14 +95,18 @@ export async function create(document) {
     logger.info(`Form with slug ${document.slug} created as form ID ${formId}`)
 
     return result
-  } catch (err) {
-    logger.error(err, `Creating form with slug ${document.slug} failed`)
+  } catch (cause) {
+    const message = `Creating form with slug ${document.slug} failed`
 
-    if (err instanceof MongoServerError && err.code === 11000) {
-      throw new FormAlreadyExistsError(document.slug)
+    if (cause instanceof MongoServerError && cause.code === 11000) {
+      const error = new FormAlreadyExistsError(document.slug, { cause })
+
+      logger.error(error, message)
+      throw Boom.badRequest(error)
     }
 
-    throw err
+    logger.error(cause, message)
+    throw cause
   }
 }
 
