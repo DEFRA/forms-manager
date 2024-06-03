@@ -249,7 +249,7 @@ export async function createDraftFromLive(formId, author) {
     )
   }
 
-  logger.info(`Draft form metadata updated for form ID ${formId}`)
+  logger.info(`Draft form metadata created for form ID ${formId}`)
 }
 
 /**
