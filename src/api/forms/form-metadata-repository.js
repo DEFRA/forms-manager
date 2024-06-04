@@ -1,10 +1,14 @@
+import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from './errors.js'
 
 import { db, COLLECTION_NAME } from '~/src/db.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
 
 export const MAX_RESULTS = 500
+
+const logger = createLogger()
 
 /**
  * Retrieves the list of documents from the database
@@ -21,24 +25,64 @@ export function list() {
  * Retrieves a form metadata by ID
  * @param {string} formId - ID of the form
  */
-export function get(formId) {
+export async function get(formId) {
+  logger.info(`Getting form with ID ${formId}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
-  return coll.findOne({ _id: new ObjectId(formId) })
+  try {
+    const document = await coll.findOne({ _id: new ObjectId(formId) })
+
+    if (!document) {
+      throw Boom.notFound(`Form with ID '${formId}' not found`)
+    }
+
+    logger.info(`Form with ID ${formId} found`)
+
+    return document
+  } catch (error) {
+    logger.error(error, `Getting form with ID ${formId} failed`)
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.badRequest(error)
+    }
+
+    throw error
+  }
 }
 
 /**
  * Retrieves a form metadata by slug
  * @param {string} slug - The slug of the form
  */
-export function getBySlug(slug) {
+export async function getBySlug(slug) {
+  logger.info(`Getting form with slug ${slug}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
-  return coll.findOne({ slug })
+  try {
+    const document = await coll.findOne({ slug })
+
+    if (!document) {
+      throw Boom.notFound(`Form with slug '${slug}' not found`)
+    }
+
+    logger.info(`Form with slug ${slug} found`)
+
+    return document
+  } catch (error) {
+    logger.error(error, `Getting form with slug ${slug} failed`)
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
+
+    throw error
+  }
 }
 
 /**
@@ -46,20 +90,31 @@ export function getBySlug(slug) {
  * @param {FormMetadataDocument} document - form metadata document
  */
 export async function create(document) {
+  logger.info(`Creating form with slug ${document.slug}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
   try {
     const result = await coll.insertOne(document)
+    const formId = result.insertedId.toString()
+
+    logger.info(`Form with slug ${document.slug} created as form ID ${formId}`)
 
     return result
-  } catch (err) {
-    if (err instanceof MongoServerError && err.code === 11000) {
-      throw new FormAlreadyExistsError(document.slug)
+  } catch (cause) {
+    const message = `Creating form with slug ${document.slug} failed`
+
+    if (cause instanceof MongoServerError && cause.code === 11000) {
+      const error = new FormAlreadyExistsError(document.slug, { cause })
+
+      logger.error(error, message)
+      throw Boom.badRequest(error)
     }
 
-    throw err
+    logger.error(cause, message)
+    throw cause
   }
 }
 
@@ -69,13 +124,34 @@ export async function create(document) {
  * @param {UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
  */
 export async function update(formId, update) {
+  logger.info(`Updating form with ID ${formId}`)
+
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
     db.collection(COLLECTION_NAME)
   )
 
-  const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
+  try {
+    const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
 
-  return result
+    // Throw if updated record count is not 1
+    if (result.modifiedCount !== 1) {
+      throw Boom.badRequest(
+        `Form with ID ${formId} not updated. Modified count ${result.modifiedCount}`
+      )
+    }
+
+    logger.info(`Form with ID ${formId} updated`)
+
+    return result
+  } catch (error) {
+    logger.error(error, `Updating form with ID ${formId} failed`)
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
+
+    throw error
+  }
 }
 
 /**

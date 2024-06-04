@@ -3,13 +3,16 @@ import { join } from 'node:path'
 import {
   S3Client,
   PutObjectCommand,
-  GetObjectCommand,
   NoSuchKey,
-  CopyObjectCommand
+  CopyObjectCommand,
+  GetObjectCommand
 } from '@aws-sdk/client-s3'
+import Boom from '@hapi/boom'
 
-import { FailedToReadFormError } from '~/src/api/forms/errors.js'
 import { config } from '~/src/config/index.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 const s3Region = config.get('s3Region')
 const formBucketName = config.get('formDefinitionBucketName')
@@ -31,6 +34,8 @@ function getFormDefinitionFilename(formId, state = 'draft') {
  * @param {FormDefinition} formDefinition - form definition (JSON object)
  */
 export async function create(id, formDefinition) {
+  logger.info(`Creating form definition (draft) for form ID ${id}`)
+
   const formDefinitionFilename = getFormDefinitionFilename(id)
 
   // Convert form definition to JSON string
@@ -38,6 +43,8 @@ export async function create(id, formDefinition) {
 
   // Write formDefinition to file
   await uploadToS3(formDefinitionFilename, formDefinitionString)
+
+  logger.info(`Created form definition (draft) for form ID ${id}`)
 }
 
 /**
@@ -45,11 +52,15 @@ export async function create(id, formDefinition) {
  * @param {string} id - id
  */
 export async function createLiveFromDraft(id) {
+  logger.info(`Copying form definition (draft to live) for form ID ${id}`)
+
   const draftDefinitionFilename = getFormDefinitionFilename(id)
   const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
 
   // Copy draft definition to live
   await copyObject(draftDefinitionFilename, liveDefinitionFilename)
+
+  logger.info(`Copied form definition (draft to live) for form ID ${id}`)
 }
 
 /**
@@ -57,11 +68,28 @@ export async function createLiveFromDraft(id) {
  * @param {string} id - id
  */
 export async function createDraftFromLive(id) {
-  const draftDefinitionFilename = getFormDefinitionFilename(id)
-  const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
+  logger.info(`Copying form definition (live to draft) for form ID ${id}`)
 
-  // Copy live definition to draft
-  await copyObject(liveDefinitionFilename, draftDefinitionFilename)
+  try {
+    const draftDefinitionFilename = getFormDefinitionFilename(id)
+    const liveDefinitionFilename = getFormDefinitionFilename(id, 'live')
+
+    // Copy live definition to draft
+    await copyObject(liveDefinitionFilename, draftDefinitionFilename)
+  } catch (error) {
+    logger.error(
+      error,
+      `Copying form definition (live to draft) for form ID ${id} failed`
+    )
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
+
+    throw error
+  }
+
+  logger.info(`Copied form definition (live to draft) for form ID ${id}`)
 }
 
 /**
@@ -70,11 +98,30 @@ export async function createDraftFromLive(id) {
  * @param {'draft' | 'live'} state - the form state
  */
 export async function get(formId, state = 'draft') {
-  const filename = getFormDefinitionFilename(formId, state)
-  const body = await retrieveFromS3(filename)
+  logger.info(`Getting form definition (${state}) for form ID ${formId}`)
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Allow JSON type 'any'
-  return /** @type {FormDefinition} */ (JSON.parse(body))
+  try {
+    const filename = getFormDefinitionFilename(formId, state)
+    const body = await retrieveFromS3(filename)
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow JSON type 'any'
+    const definition = /** @type {FormDefinition} */ (JSON.parse(body))
+
+    logger.info(`Form definition (${state}) for form ID ${formId} found`)
+
+    return definition
+  } catch (error) {
+    logger.error(
+      error,
+      `Getting form definition (${state}) for form ID ${formId} failed`
+    )
+
+    if (error instanceof Error && !Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
+
+    throw error
+  }
 }
 
 /**
@@ -94,25 +141,40 @@ function uploadToS3(filename, fileContent) {
 
 /**
  * Copy an S3 object
- * @param {string} source - the source file key
- * @param {string} destination - the destination file key
+ * @param {string} filename - the source filename
+ * @param {string} destination - the destination filename
  */
-function copyObject(source, destination) {
+async function copyObject(filename, destination) {
+  const source = `${formBucketName}/${filename}`
+
+  logger.info(`Copying from '${source}' to '${destination}'`)
+
   const command = new CopyObjectCommand({
     Bucket: formBucketName,
     Key: destination,
-    CopySource: `${formBucketName}/${source}`
+    CopySource: `${formBucketName}/${filename}`
   })
 
-  return getS3Client().send(command)
+  try {
+    const response = await getS3Client().send(command)
+    logger.info(`Copied from '${source}' to '${destination}'`)
+
+    return response
+  } catch (error) {
+    logger.error(error, `Copying from '${source}' to '${destination}' failed`)
+    throw error
+  }
 }
 
 /**
  * Retrieves filename content from an S3 bucket
  * @param {string} filename - the file name to read`
- * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 async function retrieveFromS3(filename) {
+  const source = `${formBucketName}/${filename}`
+
+  logger.info(`Retrieving from '${source}'`)
+
   const command = new GetObjectCommand({
     Bucket: formBucketName,
     Key: filename
@@ -122,16 +184,29 @@ async function retrieveFromS3(filename) {
     const response = await getS3Client().send(command)
 
     if (!response.Body) {
-      throw new FailedToReadFormError('Form definition does exist but is empty')
+      throw Boom.notFound(
+        `Form definition does exist but is empty at path ${filename}`
+      )
     }
+
+    logger.info(`Retrieved from '${source}'`)
 
     return response.Body.transformToString()
-  } catch (err) {
-    if (err instanceof NoSuchKey) {
-      throw new FailedToReadFormError('Form definition does not exist on disk')
+  } catch (cause) {
+    const message = `Retrieving from '${source}' failed`
+
+    if (cause instanceof NoSuchKey) {
+      const error = new Error(
+        `Form definition does not exist on disk at path ${filename}`,
+        { cause }
+      )
+
+      logger.error(error, message)
+      throw Boom.notFound(error)
     }
 
-    throw err
+    logger.error(cause, message)
+    throw cause
   }
 }
 

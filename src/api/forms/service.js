@@ -2,9 +2,15 @@ import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import {
+  FormOperationFailedError,
+  InvalidFormDefinitionError
+} from '~/src/api/forms/errors.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
+
+const logger = createLogger()
 
 /**
  * Maps a form metadata document from MongoDB to form metadata
@@ -26,13 +32,11 @@ function mapForm(document) {
 
 /**
  * Creates a new empty form
- * @param {FormMetadataInput} metadata - the form metadata to save
+ * @param {FormMetadataInput} metadataInput - the form metadata to save
  * @param {FormMetadataAuthor} author - the author details
- * @throws {FormAlreadyExistsError} - if the form slug already exists
- * @throws {InvalidFormDefinitionError} - if the form definition is invalid
  */
-export async function createForm(metadata, author) {
-  const { title } = metadata
+export async function createForm(metadataInput, author) {
+  const { title } = metadataInput
 
   // Create a blank form definition with the title set
   const definition = { ...formTemplates.empty(), name: title }
@@ -40,7 +44,8 @@ export async function createForm(metadata, author) {
   // Validate the form definition
   const { error } = formDefinitionSchema.validate(definition)
   if (error) {
-    throw new InvalidFormDefinitionError(error.message, {
+    logger.warn(`Form failed validation: '${metadataInput.title}'`)
+    throw new InvalidFormDefinitionError(metadataInput.title, {
       cause: error
     })
   }
@@ -54,7 +59,7 @@ export async function createForm(metadata, author) {
    * @satisfies {FormMetadataDocument}
    */
   const document = {
-    ...metadata,
+    ...metadataInput,
     slug,
     draft: {
       createdAt: now,
@@ -66,11 +71,12 @@ export async function createForm(metadata, author) {
 
   // Create the metadata document
   const { insertedId: _id } = await formMetadata.create(document)
+  const metadata = mapForm({ ...document, _id })
 
   // Create the draft form definition
-  await draftFormDefinition.create(_id.toString(), definition)
+  await draftFormDefinition.create(metadata.id, definition)
 
-  return mapForm({ ...document, _id })
+  return metadata
 }
 
 /**
@@ -89,9 +95,7 @@ export async function listForms() {
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
 
-  if (document) {
-    return mapForm(document)
-  }
+  return mapForm(document)
 }
 
 /**
@@ -101,16 +105,13 @@ export async function getForm(formId) {
 export async function getFormBySlug(slug) {
   const document = await formMetadata.getBySlug(slug)
 
-  if (document) {
-    return mapForm(document)
-  }
+  return mapForm(document)
 }
 
 /**
  * Retrieves the form definition JSON content for a given form ID
  * @param {string} formId - the ID of the form
  * @param {'draft' | 'live'} state - the form state
- * @throws {FailedToReadFormError} - if the file does not exist or is empty
  */
 export function getFormDefinition(formId, state = 'draft') {
   return draftFormDefinition.get(formId, state)
@@ -122,36 +123,44 @@ export function getFormDefinition(formId, state = 'draft') {
  * @param {FormMetadataAuthor} author - the author details
  */
 export async function updateDraftFormDefinition(formId, definition, author) {
-  const existingForm = await getForm(formId)
+  logger.info(`Updating form definition (draft) for form ID ${formId}`)
 
-  if (!existingForm) {
-    throw Boom.notFound(
-      `Form ${formId} does not exist, so the definition cannot be updated.`
-    )
-  }
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
 
-  // Throw if there's no current draft state
-  if (!existingForm.draft) {
-    throw Boom.badRequest(`No 'draft' state found for form metadata ${formId}`)
-  }
-
-  // Update the form definition
-  await draftFormDefinition.create(formId, definition)
-
-  // Update the `updatedAt/By` fields of the draft state
-  const now = new Date()
-  const result = await formMetadata.update(formId, {
-    $set: {
-      'draft.updatedAt': now,
-      'draft.updatedBy': author
+    if (!form.draft) {
+      throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
     }
-  })
 
-  // Throw if updated record count is not 1
-  if (result.modifiedCount !== 1) {
-    throw Boom.badRequest(
-      `Draft state not updated. Modified count ${result.modifiedCount}`
+    // Update the form definition
+    await draftFormDefinition.create(formId, definition)
+
+    logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+
+    // Update the `updatedAt/By` fields of the draft state
+    const now = new Date()
+    await formMetadata.update(formId, {
+      $set: {
+        'draft.updatedAt': now,
+        'draft.updatedBy': author
+      }
+    })
+
+    logger.info(`Updated form metadata (draft) for form ID ${formId}`)
+  } catch (cause) {
+    const error = new FormOperationFailedError({ cause })
+
+    logger.error(
+      error,
+      `Updating form definition (draft) for form ID ${formId} failed`
     )
+
+    if (!Boom.isBoom(cause)) {
+      throw Boom.internal(error)
+    }
+
+    throw error
   }
 }
 
@@ -161,49 +170,57 @@ export async function updateDraftFormDefinition(formId, definition, author) {
  * @param {FormMetadataAuthor} author - the author of the new live state
  */
 export async function createLiveFromDraft(formId, author) {
-  // Get the form metadata from the db
-  const form = await getForm(formId)
+  logger.info(`Make draft live for form ID ${formId}`)
 
-  if (!form) {
-    throw Boom.notFound(`Form with id '${formId}' not found`)
-  }
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
 
-  if (!form.draft) {
-    throw Boom.badRequest(`Form with id '${formId}' has no draft state`)
-  }
+    if (!form.draft) {
+      throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
+    }
 
-  // Build the live state
-  const now = new Date()
-  const set = !form.live
-    ? {
-        // Initialise the live state
-        live: {
-          updatedAt: now,
-          updatedBy: author,
-          createdAt: now,
-          createdBy: author
+    // Build the live state
+    const now = new Date()
+    const set = !form.live
+      ? {
+          // Initialise the live state
+          live: {
+            updatedAt: now,
+            updatedBy: author,
+            createdAt: now,
+            createdBy: author
+          }
         }
-      }
-    : {
-        // Partially update the live state
-        'live.updatedAt': now,
-        'live.updatedBy': author
-      }
+      : {
+          // Partially update the live state
+          'live.updatedAt': now,
+          'live.updatedBy': author
+        }
 
-  // Copy the draft form definition
-  await draftFormDefinition.createLiveFromDraft(formId)
+    // Copy the draft form definition
+    await draftFormDefinition.createLiveFromDraft(formId)
 
-  // Update the form with the live state and clear the draft
-  const result = await formMetadata.update(formId, {
-    $set: set,
-    $unset: { draft: '' }
-  })
+    logger.info(`Removing form metadata (draft) for form ID ${formId}`)
 
-  // Throw if updated record count is not 1
-  if (result.modifiedCount !== 1) {
-    throw Boom.badRequest(
-      `Live state not created from draft. Modified count ${result.modifiedCount}`
-    )
+    // Update the form with the live state and clear the draft
+    await formMetadata.update(formId, {
+      $set: set,
+      $unset: { draft: '' }
+    })
+
+    logger.info(`Removed form metadata (draft) for form ID ${formId}`)
+    logger.info(`Made draft live for form ID ${formId}`)
+  } catch (cause) {
+    const error = new FormOperationFailedError({ cause })
+
+    logger.error(error, `Make draft live for form ID ${formId} failed`)
+
+    if (!Boom.isBoom(cause)) {
+      throw Boom.internal(error)
+    }
+
+    throw error
   }
 }
 
@@ -213,39 +230,47 @@ export async function createLiveFromDraft(formId, author) {
  * @param {FormMetadataAuthor} author - the author of the new draft
  */
 export async function createDraftFromLive(formId, author) {
-  // Get the form metadata from the db
-  const form = await getForm(formId)
+  logger.info(`Create draft to edit for form ID ${formId}`)
 
-  if (!form) {
-    throw Boom.notFound(`Form with id '${formId}' not found`)
-  }
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
 
-  if (!form.live) {
-    throw Boom.badRequest(`Form with id '${formId}' not in a live state`)
-  }
-
-  // Build the draft state
-  const now = new Date()
-  const set = {
-    draft: {
-      updatedAt: now,
-      updatedBy: author,
-      createdAt: now,
-      createdBy: author
+    if (!form.live) {
+      throw Boom.badRequest(`Form with ID '${formId}' has no live state`)
     }
-  }
 
-  // Copy the draft form definition
-  await draftFormDefinition.createDraftFromLive(formId)
+    // Build the draft state
+    const now = new Date()
+    const set = {
+      draft: {
+        updatedAt: now,
+        updatedBy: author,
+        createdAt: now,
+        createdBy: author
+      }
+    }
 
-  // Update the form with the new draft state
-  const result = await formMetadata.update(formId, { $set: set })
+    // Copy the draft form definition
+    await draftFormDefinition.createDraftFromLive(formId)
 
-  // Throw if updated record count is not 1
-  if (result.modifiedCount !== 1) {
-    throw Boom.badRequest(
-      `Draft state not created from draft. Modified count ${result.modifiedCount}`
-    )
+    logger.info(`Adding form metadata (draft) for form ID ${formId}`)
+
+    // Update the form with the new draft state
+    await formMetadata.update(formId, { $set: set })
+
+    logger.info(`Added form metadata (draft) for form ID ${formId}`)
+    logger.info(`Created draft to edit for form ID ${formId}`)
+  } catch (cause) {
+    const error = new FormOperationFailedError({ cause })
+
+    logger.error(error, `Create draft to edit for form ID ${formId} failed`)
+
+    if (!Boom.isBoom(error)) {
+      throw Boom.internal(error)
+    }
+
+    throw error
   }
 }
 

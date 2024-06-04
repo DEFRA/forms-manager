@@ -1,7 +1,5 @@
 import Boom from '@hapi/boom'
 
-import { FailedToReadFormError } from '../api/forms/errors.js'
-
 import {
   listForms,
   getForm,
@@ -78,16 +76,11 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id } = params
-      const form = await getForm(id)
 
-      if (!form) {
-        return Boom.notFound(`Form with id '${id}' not found`)
-      }
-
-      return form
+      return getForm(id)
     },
     options: {
       auth: false,
@@ -102,16 +95,11 @@ export default [
     /**
      * @param {RequestFormBySlug} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { slug } = params
-      const form = await getFormBySlug(slug)
 
-      if (!form) {
-        return Boom.notFound(`Form with slug '${slug}' not found`)
-      }
-
-      return form
+      return getFormBySlug(slug)
     },
     options: {
       auth: false,
@@ -126,21 +114,11 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id } = params
 
-      try {
-        const definition = await getFormDefinition(id)
-
-        return definition
-      } catch (err) {
-        if (err instanceof FailedToReadFormError) {
-          return Boom.notFound(err.message, err)
-        }
-
-        throw err
-      }
+      return getFormDefinition(id)
     },
     options: {
       auth: false,
@@ -178,21 +156,11 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id } = params
 
-      try {
-        const definition = await getFormDefinition(id, 'live')
-
-        return definition
-      } catch (err) {
-        if (err instanceof FailedToReadFormError) {
-          return Boom.notFound(err.message, err)
-        }
-
-        throw err
-      }
+      return getFormDefinition(id, 'live')
     },
     options: {
       auth: false,

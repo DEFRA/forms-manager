@@ -11,8 +11,6 @@ import { sdkStreamMixin } from '@smithy/util-stream'
 import { mockClient } from 'aws-sdk-client-mock'
 
 import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import { FailedToReadFormError } from '~/src/api/forms/errors.js'
-
 const s3Mock = mockClient(S3Client)
 const id = '661e4ca5039739ef2902b214'
 
@@ -93,30 +91,28 @@ describe('Get forms from S3', () => {
     await expect(result).resolves.toStrictEqual(dummyFormDefinition)
   })
 
-  test('should throw FailedToReadFormError if form definition is empty', async () => {
+  test('should throw not found if form definition is empty', async () => {
     s3Mock.on(GetObjectCommand).resolvesOnce({ Body: undefined })
 
     await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
-      FailedToReadFormError
+      'Form definition does exist but is empty at path forms/draft/any-form-id.json'
     )
   })
 
-  test('should throw FailedToReadFormError if form definition does not exist on disk', async () => {
+  test('should throw not found if form definition does not exist on disk', async () => {
     s3Mock
       .on(GetObjectCommand)
       .rejectsOnce(new NoSuchKey({ $metadata: {}, message: 'dummy error' }))
 
     await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
-      FailedToReadFormError
+      'Form definition does not exist on disk at path forms/draft/any-form-id.json'
     )
   })
 
   test('should throw error if an unexpected error occurs', async () => {
     s3Mock.on(GetObjectCommand).rejectsOnce(new Error())
 
-    await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow(
-      Error
-    )
+    await expect(() => draftFormDefinition.get('any-form-id')).rejects.toThrow()
   })
 })
 
