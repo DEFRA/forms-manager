@@ -1,4 +1,3 @@
-import Boom from '@hapi/boom'
 import Jwt from '@hapi/jwt'
 
 import { config } from '../config/index.js'
@@ -39,7 +38,9 @@ export const auth = {
           const user = artifacts.decoded.payload
 
           if (!user) {
-            throw Boom.internal('User in not defined in token artifacts')
+            return {
+              isValid: false
+            }
           }
 
           const groups = Array.isArray(user.groups) ? user.groups : []
