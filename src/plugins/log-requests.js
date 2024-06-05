@@ -18,7 +18,6 @@ export const logRequests = {
         const { user } = request.auth.credentials
 
         if (
-          'user' in request.auth.credentials &&
           user &&
           'unique_name' in user &&
           typeof user.unique_name === 'string'
