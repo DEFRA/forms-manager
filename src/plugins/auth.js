@@ -1,3 +1,4 @@
+import Boom from '@hapi/boom'
 import Jwt from '@hapi/jwt'
 
 import { config } from '../config/index.js'
@@ -32,24 +33,31 @@ export const auth = {
           exp: true
         },
         /**
-         * @param {Artifacts<UserProfile>} artifacts
+         * @param {Artifacts<UserProfile & { unique_name: string }>} artifacts
          */
         validate: (artifacts) => {
           const user = artifacts.decoded.payload
-          const groups = Array.isArray(user?.groups) ? user.groups : []
 
-          logger.debug(`Validating user against groups: ${groups.join(', ')}`)
+          if (!user) {
+            throw Boom.internal('User in not defined in token artifacts')
+          }
+
+          const groups = Array.isArray(user.groups) ? user.groups : []
+
+          logger.debug(
+            `User ${user.unique_name}: validating against groups: ${groups.join(', ')}`
+          )
 
           if (!groups.includes(roleEditorGroupId)) {
             logger.warn(
-              `User failed authorisation. "${roleEditorGroupId}" not in groups.`
+              `User ${user.unique_name}: failed authorisation. "${roleEditorGroupId}" not in groups.`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug('User passed authorisation')
+          logger.debug(`User ${user.unique_name}: passed authorisation`)
           return {
             isValid: true,
             credentials: { user }
