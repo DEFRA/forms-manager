@@ -33,7 +33,7 @@ export const auth = {
           exp: true
         },
         /**
-         * @param {Artifacts<UserProfile & { unique_name: string }>} artifacts
+         * @param {Artifacts<UserProfile>} artifacts
          */
         validate: (artifacts) => {
           const user = artifacts.decoded.payload
@@ -73,7 +73,7 @@ export const auth = {
 
 /**
  * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
- * @typedef {import('oidc-client-ts').UserProfile & { groups?: string[] }} UserProfile
+ * @typedef {import('oidc-client-ts').UserProfile & { groups?: string[], unique_name: string }} UserProfile
  */
 /**
  * @template {object} Payload
