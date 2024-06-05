@@ -34,10 +34,4 @@ export const logRequests = {
 /**
  * @typedef {import('hapi-pino').Options} Options
  * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<Options>} HapiPinoServerRegisterOptions
- * @typedef {import('~/src/plugins/auth.js').UserProfile} UserProfile
- */
-
-/**
- * @template {import('@hapi/hapi').ReqRef} [ReqRef=import('@hapi/hapi').ReqRefDefaults]
- * @typedef {import('@hapi/hapi').Request<ReqRef>} Request
  */
