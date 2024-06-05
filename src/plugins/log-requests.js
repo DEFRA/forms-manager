@@ -12,16 +12,19 @@ export const logRequests = {
     log4xxResponseErrors: true,
     logRequestComplete: true,
     customRequestCompleteMessage(request, responseTime) {
-      const { user } = request.auth.credentials
-
       let userPrefix = ''
 
-      if (
-        user &&
-        'unique_name' in user &&
-        typeof user.unique_name === 'string'
-      ) {
-        userPrefix = ` [${user.unique_name}] `
+      if (request.auth.isAuthenticated) {
+        const { user } = request.auth.credentials
+
+        if (
+          'user' in request.auth.credentials &&
+          user &&
+          'unique_name' in user &&
+          typeof user.unique_name === 'string'
+        ) {
+          userPrefix = ` [${user.unique_name}] `
+        }
       }
 
       return `[response]${userPrefix} ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)`
