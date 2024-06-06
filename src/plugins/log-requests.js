@@ -19,10 +19,10 @@ export const logRequests = {
 
         if (
           user &&
-          'unique_name' in user &&
-          typeof user.unique_name === 'string'
+          'preferred_username' in user &&
+          typeof user.preferred_username === 'string'
         ) {
-          userPrefix = ` [${user.unique_name}] `
+          userPrefix = ` [${user.preferred_username}] `
         }
       }
 
