@@ -46,19 +46,19 @@ export const auth = {
           const groups = Array.isArray(user.groups) ? user.groups : []
 
           logger.debug(
-            `User ${user.unique_name}: validating against groups: ${groups.join(', ')}`
+            `User ${user.preferred_username}: validating against groups: ${groups.join(', ')}`
           )
 
           if (!groups.includes(roleEditorGroupId)) {
             logger.warn(
-              `User ${user.unique_name}: failed authorisation. "${roleEditorGroupId}" not in groups.`
+              `User ${user.preferred_username}: failed authorisation. "${roleEditorGroupId}" not in groups.`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${user.unique_name}: passed authorisation`)
+          logger.debug(`User ${user.preferred_username}: passed authorisation`)
           return {
             isValid: true,
             credentials: { user }
@@ -74,7 +74,7 @@ export const auth = {
 
 /**
  * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
- * @typedef {import('oidc-client-ts').UserProfile & { groups?: string[], unique_name: string }} UserProfile
+ * @typedef {import('oidc-client-ts').UserProfile & { groups?: string[] }} UserProfile
  */
 /**
  * @template {object} Payload
