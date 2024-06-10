@@ -61,7 +61,7 @@ export const auth = {
 
           if (!groups.includes(roleEditorGroupId)) {
             logger.warn(
-              `User ${preferredUsername}: failed authorisation. "${roleEditorGroupId}" not in groups.`
+              `User ${preferredUsername}: failed authorisation. "${roleEditorGroupId}" not in groups`
             )
             return {
               isValid: false
