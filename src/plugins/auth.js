@@ -43,22 +43,23 @@ export const auth = {
             }
           }
 
-          const groups = Array.isArray(user.groups) ? user.groups : []
+          const { groups = [] } = user
+          const { preferred_username: preferredUsername } = user
 
           logger.debug(
-            `User ${user.preferred_username}: validating against groups: ${groups.join(', ')}`
+            `User ${preferredUsername}: validating against groups: ${groups.join(', ')}`
           )
 
           if (!groups.includes(roleEditorGroupId)) {
             logger.warn(
-              `User ${user.preferred_username}: failed authorisation. "${roleEditorGroupId}" not in groups.`
+              `User ${preferredUsername}: failed authorisation. "${roleEditorGroupId}" not in groups.`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${user.preferred_username}: passed authorisation`)
+          logger.debug(`User ${preferredUsername}: passed authorisation`)
           return {
             isValid: true,
             credentials: { user }
