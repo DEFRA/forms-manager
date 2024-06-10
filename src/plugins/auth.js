@@ -56,7 +56,7 @@ export const auth = {
           }
 
           logger.debug(
-            `User ${preferredUsername}: validating against groups: ${groups.join(', ')}`
+            `User ${preferredUsername}: validating against groups: ${groups.length ? groups.join(', ') : '[]'}`
           )
 
           if (!groups.includes(roleEditorGroupId)) {
