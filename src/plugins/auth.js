@@ -36,20 +36,29 @@ export const auth = {
          */
         validate: (artifacts) => {
           const user = artifacts.decoded.payload
-          const groups = Array.isArray(user?.groups) ? user.groups : []
 
-          logger.debug(`Validating user against groups: ${groups.join(', ')}`)
+          if (!user) {
+            return {
+              isValid: false
+            }
+          }
+
+          const groups = Array.isArray(user.groups) ? user.groups : []
+
+          logger.debug(
+            `User ${user.preferred_username}: validating against groups: ${groups.join(', ')}`
+          )
 
           if (!groups.includes(roleEditorGroupId)) {
             logger.warn(
-              `User failed authorisation. "${roleEditorGroupId}" not in groups.`
+              `User ${user.preferred_username}: failed authorisation. "${roleEditorGroupId}" not in groups.`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug('User passed authorisation')
+          logger.debug(`User ${user.preferred_username}: passed authorisation`)
           return {
             isValid: true,
             credentials: { user }
