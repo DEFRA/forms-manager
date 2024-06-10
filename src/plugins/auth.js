@@ -38,27 +38,37 @@ export const auth = {
           const user = artifacts.decoded.payload
 
           if (!user) {
+            logger.error('Authentication error: Missing user')
             return {
               isValid: false
             }
           }
 
-          const groups = Array.isArray(user.groups) ? user.groups : []
+          const { preferred_username: preferredUsername, groups = [] } = user
 
-          logger.debug(
-            `User ${user.preferred_username}: validating against groups: ${groups.join(', ')}`
-          )
-
-          if (!groups.includes(roleEditorGroupId)) {
-            logger.warn(
-              `User ${user.preferred_username}: failed authorisation. "${roleEditorGroupId}" not in groups.`
+          if (!preferredUsername) {
+            logger.error(
+              'Authentication error: Missing preferred_username'
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${user.preferred_username}: passed authorisation`)
+          logger.debug(
+            `User ${preferredUsername}: validating against groups: ${groups.length ? groups.join(', ') : '[]'}`
+          )
+
+          if (!groups.includes(roleEditorGroupId)) {
+            logger.warn(
+              `User ${preferredUsername}: failed authorisation. "${roleEditorGroupId}" not in groups`
+            )
+            return {
+              isValid: false
+            }
+          }
+
+          logger.debug(`User ${preferredUsername}: passed authorisation`)
           return {
             isValid: true,
             credentials: { user }
