@@ -38,13 +38,22 @@ export const auth = {
           const user = artifacts.decoded.payload
 
           if (!user) {
+            logger.error("Couldn't validate auth. User is missing.")
             return {
               isValid: false
             }
           }
 
-          const { groups = [] } = user
-          const { preferred_username: preferredUsername } = user
+          const { preferred_username: preferredUsername, groups = [] } = user
+
+          if (!preferredUsername) {
+            logger.error(
+              "Couldn't validate auth. preferred_username is missing."
+            )
+            return {
+              isValid: false
+            }
+          }
 
           logger.debug(
             `User ${preferredUsername}: validating against groups: ${groups.join(', ')}`
