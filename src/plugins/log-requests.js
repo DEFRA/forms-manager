@@ -12,13 +12,14 @@ export const logRequests = {
     log4xxResponseErrors: true,
     logRequestComplete: true,
     customRequestCompleteMessage(request, responseTime) {
+      const { credentials, isAuthenticated } = request.auth
+
       let userPrefix = ''
 
-      if (request.auth.isAuthenticated) {
-        const { user } = request.auth.credentials
+      if (isAuthenticated && credentials.user) {
+        const { user } = credentials
 
         if (
-          user &&
           'preferred_username' in user &&
           typeof user.preferred_username === 'string'
         ) {
