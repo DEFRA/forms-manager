@@ -48,7 +48,7 @@ export const auth = {
 
           if (!preferredUsername) {
             logger.error(
-              "Couldn't validate auth. preferred_username is missing."
+              'Authentication error: Missing preferred_username'
             )
             return {
               isValid: false
