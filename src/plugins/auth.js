@@ -38,7 +38,7 @@ export const auth = {
           const user = artifacts.decoded.payload
 
           if (!user) {
-            logger.error("Couldn't validate auth. User is missing.")
+            logger.error('Authentication error: Missing user')
             return {
               isValid: false
             }
