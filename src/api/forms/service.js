@@ -89,7 +89,7 @@ export async function createForm(metadataInput, author) {
   }
 
   if (!metadata) {
-    throw Boom.badRequest('No metadata creating in the transaction')
+    throw Boom.badRequest('No metadata created in the transaction')
   }
 
   return metadata
