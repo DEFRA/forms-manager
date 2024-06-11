@@ -71,6 +71,8 @@ export async function createForm(metadataInput, author) {
   }
 
   const session = client.startSession()
+
+  /** @type {FormMetadata | undefined} */
   let metadata
 
   try {
@@ -84,6 +86,10 @@ export async function createForm(metadataInput, author) {
     })
   } finally {
     await session.endSession()
+  }
+
+  if (!metadata) {
+    throw Boom.badRequest('No metadata creating in the transaction')
   }
 
   return metadata
