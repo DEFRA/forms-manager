@@ -25,7 +25,7 @@ const dummyFormDefinition = {
     {
       path: '/page-one',
       title: 'Page one',
-      controller: './pages/summary.js',
+      controller: 'SummaryPageController',
       section: 'section',
       components: [
         {
