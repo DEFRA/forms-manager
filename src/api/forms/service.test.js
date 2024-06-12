@@ -82,10 +82,14 @@ describe('Forms service', () => {
 
   beforeEach(() => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
-    jest.mocked(client).startSession.mockReturnValue({
-      withTransaction: jest.fn((cb) => cb()),
-      endSession: jest.fn()
-    })
+    const session = /** @type {ClientSession} */ (
+      /** @type {unknown} */ ({
+        withTransaction: jest.fn((cb) => cb()),
+        endSession: jest.fn()
+      })
+    )
+
+    jest.mocked(client).startSession.mockReturnValue(session)
   })
 
   describe('createLiveFromDraft', () => {
@@ -201,6 +205,7 @@ describe('Forms service', () => {
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ * @typedef {import('mongodb').ClientSession} ClientSession
  */
 
 /**
