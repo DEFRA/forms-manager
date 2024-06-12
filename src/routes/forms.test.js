@@ -78,7 +78,6 @@ describe('Forms route', () => {
    */
   const stubFormDefinition = {
     name: '',
-    startPage: '/page-one',
     pages: [],
     conditions: [],
     sections: [],

@@ -35,8 +35,7 @@ export function empty() {
     sections: [
       {
         name: 'section',
-        title: 'Section title',
-        hideTitle: false
+        title: 'Section title'
       }
     ],
     lists: []
