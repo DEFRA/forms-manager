@@ -65,7 +65,7 @@ FORM_DEF_BUCKET_NAME=form-definition-storage
 S3_ENDPOINT=http://localhost:4566
 AWS_ACCESS_KEY_ID=dummy
 AWS_SECRET_ACCESS_KEY=dummy
-MONGO_URI='mongodb://defra:changeme@localhost:27017/'
+MONGO_URI='mongodb://localhost:27017/?replicaSet=rs0&directConnection=true'
 ```
 
 ### Development
