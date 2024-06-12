@@ -7,6 +7,7 @@ import {
   PutObjectCommand,
   CopyObjectCommand
 } from '@aws-sdk/client-s3'
+import { ComponentType } from '@defra/forms-model'
 import { sdkStreamMixin } from '@smithy/util-stream'
 import { mockClient } from 'aws-sdk-client-mock'
 
@@ -24,11 +25,10 @@ const dummyFormDefinition = {
     {
       path: '/page-one',
       title: 'Page one',
-      controller: './pages/summary.js',
       section: 'section',
       components: [
         {
-          type: 'TextField',
+          type: ComponentType.TextField,
           name: 'textField',
           title: 'This is your first field',
           hint: 'Help text',
@@ -42,12 +42,10 @@ const dummyFormDefinition = {
   sections: [
     {
       name: 'section',
-      title: 'Section title',
-      hideTitle: false
+      title: 'Section title'
     }
   ],
-  lists: [],
-  outputs: []
+  lists: []
 }
 
 describe('Create forms in S3', () => {

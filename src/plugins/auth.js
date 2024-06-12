@@ -47,9 +47,7 @@ export const auth = {
           const { preferred_username: preferredUsername, groups = [] } = user
 
           if (!preferredUsername) {
-            logger.error(
-              'Authentication error: Missing preferred_username'
-            )
+            logger.error('Authentication error: Missing preferred_username')
             return {
               isValid: false
             }

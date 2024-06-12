@@ -1,3 +1,5 @@
+import { ComponentType } from '@defra/forms-model'
+
 /**
  * Function to return an empty form
  */
@@ -12,7 +14,7 @@ export function empty() {
         section: 'section',
         components: [
           {
-            type: 'TextField',
+            type: ComponentType.TextField,
             name: 'textField',
             title: 'This is your first field',
             hint: 'Help text',
@@ -25,7 +27,7 @@ export function empty() {
       {
         title: 'Summary',
         path: '/summary',
-        controller: './pages/summary.js',
+        controller: 'SummaryPageController',
         components: []
       }
     ],
@@ -33,12 +35,10 @@ export function empty() {
     sections: [
       {
         name: 'section',
-        title: 'Section title',
-        hideTitle: false
+        title: 'Section title'
       }
     ],
-    lists: [],
-    outputs: []
+    lists: []
   })
 }
 

@@ -78,12 +78,10 @@ describe('Forms route', () => {
    */
   const stubFormDefinition = {
     name: '',
-    startPage: '/page-one',
     pages: [],
     conditions: [],
     sections: [],
-    lists: [],
-    outputs: []
+    lists: []
   }
 
   const slug = stubFormMetadataOutput.slug
