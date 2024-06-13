@@ -6,7 +6,7 @@ import { ComponentType } from '@defra/forms-model'
 export function empty() {
   return /** @satisfies {FormDefinition} */ ({
     name: '',
-    startPage: '/page-one',
+    startPage: '/random-page',
     pages: [
       {
         path: '/page-one',

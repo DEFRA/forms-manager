@@ -1,6 +1,8 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
+import { getStartPage } from './form-fixers.js'
+
 import {
   FormOperationFailedError,
   InvalidFormDefinitionError
@@ -149,9 +151,18 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
     }
 
-    // some definition attributes shouldn't be customised by users, so patch
-    // them on every write to prevent imported forms drifting (e.g. JSON upload)
+    /*
+     * Some definition attributes shouldn't be customised by users, so patch
+     * them on every write to prevent imported forms drifting (e.g. JSON upload).
+     */
     definition.name = form.title
+
+    /*
+     * Start pages can change. They might be renamed or the user might even create their own
+     * separate branch and decide to delete the original start page on the form. We can detect
+     * the branch if possible and set it on the definition, rather than letting it break.
+     */
+    definition.startPage = getStartPage(definition)
 
     const session = client.startSession()
 

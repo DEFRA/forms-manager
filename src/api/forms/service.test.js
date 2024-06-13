@@ -7,6 +7,7 @@ import {
   InvalidFormDefinitionError
 } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
+import { getStartPage } from '~/src/api/forms/form-fixers.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import {
   createForm,
@@ -49,6 +50,7 @@ jest.mock('~/src/mongo.js', () => {
     }
   }
 })
+jest.mock('~/src/api/forms/form-fixers.js')
 
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
@@ -208,6 +210,8 @@ describe('Forms service', () => {
     })
 
     it('should update the draft form definition with required attributes upon creation', async () => {
+      jest.mocked(getStartPage).mockReturnValueOnce('/page-one')
+
       const formDefinitionCustomisedTitle = actualEmptyForm()
       formDefinitionCustomisedTitle.name =
         "A custom form name that shouldn't be allowed"
@@ -221,12 +225,8 @@ describe('Forms service', () => {
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
       )
-    })
 
-    it('should update the draft form definition with required attributes upon creation', async () => {
-      await updateDraftFormDefinition('123', formDefinition, author)
-
-      expect(formDefinition.name).toBe(formMetadataDocument.title)
+      expect(formDefinitionCustomisedTitle.startPage).toBe('/page-one')
     })
 
     it('should throw an error if the form associated with the definition does not exist', async () => {
