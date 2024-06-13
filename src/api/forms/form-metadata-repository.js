@@ -3,8 +3,8 @@ import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from './errors.js'
 
-import { db, COLLECTION_NAME } from '~/src/db.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
+import { db, METADATA_COLLECTION_NAME } from '~/src/mongo.js'
 
 export const MAX_RESULTS = 500
 
@@ -15,7 +15,7 @@ const logger = createLogger()
  */
 export function list() {
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
-    db.collection(COLLECTION_NAME)
+    db.collection(METADATA_COLLECTION_NAME)
   )
 
   return coll.find().limit(MAX_RESULTS).toArray()
@@ -29,7 +29,7 @@ export async function get(formId) {
   logger.info(`Getting form with ID ${formId}`)
 
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
-    db.collection(COLLECTION_NAME)
+    db.collection(METADATA_COLLECTION_NAME)
   )
 
   try {
@@ -61,7 +61,7 @@ export async function getBySlug(slug) {
   logger.info(`Getting form with slug ${slug}`)
 
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
-    db.collection(COLLECTION_NAME)
+    db.collection(METADATA_COLLECTION_NAME)
   )
 
   try {
@@ -88,16 +88,17 @@ export async function getBySlug(slug) {
 /**
  * Create a document in the database
  * @param {FormMetadataDocument} document - form metadata document
+ * @param {ClientSession} session - mongo transaction session
  */
-export async function create(document) {
+export async function create(document, session) {
   logger.info(`Creating form with slug ${document.slug}`)
 
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
-    db.collection(COLLECTION_NAME)
+    db.collection(METADATA_COLLECTION_NAME)
   )
 
   try {
-    const result = await coll.insertOne(document)
+    const result = await coll.insertOne(document, { session })
     const formId = result.insertedId.toString()
 
     logger.info(`Form with slug ${document.slug} created as form ID ${formId}`)
@@ -122,16 +123,19 @@ export async function create(document) {
  * Update a document in the database
  * @param {string} formId - ID of the form
  * @param {UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
+ * @param {ClientSession} session - mongo transaction session
  */
-export async function update(formId, update) {
+export async function update(formId, update, session) {
   logger.info(`Updating form with ID ${formId}`)
 
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
-    db.collection(COLLECTION_NAME)
+    db.collection(METADATA_COLLECTION_NAME)
   )
 
   try {
-    const result = await coll.updateOne({ _id: new ObjectId(formId) }, update)
+    const result = await coll.updateOne({ _id: new ObjectId(formId) }, update, {
+      session
+    })
 
     // Throw if updated record count is not 1
     if (result.modifiedCount !== 1) {
@@ -167,4 +171,8 @@ export async function update(formId, update) {
 /**
  * @template {object} Schema
  * @typedef {import('mongodb').UpdateFilter<Schema>} UpdateFilter
+ */
+
+/**
+ * @typedef {import('mongodb').ClientSession} ClientSession
  */

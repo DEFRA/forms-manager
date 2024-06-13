@@ -14,10 +14,18 @@ import {
   updateDraftFormDefinition
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { client } from '~/src/mongo.js'
 
 jest.mock('~/src/api/forms/draft-form-definition-repository.js')
 jest.mock('~/src/api/forms/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
+jest.mock('~/src/mongo.js', () => {
+  return {
+    client: {
+      startSession: jest.fn()
+    }
+  }
+})
 
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
@@ -70,10 +78,14 @@ describe('Forms service', () => {
     draft: formMetadataOutput.draft
   }
 
-  const formDefinition = actualEmptyForm()
+  const definition = actualEmptyForm()
 
   beforeEach(() => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest.mocked(client).startSession.mockReturnValue({
+      withTransaction: jest.fn((cb) => cb()),
+      endSession: jest.fn()
+    })
   })
 
   describe('createLiveFromDraft', () => {
@@ -95,8 +107,8 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(draftFormDefinition.create).mockResolvedValue()
-      jest.mocked(formTemplates.empty).mockReturnValue(formDefinition)
+      jest.mocked(draftFormDefinition.upsert).mockResolvedValue()
+      jest.mocked(formTemplates.empty).mockReturnValue(definition)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
         insertedId: new ObjectId(id)
@@ -154,7 +166,7 @@ describe('Forms service', () => {
     })
 
     it('should throw an error when writing form def fails', async () => {
-      jest.mocked(draftFormDefinition.create).mockRejectedValueOnce(new Error())
+      jest.mocked(draftFormDefinition.upsert).mockRejectedValueOnce(new Error())
 
       const input = {
         ...formMetadataInput,
@@ -167,11 +179,9 @@ describe('Forms service', () => {
     })
 
     it('should return the form definition', async () => {
-      jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(formDefinition)
+      jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(definition)
 
-      await expect(getFormDefinition('123')).resolves.toMatchObject(
-        formDefinition
-      )
+      await expect(getFormDefinition('123')).resolves.toMatchObject(definition)
     })
 
     it('should throw an error if the form associated with the definition does not exist', async () => {
@@ -180,7 +190,7 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.get).mockRejectedValue(error)
 
       await expect(
-        updateDraftFormDefinition('123', formDefinition, author)
+        updateDraftFormDefinition('123', definition, author)
       ).rejects.toThrow(new FormOperationFailedError({ cause: error }))
     })
   })
