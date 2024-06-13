@@ -1,11 +1,12 @@
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
+import { pino } from 'pino'
 
-import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
 import {
   FormOperationFailedError,
   InvalidFormDefinitionError
 } from '~/src/api/forms/errors.js'
+import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import {
   createForm,
@@ -14,10 +15,40 @@ import {
   updateDraftFormDefinition
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { prepareDb } from '~/src/mongo.js'
 
-jest.mock('~/src/api/forms/draft-form-definition-repository.js')
+jest.mock('~/src/api/forms/form-definition-repository.js')
 jest.mock('~/src/api/forms/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
+jest.mock('~/src/mongo.js', () => {
+  let isPrepared = false
+
+  return {
+    get client() {
+      if (!isPrepared) {
+        return undefined
+      }
+
+      return {
+        startSession: () => ({
+          endSession: jest.fn().mockResolvedValue(undefined),
+          withTransaction: jest.fn(
+            /**
+             * Mock transaction handler
+             * @param {() => Promise<void>} fn
+             */
+            async (fn) => fn()
+          )
+        })
+      }
+    },
+
+    prepareDb() {
+      isPrepared = true
+      return Promise.resolve()
+    }
+  }
+})
 
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
@@ -70,7 +101,11 @@ describe('Forms service', () => {
     draft: formMetadataOutput.draft
   }
 
-  const formDefinition = actualEmptyForm()
+  const definition = actualEmptyForm()
+
+  beforeAll(async () => {
+    await prepareDb(pino())
+  })
 
   beforeEach(() => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
@@ -78,7 +113,7 @@ describe('Forms service', () => {
 
   describe('createLiveFromDraft', () => {
     beforeEach(() => {
-      jest.mocked(draftFormDefinition.createLiveFromDraft).mockResolvedValue()
+      jest.mocked(formDefinition.createLiveFromDraft).mockResolvedValue()
       jest.mocked(formMetadata.update).mockResolvedValue({
         acknowledged: true,
         modifiedCount: 1,
@@ -95,8 +130,8 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(draftFormDefinition.create).mockResolvedValue()
-      jest.mocked(formTemplates.empty).mockReturnValue(formDefinition)
+      jest.mocked(formDefinition.upsert).mockResolvedValue()
+      jest.mocked(formTemplates.empty).mockReturnValue(definition)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
         insertedId: new ObjectId(id)
@@ -154,7 +189,7 @@ describe('Forms service', () => {
     })
 
     it('should throw an error when writing form def fails', async () => {
-      jest.mocked(draftFormDefinition.create).mockRejectedValueOnce(new Error())
+      jest.mocked(formDefinition.upsert).mockRejectedValueOnce(new Error())
 
       const input = {
         ...formMetadataInput,
@@ -167,11 +202,9 @@ describe('Forms service', () => {
     })
 
     it('should return the form definition', async () => {
-      jest.mocked(draftFormDefinition.get).mockResolvedValueOnce(formDefinition)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
 
-      await expect(getFormDefinition('123')).resolves.toMatchObject(
-        formDefinition
-      )
+      await expect(getFormDefinition('123')).resolves.toMatchObject(definition)
     })
 
     it('should throw an error if the form associated with the definition does not exist', async () => {
@@ -180,7 +213,7 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.get).mockRejectedValue(error)
 
       await expect(
-        updateDraftFormDefinition('123', formDefinition, author)
+        updateDraftFormDefinition('123', definition, author)
       ).rejects.toThrow(new FormOperationFailedError({ cause: error }))
     })
   })

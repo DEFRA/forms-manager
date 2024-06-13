@@ -71,31 +71,6 @@ export const config = convict({
     default: '',
     env: 'CDP_HTTPS_PROXY'
   },
-  formDirectory: {
-    doc: 'Directory on disk to store the forms',
-    format: String,
-    nullable: false,
-    default: 'forms',
-    env: 'FORMS_DIRECTORY'
-  },
-  formDefinitionBucketName: {
-    doc: 'Name of the S3 bucket hosting the form definitions',
-    format: String,
-    default: 'form-definition-storage',
-    env: 'FORM_DEF_BUCKET_NAME'
-  },
-  s3Region: {
-    doc: 'S3 region for the app on CDP',
-    format: String,
-    default: 'eu-west-2',
-    env: 'S3_REGION'
-  },
-  s3Endpoint: {
-    doc: 'The S3 HTTP(S) endpoint, if required (e.g. a local development dev service). Activating this will force path style addressing for compatibility with Localstack.',
-    format: String,
-    default: '',
-    env: 'S3_ENDPOINT'
-  },
   /**
    * @todo We plan to replace `node-convict` with `joi` and remove all defaults.
    * These OIDC/roles are for the DEV application in the DEFRA tenant.

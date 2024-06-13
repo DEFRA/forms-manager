@@ -3,8 +3,8 @@ import path from 'path'
 import hapi from '@hapi/hapi'
 
 import { config } from '~/src/config/index.js'
-import { prepareDb } from '~/src/db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
+import { prepareDb } from '~/src/mongo.js'
 import { auth } from '~/src/plugins/auth.js'
 import { logRequests } from '~/src/plugins/log-requests.js'
 import { router } from '~/src/plugins/router.js'
@@ -55,7 +55,7 @@ export async function createServer() {
     prepareSecureContext(server)
   }
 
-  await prepareDb(server)
+  await prepareDb(server.logger)
   await server.register(transformErrors)
   await server.register(router)
 

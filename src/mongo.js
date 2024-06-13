@@ -11,17 +11,23 @@ const databaseName = config.get('mongoDatabase')
  */
 export let db
 
-export const COLLECTION_NAME = 'form-metadata'
+/**
+ * @type {MongoClient}
+ */
+export let client
+
+export const METADATA_COLLECTION_NAME = 'form-metadata'
+export const DEFINITION_COLLECTION_NAME = 'form-definition'
 
 /**
  * Prepare the database and establish a connection
- * @param {Server} server - the hapi server
+ * @param {Logger} logger - Logger instance
  */
-export async function prepareDb(server) {
-  server.logger.info('Setting up mongodb')
+export async function prepareDb(logger) {
+  logger.info('Setting up mongodb')
 
   // Create the mongodb client
-  const client = await MongoClient.connect(mongoUrl, {
+  client = await MongoClient.connect(mongoUrl, {
     retryWrites: false,
     readPreference: 'secondary',
     secureContext
@@ -31,17 +37,17 @@ export async function prepareDb(server) {
   db = client.db(databaseName)
 
   // Ensure db indexes
-  const coll = db.collection(COLLECTION_NAME)
+  const coll = db.collection(METADATA_COLLECTION_NAME)
 
   await coll.createIndex({ title: 1 })
   await coll.createIndex({ slug: 1 }, { unique: true })
 
-  server.logger.info(`Mongodb connected to ${databaseName}`)
+  logger.info(`Mongodb connected to ${databaseName}`)
 
   return db
 }
 
 /**
  * @typedef {import('mongodb').Db} Db
- * @typedef {import('@hapi/hapi').Server} Server
+ * @typedef {import('pino').Logger} Logger
  */

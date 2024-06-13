@@ -1,14 +1,15 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
 import {
   FormOperationFailedError,
   InvalidFormDefinitionError
 } from '~/src/api/forms/errors.js'
+import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
+import { client } from '~/src/mongo.js'
 
 const logger = createLogger()
 
@@ -69,12 +70,27 @@ export async function createForm(metadataInput, author) {
     }
   }
 
-  // Create the metadata document
-  const { insertedId: _id } = await formMetadata.create(document)
-  const metadata = mapForm({ ...document, _id })
+  const session = client.startSession()
 
-  // Create the draft form definition
-  await draftFormDefinition.create(metadata.id, definition)
+  /** @type {FormMetadata | undefined} */
+  let metadata
+
+  try {
+    await session.withTransaction(async () => {
+      // Create the metadata document
+      const { insertedId: _id } = await formMetadata.create(document, session)
+      metadata = mapForm({ ...document, _id })
+
+      // Create the draft form definition
+      await formDefinition.upsert(metadata.id, definition, session)
+    })
+  } finally {
+    await session.endSession()
+  }
+
+  if (!metadata) {
+    throw Boom.badRequest('No metadata created in the transaction')
+  }
 
   return metadata
 }
@@ -114,7 +130,7 @@ export async function getFormBySlug(slug) {
  * @param {'draft' | 'live'} state - the form state
  */
 export function getFormDefinition(formId, state = 'draft') {
-  return draftFormDefinition.get(formId, state)
+  return formDefinition.get(formId, state)
 }
 
 /**
@@ -133,19 +149,31 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
     }
 
-    // Update the form definition
-    await draftFormDefinition.create(formId, definition)
+    const session = client.startSession()
 
-    logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+    try {
+      await session.withTransaction(async () => {
+        // Update the form definition
+        await formDefinition.upsert(formId, definition, session)
 
-    // Update the `updatedAt/By` fields of the draft state
-    const now = new Date()
-    await formMetadata.update(formId, {
-      $set: {
-        'draft.updatedAt': now,
-        'draft.updatedBy': author
-      }
-    })
+        logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+
+        // Update the `updatedAt/By` fields of the draft state
+        const now = new Date()
+        await formMetadata.update(
+          formId,
+          {
+            $set: {
+              'draft.updatedAt': now,
+              'draft.updatedBy': author
+            }
+          },
+          session
+        )
+      })
+    } finally {
+      await session.endSession()
+    }
 
     logger.info(`Updated form metadata (draft) for form ID ${formId}`)
   } catch (cause) {
@@ -198,16 +226,28 @@ export async function createLiveFromDraft(formId, author) {
           'live.updatedBy': author
         }
 
-    // Copy the draft form definition
-    await draftFormDefinition.createLiveFromDraft(formId)
+    const session = client.startSession()
 
-    logger.info(`Removing form metadata (draft) for form ID ${formId}`)
+    try {
+      await session.withTransaction(async () => {
+        // Copy the draft form definition
+        await formDefinition.createLiveFromDraft(formId, session)
 
-    // Update the form with the live state and clear the draft
-    await formMetadata.update(formId, {
-      $set: set,
-      $unset: { draft: '' }
-    })
+        logger.info(`Removing form metadata (draft) for form ID ${formId}`)
+
+        // Update the form with the live state and clear the draft
+        await formMetadata.update(
+          formId,
+          {
+            $set: set,
+            $unset: { draft: '' }
+          },
+          session
+        )
+      })
+    } finally {
+      await session.endSession()
+    }
 
     logger.info(`Removed form metadata (draft) for form ID ${formId}`)
     logger.info(`Made draft live for form ID ${formId}`)
@@ -251,13 +291,21 @@ export async function createDraftFromLive(formId, author) {
       }
     }
 
-    // Copy the draft form definition
-    await draftFormDefinition.createDraftFromLive(formId)
+    const session = client.startSession()
 
-    logger.info(`Adding form metadata (draft) for form ID ${formId}`)
+    try {
+      await session.withTransaction(async () => {
+        // Copy the draft form definition
+        await formDefinition.createDraftFromLive(formId, session)
 
-    // Update the form with the new draft state
-    await formMetadata.update(formId, { $set: set })
+        logger.info(`Adding form metadata (draft) for form ID ${formId}`)
+
+        // Update the form with the new draft state
+        await formMetadata.update(formId, { $set: set }, session)
+      })
+    } finally {
+      await session.endSession()
+    }
 
     logger.info(`Added form metadata (draft) for form ID ${formId}`)
     logger.info(`Created draft to edit for form ID ${formId}`)

@@ -14,7 +14,7 @@ import {
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
 
-jest.mock('~/src/db.js')
+jest.mock('~/src/mongo.js')
 jest.mock('~/src/api/forms/service.js')
 
 describe('Forms route', () => {
