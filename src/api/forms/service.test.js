@@ -208,9 +208,19 @@ describe('Forms service', () => {
     })
 
     it('should update the draft form definition with required attributes upon creation', async () => {
-      await updateDraftFormDefinition('123', formDefinition, author)
+      const formDefinitionCustomisedTitle = actualEmptyForm()
+      formDefinitionCustomisedTitle.name =
+        "A custom form name that shouldn't be allowed"
 
-      expect(formDefinition.name).toBe(formMetadataDocument.title)
+      await updateDraftFormDefinition(
+        '123',
+        formDefinitionCustomisedTitle,
+        author
+      )
+
+      expect(formDefinitionCustomisedTitle.name).toBe(
+        formMetadataDocument.title
+      )
     })
 
     it('should throw an error if the form associated with the definition does not exist', async () => {
