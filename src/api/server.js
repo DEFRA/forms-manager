@@ -55,7 +55,7 @@ export async function createServer() {
     prepareSecureContext(server)
   }
 
-  await prepareDb(server)
+  await prepareDb(server.logger)
   await server.register(transformErrors)
   await server.register(router)
 

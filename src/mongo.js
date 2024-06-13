@@ -21,10 +21,10 @@ export const DEFINITION_COLLECTION_NAME = 'form-definition'
 
 /**
  * Prepare the database and establish a connection
- * @param {Server} server - the hapi server
+ * @param {Logger} logger - Logger instance
  */
-export async function prepareDb(server) {
-  server.logger.info('Setting up mongodb')
+export async function prepareDb(logger) {
+  logger.info('Setting up mongodb')
 
   // Create the mongodb client
   client = await MongoClient.connect(mongoUrl, {
@@ -42,12 +42,12 @@ export async function prepareDb(server) {
   await coll.createIndex({ title: 1 })
   await coll.createIndex({ slug: 1 }, { unique: true })
 
-  server.logger.info(`Mongodb connected to ${databaseName}`)
+  logger.info(`Mongodb connected to ${databaseName}`)
 
   return db
 }
 
 /**
  * @typedef {import('mongodb').Db} Db
- * @typedef {import('@hapi/hapi').Server} Server
+ * @typedef {import('pino').Logger} Logger
  */
