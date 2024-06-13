@@ -149,6 +149,9 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
     }
 
+    // patch the form definition with attributes from the title, where they're not designed to be customised
+    definition.name = form.title
+
     const session = client.startSession()
 
     try {
