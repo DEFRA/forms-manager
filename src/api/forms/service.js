@@ -150,7 +150,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     }
 
     // some definition attributes shouldn't be customised by users, so patch
-    // them on every write to prevent imported forms drifting.
+    // them on every write to prevent imported forms drifting (e.g. JSON upload)
     definition.name = form.title
 
     const session = client.startSession()
