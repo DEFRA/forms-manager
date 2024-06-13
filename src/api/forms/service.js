@@ -1,11 +1,11 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
 import {
   FormOperationFailedError,
   InvalidFormDefinitionError
 } from '~/src/api/forms/errors.js'
+import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
@@ -82,7 +82,7 @@ export async function createForm(metadataInput, author) {
       metadata = mapForm({ ...document, _id })
 
       // Create the draft form definition
-      await draftFormDefinition.upsert(metadata.id, definition, session)
+      await formDefinition.upsert(metadata.id, definition, session)
     })
   } finally {
     await session.endSession()
@@ -130,7 +130,7 @@ export async function getFormBySlug(slug) {
  * @param {'draft' | 'live'} state - the form state
  */
 export function getFormDefinition(formId, state = 'draft') {
-  return draftFormDefinition.get(formId, state)
+  return formDefinition.get(formId, state)
 }
 
 /**
@@ -154,7 +154,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     try {
       await session.withTransaction(async () => {
         // Update the form definition
-        await draftFormDefinition.upsert(formId, definition, session)
+        await formDefinition.upsert(formId, definition, session)
 
         logger.info(`Updating form metadata (draft) for form ID ${formId}`)
 
@@ -231,7 +231,7 @@ export async function createLiveFromDraft(formId, author) {
     try {
       await session.withTransaction(async () => {
         // Copy the draft form definition
-        await draftFormDefinition.createLiveFromDraft(formId, session)
+        await formDefinition.createLiveFromDraft(formId, session)
 
         logger.info(`Removing form metadata (draft) for form ID ${formId}`)
 
@@ -296,7 +296,7 @@ export async function createDraftFromLive(formId, author) {
     try {
       await session.withTransaction(async () => {
         // Copy the draft form definition
-        await draftFormDefinition.createDraftFromLive(formId, session)
+        await formDefinition.createDraftFromLive(formId, session)
 
         logger.info(`Adding form metadata (draft) for form ID ${formId}`)
 
