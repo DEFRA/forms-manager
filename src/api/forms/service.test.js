@@ -207,6 +207,22 @@ describe('Forms service', () => {
       await expect(getFormDefinition('123')).resolves.toMatchObject(definition)
     })
 
+    it('should update the draft form definition with required attributes upon creation', async () => {
+      const formDefinitionCustomisedTitle = actualEmptyForm()
+      formDefinitionCustomisedTitle.name =
+        "A custom form name that shouldn't be allowed"
+
+      await updateDraftFormDefinition(
+        '123',
+        formDefinitionCustomisedTitle,
+        author
+      )
+
+      expect(formDefinitionCustomisedTitle.name).toBe(
+        formMetadataDocument.title
+      )
+    })
+
     it('should throw an error if the form associated with the definition does not exist', async () => {
       const error = Boom.notFound("Form with ID '123' not found")
 
