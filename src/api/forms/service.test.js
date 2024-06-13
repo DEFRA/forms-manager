@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
+import { pino } from 'pino'
 
 import {
   FormOperationFailedError,
@@ -14,15 +15,37 @@ import {
   updateDraftFormDefinition
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
-import { client } from '~/src/mongo.js'
+import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/api/forms/form-definition-repository.js')
 jest.mock('~/src/api/forms/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js', () => {
+  let isPrepared = false
+
   return {
-    client: {
-      startSession: jest.fn()
+    get client() {
+      if (!isPrepared) {
+        return undefined
+      }
+
+      return {
+        startSession: () => ({
+          endSession: jest.fn().mockResolvedValue(undefined),
+          withTransaction: jest.fn(
+            /**
+             * Mock transaction handler
+             * @param {() => Promise<void>} fn
+             */
+            async (fn) => fn()
+          )
+        })
+      }
+    },
+
+    prepareDb() {
+      isPrepared = true
+      return Promise.resolve()
     }
   }
 })
@@ -80,16 +103,12 @@ describe('Forms service', () => {
 
   const definition = actualEmptyForm()
 
+  beforeAll(async () => {
+    await prepareDb(pino())
+  })
+
   beforeEach(() => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
-    const session = /** @type {ClientSession} */ (
-      /** @type {unknown} */ ({
-        withTransaction: jest.fn((cb) => cb()),
-        endSession: jest.fn()
-      })
-    )
-
-    jest.mocked(client).startSession.mockReturnValue(session)
   })
 
   describe('createLiveFromDraft', () => {
@@ -205,7 +224,6 @@ describe('Forms service', () => {
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- * @typedef {import('mongodb').ClientSession} ClientSession
  */
 
 /**
