@@ -159,7 +159,7 @@ export async function update(formId, update, session) {
 }
 
 /**
- * Deletes the form metadata.
+ * Deletes a form metadata
  * @param {string} formId - ID of the form
  * @param {ClientSession} session
  */

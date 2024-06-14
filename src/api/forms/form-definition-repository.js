@@ -127,7 +127,7 @@ export async function get(formId, state = 'draft') {
 }
 
 /**
- * Retrieves the form definition for a given form ID
+ * Deletes a form definition (both draft and live components)
  * @param {string} formId - the ID of the form
  * @param {ClientSession} session
  */
