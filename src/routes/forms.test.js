@@ -10,7 +10,7 @@ import {
   getFormBySlug,
   createLiveFromDraft,
   createDraftFromLive,
-  deleteForm
+  dropForm
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -257,7 +257,7 @@ describe('Forms route', () => {
     })
 
     test('Testing DELETE /forms/{id} route returns internal server error', async () => {
-      jest.mocked(deleteForm).mockRejectedValueOnce('error')
+      jest.mocked(dropForm).mockRejectedValueOnce('error')
 
       const response = await server.inject({
         method: 'DELETE',

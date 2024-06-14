@@ -9,11 +9,11 @@ import {
   getFormDefinition,
   createLiveFromDraft,
   createDraftFromLive,
-  deleteForm
+  dropForm
 } from '~/src/api/forms/service.js'
 import {
   createFormSchema,
-  deleteFormPayloadSchema,
+  dropFormPayloadSchema,
   formByIdSchema,
   formBySlugSchema,
   updateFormDefinitionSchema
@@ -114,14 +114,14 @@ export default [
     method: 'DELETE',
     path: '/forms/{id}',
     /**
-     * @param {RequestDeleteFormById} request
+     * @param {RequestDropFormById} request
      */
     async handler(request) {
       const { params, payload } = request
       const { id } = params
       const { force } = payload
 
-      await deleteForm(id, force)
+      await dropForm(id, force)
 
       return {
         id: params.id,
@@ -131,7 +131,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: deleteFormPayloadSchema
+        payload: dropFormPayloadSchema
       }
     }
   },
@@ -252,7 +252,7 @@ export default [
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
- * @typedef {import('~/src/api/types.js').RequestDeleteFormById} RequestDeleteFormById
+ * @typedef {import('~/src/api/types.js').RequestDropFormById} RequestDropFormById
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate

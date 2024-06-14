@@ -13,7 +13,7 @@ export const formByIdSchema = Joi.object()
   })
   .required()
 
-export const deleteFormPayloadSchema = Joi.object({
+export const dropFormPayloadSchema = Joi.object({
   force: Joi.boolean().default(false)
 })
 
