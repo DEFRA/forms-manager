@@ -6,8 +6,8 @@ import {
   FormOperationFailedError,
   InvalidFormDefinitionError
 } from '~/src/api/forms/errors.js'
-import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
-import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
+import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
+import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   createForm,
   getFormDefinition,
@@ -18,8 +18,8 @@ import {
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { prepareDb } from '~/src/mongo.js'
 
-jest.mock('~/src/api/forms/form-definition-repository.js')
-jest.mock('~/src/api/forms/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
+jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false

@@ -139,7 +139,8 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'DELETE',
         url: `/forms/${id}`,
-        auth
+        auth,
+        payload: {}
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -261,7 +262,8 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'DELETE',
         url: `/forms/${id}`,
-        auth
+        auth,
+        payload: {}
       })
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
