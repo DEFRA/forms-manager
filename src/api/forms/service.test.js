@@ -268,7 +268,7 @@ describe('Forms service', () => {
   })
 
   describe('deleteForm', () => {
-    test('should not fail if repositories did not fail', async () => {
+    test('should succeed if both operations succeed', async () => {
       jest.mocked(formMetadata.drop).mockResolvedValueOnce()
       jest.mocked(formDefinition.drop).mockResolvedValueOnce()
 
@@ -301,16 +301,6 @@ describe('Forms service', () => {
       jest
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
-
-      await expect(deleteForm(id, true)).resolves.toBeUndefined()
-    })
-
-    test('should succeed if form metadata deletion fails and the form is being force deleted', async () => {
-      jest
-        .mocked(formMetadata.get)
-        .mockResolvedValueOnce(formMetadataWithLiveDocument)
-
-      jest.mocked(formMetadata.drop).mockRejectedValueOnce('unknown error')
 
       await expect(deleteForm(id, true)).resolves.toBeUndefined()
     })

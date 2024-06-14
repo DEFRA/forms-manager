@@ -350,7 +350,7 @@ export async function deleteForm(formId, force = false) {
         await formDefinition.drop(formId, session)
       } catch (err) {
         // we might have old forms that don't have form definitions but do have metadata entries.
-        // keep this as a short term only, then remove once cleaned up.
+        // TODO keep this as a short term only, then remove once cleaned up.
         if (!force) {
           throw err
         }
