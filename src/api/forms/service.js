@@ -344,17 +344,13 @@ export async function deleteForm(formId, force = false) {
 
   try {
     await session.withTransaction(async () => {
-      try {
-        await formMetadata.drop(formId, session)
-      } catch (err) {
-        if (!force) {
-          throw err
-        }
-      }
+      await formMetadata.drop(formId, session)
 
       try {
         await formDefinition.drop(formId, session)
       } catch (err) {
+        // we might have old forms that don't have form definitions but do have metadata entries.
+        // keep this as a short term only, then remove once cleaned up.
         if (!force) {
           throw err
         }

@@ -15,7 +15,7 @@ export const formByIdSchema = Joi.object()
 
 export const deleteFormPayloadSchema = Joi.object({
   force: Joi.boolean().default(false)
-}).allow(null) // while we only have all optional properties, we don't need to require an empty payload {}
+})
 
 // Retrieve form by slug schema
 export const formBySlugSchema = Joi.object()
