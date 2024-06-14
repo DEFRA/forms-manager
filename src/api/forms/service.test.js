@@ -93,6 +93,27 @@ describe('Forms service', () => {
   }
 
   /**
+   * @satisfies {FormMetadata}
+   */
+  const formMetadataWithLiveOutput = {
+    ...formMetadataInput,
+    id,
+    slug,
+    draft: {
+      createdAt: expect.any(Date),
+      createdBy: author,
+      updatedAt: expect.any(Date),
+      updatedBy: author
+    },
+    live: {
+      createdAt: expect.any(Date),
+      createdBy: author,
+      updatedAt: expect.any(Date),
+      updatedBy: author
+    }
+  }
+
+  /**
    * @satisfies {WithId<FormMetadataDocument>}
    */
   const formMetadataDocument = {
@@ -100,6 +121,17 @@ describe('Forms service', () => {
     _id: new ObjectId(id),
     slug: formMetadataOutput.slug,
     draft: formMetadataOutput.draft
+  }
+
+  /**
+   * @satisfies {WithId<FormMetadataDocument>}
+   */
+  const formMetadataWithLiveDocument = {
+    ...formMetadataInput,
+    _id: new ObjectId(id),
+    slug: formMetadataWithLiveOutput.slug,
+    draft: formMetadataWithLiveOutput.draft,
+    live: formMetadataWithLiveOutput.live
   }
 
   const definition = actualEmptyForm()
@@ -255,6 +287,42 @@ describe('Forms service', () => {
       jest.mocked(formDefinition.drop).mockRejectedValueOnce('unknown error')
 
       await expect(deleteForm(id)).rejects.toBeDefined()
+    })
+
+    test('should fail if the form is live but not being force deleted', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      await expect(deleteForm(id)).rejects.toBeDefined()
+    })
+
+    test('should succeed if the form is live and being force deleted', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      await expect(deleteForm(id, true)).resolves.toBeUndefined()
+    })
+
+    test('should succeed if form metadata deletion fails and the form is being force deleted', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      jest.mocked(formMetadata.drop).mockRejectedValueOnce('unknown error')
+
+      await expect(deleteForm(id, true)).resolves.toBeUndefined()
+    })
+
+    test('should succeed if form definition deletion fails and the form is being force deleted', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      jest.mocked(formDefinition.drop).mockRejectedValueOnce('unknown error')
+
+      await expect(deleteForm(id, true)).resolves.toBeUndefined()
     })
   })
 })

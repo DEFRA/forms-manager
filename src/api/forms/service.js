@@ -329,21 +329,41 @@ export async function createDraftFromLive(formId, author) {
 /**
  * @param {string} formId
  */
-export async function deleteForm(formId) {
+export async function deleteForm(formId, force = false) {
   logger.info(`Deleting form with ID ${formId}`)
 
-  await getForm(formId) // if this throws, the form doesn't exist
+  const form = await getForm(formId)
+
+  if (!force && form.live) {
+    throw Boom.badRequest(
+      `Form with ID '${formId}' is live and cannot be deleted. Set force=true to delete the form anyway.`
+    )
+  }
 
   const session = client.startSession()
 
   try {
     await session.withTransaction(async () => {
-      await formMetadata.drop(formId, session)
-      await formDefinition.drop(formId, session)
+      try {
+        await formMetadata.drop(formId, session)
+      } catch (err) {
+        if (!force) {
+          throw err
+        }
+      }
+
+      try {
+        await formDefinition.drop(formId, session)
+      } catch (err) {
+        if (!force) {
+          throw err
+        }
+      }
     })
   } finally {
     await session.endSession()
   }
+
   logger.info(`Deleted form with ID ${formId}`)
 }
 
