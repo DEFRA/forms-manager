@@ -1,5 +1,3 @@
-version: '3.1'
-
 services:
   mongo:
     # Initialise a Mongo cluster with a replicaset of 1 node.
