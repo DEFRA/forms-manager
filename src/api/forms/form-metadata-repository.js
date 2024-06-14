@@ -159,6 +159,33 @@ export async function update(formId, update, session) {
 }
 
 /**
+ * Deletes the form metadata.
+ * @param {string} formId - ID of the form
+ * @param {ClientSession} session
+ */
+export async function drop(formId, session) {
+  logger.info(`Deleting form metadata with ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
+    db.collection(METADATA_COLLECTION_NAME)
+  )
+
+  const result = await coll.deleteOne(
+    { _id: new ObjectId(formId) },
+    { session }
+  )
+  const { deletedCount } = result
+
+  if (deletedCount !== 1) {
+    throw new Error(
+      `Failed to delete form metadata. Expected deleted count of 1, received ${deletedCount}`
+    )
+  }
+
+  logger.info(`Deleted form metadata with ID ${formId}`)
+}
+
+/**
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  */

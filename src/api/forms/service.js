@@ -327,6 +327,27 @@ export async function createDraftFromLive(formId, author) {
 }
 
 /**
+ * @param {string} formId
+ */
+export async function deleteForm(formId) {
+  logger.info(`Deleting form with ID ${formId}`)
+
+  await getForm(formId) // if this throws, the form doesn't exist
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await formMetadata.drop(formId, session)
+      await formDefinition.drop(formId, session)
+    })
+  } finally {
+    await session.endSession()
+  }
+  logger.info(`Deleted form with ID ${formId}`)
+}
+
+/**
  * @typedef {import('~/src/api/forms/errors.js').FormAlreadyExistsError} FormAlreadyExistsError
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata

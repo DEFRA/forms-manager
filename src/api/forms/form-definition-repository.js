@@ -127,6 +127,33 @@ export async function get(formId, state = 'draft') {
 }
 
 /**
+ * Retrieves the form definition for a given form ID
+ * @param {string} formId - the ID of the form
+ * @param {ClientSession} session
+ */
+export async function drop(formId, session) {
+  logger.info(`Deleting form definition with ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<FormDefinition>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const result = await coll.deleteOne(
+    { _id: new ObjectId(formId) },
+    { session }
+  )
+  const { deletedCount } = result
+
+  if (deletedCount !== 1) {
+    throw new Error(
+      `Failed to delete form definition. Expected deleted count of 1, received ${deletedCount}`
+    )
+  }
+
+  logger.info(`Deleted form definition with ID ${formId}`)
+}
+
+/**
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  */
 

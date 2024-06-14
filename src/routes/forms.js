@@ -8,7 +8,8 @@ import {
   updateDraftFormDefinition,
   getFormDefinition,
   createLiveFromDraft,
-  createDraftFromLive
+  createDraftFromLive,
+  deleteForm
 } from '~/src/api/forms/service.js'
 import {
   createFormSchema,
@@ -105,6 +106,29 @@ export default [
       auth: false,
       validate: {
         params: formBySlugSchema
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/forms/{id}',
+    /**
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { params } = request
+      const { id } = params
+
+      await deleteForm(id)
+
+      return {
+        id: params.id,
+        status: 'deleted'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema
       }
     }
   },

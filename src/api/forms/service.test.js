@@ -12,7 +12,8 @@ import {
   createForm,
   getFormDefinition,
   createLiveFromDraft,
-  updateDraftFormDefinition
+  updateDraftFormDefinition,
+  deleteForm
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -231,6 +232,29 @@ describe('Forms service', () => {
       await expect(
         updateDraftFormDefinition('123', definition, author)
       ).rejects.toThrow(new FormOperationFailedError({ cause: error }))
+    })
+  })
+
+  describe('deleteForm', () => {
+    test('should not fail if repositories did not fail', async () => {
+      jest.mocked(formMetadata.drop).mockResolvedValueOnce()
+      jest.mocked(formDefinition.drop).mockResolvedValueOnce()
+
+      await expect(deleteForm(id)).resolves.toBeUndefined()
+    })
+
+    test('should fail if form metadata drop fails', async () => {
+      jest.mocked(formMetadata.drop).mockRejectedValueOnce('unknown error')
+      jest.mocked(formDefinition.drop).mockResolvedValueOnce()
+
+      await expect(deleteForm(id)).rejects.toBeDefined()
+    })
+
+    test('should fail if form definition drop fails', async () => {
+      jest.mocked(formMetadata.drop).mockResolvedValueOnce()
+      jest.mocked(formDefinition.drop).mockRejectedValueOnce('unknown error')
+
+      await expect(deleteForm(id)).rejects.toBeDefined()
     })
   })
 })
