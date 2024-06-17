@@ -16,7 +16,7 @@ export async function dropById(session, collectionName, id) {
 
   if (deletedCount !== 1) {
     throw new Error(
-      `Failed to delete form definition. Expected deleted count of 1, received ${deletedCount}`
+      `Failed to delete id '${id}' from '${collectionName}'. Expected deleted count of 1, received ${deletedCount}`
     )
   }
 }
