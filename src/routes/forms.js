@@ -46,9 +46,6 @@ export default [
     path: '/forms',
     handler() {
       return listForms()
-    },
-    options: {
-      auth: false
     }
   },
   {
@@ -132,7 +129,6 @@ export default [
       }
     },
     options: {
-      auth: false,
       validate: {
         params: formByIdSchema,
         payload: removeFormPayloadSchema
