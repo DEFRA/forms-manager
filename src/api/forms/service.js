@@ -332,7 +332,7 @@ export async function createDraftFromLive(formId, author) {
  * @param {boolean} force - deletes the form even if it's live, and ignores failures to delete the form definition.
  */
 export async function dropForm(formId, force = false) {
-  logger.info(`Deleting form with ID ${formId}`)
+  logger.info(`Deleting form with ID ${formId} and force=${force}`)
 
   const form = await getForm(formId)
 
