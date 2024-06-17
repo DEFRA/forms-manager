@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
-import { dropById } from './helpers.js'
+import { removeById } from './helpers.js'
 
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { db, DEFINITION_COLLECTION_NAME } from '~/src/mongo.js'
@@ -129,16 +129,16 @@ export async function get(formId, state = 'draft') {
 }
 
 /**
- * Deletes a form definition (both draft and live components)
+ * Removes a form definition (both draft and live components)
  * @param {string} formId - the ID of the form
  * @param {ClientSession} session
  */
-export async function drop(formId, session) {
-  logger.info(`Deleting form definition with ID ${formId}`)
+export async function remove(formId, session) {
+  logger.info(`Removing form definition with ID ${formId}`)
 
-  await dropById(session, DEFINITION_COLLECTION_NAME, formId)
+  await removeById(session, DEFINITION_COLLECTION_NAME, formId)
 
-  logger.info(`Deleted form definition with ID ${formId}`)
+  logger.info(`Removed form definition with ID ${formId}`)
 }
 
 /**

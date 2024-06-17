@@ -3,12 +3,12 @@ import { ObjectId } from 'mongodb'
 import { db } from '~/src/mongo.js'
 
 /**
- * Drops a row in a MongoDB collection by its unique ID and fail if not completed.
+ * Removes a row in a MongoDB collection by its unique ID and fail if not completed.
  * @param {import('mongodb').ClientSession} session
- * @param {string} collectionName - name of the collection to drop from
+ * @param {string} collectionName - name of the collection to remove from
  * @param {string} id - object _id
  */
-export async function dropById(session, collectionName, id) {
+export async function removeById(session, collectionName, id) {
   const coll = db.collection(collectionName)
 
   const result = await coll.deleteOne({ _id: new ObjectId(id) }, { session })

@@ -327,12 +327,12 @@ export async function createDraftFromLive(formId, author) {
 }
 
 /**
- * Deletes a form (metadata and definition)
+ * Removes a form (metadata and definition)
  * @param {string} formId
  * @param {boolean} force - deletes the form even if it's live, and ignores failures to delete the form definition.
  */
-export async function dropForm(formId, force = false) {
-  logger.info(`Deleting form with ID ${formId} and force=${force}`)
+export async function removeForm(formId, force = false) {
+  logger.info(`Removing form with ID ${formId} and force=${force}`)
 
   const form = await getForm(formId)
 
@@ -346,10 +346,10 @@ export async function dropForm(formId, force = false) {
 
   try {
     await session.withTransaction(async () => {
-      await formMetadata.drop(formId, session)
+      await formMetadata.remove(formId, session)
 
       try {
-        await formDefinition.drop(formId, session)
+        await formDefinition.remove(formId, session)
       } catch (err) {
         // we might have old forms that don't have form definitions but do have metadata entries.
         // TODO keep this as a short term only, then remove once cleaned up.
@@ -362,7 +362,7 @@ export async function dropForm(formId, force = false) {
     await session.endSession()
   }
 
-  logger.info(`Deleted form with ID ${formId}`)
+  logger.info(`Removed form with ID ${formId}`)
 }
 
 /**

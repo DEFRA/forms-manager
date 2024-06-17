@@ -3,7 +3,7 @@ import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from '../errors.js'
 
-import { dropById } from './helpers.js'
+import { removeById } from './helpers.js'
 
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { db, METADATA_COLLECTION_NAME } from '~/src/mongo.js'
@@ -161,16 +161,16 @@ export async function update(formId, update, session) {
 }
 
 /**
- * Deletes a form metadata
+ * Removes a form metadata
  * @param {string} formId - ID of the form
  * @param {ClientSession} session
  */
-export async function drop(formId, session) {
-  logger.info(`Deleting form metadata with ID ${formId}`)
+export async function remove(formId, session) {
+  logger.info(`Removing form metadata with ID ${formId}`)
 
-  await dropById(session, METADATA_COLLECTION_NAME, formId)
+  await removeById(session, METADATA_COLLECTION_NAME, formId)
 
-  logger.info(`Deleted form metadata with ID ${formId}`)
+  logger.info(`Removed form metadata with ID ${formId}`)
 }
 
 /**
