@@ -8,10 +8,12 @@ import {
   updateDraftFormDefinition,
   getFormDefinition,
   createLiveFromDraft,
-  createDraftFromLive
+  createDraftFromLive,
+  removeForm
 } from '~/src/api/forms/service.js'
 import {
   createFormSchema,
+  removeFormPayloadSchema,
   formByIdSchema,
   formBySlugSchema,
   updateFormDefinitionSchema
@@ -44,6 +46,9 @@ export default [
     path: '/forms',
     handler() {
       return listForms()
+    },
+    options: {
+      auth: false
     }
   },
   {
@@ -105,6 +110,32 @@ export default [
       auth: false,
       validate: {
         params: formBySlugSchema
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/forms/{id}',
+    /**
+     * @param {RequestRemoveFormById} request
+     */
+    async handler(request) {
+      const { params, payload } = request
+      const { id } = params
+      const { force } = payload
+
+      await removeForm(id, force)
+
+      return {
+        id: params.id,
+        status: 'deleted'
+      }
+    },
+    options: {
+      auth: false,
+      validate: {
+        params: formByIdSchema,
+        payload: removeFormPayloadSchema
       }
     }
   },
@@ -225,6 +256,7 @@ export default [
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
+ * @typedef {import('~/src/api/types.js').RequestRemoveFormById} RequestRemoveFormById
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate

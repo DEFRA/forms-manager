@@ -9,7 +9,8 @@ import {
   getFormDefinition,
   getFormBySlug,
   createLiveFromDraft,
-  createDraftFromLive
+  createDraftFromLive,
+  removeForm
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -134,6 +135,22 @@ describe('Forms route', () => {
       })
     })
 
+    test('Testing DELETE /forms/{id} route returns a "deleted" status', async () => {
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}`,
+        auth,
+        payload: {}
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id,
+        status: 'deleted'
+      })
+    })
+
     test('Testing GET /forms/{id} route returns a form', async () => {
       jest.mocked(getForm).mockResolvedValue(stubFormMetadataOutput)
 
@@ -223,9 +240,7 @@ describe('Forms route', () => {
 
   describe('Error responses', () => {
     test('Testing GET /forms route throws unknown error', async () => {
-      jest
-        .mocked(listForms)
-        .mockResolvedValue(Promise.reject(new Error('Unknown error')))
+      jest.mocked(listForms).mockRejectedValueOnce(new Error('Unknown error'))
 
       const response = await server.inject({
         method: 'GET',
@@ -239,6 +254,19 @@ describe('Forms route', () => {
         error: 'Internal Server Error',
         message: 'An internal server error occurred'
       })
+    })
+
+    test('Testing DELETE /forms/{id} route returns internal server error', async () => {
+      jest.mocked(removeForm).mockRejectedValueOnce('error')
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}`,
+        auth,
+        payload: {}
+      })
+
+      expect(response.statusCode).toEqual(internalErrorStatusCode)
     })
 
     test.each([

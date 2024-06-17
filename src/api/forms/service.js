@@ -5,8 +5,8 @@ import {
   FormOperationFailedError,
   InvalidFormDefinitionError
 } from '~/src/api/forms/errors.js'
-import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
-import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
+import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
+import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
@@ -324,6 +324,45 @@ export async function createDraftFromLive(formId, author) {
 
     throw error
   }
+}
+
+/**
+ * Removes a form (metadata and definition)
+ * @param {string} formId
+ * @param {boolean} force - deletes the form even if it's live, and ignores failures to delete the form definition.
+ */
+export async function removeForm(formId, force = false) {
+  logger.info(`Removing form with ID ${formId} and force=${force}`)
+
+  const form = await getForm(formId)
+
+  if (!force && form.live) {
+    throw Boom.badRequest(
+      `Form with ID '${formId}' is live and cannot be deleted. Set force=true to delete the form anyway.`
+    )
+  }
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await formMetadata.remove(formId, session)
+
+      try {
+        await formDefinition.remove(formId, session)
+      } catch (err) {
+        // we might have old forms that don't have form definitions but do have metadata entries.
+        // TODO keep this as a short term only, then remove once cleaned up.
+        if (!force) {
+          throw err
+        }
+      }
+    })
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Removed form with ID ${formId}`)
 }
 
 /**

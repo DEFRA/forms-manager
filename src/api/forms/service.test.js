@@ -6,19 +6,20 @@ import {
   FormOperationFailedError,
   InvalidFormDefinitionError
 } from '~/src/api/forms/errors.js'
-import * as formDefinition from '~/src/api/forms/form-definition-repository.js'
-import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
+import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
+import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   createForm,
   getFormDefinition,
   createLiveFromDraft,
-  updateDraftFormDefinition
+  updateDraftFormDefinition,
+  removeForm
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { prepareDb } from '~/src/mongo.js'
 
-jest.mock('~/src/api/forms/form-definition-repository.js')
-jest.mock('~/src/api/forms/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
+jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -92,6 +93,27 @@ describe('Forms service', () => {
   }
 
   /**
+   * @satisfies {FormMetadata}
+   */
+  const formMetadataWithLiveOutput = {
+    ...formMetadataInput,
+    id,
+    slug,
+    draft: {
+      createdAt: expect.any(Date),
+      createdBy: author,
+      updatedAt: expect.any(Date),
+      updatedBy: author
+    },
+    live: {
+      createdAt: expect.any(Date),
+      createdBy: author,
+      updatedAt: expect.any(Date),
+      updatedBy: author
+    }
+  }
+
+  /**
    * @satisfies {WithId<FormMetadataDocument>}
    */
   const formMetadataDocument = {
@@ -99,6 +121,17 @@ describe('Forms service', () => {
     _id: new ObjectId(id),
     slug: formMetadataOutput.slug,
     draft: formMetadataOutput.draft
+  }
+
+  /**
+   * @satisfies {WithId<FormMetadataDocument>}
+   */
+  const formMetadataWithLiveDocument = {
+    ...formMetadataInput,
+    _id: new ObjectId(id),
+    slug: formMetadataWithLiveOutput.slug,
+    draft: formMetadataWithLiveOutput.draft,
+    live: formMetadataWithLiveOutput.live
   }
 
   const definition = actualEmptyForm()
@@ -231,6 +264,55 @@ describe('Forms service', () => {
       await expect(
         updateDraftFormDefinition('123', definition, author)
       ).rejects.toThrow(new FormOperationFailedError({ cause: error }))
+    })
+  })
+
+  describe('removeForm', () => {
+    test('should succeed if both operations succeed', async () => {
+      jest.mocked(formMetadata.remove).mockResolvedValueOnce()
+      jest.mocked(formDefinition.remove).mockResolvedValueOnce()
+
+      await expect(removeForm(id)).resolves.toBeUndefined()
+    })
+
+    test('should fail if form metadata remove fails', async () => {
+      jest.mocked(formMetadata.remove).mockRejectedValueOnce('unknown error')
+      jest.mocked(formDefinition.remove).mockResolvedValueOnce()
+
+      await expect(removeForm(id)).rejects.toBeDefined()
+    })
+
+    test('should fail if form definition remove fails', async () => {
+      jest.mocked(formMetadata.remove).mockResolvedValueOnce()
+      jest.mocked(formDefinition.remove).mockRejectedValueOnce('unknown error')
+
+      await expect(removeForm(id)).rejects.toBeDefined()
+    })
+
+    test('should fail if the form is live but not being force deleted', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      await expect(removeForm(id)).rejects.toBeDefined()
+    })
+
+    test('should succeed if the form is live and being force deleted', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      await expect(removeForm(id, true)).resolves.toBeUndefined()
+    })
+
+    test('should succeed if form definition deletion fails and the form is being force deleted', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      jest.mocked(formDefinition.remove).mockRejectedValueOnce('unknown error')
+
+      await expect(removeForm(id, true)).resolves.toBeUndefined()
     })
   })
 })
