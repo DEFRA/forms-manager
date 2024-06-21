@@ -1,6 +1,8 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
+import { makeFormLiveErrorMessages } from './constants.js'
+
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -204,17 +206,17 @@ export async function createLiveFromDraft(formId, author) {
         `Form with ID '${formId}' has no draft state so failed deployment to live`
       )
 
-      throw Boom.badRequest(
-        `This form is not in draft, so it cannot be published as live.`
-      )
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
     }
 
     const draftFormDefinition = await formDefinition.get(formId, 'draft')
 
     if (!draftFormDefinition?.startPage) {
-      throw Boom.badRequest(
-        `This form has no start page. Please ensure there is only one starting page in the draft form.`
-      )
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
+    }
+
+    if (!draftFormDefinition.outputEmail) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
     }
 
     // Build the live state

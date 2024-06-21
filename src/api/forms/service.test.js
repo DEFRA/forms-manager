@@ -2,6 +2,8 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
+import { makeFormLiveErrorMessages } from './constants.js'
+
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -131,13 +133,14 @@ describe('Forms service', () => {
     live: formMetadataWithLiveOutput.live
   }
 
-  const definition = actualEmptyForm()
+  let definition = actualEmptyForm()
 
   beforeAll(async () => {
     await prepareDb(pino())
   })
 
   beforeEach(() => {
+    definition = actualEmptyForm()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
   })
 
@@ -158,9 +161,10 @@ describe('Forms service', () => {
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
 
-    test('should fail to create a live state from existing draft form when no start page', async () => {
-      const draftDefinitionNoStartPage =
-        /** @type {import('@defra/forms-model').FormDefinition} */ (definition)
+    test('should fail to create a live state from existing draft form when there is no start page', async () => {
+      const draftDefinitionNoStartPage = /** @type {FormDefinition} */ (
+        definition
+      )
       delete draftDefinitionNoStartPage.startPage
 
       jest
@@ -168,9 +172,22 @@ describe('Forms service', () => {
         .mockResolvedValueOnce(draftDefinitionNoStartPage)
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
-        Boom.badRequest(
-          'This form has no start page. Please ensure there is only one starting page in the draft form.'
-        )
+        Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
+      )
+    })
+
+    test('should fail to create a live state from existing draft form when there is no output email', async () => {
+      const draftDefinitionNoStartPage = /** @type {FormDefinition} */ (
+        definition
+      )
+      delete draftDefinitionNoStartPage.outputEmail
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(draftDefinitionNoStartPage)
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
       )
     })
   })
@@ -336,6 +353,7 @@ describe('Forms service', () => {
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  */
 
 /**
