@@ -2,10 +2,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
-import {
-  FormOperationFailedError,
-  InvalidFormDefinitionError
-} from '~/src/api/forms/errors.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
@@ -280,7 +277,7 @@ describe('Forms service', () => {
 
       await expect(
         updateDraftFormDefinition('123', definition, author)
-      ).rejects.toThrow(new FormOperationFailedError({ cause: error }))
+      ).rejects.toThrow(error)
     })
   })
 
