@@ -169,7 +169,7 @@ describe('Forms service', () => {
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(
-          'This form has no start page defined. Please ensure there is only one starting page in the draft form.'
+          'This form has no start page. Please ensure there is only one starting page in the draft form.'
         )
       )
     })

@@ -205,7 +205,7 @@ export async function createLiveFromDraft(formId, author) {
       )
 
       throw Boom.badRequest(
-        `This form has no draft state, so it cannot be deployed to live.`
+        `This form is not in draft, so it cannot be published as live.`
       )
     }
 
@@ -213,7 +213,7 @@ export async function createLiveFromDraft(formId, author) {
 
     if (!draftFormDefinition?.startPage) {
       throw Boom.badRequest(
-        `This form has no start page defined. Please ensure there is only one starting page in the draft form.`
+        `This form has no start page. Please ensure there is only one starting page in the draft form.`
       )
     }
 
