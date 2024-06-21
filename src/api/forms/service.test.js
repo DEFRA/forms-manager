@@ -157,7 +157,24 @@ describe('Forms service', () => {
     })
 
     test('should create a live state from existing draft form', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
+    })
+
+    test('should fail to create a live state from existing draft form when no start page', async () => {
+      const draftDefinitionNoStartPage =
+        /** @type {import('@defra/forms-model').FormDefinition} */ (definition)
+      delete draftDefinitionNoStartPage.startPage
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(draftDefinitionNoStartPage)
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(
+          'This form has no start page defined. Please ensure there is only one starting page in the draft form.'
+        )
+      )
     })
   })
 
