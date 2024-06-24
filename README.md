@@ -45,7 +45,12 @@ OIDC_JWKS_URI=""
 OIDC_VERIFY_AUD=""
 OIDC_VERIFY_ISS=""
 ROLE_EDITOR_GROUP_ID=""
+HTTP_PROXY=
+HTTPS_PROXY=
+NO_PROXY=
 ```
+
+For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.
 
 ### Development
 
