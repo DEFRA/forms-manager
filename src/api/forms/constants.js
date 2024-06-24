@@ -1,7 +1,8 @@
 export const makeFormLiveErrorMessages = {
-  missingDraft: 'This form is not in draft, so it cannot be published as live.',
+  missingDraft:
+    'This form is already live. Create a new draft to change the form.',
   missingStartPage:
-    'This form has no start page. Please ensure there is only one starting page in the draft form.',
+    'The questions in this form are not all connected. Connect all pages within the form.',
   missingOutputEmail:
-    'This form has no output email address configured, therefore submissions wil not be sent anywhere. Please add an output email to the draft form.'
+    'The draft form does not contain an output email address. Add an output email address for forms to be sent to.'
 }
