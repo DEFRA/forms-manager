@@ -40,7 +40,7 @@
     "dotenv": "^16.4.5",
     "hapi-pino": "^12.1.0",
     "https-proxy-agent": "^7.0.4",
-    "joi": "^17.13.1",
+    "joi": "^17.13.3",
     "mongodb": "^6.7.0",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.1",
