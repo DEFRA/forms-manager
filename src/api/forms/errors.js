@@ -31,21 +31,6 @@ export class InvalidFormDefinitionError extends ApplicationError {
 }
 
 /**
- * Indicates the form metadata and/or definition could not be persisted.
- */
-export class FormOperationFailedError extends ApplicationError {
-  name = 'FailedCreationOperationError'
-
-  /**
-   * Constructs an error
-   * @param {ErrorOptions} [options]
-   */
-  constructor(options) {
-    super('Failed to persist the form metadata and/or definition.', options)
-  }
-}
-
-/**
  * Indicates the form already exists so cannot be created again.
  */
 export class FormAlreadyExistsError extends ApplicationError {

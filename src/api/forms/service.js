@@ -1,10 +1,9 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import {
-  FormOperationFailedError,
-  InvalidFormDefinitionError
-} from '~/src/api/forms/errors.js'
+import { makeFormLiveErrorMessages } from './constants.js'
+
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
@@ -180,19 +179,13 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     }
 
     logger.info(`Updated form metadata (draft) for form ID ${formId}`)
-  } catch (cause) {
-    const error = new FormOperationFailedError({ cause })
-
+  } catch (err) {
     logger.error(
-      error,
+      err,
       `Updating form definition (draft) for form ID ${formId} failed`
     )
 
-    if (!Boom.isBoom(cause)) {
-      throw Boom.internal(error)
-    }
-
-    throw error
+    throw err
   }
 }
 
@@ -209,7 +202,21 @@ export async function createLiveFromDraft(formId, author) {
     const form = await getForm(formId)
 
     if (!form.draft) {
-      throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
+      logger.error(
+        `Form with ID '${formId}' has no draft state so failed deployment to live`
+      )
+
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
+    }
+
+    const draftFormDefinition = await formDefinition.get(formId, 'draft')
+
+    if (!draftFormDefinition?.startPage) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
+    }
+
+    if (!draftFormDefinition.outputEmail) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
     }
 
     // Build the live state
@@ -255,16 +262,10 @@ export async function createLiveFromDraft(formId, author) {
 
     logger.info(`Removed form metadata (draft) for form ID ${formId}`)
     logger.info(`Made draft live for form ID ${formId}`)
-  } catch (cause) {
-    const error = new FormOperationFailedError({ cause })
+  } catch (err) {
+    logger.error(err, `Make draft live for form ID ${formId} failed`)
 
-    logger.error(error, `Make draft live for form ID ${formId} failed`)
-
-    if (!Boom.isBoom(cause)) {
-      throw Boom.internal(error)
-    }
-
-    throw error
+    throw err
   }
 }
 
@@ -313,16 +314,10 @@ export async function createDraftFromLive(formId, author) {
 
     logger.info(`Added form metadata (draft) for form ID ${formId}`)
     logger.info(`Created draft to edit for form ID ${formId}`)
-  } catch (cause) {
-    const error = new FormOperationFailedError({ cause })
+  } catch (err) {
+    logger.error(err, `Create draft to edit for form ID ${formId} failed`)
 
-    logger.error(error, `Create draft to edit for form ID ${formId} failed`)
-
-    if (!Boom.isBoom(error)) {
-      throw Boom.internal(error)
-    }
-
-    throw error
+    throw err
   }
 }
 
