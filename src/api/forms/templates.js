@@ -7,7 +7,6 @@ export function empty() {
   return /** @satisfies {FormDefinition} */ ({
     name: '',
     startPage: '/page-one',
-    outputEmail: 'test@defra.gov.uk',
     pages: [
       {
         path: '/page-one',

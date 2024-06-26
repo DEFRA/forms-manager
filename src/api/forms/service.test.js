@@ -157,7 +157,10 @@ describe('Forms service', () => {
     })
 
     test('should create a live state from existing draft form', async () => {
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...definition,
+        outputEmail: 'test@defra.gov.uk'
+      })
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
 
