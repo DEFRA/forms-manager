@@ -211,7 +211,7 @@ export async function createLiveFromDraft(formId, author) {
 
     const draftFormDefinition = await formDefinition.get(formId, 'draft')
 
-    if (!draftFormDefinition?.startPage) {
+    if (!draftFormDefinition.startPage) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
     }
 
