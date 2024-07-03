@@ -3,11 +3,11 @@ import Boom from '@hapi/boom'
 import { ApplicationError } from '~/src/api/forms/errors.js'
 
 /**
- * @satisfies {import('@hapi/hapi').Plugin<void>}
+ * @satisfies {Plugin<void>}
  */
 export const transformErrors = {
   name: 'transform-errors',
-  register: (server) => {
+  register(server) {
     server.ext('onPreResponse', (request, h) => {
       const response = request.response
 
@@ -24,3 +24,8 @@ export const transformErrors = {
     })
   }
 }
+
+/**
+ * @template {object | void} [PluginOptions=void]
+ * @typedef {import('@hapi/hapi').Plugin<PluginOptions>} Plugin
+ */
