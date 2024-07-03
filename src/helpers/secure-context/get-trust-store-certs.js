@@ -1,11 +1,14 @@
 /**
  * Get base64 certs from all environment variables starting with TRUSTSTORE_
- * @param {NodeJS.ProcessEnv} envs - environment variables
+ * @param {NodeJS.ProcessEnv} envs
+ * @returns {string[]}
  */
-export const getTrustStoreCerts = (envs) =>
-  Object.entries(envs)
+export function getTrustStoreCerts(envs) {
+  return Object.entries(envs)
+    .map(([key, value]) => key.startsWith('TRUSTSTORE_') && value)
     .filter(
-      /** @type { (env: [string, string?]) => env is [string, string] } */
-      (([key, value]) => key.startsWith('TRUSTSTORE_') && !!value)
+      /** @returns {envValue is string} */
+      (envValue) => Boolean(envValue)
     )
-    .map(([, value]) => Buffer.from(value, 'base64').toString().trim())
+    .map((envValue) => Buffer.from(envValue, 'base64').toString().trim())
+}

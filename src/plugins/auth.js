@@ -12,7 +12,7 @@ const roleEditorGroupId = config.get('roleEditorGroupId')
 const logger = createLogger()
 
 /**
- * @satisfies {ServerRegisterPlugin}
+ * @satisfies {ServerRegisterPluginObject<void>}
  */
 export const auth = {
   plugin: {
@@ -34,7 +34,7 @@ export const auth = {
         /**
          * @param {Artifacts<UserProfile>} artifacts
          */
-        validate: (artifacts) => {
+        validate(artifacts) {
           const user = artifacts.decoded.payload
 
           if (!user) {
@@ -81,10 +81,15 @@ export const auth = {
 }
 
 /**
- * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<void, void>} ServerRegisterPlugin
- * @typedef {import('oidc-client-ts').UserProfile & { groups?: string[] }} UserProfile
+ * @template {object | void} [PluginOptions=void]
+ * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<PluginOptions>} ServerRegisterPluginObject
  */
+
 /**
  * @template {object} Payload
  * @typedef {import('@hapi/jwt').HapiJwt.Artifacts<{ JwtPayload?: Payload }>} Artifacts
+ */
+
+/**
+ * @typedef {import('oidc-client-ts').UserProfile & { groups?: string[] }} UserProfile
  */
