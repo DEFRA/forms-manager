@@ -38,7 +38,13 @@ nvm use
 
 1. Install Docker
 
-2. Create a `.env` file with the following mandatory environment variables populated at root level:
+2. Bring up runtime dependencies
+
+```bash
+docker compose up
+```
+
+3. Create a `.env` file with the following mandatory environment variables populated at root level:
 
 ```text
 MONGO_URI=""
@@ -53,12 +59,6 @@ NO_PROXY=
 ```
 
 For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.
-
-3. Bring up runtime dependencies
-
-```bash
-docker compose up
-```
 
 ### Development
 
