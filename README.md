@@ -36,44 +36,25 @@ nvm use
 
 ### Setup
 
-1. Install application dependencies:
+1. Install Docker
 
-```bash
-npm ci
-```
-
-2. Install Docker
-
-3. Install Localstack: https://docs.localstack.cloud/getting-started/installation/
-
-4. Install awslocal: https://github.com/localstack/awscli-local
-
-5. Create a new S3 bucket using localstack with the awslocal wrapper:
-
-Or if you are on Mac
-
-1. brew install awscli
-2. brew install awscli-local
-
-```bash
-localstack start
-awslocal s3api create-bucket \
-  --bucket form-definition-storage \
-  --region eu-west-2 \
-  --create-bucket-configuration LocationConstraint=eu-west-2
-```
-
-5. Add your bucket name into your .env file at project root level:
+2. Create a `.env` file with the following mandatory environment variables populated at root level:
 
 ```text
-FORM_DEF_BUCKET_NAME=form-definition-storage
-S3_ENDPOINT=http://localhost:4566
-AWS_ACCESS_KEY_ID=dummy
-AWS_SECRET_ACCESS_KEY=dummy
-MONGO_URI='mongodb://defra:changeme@localhost:27017/'
+MONGO_URI=""
+MONGO_DATABASE=""
+OIDC_JWKS_URI=""
+OIDC_VERIFY_AUD=""
+OIDC_VERIFY_ISS=""
+ROLE_EDITOR_GROUP_ID=""
+HTTP_PROXY=
+HTTPS_PROXY=
+NO_PROXY=
 ```
 
-6. Bring up runtime dependencies
+For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.
+
+3. Bring up runtime dependencies
 
 ```bash
 docker compose up

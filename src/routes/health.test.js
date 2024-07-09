@@ -1,6 +1,6 @@
 import { createServer } from '~/src/api/server.js'
 
-jest.mock('~/src/db.js')
+jest.mock('~/src/mongo.js')
 jest.mock('~/src/api/forms/service.js')
 
 describe('Health route', () => {

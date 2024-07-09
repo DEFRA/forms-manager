@@ -1,10 +1,8 @@
-const pkg = require('./package.json')
-
 /**
  * @type {import('eslint').ESLint.ConfigData}
  */
 module.exports = {
-  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage', '.eslintrc.cjs'],
+  ignorePatterns: ['.server', 'src/__fixtures__', 'coverage'],
   overrides: [
     {
       extends: [
@@ -14,7 +12,6 @@ module.exports = {
         'plugin:import/typescript',
         'plugin:jsdoc/recommended-typescript-flavor',
         'plugin:n/recommended',
-        'plugin:prettier/recommended',
         'plugin:promise/recommended',
         'plugin:@typescript-eslint/strict-type-checked',
         'plugin:@typescript-eslint/stylistic-type-checked',
@@ -24,19 +21,11 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaVersion: 'latest',
-        project: true,
+        project: ['./tsconfig.json'],
         tsconfigRootDir: __dirname
       },
-      plugins: [
-        '@typescript-eslint',
-        'import',
-        'jsdoc',
-        'n',
-        'prettier',
-        'promise'
-      ],
+      plugins: ['@typescript-eslint', 'import', 'jsdoc', 'n', 'promise'],
       rules: {
-        'prettier/prettier': 'error',
         'no-console': 'error',
 
         // Only show warnings for missing types
@@ -55,13 +44,13 @@ module.exports = {
           }
         ],
 
-        // Check namespace import members
-        'import/namespace': [
-          'error',
-          {
-            allowComputed: true
-          }
-        ],
+        // Skip rules handled by TypeScript compiler
+        'import/default': 'off',
+        'import/extensions': 'off',
+        'import/named': 'off',
+        'import/namespace': 'off',
+        'import/no-named-as-default-member': 'off',
+        'import/no-unresolved': 'off',
 
         // Check import or require statements are A-Z ordered
         'import/order': [
@@ -109,16 +98,17 @@ module.exports = {
           }
         ],
 
-        // JSDoc @param description is optional
+        // JSDoc @param types are mandatory for JavaScript
         'jsdoc/require-param-description': 'off',
-        'jsdoc/require-param': 'error',
+        'jsdoc/require-param-type': 'error',
+        'jsdoc/require-param': 'off',
 
-        // JSDoc @returns description is optional
+        // JSDoc @returns is optional
         'jsdoc/require-returns-description': 'off',
         'jsdoc/require-returns-type': 'off',
         'jsdoc/require-returns': 'off',
 
-        // Skip rules handled by import plugin
+        // Skip rules handled by TypeScript compiler
         'n/no-extraneous-require': 'off',
         'n/no-extraneous-import': 'off',
         'n/no-missing-require': 'off',
@@ -133,10 +123,7 @@ module.exports = {
       settings: {
         'import/resolver': {
           node: true,
-          typescript: {
-            alwaysTryTypes: true,
-            project: ['./tsconfig.json']
-          }
+          typescript: true
         }
       }
     },
@@ -162,11 +149,20 @@ module.exports = {
     },
     {
       env: {
-        jest: true
+        'jest/globals': true
       },
-      extends: ['plugin:jest/style'],
+      extends: ['plugin:jest/recommended', 'plugin:jest/style'],
       files: ['**/*.test.{cjs,js,mjs}'],
-      plugins: ['jest']
+      plugins: ['jest'],
+      rules: {
+        // Turn off warnings for jest.Expect 'any' types
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
+
+        // Allow Jest to assert on mocked unbound methods
+        '@typescript-eslint/unbound-method': 'off',
+        'jest/unbound-method': 'error'
+      }
     }
   ],
   root: true

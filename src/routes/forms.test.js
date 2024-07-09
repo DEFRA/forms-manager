@@ -1,17 +1,21 @@
-import {
-  FailedToReadFormError,
-  FormAlreadyExistsError
-} from '../api/forms/errors.js'
+import { organisations } from '@defra/forms-model' /*  */
+import Boom from '@hapi/boom'
 
+import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   listForms,
   createForm,
   getForm,
-  getDraftFormDefinition
+  getFormDefinition,
+  getFormBySlug,
+  createLiveFromDraft,
+  createDraftFromLive,
+  removeForm
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
+import { auth } from '~/test/fixtures/auth.js'
 
-jest.mock('~/src/db.js')
+jest.mock('~/src/mongo.js')
 jest.mock('~/src/api/forms/service.js')
 
 describe('Forms route', () => {
@@ -33,43 +37,55 @@ describe('Forms route', () => {
   const internalErrorStatusCode = 500
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
-  const stubFormInput = {
+  const now = new Date()
+  const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+  const authorDisplayName = 'Enrique Chase'
+
+  /**
+   * @satisfies {FormMetadataAuthor}
+   */
+  const author = { id: authorId, displayName: authorDisplayName }
+
+  /**
+   * @satisfies {FormMetadataInput}
+   */
+  const stubFormMetadataInput = {
     title: 'Test form',
     organisation: 'Defra',
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk'
   }
-  const stubFormOutput = {
+
+  /**
+   * @satisfies {FormMetadata}
+   */
+  const stubFormMetadataOutput = {
     id,
     slug: 'test-form',
     title: 'Test form',
     organisation: 'Defra',
     teamName: 'Defra Forms',
-    teamEmail: 'defraforms@defra.gov.uk'
+    teamEmail: 'defraforms@defra.gov.uk',
+    draft: {
+      createdAt: now,
+      createdBy: author,
+      updatedAt: now,
+      updatedBy: author
+    }
   }
+
+  /**
+   * @satisfies {FormDefinition}
+   */
   const stubFormDefinition = {
     name: '',
-    startPage: '/page-one',
     pages: [],
     conditions: [],
     sections: [],
-    lists: [],
-    fees: [],
-    outputs: [],
-    feeOptions: {
-      paymentReferenceFormat: 'string',
-      payReturnUrl: 'string',
-      allowSubmissionWithoutPayment: true,
-      maxAttempts: 1,
-      customPayErrorMessage: 'string',
-      showPaymentSkippedWarningPage: true
-    }
+    lists: []
   }
-  const internalErrorResponse = {
-    error: 'Internal Server Error',
-    message: 'An internal server error occurred',
-    statusCode: 500
-  }
+
+  const slug = stubFormMetadataOutput.slug
 
   describe('Success responses', () => {
     test('Testing GET /forms route returns empty array', async () => {
@@ -77,7 +93,8 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -86,37 +103,56 @@ describe('Forms route', () => {
     })
 
     test('Testing GET /forms route returns a list of forms', async () => {
-      jest.mocked(listForms).mockResolvedValue([stubFormOutput])
+      jest.mocked(listForms).mockResolvedValue([stubFormMetadataOutput])
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual([stubFormOutput])
+      expect(response.result).toEqual([stubFormMetadataOutput])
     })
 
-    test('Testing POST /forms route returns a new form', async () => {
-      jest.mocked(createForm).mockResolvedValue(stubFormOutput)
+    test('Testing POST /forms route returns a "created" status', async () => {
+      jest.mocked(createForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
         method: 'POST',
         url: '/forms',
-        payload: stubFormInput
+        payload: stubFormMetadataInput,
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        id: stubFormOutput.id,
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        slug: 'test-form',
         status: 'created'
       })
     })
 
+    test('Testing DELETE /forms/{id} route returns a "deleted" status', async () => {
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}`,
+        auth,
+        payload: {}
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id,
+        status: 'deleted'
+      })
+    })
+
     test('Testing GET /forms/{id} route returns a form', async () => {
-      jest.mocked(getForm).mockResolvedValue(stubFormOutput)
+      jest.mocked(getForm).mockResolvedValue(stubFormMetadataOutput)
 
       const response = await server.inject({
         method: 'GET',
@@ -125,11 +161,37 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(stubFormOutput)
+      expect(response.result).toEqual(stubFormMetadataOutput)
+    })
+
+    test('Testing GET /forms/slug/{slug} route returns a form', async () => {
+      jest.mocked(getFormBySlug).mockResolvedValue(stubFormMetadataOutput)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/slug/${slug}`
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormMetadataOutput)
+    })
+
+    test('Testing GET /forms/{id}/definition route returns a form definition', async () => {
+      jest.mocked(getFormDefinition).mockResolvedValue(stubFormDefinition)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/definition`
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
     })
 
     test('Testing GET /forms/{id}/definition/draft route returns a form definition', async () => {
-      jest.mocked(getDraftFormDefinition).mockResolvedValue(stubFormDefinition)
+      jest.mocked(getFormDefinition).mockResolvedValue(stubFormDefinition)
 
       const response = await server.inject({
         method: 'GET',
@@ -140,197 +202,188 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual(stubFormDefinition)
     })
+
+    test('Testing POST /forms/{id}/create-live route returns a "created-live" status', async () => {
+      jest.mocked(createLiveFromDraft).mockResolvedValue(undefined)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/create-live`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        status: 'created-live'
+      })
+    })
+
+    test('Testing POST /forms/{id}/create-draft route returns a "created-draft" status', async () => {
+      jest.mocked(createDraftFromLive).mockResolvedValue(undefined)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/create-draft`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        status: 'created-draft'
+      })
+    })
   })
 
   describe('Error responses', () => {
     test('Testing GET /forms route throws unknown error', async () => {
-      jest
-        .mocked(listForms)
-        .mockResolvedValue(Promise.reject(new Error('Unknown error')))
+      jest.mocked(listForms).mockRejectedValueOnce(new Error('Unknown error'))
 
       const response = await server.inject({
         method: 'GET',
-        url: '/forms'
+        url: '/forms',
+        auth
       })
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(internalErrorResponse)
+      expect(response.result).toMatchObject({
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      })
     })
 
-    test('Testing POST /forms route with an empty payload returns validation errors', async () => {
+    test('Testing DELETE /forms/{id} route returns internal server error', async () => {
+      jest.mocked(removeForm).mockRejectedValueOnce('error')
+
       const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+        method: 'DELETE',
+        url: `/forms/${id}`,
+        auth,
         payload: {}
       })
 
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" is required. "organisation" is required. "teamName" is required. "teamEmail" is required',
-        statusCode: 400,
-        validation: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          source: 'payload'
-        }
-      })
+      expect(response.statusCode).toEqual(internalErrorStatusCode)
     })
 
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
-        payload: { title: '', organisation: '', teamName: '', teamEmail: '' }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" is not allowed to be empty. "organisation" is not allowed to be empty. "teamName" is not allowed to be empty. "teamEmail" is not allowed to be empty',
-        statusCode: 400,
-        validation: {
+    test.each([
+      {
+        payload: {},
+        error: {
           keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          source: 'payload'
+          messages: [
+            '"title" is required.',
+            '"organisation" is required.',
+            '"teamName" is required.',
+            '"teamEmail" is required'
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
-          title: ' ',
-          organisation: ' ',
-          teamName: ' ',
-          teamEmail: ' '
+          title: '',
+          organisation: '',
+          teamName: '',
+          teamEmail: ''
+        },
+        error: {
+          keys: [
+            'title',
+            'organisation',
+            'organisation',
+            'teamName',
+            'teamEmail'
+          ],
+          messages: [
+            '"title" is not allowed to be empty.',
+            `"organisation" must be one of [${organisations.join(', ')}].`,
+            '"organisation" is not allowed to be empty.',
+            '"teamName" is not allowed to be empty.',
+            '"teamEmail" is not allowed to be empty'
+          ]
         }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" is not allowed to be empty. "organisation" is not allowed to be empty. "teamName" is not allowed to be empty. "teamEmail" is not allowed to be empty',
-        statusCode: 400,
-        validation: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          source: 'payload'
-        }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'x'.repeat(251),
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"title" length must be less than or equal to 250 characters long',
-        statusCode: 400,
-        validation: {
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        error: {
           keys: ['title'],
-          source: 'payload'
+          messages: [
+            '"title" length must be less than or equal to 250 characters long'
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'title',
-          organisation: 'x'.repeat(101),
+          organisation: 'Cyberdyne Systems',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"organisation" length must be less than or equal to 100 characters long',
-        statusCode: 400,
-        validation: {
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        error: {
           keys: ['organisation'],
-          source: 'payload'
+          messages: [
+            `"organisation" must be one of [${organisations.join(', ')}]`
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'title',
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'x'.repeat(101),
-          teamEmail: 'test@example.com'
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"teamName" length must be less than or equal to 100 characters long',
-        statusCode: 400,
-        validation: {
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        error: {
           keys: ['teamName'],
-          source: 'payload'
+          messages: [
+            '"teamName" length must be less than or equal to 100 characters long'
+          ]
         }
-      })
-    })
-
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
+      },
+      {
         payload: {
           title: 'title',
-          organisation: 'orgname',
-          teamName: 'x'.repeat(101),
-          teamEmail: 'test@example.com'
+          organisation: 'Defra',
+          teamName: 'teamname',
+          teamEmail: `x`
+        },
+        error: {
+          keys: ['teamEmail'],
+          messages: ['"teamEmail" must be a valid email']
         }
-      })
+      }
+    ])(
+      'Testing POST /forms route with an invalid payload returns validation errors',
+      async ({ payload: metadata, error }) => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/forms',
+          payload: metadata,
+          auth
+        })
 
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message:
-          '"teamName" length must be less than or equal to 100 characters long',
-        statusCode: 400,
-        validation: {
-          keys: ['teamName'],
-          source: 'payload'
-        }
-      })
-    })
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'payload'
+          }
+        })
+      }
+    )
 
-    test('Testing POST /forms route with an slug that already exists returns 400 FormAlreadyExistsError', async () => {
+    test('Testing POST /forms route with a slug that already exists returns 400 FormAlreadyExistsError', async () => {
       jest
         .mocked(createForm)
         .mockRejectedValue(new FormAlreadyExistsError('my-title'))
@@ -340,86 +393,58 @@ describe('Forms route', () => {
         url: '/forms',
         payload: {
           title: 'My Title',
-          organisation: 'orgname',
+          organisation: 'Defra',
           teamName: 'teamname',
-          teamEmail: 'test@example.com'
-        }
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        auth
       })
 
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        statusCode: 400,
+      expect(response.result).toMatchObject({
         error: 'FormAlreadyExistsError',
         message: 'Form with slug my-title already exists'
       })
     })
 
-    test('Testing POST /forms route with an invalid payload returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'POST',
-        url: '/forms',
-        payload: {
-          title: 'title',
-          organisation: 'orgname',
-          teamName: 'teamname',
-          teamEmail: `x`
-        }
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"teamEmail" must be a valid email',
-        statusCode: 400,
-        validation: {
-          keys: ['teamEmail'],
-          source: 'payload'
-        }
-      })
-    })
-
-    test('Testing GET /forms/{id} route with an invalid id returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: '/forms/1'
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" length must be 24 characters long',
-        statusCode: 400,
-        validation: {
+    test.each([
+      {
+        url: '/forms/1',
+        error: {
           keys: ['id'],
-          source: 'params'
+          messages: ['"id" length must be 24 characters long']
         }
-      })
-    })
-
-    test('Testing GET /forms/{id} route with an invalid id returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: `/forms/${'x'.repeat(24)}`
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" must only contain hexadecimal characters',
-        statusCode: 400,
-        validation: {
+      },
+      {
+        url: `/forms/${'x'.repeat(24)}`,
+        error: {
           keys: ['id'],
-          source: 'params'
+          messages: ['"id" must only contain hexadecimal characters']
         }
-      })
-    })
+      }
+    ])(
+      'Testing GET /forms/{id} route with an invalid id returns validation errors',
+      async ({ url, error }) => {
+        const response = await server.inject({ method: 'GET', url })
 
-    test('Testing GET /forms/{id} route with an id that is not found returns 404 Not found', async () => {
-      jest.mocked(getForm).mockResolvedValue(undefined)
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'params'
+          }
+        })
+      }
+    )
+
+    test('Testing GET /forms/{id} route with an ID that is not found returns 404 Not found', async () => {
+      jest
+        .mocked(getForm)
+        .mockRejectedValue(Boom.notFound(`Form with ID '${id}' not found`))
 
       const response = await server.inject({
         method: 'GET',
@@ -428,55 +453,65 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
+      expect(response.result).toMatchObject({
         error: 'Not Found',
-        message: `Form with id '${id}' not found`,
-        statusCode: 404
+        message: `Form with ID '${id}' not found`
       })
     })
 
-    test('Testing GET /forms/{id}/definition/draft route with an invalid id returns validation errors', async () => {
+    test('Testing GET /forms/{slug} route with a slug that is not found returns 404 Not found', async () => {
+      jest
+        .mocked(getFormBySlug)
+        .mockRejectedValue(Boom.notFound(`Form with slug '${slug}' not found`))
+
       const response = await server.inject({
         method: 'GET',
-        url: '/forms/1/definition/draft'
+        url: `/forms/slug/${slug}`
       })
 
-      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" length must be 24 characters long',
-        statusCode: 400,
-        validation: {
-          keys: ['id'],
-          source: 'params'
-        }
+      expect(response.result).toMatchObject({
+        error: 'Not Found',
+        message: `Form with slug '${slug}' not found`
       })
     })
 
-    test('Testing GET /forms/{id}/definition/draft route with an invalid id returns validation errors', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: `/forms/${'x'.repeat(24)}/definition/draft`
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        error: 'Bad Request',
-        message: '"id" must only contain hexadecimal characters',
-        statusCode: 400,
-        validation: {
+    test.each([
+      {
+        url: '/forms/1/definition/draft',
+        error: {
           keys: ['id'],
-          source: 'params'
+          messages: ['"id" length must be 24 characters long']
         }
-      })
-    })
+      },
+      {
+        url: `/forms/${'x'.repeat(24)}/definition/draft`,
+        error: {
+          keys: ['id'],
+          messages: ['"id" must only contain hexadecimal characters']
+        }
+      }
+    ])(
+      'Testing GET /forms/{id}/definition/draft route with an invalid id returns validation errors',
+      async ({ url, error }) => {
+        const response = await server.inject({ method: 'GET', url })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'params'
+          }
+        })
+      }
+    )
 
     test('Testing GET /forms/{id}/definition/draft route with an id that is not found returns 404 Not found', async () => {
-      jest
-        .mocked(getDraftFormDefinition)
-        .mockRejectedValue(new FailedToReadFormError('Failed'))
+      jest.mocked(getFormDefinition).mockRejectedValue(Boom.notFound())
 
       const response = await server.inject({
         method: 'GET',
@@ -485,16 +520,15 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(notFoundStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
+      expect(response.result).toMatchObject({
         error: 'Not Found',
-        message: 'Failed',
-        statusCode: 404
+        message: 'Not Found'
       })
     })
 
     test('Testing GET /forms/{id}/definition/draft route throws unknown error', async () => {
       jest
-        .mocked(getDraftFormDefinition)
+        .mocked(getFormDefinition)
         .mockRejectedValue(new Error('Unknown error'))
 
       const response = await server.inject({
@@ -504,7 +538,10 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(internalErrorStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(internalErrorResponse)
+      expect(response.result).toMatchObject({
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      })
     })
   })
 })
@@ -512,4 +549,7 @@ describe('Forms route', () => {
 /**
  * @typedef {import('@hapi/hapi').Server} Server
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
+ * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  */

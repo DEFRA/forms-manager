@@ -1,12 +1,16 @@
-import { formDefinitionSchema } from '@defra/forms-model'
+import { formDefinitionSchema, slugify } from '@defra/forms-model'
+import Boom from '@hapi/boom'
 
-import * as draftFormDefinition from '~/src/api/forms/draft-form-definition-repository.js'
-import {
-  InvalidFormDefinitionError,
-  ResourceNotFoundError
-} from '~/src/api/forms/errors.js'
-import * as formMetadata from '~/src/api/forms/form-metadata-repository.js'
+import { makeFormLiveErrorMessages } from './constants.js'
+
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
+import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
+import { client } from '~/src/mongo.js'
+
+const logger = createLogger()
 
 /**
  * Maps a form metadata document from MongoDB to form metadata
@@ -20,18 +24,19 @@ function mapForm(document) {
     title: document.title,
     organisation: document.organisation,
     teamName: document.teamName,
-    teamEmail: document.teamEmail
+    teamEmail: document.teamEmail,
+    draft: document.draft,
+    live: document.live
   }
 }
 
 /**
- * Adds an empty form
- * @param {FormMetadataInput} formMetadataInput - the desired form metadata to save
- * @throws {FormAlreadyExistsError} - if the form slug already exists
- * @throws {InvalidFormDefinitionError} - if the form definition is invalid
+ * Creates a new empty form
+ * @param {FormMetadataInput} metadataInput - the form metadata to save
+ * @param {FormMetadataAuthor} author - the author details
  */
-export async function createForm(formMetadataInput) {
-  const { title } = formMetadataInput
+export async function createForm(metadataInput, author) {
+  const { title } = metadataInput
 
   // Create a blank form definition with the title set
   const definition = { ...formTemplates.empty(), name: title }
@@ -39,27 +44,54 @@ export async function createForm(formMetadataInput) {
   // Validate the form definition
   const { error } = formDefinitionSchema.validate(definition)
   if (error) {
-    throw new InvalidFormDefinitionError(error.message, {
+    logger.warn(`Form failed validation: '${metadataInput.title}'`)
+    throw new InvalidFormDefinitionError(metadataInput.title, {
       cause: error
     })
   }
 
   // Create the slug
-  const slug = formTitleToSlug(title)
+  const slug = slugify(title)
+  const now = new Date()
 
   /**
    * Create the metadata document
    * @satisfies {FormMetadataDocument}
    */
-  const document = { ...formMetadataInput, slug }
+  const document = {
+    ...metadataInput,
+    slug,
+    draft: {
+      createdAt: now,
+      createdBy: author,
+      updatedAt: now,
+      updatedBy: author
+    }
+  }
 
-  // Create the metadata document
-  const { insertedId: _id } = await formMetadata.create(document)
+  const session = client.startSession()
 
-  // Create the form definition
-  await draftFormDefinition.create(_id.toString(), definition)
+  /** @type {FormMetadata | undefined} */
+  let metadata
 
-  return mapForm({ ...document, _id })
+  try {
+    await session.withTransaction(async () => {
+      // Create the metadata document
+      const { insertedId: _id } = await formMetadata.create(document, session)
+      metadata = mapForm({ ...document, _id })
+
+      // Create the draft form definition
+      await formDefinition.upsert(metadata.id, definition, session)
+    })
+  } finally {
+    await session.endSession()
+  }
+
+  if (!metadata) {
+    throw Boom.badRequest('No metadata created in the transaction')
+  }
+
+  return metadata
 }
 
 /**
@@ -72,53 +104,260 @@ export async function listForms() {
 }
 
 /**
- * Retrieves form metadata
+ * Retrieves form metadata by ID
  * @param {string} formId - ID of the form
  */
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
 
-  if (document) {
-    return mapForm(document)
-  }
+  return mapForm(document)
+}
+
+/**
+ * Retrieves form metadata by slug
+ * @param {string} slug - The slug of the form
+ */
+export async function getFormBySlug(slug) {
+  const document = await formMetadata.getBySlug(slug)
+
+  return mapForm(document)
 }
 
 /**
  * Retrieves the form definition JSON content for a given form ID
  * @param {string} formId - the ID of the form
- * @throws {FailedToReadFormError} - if the file does not exist or is empty
+ * @param {'draft' | 'live'} state - the form state
  */
-export function getDraftFormDefinition(formId) {
-  return draftFormDefinition.get(formId)
+export function getFormDefinition(formId, state = 'draft') {
+  return formDefinition.get(formId, state)
 }
 
 /**
  * @param {string} formId - ID of the form
- * @param {FormDefinition} formDefinition - full JSON form definition
+ * @param {FormDefinition} definition - full JSON form definition
+ * @param {FormMetadataAuthor} author - the author details
  */
-export async function updateDraftFormDefinition(formId, formDefinition) {
-  const existingForm = await getForm(formId)
+export async function updateDraftFormDefinition(formId, definition, author) {
+  logger.info(`Updating form definition (draft) for form ID ${formId}`)
 
-  if (!existingForm) {
-    throw new ResourceNotFoundError(
-      `Form ${formId} does not exist, so the definition cannot be updated.`
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
+
+    if (!form.draft) {
+      throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
+    }
+
+    // some definition attributes shouldn't be customised by users, so patch
+    // them on every write to prevent imported forms drifting (e.g. JSON upload)
+    definition.name = form.title
+
+    const session = client.startSession()
+
+    try {
+      await session.withTransaction(async () => {
+        // Update the form definition
+        await formDefinition.upsert(formId, definition, session)
+
+        logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+
+        // Update the `updatedAt/By` fields of the draft state
+        const now = new Date()
+        await formMetadata.update(
+          formId,
+          {
+            $set: {
+              'draft.updatedAt': now,
+              'draft.updatedBy': author
+            }
+          },
+          session
+        )
+      })
+    } finally {
+      await session.endSession()
+    }
+
+    logger.info(`Updated form metadata (draft) for form ID ${formId}`)
+  } catch (err) {
+    logger.error(
+      err,
+      `Updating form definition (draft) for form ID ${formId} failed`
     )
-  }
 
-  return draftFormDefinition.create(formId, formDefinition)
+    throw err
+  }
 }
 
 /**
- * Given a form title, returns the slug of the form.
- * E.g. "Hello - world" -> "hello-world".
- * @param {string} title - title of the form
+ * Creates the live form from the current draft state
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataAuthor} author - the author of the new live state
  */
-function formTitleToSlug(title) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, '') // remove any non-alphanumeric characters
-    .replace(/\s+/g, ' ') // replace any whitespaces with a single space
-    .replace(/ /g, '-') // replace any spaces with a hyphen
+export async function createLiveFromDraft(formId, author) {
+  logger.info(`Make draft live for form ID ${formId}`)
+
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
+
+    if (!form.draft) {
+      logger.error(
+        `Form with ID '${formId}' has no draft state so failed deployment to live`
+      )
+
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
+    }
+
+    const draftFormDefinition = await formDefinition.get(formId, 'draft')
+
+    if (!draftFormDefinition.startPage) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
+    }
+
+    if (!draftFormDefinition.outputEmail) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
+    }
+
+    // Build the live state
+    const now = new Date()
+    const set = !form.live
+      ? {
+          // Initialise the live state
+          live: {
+            updatedAt: now,
+            updatedBy: author,
+            createdAt: now,
+            createdBy: author
+          }
+        }
+      : {
+          // Partially update the live state
+          'live.updatedAt': now,
+          'live.updatedBy': author
+        }
+
+    const session = client.startSession()
+
+    try {
+      await session.withTransaction(async () => {
+        // Copy the draft form definition
+        await formDefinition.createLiveFromDraft(formId, session)
+
+        logger.info(`Removing form metadata (draft) for form ID ${formId}`)
+
+        // Update the form with the live state and clear the draft
+        await formMetadata.update(
+          formId,
+          {
+            $set: set,
+            $unset: { draft: '' }
+          },
+          session
+        )
+      })
+    } finally {
+      await session.endSession()
+    }
+
+    logger.info(`Removed form metadata (draft) for form ID ${formId}`)
+    logger.info(`Made draft live for form ID ${formId}`)
+  } catch (err) {
+    logger.error(err, `Make draft live for form ID ${formId} failed`)
+
+    throw err
+  }
+}
+
+/**
+ * Recreates the draft form from the current live state
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataAuthor} author - the author of the new draft
+ */
+export async function createDraftFromLive(formId, author) {
+  logger.info(`Create draft to edit for form ID ${formId}`)
+
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
+
+    if (!form.live) {
+      throw Boom.badRequest(`Form with ID '${formId}' has no live state`)
+    }
+
+    // Build the draft state
+    const now = new Date()
+    const set = {
+      draft: {
+        updatedAt: now,
+        updatedBy: author,
+        createdAt: now,
+        createdBy: author
+      }
+    }
+
+    const session = client.startSession()
+
+    try {
+      await session.withTransaction(async () => {
+        // Copy the draft form definition
+        await formDefinition.createDraftFromLive(formId, session)
+
+        logger.info(`Adding form metadata (draft) for form ID ${formId}`)
+
+        // Update the form with the new draft state
+        await formMetadata.update(formId, { $set: set }, session)
+      })
+    } finally {
+      await session.endSession()
+    }
+
+    logger.info(`Added form metadata (draft) for form ID ${formId}`)
+    logger.info(`Created draft to edit for form ID ${formId}`)
+  } catch (err) {
+    logger.error(err, `Create draft to edit for form ID ${formId} failed`)
+
+    throw err
+  }
+}
+
+/**
+ * Removes a form (metadata and definition)
+ * @param {string} formId
+ * @param {boolean} force - deletes the form even if it's live, and ignores failures to delete the form definition.
+ */
+export async function removeForm(formId, force = false) {
+  logger.info(`Removing form with ID ${formId} and force=${force}`)
+
+  const form = await getForm(formId)
+
+  if (!force && form.live) {
+    throw Boom.badRequest(
+      `Form with ID '${formId}' is live and cannot be deleted. Set force=true to delete the form anyway.`
+    )
+  }
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await formMetadata.remove(formId, session)
+
+      try {
+        await formDefinition.remove(formId, session)
+      } catch (err) {
+        // we might have old forms that don't have form definitions but do have metadata entries.
+        // TODO keep this as a short term only, then remove once cleaned up.
+        if (!force) {
+          throw err
+        }
+      }
+    })
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Removed form with ID ${formId}`)
 }
 
 /**
@@ -126,6 +365,7 @@ function formTitleToSlug(title) {
  * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
  * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
  */
 

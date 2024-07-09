@@ -17,11 +17,19 @@ updates:
       lint:
         patterns:
           - '@typescript-eslint/*'
+          - 'editorconfig-checker'
           - 'eslint'
           - 'eslint-*'
           - 'husky'
           - 'lint-staged'
           - 'prettier'
+
+      logging:
+        patterns:
+          - '*-pino'
+          - '*-pino-format'
+          - 'pino'
+          - 'pino-*'
 
       tools:
         patterns:

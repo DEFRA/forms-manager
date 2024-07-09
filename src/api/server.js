@@ -1,16 +1,27 @@
 import path from 'path'
 
 import hapi from '@hapi/hapi'
+import Wreck from '@hapi/wreck'
+import { ProxyAgent } from 'proxy-agent'
 
 import { config } from '~/src/config/index.js'
-import { prepareDb } from '~/src/db.js'
 import { failAction } from '~/src/helpers/fail-action.js'
+import { prepareDb } from '~/src/mongo.js'
+import { auth } from '~/src/plugins/auth.js'
 import { logRequests } from '~/src/plugins/log-requests.js'
 import { router } from '~/src/plugins/router.js'
 import { transformErrors } from '~/src/plugins/transform-errors.js'
 import { prepareSecureContext } from '~/src/secure-context.js'
 
 const isProduction = config.get('isProduction')
+
+const proxyAgent = new ProxyAgent()
+
+Wreck.agents = {
+  https: proxyAgent,
+  http: proxyAgent,
+  httpsAllowUnauthorized: proxyAgent
+}
 
 /**
  * Creates the Hapi server
@@ -19,6 +30,9 @@ export async function createServer() {
   const server = hapi.server({
     port: config.get('port'),
     routes: {
+      auth: {
+        mode: 'required'
+      },
       validate: {
         options: {
           abortEarly: false
@@ -44,13 +58,14 @@ export async function createServer() {
     }
   })
 
+  await server.register(auth)
   await server.register(logRequests)
 
   if (isProduction) {
     prepareSecureContext(server)
   }
 
-  await prepareDb(server)
+  await prepareDb(server.logger)
   await server.register(transformErrors)
   await server.register(router)
 

@@ -3,7 +3,7 @@ import { ecsFormat } from '@elastic/ecs-pino-format'
 import { config } from '~/src/config/index.js'
 
 /**
- * @satisfies {import('pino').LoggerOptions}
+ * @satisfies {LoggerOptions}
  */
 export const loggerOptions = {
   enabled: !config.get('isTest'),
@@ -13,6 +13,12 @@ export const loggerOptions = {
   },
   level: config.get('logLevel'),
   ...(config.get('isDevelopment')
-    ? { transport: { target: 'pino-pretty' } }
-    : ecsFormat())
+    ? /** @type {LoggerTransport} */ ({ transport: { target: 'pino-pretty' } })
+    : /** @type {LoggerFormat} */ (ecsFormat()))
 }
+
+/**
+ * @typedef {import('pino').LoggerOptions} LoggerOptions
+ * @typedef {{ transport: import('pino').TransportSingleOptions }} LoggerTransport
+ * @typedef {Pick<LoggerOptions, 'messageKey' | 'timestamp' | 'formatters'>} LoggerFormat
+ */

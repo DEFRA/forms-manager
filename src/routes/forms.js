@@ -1,16 +1,41 @@
-import { formDefinitionSchema, formMetadataSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
-
-import { FailedToReadFormError } from '../api/forms/errors.js'
 
 import {
   listForms,
   getForm,
+  getFormBySlug,
   createForm,
   updateDraftFormDefinition,
-  getDraftFormDefinition
+  getFormDefinition,
+  createLiveFromDraft,
+  createDraftFromLive,
+  removeForm
 } from '~/src/api/forms/service.js'
-import { formByIdSchema } from '~/src/models/forms.js'
+import {
+  createFormSchema,
+  removeFormPayloadSchema,
+  formByIdSchema,
+  formBySlugSchema,
+  updateFormDefinitionSchema
+} from '~/src/models/forms.js'
+
+/**
+ * Get the author from the auth credentials
+ * @param {UserCredentials & OidcStandardClaims} [user]
+ * @returns {FormMetadataAuthor}
+ */
+function getAuthor(user) {
+  if (!user || !user.sub) {
+    throw Boom.unauthorized(
+      'Failed to get the author, user is undefined or has no id (sub)'
+    )
+  }
+
+  return {
+    id: user.sub,
+    displayName: `${user.given_name} ${user.family_name}`
+  }
+}
 
 /**
  * @type {ServerRoute[]}
@@ -27,21 +52,23 @@ export default [
     method: 'POST',
     path: '/forms',
     /**
-     * @param {RequestFormMetadata} request
+     * @param {RequestFormMetadataCreate} request
      */
     async handler(request) {
-      const { payload } = request
+      const { auth, payload } = request
+      const author = getAuthor(auth.credentials.user)
 
-      const formMetadata = await createForm(payload)
+      const formMetadata = await createForm(payload, author)
 
       return {
         id: formMetadata.id,
+        slug: formMetadata.slug,
         status: 'created'
       }
     },
     options: {
       validate: {
-        payload: formMetadataSchema
+        payload: createFormSchema
       }
     }
   },
@@ -51,20 +78,60 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id } = params
-      const form = await getForm(id)
 
-      if (!form) {
-        return Boom.notFound(`Form with id '${id}' not found`)
+      return getForm(id)
+    },
+    options: {
+      auth: false,
+      validate: {
+        params: formByIdSchema
       }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/forms/slug/{slug}',
+    /**
+     * @param {RequestFormBySlug} request
+     */
+    handler(request) {
+      const { params } = request
+      const { slug } = params
 
-      return form
+      return getFormBySlug(slug)
+    },
+    options: {
+      auth: false,
+      validate: {
+        params: formBySlugSchema
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/forms/{id}',
+    /**
+     * @param {RequestRemoveFormById} request
+     */
+    async handler(request) {
+      const { params, payload } = request
+      const { id } = params
+      const { force } = payload
+
+      await removeForm(id, force)
+
+      return {
+        id: params.id,
+        status: 'deleted'
+      }
     },
     options: {
       validate: {
-        params: formByIdSchema
+        params: formByIdSchema,
+        payload: removeFormPayloadSchema
       }
     }
   },
@@ -74,23 +141,14 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id } = params
 
-      try {
-        const definition = await getDraftFormDefinition(id)
-
-        return definition
-      } catch (err) {
-        if (err instanceof FailedToReadFormError) {
-          return Boom.notFound(err.message, err)
-        }
-
-        throw err
-      }
+      return getFormDefinition(id)
     },
     options: {
+      auth: false,
       validate: {
         params: formByIdSchema
       }
@@ -103,9 +161,10 @@ export default [
      * @param {RequestFormDefinition} request
      */
     async handler(request) {
-      const { params, payload } = request
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
 
-      await updateDraftFormDefinition(params.id, payload)
+      await updateDraftFormDefinition(params.id, payload, author)
 
       return {
         id: params.id,
@@ -114,7 +173,76 @@ export default [
     },
     options: {
       validate: {
-        payload: formDefinitionSchema
+        payload: updateFormDefinitionSchema
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/forms/{id}/definition',
+    /**
+     * @param {RequestFormById} request
+     */
+    handler(request) {
+      const { params } = request
+      const { id } = params
+
+      return getFormDefinition(id, 'live')
+    },
+    options: {
+      auth: false,
+      validate: {
+        params: formByIdSchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/create-live',
+    /**
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Create the live state from draft using the author in the credentials
+      await createLiveFromDraft(id, author)
+
+      return {
+        id,
+        status: 'created-live'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/create-draft',
+    /**
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Recreate the draft state from live using the author in the credentials
+      await createDraftFromLive(id, author)
+
+      return {
+        id,
+        status: 'created-draft'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema
       }
     }
   }
@@ -122,7 +250,14 @@ export default [
 
 /**
  * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
+ * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
+ * @typedef {import('~/src/api/types.js').RequestRemoveFormById} RequestRemoveFormById
+ * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
- * @typedef {import('~/src/api/types.js').RequestFormMetadata} RequestFormMetadata
+ * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
+ * @typedef {import('@hapi/hapi').AuthCredentials} AuthCredentials
+ * @typedef {import('@hapi/hapi').UserCredentials} UserCredentials
+ * @typedef {import('@hapi/hapi').RequestAuth} RequestAuth
+ * @typedef {import('oidc-client-ts').OidcStandardClaims} OidcStandardClaims
  */

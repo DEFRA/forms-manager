@@ -22,7 +22,8 @@ module.exports = {
           '~': '.'
         }
       }
-    ]
+    ],
+    '@babel/plugin-syntax-import-attributes'
   ],
   env: {
     test: {
