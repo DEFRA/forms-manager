@@ -36,9 +36,17 @@ nvm use
 
 ### Setup
 
-Create a `.env` file with the following mandatory environment variables populated
+1. Install Docker
 
+2. Bring up runtime dependencies
+
+```bash
+docker compose up
 ```
+
+3. Create a `.env` file with the following mandatory environment variables populated at root level:
+
+```text
 MONGO_URI=""
 MONGO_DATABASE=""
 OIDC_JWKS_URI=""
