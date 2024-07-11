@@ -1,4 +1,7 @@
+import { formMetadataInputSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
+
+import { createLogger } from '../helpers/logging/logger.js'
 
 import {
   listForms,
@@ -9,7 +12,8 @@ import {
   getFormDefinition,
   createLiveFromDraft,
   createDraftFromLive,
-  removeForm
+  removeForm,
+  updateFormMetadata
 } from '~/src/api/forms/service.js'
 import {
   createFormSchema,
@@ -18,6 +22,8 @@ import {
   formBySlugSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
+
+const logger = createLogger()
 
 /**
  * Get the author from the auth credentials
@@ -69,6 +75,35 @@ export default [
     options: {
       validate: {
         payload: createFormSchema
+      }
+    }
+  },
+  {
+    method: 'PATCH',
+    path: '/forms/{formId}',
+    /**
+     * @param {RequestFormMetadataUpdateById} request
+     */
+    async handler(request) {
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
+      const { id } = params
+
+      const slug = await updateFormMetadata(id, payload, author)
+      logger.info(`Updated form metadata (draft) for form ID ${id}`)
+
+      return {
+        id,
+        slug,
+        status: 'updated'
+      }
+    },
+    options: {
+      // TODO: update auth to true after dev testing
+      auth: false,
+      validate: {
+        params: formByIdSchema,
+        payload: formMetadataInputSchema
       }
     }
   },
@@ -253,6 +288,7 @@ export default [
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
  * @typedef {import('~/src/api/types.js').RequestRemoveFormById} RequestRemoveFormById
+ * @typedef {import('~/src/api/types.js').RequestFormMetadataUpdateById} RequestFormMetadataUpdateById
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate

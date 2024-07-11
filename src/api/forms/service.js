@@ -190,6 +190,70 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 }
 
 /**
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataInput} formUpdate - full JSON form definition
+ * @param {FormMetadataAuthor} author - the author details
+ * @returns {Promise<string>}
+ */
+export async function updateFormMetadata(formId, formUpdate, author) {
+  logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
+
+    if (form.live && formUpdate.title) {
+      throw Boom.badRequest(
+        `Field ${formUpdate.title} cannot be updated once the form has gone live`
+      )
+    }
+
+    const updatedSlug = formUpdate.title && slugify(formUpdate.title)
+
+    const updatedForm = {
+      ...form,
+      ...formUpdate,
+      ...{ slug: updatedSlug }
+    }
+
+    const session = client.startSession()
+
+    try {
+      await session.withTransaction(async () => {
+        // Update the form metadata
+        await formMetadata.update(formId, updatedForm, session)
+
+        logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+
+        // Update the `updatedAt/By` fields of the draft state
+        const now = new Date()
+        await formMetadata.update(
+          formId,
+          {
+            $set: {
+              'draft.updatedAt': now,
+              'draft.updatedBy': author
+            }
+          },
+          session
+        )
+      })
+
+      return updatedSlug
+    } finally {
+      await session.endSession()
+    }
+  } catch (err) {
+    logger.error(
+      err,
+      `Updating form metadata (draft) for form ID ${formId} failed`
+    )
+
+    throw err
+  }
+}
+
+/**
  * Creates the live form from the current draft state
  * @param {string} formId - ID of the form
  * @param {FormMetadataAuthor} author - the author of the new live state
