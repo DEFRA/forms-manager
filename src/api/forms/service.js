@@ -213,7 +213,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
     const updatedForm = {
       ...form,
       ...formUpdate,
-      ...{ slug: updatedSlug }
+      ...(updatedSlug && { slug: updatedSlug })
     }
 
     const session = client.startSession()

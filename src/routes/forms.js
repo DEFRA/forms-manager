@@ -80,7 +80,7 @@ export default [
   },
   {
     method: 'PATCH',
-    path: '/forms/{formId}',
+    path: '/forms/{id}',
     /**
      * @param {RequestFormMetadataUpdateById} request
      */
