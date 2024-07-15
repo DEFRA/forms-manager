@@ -289,7 +289,7 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(internalErrorStatusCode)
     })
 
-    test.each([
+    const invalidPayloadErrorsTestData = [
       {
         payload: {},
         error: {
@@ -380,12 +380,37 @@ describe('Forms route', () => {
           messages: ['"teamEmail" must be a valid email']
         }
       }
-    ])(
+    ]
+
+    test.each(invalidPayloadErrorsTestData)(
       'Testing POST /forms route with an invalid payload returns validation errors',
       async ({ payload: metadata, error }) => {
         const response = await server.inject({
           method: 'POST',
           url: '/forms',
+          payload: metadata,
+          auth
+        })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'payload'
+          }
+        })
+      }
+    )
+
+    test.each(invalidPayloadErrorsTestData)(
+      'Testing PATCH /forms/id route with an invalid payload returns validation errors',
+      async ({ payload: metadata, error }) => {
+        const response = await server.inject({
+          method: 'PATCH',
+          url: '/forms/661e4ca5039739ef2902b214',
           payload: metadata,
           auth
         })
@@ -425,26 +450,6 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         error: 'FormAlreadyExistsError',
         message: 'Form with slug my-title already exists'
-      })
-    })
-
-    test('Testing PATCH /forms/id route with missing title', async () => {
-      const response = await server.inject({
-        method: 'PATCH',
-        url: '/forms/661e4ca5039739ef2902b214',
-        payload: {
-          organisation: 'Defra',
-          teamName: 'teamname',
-          teamEmail: 'defraforms@defra.gov.uk'
-        },
-        auth
-      })
-
-      expect(response.statusCode).toEqual(badRequestStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toMatchObject({
-        error: 'Bad Request',
-        message: '"title" is required'
       })
     })
 
