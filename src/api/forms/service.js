@@ -195,6 +195,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
  * @param {FormMetadataAuthor} author - the author details
  * @returns {Promise<string>}
  */
+// TODO: author to be used to update updatedBy in next PR
 export async function updateFormMetadata(formId, formUpdate, author) {
   logger.info(`Updating form metadata (draft) for form ID ${formId}`)
 
@@ -208,12 +209,12 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       )
     }
 
-    const updatedSlug = formUpdate.title && slugify(formUpdate.title)
+    const updatedSlug = slugify(formUpdate.title)
 
     const updatedForm = {
       ...form,
       ...formUpdate,
-      ...(updatedSlug && { slug: updatedSlug })
+      ...(formUpdate.title && { slug: updatedSlug })
     }
 
     const session = client.startSession()
@@ -224,23 +225,12 @@ export async function updateFormMetadata(formId, formUpdate, author) {
         await formMetadata.update(formId, updatedForm, session)
 
         logger.info(`Updating form metadata (draft) for form ID ${formId}`)
-
-        // Update the `updatedAt/By` fields of the draft state
-        const now = new Date()
-        await formMetadata.update(
-          formId,
-          {
-            $set: {
-              'draft.updatedAt': now,
-              'draft.updatedBy': author
-            }
-          },
-          session
-        )
       })
 
       return updatedSlug
     } finally {
+      // TODO: added it to satisfy linter until author is used to update updatedBy in next PR
+      logger.info(author)
       await session.endSession()
     }
   } catch (err) {

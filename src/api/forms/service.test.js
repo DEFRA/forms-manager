@@ -12,7 +12,8 @@ import {
   getFormDefinition,
   createLiveFromDraft,
   updateDraftFormDefinition,
-  removeForm
+  removeForm,
+  updateFormMetadata
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -192,6 +193,67 @@ describe('Forms service', () => {
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
       )
+    })
+  })
+
+  describe('updateFormMetadata', () => {
+    beforeEach(() => {
+      jest.mocked(formMetadata.update).mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null
+      })
+    })
+
+    test('should update form metadata', async () => {
+      await expect(
+        updateFormMetadata(id, formMetadataInput, author)
+      ).resolves.toBe('test-form')
+    })
+
+    test('should update form metadata without special characters in the title', async () => {
+      const input = {
+        ...formMetadataInput,
+        title: 'A !Super! Duper Form -    from Defra...'
+      }
+
+      await expect(updateFormMetadata(id, input, author)).resolves.toBe(
+        'a-super-duper-form-from-defra'
+      )
+    })
+
+    it('should throw an error when writing for metadata fails', async () => {
+      jest.mocked(formMetadata.update).mockRejectedValue(new Error('error'))
+
+      await expect(
+        updateFormMetadata(id, formMetadataInput, author)
+      ).rejects.toThrow('error')
+    })
+
+    it('should throw an error if form does not exist', async () => {
+      const error = Boom.notFound("Form with ID '123' not found")
+
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(
+        updateFormMetadata('123', formMetadataInput, author)
+      ).rejects.toThrow(error)
+    })
+
+    it('should throw an error if form is live and trying to update title', async () => {
+      const error = Boom.notFound(
+        'Field Test form cannot be updated once the form has gone live'
+      )
+
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      await expect(
+        updateFormMetadata('123', formMetadataInput, author)
+      ).rejects.toThrow(error)
     })
   })
 
