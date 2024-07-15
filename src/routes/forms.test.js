@@ -10,7 +10,8 @@ import {
   getFormBySlug,
   createLiveFromDraft,
   createDraftFromLive,
-  removeForm
+  removeForm,
+  updateFormMetadata
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -132,6 +133,25 @@ describe('Forms route', () => {
         id: stubFormMetadataOutput.id,
         slug: 'test-form',
         status: 'created'
+      })
+    })
+
+    test('Testing PATCH /forms/{id} route returns "updated" status with id and slug', async () => {
+      jest.mocked(updateFormMetadata).mockResolvedValue('test-form')
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/forms/661e4ca5039739ef2902b214',
+        payload: stubFormMetadataInput,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        slug: 'test-form',
+        status: 'updated'
       })
     })
 
@@ -405,6 +425,26 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         error: 'FormAlreadyExistsError',
         message: 'Form with slug my-title already exists'
+      })
+    })
+
+    test('Testing PATCH /forms/id route with missing title', async () => {
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/forms/661e4ca5039739ef2902b214',
+        payload: {
+          organisation: 'Defra',
+          teamName: 'teamname',
+          teamEmail: 'defraforms@defra.gov.uk'
+        },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"title" is required'
       })
     })
 
