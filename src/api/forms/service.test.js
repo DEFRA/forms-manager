@@ -224,12 +224,23 @@ describe('Forms service', () => {
       )
     })
 
+    test('should update slug when title is updated', async () => {
+      const input = {
+        title: 'new title'
+      }
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      const updatedSlug = await updateFormMetadata(id, input)
+      expect(updatedSlug).toBe('new-title')
+    })
+
     it('should throw an error when writing for metadata fails', async () => {
       jest.mocked(formMetadata.update).mockRejectedValue(new Error('error'))
 
-      await expect(
-        updateFormMetadata(id, formMetadataInput, author)
-      ).rejects.toThrow('error')
+      await expect(updateFormMetadata(id, formMetadataInput)).rejects.toThrow(
+        'error'
+      )
     })
 
     it('should throw an error if form does not exist', async () => {
@@ -238,7 +249,7 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.get).mockRejectedValue(error)
 
       await expect(
-        updateFormMetadata('123', formMetadataInput, author)
+        updateFormMetadata('123', formMetadataInput)
       ).rejects.toThrow(error)
     })
 
@@ -252,7 +263,7 @@ describe('Forms service', () => {
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
       await expect(
-        updateFormMetadata('123', formMetadataInput, author)
+        updateFormMetadata('123', formMetadataInput)
       ).rejects.toThrow(error)
     })
   })

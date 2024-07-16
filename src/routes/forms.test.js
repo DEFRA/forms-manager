@@ -367,6 +367,19 @@ describe('Forms route', () => {
           keys: ['teamEmail'],
           messages: ['"teamEmail" must be a valid email']
         }
+      },
+      {
+        payload: {
+          title: 'title',
+          organisation: 'Defra',
+          teamName: 'teamname',
+          teamEmail: 'defraforms@defra.gov.uk',
+          slug: 'test-title'
+        },
+        error: {
+          keys: ['slug'],
+          messages: ['"slug" is not allowed']
+        }
       }
     ]
 
