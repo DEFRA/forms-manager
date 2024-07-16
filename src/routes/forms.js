@@ -1,8 +1,6 @@
 import { formMetadataInputSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { createLogger } from '../helpers/logging/logger.js'
-
 import {
   listForms,
   getForm,
@@ -22,8 +20,6 @@ import {
   formBySlugSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
-
-const logger = createLogger()
 
 /**
  * Get the author from the auth credentials
@@ -89,7 +85,6 @@ export default [
       const { id } = params
 
       const slug = await updateFormMetadata(id, payload)
-      logger.info(`Updated form metadata (draft) for form ID ${id}`)
 
       return {
         id,
@@ -100,7 +95,9 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
+        // Take the form metadata update schema and make all fields optional. This acts similar to Partial<T> in Typescript.
         payload: formMetadataInputSchema.fork(
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           Object.keys(formMetadataInputSchema.describe().keys),
           (schema) => schema.optional()
         )

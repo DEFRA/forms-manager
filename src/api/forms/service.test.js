@@ -208,9 +208,9 @@ describe('Forms service', () => {
     })
 
     test('should update form metadata', async () => {
-      await expect(
-        updateFormMetadata(id, formMetadataInput, author)
-      ).resolves.toBe('test-form')
+      await expect(updateFormMetadata(id, formMetadataInput)).resolves.toBe(
+        'test-form'
+      )
     })
 
     test('should update form metadata without special characters in the title', async () => {
@@ -219,7 +219,7 @@ describe('Forms service', () => {
         title: 'A !Super! Duper Form -    from Defra...'
       }
 
-      await expect(updateFormMetadata(id, input, author)).resolves.toBe(
+      await expect(updateFormMetadata(id, input)).resolves.toBe(
         'a-super-duper-form-from-defra'
       )
     })
@@ -233,6 +233,17 @@ describe('Forms service', () => {
 
       const updatedSlug = await updateFormMetadata(id, input)
       expect(updatedSlug).toBe('new-title')
+    })
+
+    test('should update organisation and return existing slug', async () => {
+      const input = {
+        organisation: 'new organisation'
+      }
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      const slug = await updateFormMetadata(id, input)
+      expect(slug).toBe('test-form')
     })
 
     it('should throw an error when writing for metadata fails', async () => {

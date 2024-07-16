@@ -196,7 +196,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
  */
 // TODO: author to be used to update updatedBy in next PR
 export async function updateFormMetadata(formId, formUpdate) {
-  logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+  logger.info(`Updating form metadata for form ID ${formId}`)
 
   try {
     // Get the form metadata from the db
@@ -208,11 +208,17 @@ export async function updateFormMetadata(formId, formUpdate) {
       )
     }
 
-    const updatedSlug = slugify(formUpdate.title)
+    let updatedSlug
 
     const updatedForm = {
-      ...formUpdate,
-      ...(formUpdate.title && { slug: updatedSlug })
+      slug: form.slug,
+      ...formUpdate
+    }
+
+    if (formUpdate.title) {
+      updatedSlug = slugify(formUpdate.title)
+    } else {
+      updatedSlug = form.slug
     }
 
     const session = client.startSession()
@@ -220,9 +226,9 @@ export async function updateFormMetadata(formId, formUpdate) {
     try {
       await session.withTransaction(async () => {
         // Update the form metadata
-        await formMetadata.update(formId, { $set: updatedForm }, session)
 
-        logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+        await formMetadata.update(formId, { $set: updatedForm }, session)
+        logger.info(`Updated form metadata for form ID ${formId}`)
       })
 
       return updatedSlug
@@ -230,10 +236,7 @@ export async function updateFormMetadata(formId, formUpdate) {
       await session.endSession()
     }
   } catch (err) {
-    logger.error(
-      err,
-      `Updating form metadata (draft) for form ID ${formId} failed`
-    )
+    logger.error(err, `Updating form metadata for form ID ${formId} failed`)
 
     throw err
   }
