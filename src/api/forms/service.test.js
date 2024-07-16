@@ -242,8 +242,8 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const slug = await updateFormMetadata(id, input)
-      expect(slug).toBe('test-form')
+      const slugAfterUpdate = await updateFormMetadata(id, input)
+      expect(slugAfterUpdate).toBe('test-form')
     })
 
     it('should throw an error when writing for metadata fails', async () => {
