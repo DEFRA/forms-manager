@@ -85,11 +85,10 @@ export default [
      * @param {RequestFormMetadataUpdateById} request
      */
     async handler(request) {
-      const { auth, params, payload } = request
-      const author = getAuthor(auth.credentials.user)
+      const { params, payload } = request
       const { id } = params
 
-      const slug = await updateFormMetadata(id, payload, author)
+      const slug = await updateFormMetadata(id, payload)
       logger.info(`Updated form metadata (draft) for form ID ${id}`)
 
       return {
@@ -99,11 +98,12 @@ export default [
       }
     },
     options: {
-      // TODO: update auth to true after dev testing
-      auth: false,
       validate: {
         params: formByIdSchema,
-        payload: formMetadataInputSchema
+        payload: formMetadataInputSchema.fork(
+          Object.keys(formMetadataInputSchema.describe().keys),
+          (schema) => schema.optional()
+        )
       }
     }
   },

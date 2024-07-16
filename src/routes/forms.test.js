@@ -291,18 +291,6 @@ describe('Forms route', () => {
 
     const invalidPayloadErrorsTestData = [
       {
-        payload: {},
-        error: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          messages: [
-            '"title" is required.',
-            '"organisation" is required.',
-            '"teamName" is required.',
-            '"teamEmail" is required'
-          ]
-        }
-      },
-      {
         payload: {
           title: '',
           organisation: '',
@@ -382,7 +370,21 @@ describe('Forms route', () => {
       }
     ]
 
-    test.each(invalidPayloadErrorsTestData)(
+    test.each([
+      {
+        payload: {},
+        error: {
+          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
+          messages: [
+            '"title" is required.',
+            '"organisation" is required.',
+            '"teamName" is required.',
+            '"teamEmail" is required'
+          ]
+        }
+      },
+      ...invalidPayloadErrorsTestData
+    ])(
       'Testing POST /forms route with an invalid payload returns validation errors',
       async ({ payload: metadata, error }) => {
         const response = await server.inject({
