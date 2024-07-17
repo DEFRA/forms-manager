@@ -1,4 +1,7 @@
-import { formMetadataInputSchema } from '@defra/forms-model'
+import {
+  formMetadataInputKeys,
+  formMetadataInputSchema
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import {
@@ -97,8 +100,7 @@ export default [
         params: formByIdSchema,
         // Take the form metadata update schema and make all fields optional. This acts similar to Partial<T> in Typescript.
         payload: formMetadataInputSchema.fork(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          Object.keys(formMetadataInputSchema.describe().keys),
+          Object.keys(formMetadataInputKeys),
           (schema) => schema.optional()
         )
       }
