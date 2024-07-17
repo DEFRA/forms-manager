@@ -201,9 +201,9 @@ export async function updateFormMetadata(formId, formUpdate) {
     // Get the form metadata from the db
     const form = await getForm(formId)
 
-    if (form.live && formUpdate.title) {
+    if (form.live && 'title' in formUpdate) {
       throw Boom.badRequest(
-        `Field ${formUpdate.title} cannot be updated once the form has gone live`
+        `Form with ID '${formId}' is live so 'title' cannot be updated`
       )
     }
 

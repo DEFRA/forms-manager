@@ -266,7 +266,7 @@ describe('Forms service', () => {
 
     it('should throw an error if form is live and trying to update title', async () => {
       const error = Boom.notFound(
-        'Field Test form cannot be updated once the form has gone live'
+        `Form with ID '123' is live so 'title' cannot be updated`
       )
 
       jest
