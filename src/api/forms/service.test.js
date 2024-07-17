@@ -196,6 +196,17 @@ describe('Forms service', () => {
     })
   })
 
+  const slugExamples = [
+    {
+      input: 'Test form',
+      output: 'test-form'
+    },
+    {
+      input: 'A !Super! Duper Form -    from Defra...',
+      output: 'a-super-duper-form-from-defra'
+    }
+  ]
+
   describe('updateFormMetadata', () => {
     beforeEach(() => {
       jest.mocked(formMetadata.update).mockResolvedValue({
@@ -207,21 +218,17 @@ describe('Forms service', () => {
       })
     })
 
-    test('should update form metadata', async () => {
-      await expect(updateFormMetadata(id, formMetadataInput)).resolves.toBe(
-        'test-form'
-      )
-    })
+    describe.each(slugExamples)('should return correct slug', (slug) => {
+      test(`should return slug - ${slug.output}`, async () => {
+        const input = {
+          ...formMetadataInput,
+          title: slug.input
+        }
 
-    test('should update form metadata without special characters in the title', async () => {
-      const input = {
-        ...formMetadataInput,
-        title: 'A !Super! Duper Form -    from Defra...'
-      }
-
-      await expect(updateFormMetadata(id, input)).resolves.toBe(
-        'a-super-duper-form-from-defra'
-      )
+        await expect(updateFormMetadata(id, input)).resolves.toEqual(
+          slug.output
+        )
+      })
     })
 
     test('should update slug when title is updated', async () => {
@@ -289,25 +296,17 @@ describe('Forms service', () => {
       })
     })
 
-    test('should create a new form', async () => {
-      await expect(createForm(formMetadataInput, author)).resolves.toEqual(
-        formMetadataOutput
-      )
-    })
+    describe.each(slugExamples)('should return correct slug', (slug) => {
+      test(`should return slug - ${slug.output}`, async () => {
+        const input = {
+          ...formMetadataInput,
+          title: slug.input
+        }
 
-    test('should create a new form without special characters in the name', async () => {
-      const input = {
-        ...formMetadataInput,
-        title: 'A !Super! Duper Form -    from Defra...'
-      }
-
-      const output = {
-        ...formMetadataOutput,
-        slug: 'a-super-duper-form-from-defra',
-        title: 'A !Super! Duper Form -    from Defra...'
-      }
-
-      await expect(createForm(input, author)).resolves.toEqual(output)
+        await expect(updateFormMetadata(id, input)).resolves.toEqual(
+          slug.output
+        )
+      })
     })
 
     it('should throw an error when schema validation fails', async () => {
