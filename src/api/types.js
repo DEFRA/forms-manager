@@ -5,7 +5,7 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormDefinition }>} RequestFormDefinition
  * @typedef {Request<{ Server: { db: Db }, Payload: FormMetadataInput }>} RequestFormMetadataCreate
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: { force: boolean }}>} RequestRemoveFormById
- * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormMetadataInput }>} RequestFormMetadataUpdateById
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: Partial<FormMetadataInput> }>} RequestFormMetadataUpdateById
  */
 
 /**
