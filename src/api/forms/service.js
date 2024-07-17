@@ -222,11 +222,15 @@ export async function updateFormMetadata(formId, formUpdate) {
 
     const session = client.startSession()
 
-    // Update the form metadata
-    await formMetadata.update(formId, { $set: updatedForm }, session)
-    logger.info(`Updated form metadata for form ID ${formId}`)
+    try {
+      // Update the form metadata
+      await formMetadata.update(formId, { $set: updatedForm }, session)
+      logger.info(`Updated form metadata for form ID ${formId}`)
 
-    return updatedSlug
+      return updatedSlug
+    } finally {
+      await session.endSession()
+    }
   } catch (err) {
     logger.error(err, `Updating form metadata for form ID ${formId} failed`)
 
