@@ -194,7 +194,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
  * @param {Partial<FormMetadataInput>} formUpdate - full JSON form definition
  * @returns {Promise<string>}
  */
-// TODO: author to be used to update updatedBy in next PR
 export async function updateFormMetadata(formId, formUpdate) {
   logger.info(`Updating form metadata for form ID ${formId}`)
 
