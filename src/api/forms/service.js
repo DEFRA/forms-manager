@@ -176,7 +176,9 @@ export async function updateDraftFormDefinition(formId, definition, author) {
           {
             $set: {
               'draft.updatedAt': now,
-              'draft.updatedBy': author
+              'draft.updatedBy': author,
+              updatedAt: now,
+              updatedBy: author
             }
           },
           session
@@ -200,9 +202,10 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 /**
  * @param {string} formId - ID of the form
  * @param {Partial<FormMetadataInput>} formUpdate - full form definition
+ * @param {FormMetadataAuthor} author - the author details
  * @returns {Promise<string>}
  */
-export async function updateFormMetadata(formId, formUpdate) {
+export async function updateFormMetadata(formId, formUpdate, author) {
   logger.info(`Updating form metadata for form ID ${formId}`)
 
   try {
@@ -216,7 +219,11 @@ export async function updateFormMetadata(formId, formUpdate) {
     }
 
     /** @type {Partial<FormMetadataDocument>} */
-    const updatedForm = { ...formUpdate }
+    const updatedForm = {
+      ...formUpdate,
+      updatedAt: new Date(),
+      updatedBy: author
+    }
 
     if (formUpdate.title) {
       updatedForm.slug = slugify(formUpdate.title)
@@ -274,12 +281,16 @@ export async function createLiveFromDraft(formId, author) {
             updatedBy: author,
             createdAt: now,
             createdBy: author
-          }
+          },
+          updatedAt: now,
+          updatedBy: author
         }
       : {
           // Partially update the live state
           'live.updatedAt': now,
-          'live.updatedBy': author
+          'live.updatedBy': author,
+          updatedAt: now,
+          updatedBy: author
         }
 
     const session = client.startSession()
