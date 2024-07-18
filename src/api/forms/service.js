@@ -215,10 +215,8 @@ export async function updateFormMetadata(formId, formUpdate) {
       )
     }
 
-    const updatedForm = {
-      slug: form.slug,
-      ...formUpdate
-    }
+    /** @type {Partial<FormMetadataDocument>} */
+    const updatedForm = { ...formUpdate }
 
     if (formUpdate.title) {
       updatedForm.slug = slugify(formUpdate.title)
@@ -228,7 +226,7 @@ export async function updateFormMetadata(formId, formUpdate) {
     await formMetadata.update(formId, { $set: updatedForm })
     logger.info(`Updated form metadata for form ID ${formId}`)
 
-    return updatedForm.slug
+    return updatedForm.slug ?? form.slug
   } catch (err) {
     logger.error(err, `Updating form metadata for form ID ${formId} failed`)
 
