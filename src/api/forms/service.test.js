@@ -234,13 +234,15 @@ describe('Forms service', () => {
       })
     })
 
-    test.each(slugExamples)(`should return slug '$output'`, async (slug) => {
+    test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
       const input = {
         ...formMetadataInput,
-        title: slug.input
+        title: slugIn.input
       }
 
-      await expect(updateFormMetadata(id, input)).resolves.toEqual(slug.output)
+      await expect(updateFormMetadata(id, input)).resolves.toEqual(
+        slugIn.output
+      )
     })
 
     test('should update slug when title is updated', async () => {
@@ -308,13 +310,15 @@ describe('Forms service', () => {
       })
     })
 
-    test.each(slugExamples)(`should return slug '$output'`, async (slug) => {
+    test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
       const input = {
         ...formMetadataInput,
-        title: slug.input
+        title: slugIn.input
       }
 
-      await expect(updateFormMetadata(id, input)).resolves.toEqual(slug.output)
+      await expect(updateFormMetadata(id, input)).resolves.toEqual(
+        slugIn.output
+      )
     })
 
     it('should throw an error when schema validation fails', async () => {
