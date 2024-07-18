@@ -89,7 +89,11 @@ describe('Forms service', () => {
       createdBy: author,
       updatedAt: expect.any(Date),
       updatedBy: author
-    }
+    },
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   /**
@@ -110,7 +114,11 @@ describe('Forms service', () => {
       createdBy: author,
       updatedAt: expect.any(Date),
       updatedBy: author
-    }
+    },
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   /**
@@ -120,7 +128,11 @@ describe('Forms service', () => {
     ...formMetadataInput,
     _id: new ObjectId(id),
     slug: formMetadataOutput.slug,
-    draft: formMetadataOutput.draft
+    draft: formMetadataOutput.draft,
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   /**
@@ -131,7 +143,11 @@ describe('Forms service', () => {
     _id: new ObjectId(id),
     slug: formMetadataWithLiveOutput.slug,
     draft: formMetadataWithLiveOutput.draft,
-    live: formMetadataWithLiveOutput.live
+    live: formMetadataWithLiveOutput.live,
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   let definition = actualEmptyForm()

@@ -26,7 +26,11 @@ function mapForm(document) {
     teamName: document.teamName,
     teamEmail: document.teamEmail,
     draft: document.draft,
-    live: document.live
+    live: document.live,
+    createdBy: document.createdBy,
+    createdAt: document.createdAt,
+    updatedBy: document.updatedBy,
+    updatedAt: document.updatedAt
   }
 }
 
@@ -66,7 +70,11 @@ export async function createForm(metadataInput, author) {
       createdBy: author,
       updatedAt: now,
       updatedBy: author
-    }
+    },
+    createdAt: now,
+    createdBy: author,
+    updatedAt: now,
+    updatedBy: author
   }
 
   const session = client.startSession()

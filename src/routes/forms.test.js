@@ -72,7 +72,11 @@ describe('Forms route', () => {
       createdBy: author,
       updatedAt: now,
       updatedBy: author
-    }
+    },
+    createdAt: now,
+    createdBy: author,
+    updatedAt: now,
+    updatedBy: author
   }
 
   /**
