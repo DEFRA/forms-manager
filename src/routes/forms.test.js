@@ -10,7 +10,8 @@ import {
   getFormBySlug,
   createLiveFromDraft,
   createDraftFromLive,
-  removeForm
+  removeForm,
+  updateFormMetadata
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -71,7 +72,11 @@ describe('Forms route', () => {
       createdBy: author,
       updatedAt: now,
       updatedBy: author
-    }
+    },
+    createdAt: now,
+    createdBy: author,
+    updatedAt: now,
+    updatedBy: author
   }
 
   /**
@@ -132,6 +137,25 @@ describe('Forms route', () => {
         id: stubFormMetadataOutput.id,
         slug: 'test-form',
         status: 'created'
+      })
+    })
+
+    test('Testing PATCH /forms/{id} route returns "updated" status with id and slug', async () => {
+      jest.mocked(updateFormMetadata).mockResolvedValue('test-form')
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/forms/661e4ca5039739ef2902b214',
+        payload: stubFormMetadataInput,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        slug: 'test-form',
+        status: 'updated'
       })
     })
 
@@ -269,19 +293,7 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(internalErrorStatusCode)
     })
 
-    test.each([
-      {
-        payload: {},
-        error: {
-          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
-          messages: [
-            '"title" is required.',
-            '"organisation" is required.',
-            '"teamName" is required.',
-            '"teamEmail" is required'
-          ]
-        }
-      },
+    const invalidPayloadErrorsTestData = [
       {
         payload: {
           title: '',
@@ -359,13 +371,65 @@ describe('Forms route', () => {
           keys: ['teamEmail'],
           messages: ['"teamEmail" must be a valid email']
         }
+      },
+      {
+        payload: {
+          title: 'title',
+          organisation: 'Defra',
+          teamName: 'teamname',
+          teamEmail: 'defraforms@defra.gov.uk',
+          slug: 'test-title'
+        },
+        error: {
+          keys: ['slug'],
+          messages: ['"slug" is not allowed']
+        }
       }
+    ]
+
+    test.each([
+      {
+        payload: {},
+        error: {
+          keys: ['title', 'organisation', 'teamName', 'teamEmail'],
+          messages: [
+            '"title" is required.',
+            '"organisation" is required.',
+            '"teamName" is required.',
+            '"teamEmail" is required'
+          ]
+        }
+      },
+      ...invalidPayloadErrorsTestData
     ])(
       'Testing POST /forms route with an invalid payload returns validation errors',
       async ({ payload: metadata, error }) => {
         const response = await server.inject({
           method: 'POST',
           url: '/forms',
+          payload: metadata,
+          auth
+        })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: error.messages.join(' '),
+          validation: {
+            keys: error.keys,
+            source: 'payload'
+          }
+        })
+      }
+    )
+
+    test.each(invalidPayloadErrorsTestData)(
+      'Testing PATCH /forms/id route with an invalid payload returns validation errors',
+      async ({ payload: metadata, error }) => {
+        const response = await server.inject({
+          method: 'PATCH',
+          url: '/forms/661e4ca5039739ef2902b214',
           payload: metadata,
           auth
         })

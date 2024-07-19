@@ -1,3 +1,7 @@
+import {
+  formMetadataInputKeys,
+  formMetadataInputSchema
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import {
@@ -9,7 +13,8 @@ import {
   getFormDefinition,
   createLiveFromDraft,
   createDraftFromLive,
-  removeForm
+  removeForm,
+  updateFormMetadata
 } from '~/src/api/forms/service.js'
 import {
   createFormSchema,
@@ -69,6 +74,35 @@ export default [
     options: {
       validate: {
         payload: createFormSchema
+      }
+    }
+  },
+  {
+    method: 'PATCH',
+    path: '/forms/{id}',
+    /**
+     * @param {RequestFormMetadataUpdateById} request
+     */
+    async handler(request) {
+      const { params, payload } = request
+      const { id } = params
+
+      const slug = await updateFormMetadata(id, payload)
+
+      return {
+        id,
+        slug,
+        status: 'updated'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        // Take the form metadata update schema and make all fields optional. This acts similar to Partial<T> in Typescript.
+        payload: formMetadataInputSchema.fork(
+          Object.keys(formMetadataInputKeys),
+          (schema) => schema.optional()
+        )
       }
     }
   },
@@ -253,6 +287,7 @@ export default [
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
  * @typedef {import('~/src/api/types.js').RequestRemoveFormById} RequestRemoveFormById
+ * @typedef {import('~/src/api/types.js').RequestFormMetadataUpdateById} RequestFormMetadataUpdateById
  * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
  * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
  * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate

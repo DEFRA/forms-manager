@@ -12,7 +12,8 @@ import {
   getFormDefinition,
   createLiveFromDraft,
   updateDraftFormDefinition,
-  removeForm
+  removeForm,
+  updateFormMetadata
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -88,7 +89,11 @@ describe('Forms service', () => {
       createdBy: author,
       updatedAt: expect.any(Date),
       updatedBy: author
-    }
+    },
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   /**
@@ -109,7 +114,11 @@ describe('Forms service', () => {
       createdBy: author,
       updatedAt: expect.any(Date),
       updatedBy: author
-    }
+    },
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   /**
@@ -119,7 +128,11 @@ describe('Forms service', () => {
     ...formMetadataInput,
     _id: new ObjectId(id),
     slug: formMetadataOutput.slug,
-    draft: formMetadataOutput.draft
+    draft: formMetadataOutput.draft,
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   /**
@@ -130,7 +143,11 @@ describe('Forms service', () => {
     _id: new ObjectId(id),
     slug: formMetadataWithLiveOutput.slug,
     draft: formMetadataWithLiveOutput.draft,
-    live: formMetadataWithLiveOutput.live
+    live: formMetadataWithLiveOutput.live,
+    createdAt: expect.any(Date),
+    createdBy: author,
+    updatedAt: expect.any(Date),
+    updatedBy: author
   }
 
   let definition = actualEmptyForm()
@@ -195,6 +212,94 @@ describe('Forms service', () => {
     })
   })
 
+  const slugExamples = [
+    {
+      input: 'Test form',
+      output: 'test-form'
+    },
+    {
+      input: 'A !Super! Duper Form -    from Defra...',
+      output: 'a-super-duper-form-from-defra'
+    }
+  ]
+
+  describe('updateFormMetadata', () => {
+    beforeEach(() => {
+      jest.mocked(formMetadata.update).mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null
+      })
+    })
+
+    test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
+      const input = {
+        ...formMetadataInput,
+        title: slugIn.input
+      }
+
+      await expect(updateFormMetadata(id, input)).resolves.toEqual(
+        slugIn.output
+      )
+    })
+
+    test('should update slug when title is updated', async () => {
+      const input = {
+        title: 'new title'
+      }
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      const updatedSlug = await updateFormMetadata(id, input)
+      expect(updatedSlug).toBe('new-title')
+    })
+
+    test('should update organisation and return existing slug', async () => {
+      const input = {
+        organisation: 'new organisation'
+      }
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      const slugAfterUpdate = await updateFormMetadata(id, input)
+      expect(slugAfterUpdate).toBe('test-form')
+    })
+
+    it('should throw an error when writing for metadata fails', async () => {
+      jest.mocked(formMetadata.update).mockRejectedValue(new Error('error'))
+
+      await expect(updateFormMetadata(id, formMetadataInput)).rejects.toThrow(
+        'error'
+      )
+    })
+
+    it('should throw an error if form does not exist', async () => {
+      const error = Boom.notFound("Form with ID '123' not found")
+
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(
+        updateFormMetadata('123', formMetadataInput)
+      ).rejects.toThrow(error)
+    })
+
+    it('should throw an error if form is live and trying to update title', async () => {
+      const error = Boom.notFound(
+        `Form with ID '123' is live so 'title' cannot be updated`
+      )
+
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      await expect(
+        updateFormMetadata('123', formMetadataInput)
+      ).rejects.toThrow(error)
+    })
+  })
+
   describe('createForm', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.upsert).mockResolvedValue()
@@ -205,25 +310,15 @@ describe('Forms service', () => {
       })
     })
 
-    test('should create a new form', async () => {
-      await expect(createForm(formMetadataInput, author)).resolves.toEqual(
-        formMetadataOutput
-      )
-    })
-
-    test('should create a new form without special characters in the name', async () => {
+    test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
       const input = {
         ...formMetadataInput,
-        title: 'A !Super! Duper Form -    from Defra...'
+        title: slugIn.input
       }
 
-      const output = {
-        ...formMetadataOutput,
-        slug: 'a-super-duper-form-from-defra',
-        title: 'A !Super! Duper Form -    from Defra...'
-      }
-
-      await expect(createForm(input, author)).resolves.toEqual(output)
+      await expect(updateFormMetadata(id, input)).resolves.toEqual(
+        slugIn.output
+      )
     })
 
     it('should throw an error when schema validation fails', async () => {

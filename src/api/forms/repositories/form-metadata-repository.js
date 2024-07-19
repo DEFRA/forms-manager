@@ -125,7 +125,7 @@ export async function create(document, session) {
  * Update a document in the database
  * @param {string} formId - ID of the form
  * @param {UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
- * @param {ClientSession} session - mongo transaction session
+ * @param {ClientSession} [session] - mongo transaction session
  */
 export async function update(formId, update, session) {
   logger.info(`Updating form with ID ${formId}`)

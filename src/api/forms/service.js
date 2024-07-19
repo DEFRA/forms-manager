@@ -26,7 +26,11 @@ function mapForm(document) {
     teamName: document.teamName,
     teamEmail: document.teamEmail,
     draft: document.draft,
-    live: document.live
+    live: document.live,
+    createdBy: document.createdBy,
+    createdAt: document.createdAt,
+    updatedBy: document.updatedBy,
+    updatedAt: document.updatedAt
   }
 }
 
@@ -66,7 +70,11 @@ export async function createForm(metadataInput, author) {
       createdBy: author,
       updatedAt: now,
       updatedBy: author
-    }
+    },
+    createdAt: now,
+    createdBy: author,
+    updatedAt: now,
+    updatedBy: author
   }
 
   const session = client.startSession()
@@ -124,7 +132,7 @@ export async function getFormBySlug(slug) {
 }
 
 /**
- * Retrieves the form definition JSON content for a given form ID
+ * Retrieves the form definition content for a given form ID
  * @param {string} formId - the ID of the form
  * @param {'draft' | 'live'} state - the form state
  */
@@ -134,7 +142,7 @@ export function getFormDefinition(formId, state = 'draft') {
 
 /**
  * @param {string} formId - ID of the form
- * @param {FormDefinition} definition - full JSON form definition
+ * @param {FormDefinition} definition - full form definition
  * @param {FormMetadataAuthor} author - the author details
  */
 export async function updateDraftFormDefinition(formId, definition, author) {
@@ -184,6 +192,43 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       err,
       `Updating form definition (draft) for form ID ${formId} failed`
     )
+
+    throw err
+  }
+}
+
+/**
+ * @param {string} formId - ID of the form
+ * @param {Partial<FormMetadataInput>} formUpdate - full form definition
+ * @returns {Promise<string>}
+ */
+export async function updateFormMetadata(formId, formUpdate) {
+  logger.info(`Updating form metadata for form ID ${formId}`)
+
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
+
+    if (form.live && 'title' in formUpdate) {
+      throw Boom.badRequest(
+        `Form with ID '${formId}' is live so 'title' cannot be updated`
+      )
+    }
+
+    /** @type {Partial<FormMetadataDocument>} */
+    const updatedForm = { ...formUpdate }
+
+    if (formUpdate.title) {
+      updatedForm.slug = slugify(formUpdate.title)
+    }
+
+    // Update the form metadata
+    await formMetadata.update(formId, { $set: updatedForm })
+    logger.info(`Updated form metadata for form ID ${formId}`)
+
+    return updatedForm.slug ?? form.slug
+  } catch (err) {
+    logger.error(err, `Updating form metadata for form ID ${formId} failed`)
 
     throw err
   }
