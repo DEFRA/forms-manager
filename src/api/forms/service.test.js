@@ -252,8 +252,20 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
+      const updateSpy = jest.spyOn(formMetadata, 'update')
+
       const updatedSlug = await updateFormMetadata(id, input, author)
       expect(updatedSlug).toBe('new-title')
+
+      const dbUpdateArgs = updateSpy.mock.calls[0]
+
+      expect(updateSpy).toHaveBeenCalled()
+      expect(dbUpdateArgs[0]).toBe('661e4ca5039739ef2902b214')
+      expect(dbUpdateArgs[1].$set?.slug).toBe('new-title')
+      expect(dbUpdateArgs[1].$set?.updatedBy).toEqual({
+        displayName: 'Enrique Chase',
+        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+      })
     })
 
     test('should update organisation and return existing slug', async () => {
