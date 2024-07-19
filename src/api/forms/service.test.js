@@ -50,6 +50,7 @@ jest.mock('~/src/mongo.js', () => {
     }
   }
 })
+jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
@@ -252,20 +253,23 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const updateSpy = jest.spyOn(formMetadata, 'update')
+      const dbSpy = jest.spyOn(formMetadata, 'update')
 
       const updatedSlug = await updateFormMetadata(id, input, author)
       expect(updatedSlug).toBe('new-title')
 
-      const dbUpdateArgs = updateSpy.mock.calls[0]
+      const dbOperationArgs = dbSpy.mock.calls[0]
 
-      expect(updateSpy).toHaveBeenCalled()
-      expect(dbUpdateArgs[0]).toBe('661e4ca5039739ef2902b214')
-      expect(dbUpdateArgs[1].$set?.slug).toBe('new-title')
-      expect(dbUpdateArgs[1].$set?.updatedBy).toEqual({
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('661e4ca5039739ef2902b214')
+      expect(dbOperationArgs[1].$set?.slug).toBe('new-title')
+      expect(dbOperationArgs[1].$set?.updatedBy).toEqual({
         displayName: 'Enrique Chase',
         id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
       })
+      expect(
+        dbOperationArgs[1].$set?.updatedAt?.toISOString().split('T')[0]
+      ).toBe('2020-01-01')
     })
 
     test('should update organisation and return existing slug', async () => {
@@ -322,15 +326,19 @@ describe('Forms service', () => {
       })
     })
 
+    test('should create a new form', async () => {
+      await expect(createForm(formMetadataInput, author)).resolves.toEqual(
+        formMetadataOutput
+      )
+    })
+
     test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
       const input = {
         ...formMetadataInput,
         title: slugIn.input
       }
 
-      await expect(updateFormMetadata(id, input, author)).resolves.toEqual(
-        slugIn.output
-      )
+      expect((await createForm(input, author)).slug).toBe(slugIn.output)
     })
 
     it('should throw an error when schema validation fails', async () => {
