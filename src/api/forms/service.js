@@ -132,7 +132,7 @@ export async function getFormBySlug(slug) {
 }
 
 /**
- * Retrieves the form definition JSON content for a given form ID
+ * Retrieves the form definition content for a given form ID
  * @param {string} formId - the ID of the form
  * @param {'draft' | 'live'} state - the form state
  */
@@ -142,7 +142,7 @@ export function getFormDefinition(formId, state = 'draft') {
 
 /**
  * @param {string} formId - ID of the form
- * @param {FormDefinition} definition - full JSON form definition
+ * @param {FormDefinition} definition - full form definition
  * @param {FormMetadataAuthor} author - the author details
  */
 export async function updateDraftFormDefinition(formId, definition, author) {
@@ -199,7 +199,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
 /**
  * @param {string} formId - ID of the form
- * @param {Partial<FormMetadataInput>} formUpdate - full JSON form definition
+ * @param {Partial<FormMetadataInput>} formUpdate - full form definition
  * @returns {Promise<string>}
  */
 export async function updateFormMetadata(formId, formUpdate) {
