@@ -240,7 +240,7 @@ describe('Forms service', () => {
         title: slugIn.input
       }
 
-      await expect(updateFormMetadata(id, input)).resolves.toEqual(
+      await expect(updateFormMetadata(id, input, author)).resolves.toEqual(
         slugIn.output
       )
     })
@@ -252,7 +252,7 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const updatedSlug = await updateFormMetadata(id, input)
+      const updatedSlug = await updateFormMetadata(id, input, author)
       expect(updatedSlug).toBe('new-title')
     })
 
@@ -263,16 +263,16 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const slugAfterUpdate = await updateFormMetadata(id, input)
+      const slugAfterUpdate = await updateFormMetadata(id, input, author)
       expect(slugAfterUpdate).toBe('test-form')
     })
 
     it('should throw an error when writing for metadata fails', async () => {
       jest.mocked(formMetadata.update).mockRejectedValue(new Error('error'))
 
-      await expect(updateFormMetadata(id, formMetadataInput)).rejects.toThrow(
-        'error'
-      )
+      await expect(
+        updateFormMetadata(id, formMetadataInput, author)
+      ).rejects.toThrow('error')
     })
 
     it('should throw an error if form does not exist', async () => {
@@ -281,7 +281,7 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.get).mockRejectedValue(error)
 
       await expect(
-        updateFormMetadata('123', formMetadataInput)
+        updateFormMetadata('123', formMetadataInput, author)
       ).rejects.toThrow(error)
     })
 
@@ -295,7 +295,7 @@ describe('Forms service', () => {
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
       await expect(
-        updateFormMetadata('123', formMetadataInput)
+        updateFormMetadata('123', formMetadataInput, author)
       ).rejects.toThrow(error)
     })
   })
@@ -316,7 +316,7 @@ describe('Forms service', () => {
         title: slugIn.input
       }
 
-      await expect(updateFormMetadata(id, input)).resolves.toEqual(
+      await expect(updateFormMetadata(id, input, author)).resolves.toEqual(
         slugIn.output
       )
     })
