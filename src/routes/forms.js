@@ -283,16 +283,8 @@ export default [
 ]
 
 /**
- * @typedef {import('@hapi/hapi').ServerRoute} ServerRoute
- * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
- * @typedef {import('~/src/api/types.js').RequestFormById} RequestFormById
- * @typedef {import('~/src/api/types.js').RequestRemoveFormById} RequestRemoveFormById
- * @typedef {import('~/src/api/types.js').RequestFormMetadataUpdateById} RequestFormMetadataUpdateById
- * @typedef {import('~/src/api/types.js').RequestFormBySlug} RequestFormBySlug
- * @typedef {import('~/src/api/types.js').RequestFormDefinition} RequestFormDefinition
- * @typedef {import('~/src/api/types.js').RequestFormMetadataCreate} RequestFormMetadataCreate
- * @typedef {import('@hapi/hapi').AuthCredentials} AuthCredentials
- * @typedef {import('@hapi/hapi').UserCredentials} UserCredentials
- * @typedef {import('@hapi/hapi').RequestAuth} RequestAuth
- * @typedef {import('oidc-client-ts').OidcStandardClaims} OidcStandardClaims
+ * @import { FormMetadataAuthor, FormMetadataInput } from '@defra/forms-model'
+ * @import { AuthCredentials, RequestAuth, ServerRoute, UserCredentials } from '@hapi/hapi'
+ * @import { OidcStandardClaims } from 'oidc-client-ts'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestRemoveFormById } from '~/src/api/types.js'
  */
