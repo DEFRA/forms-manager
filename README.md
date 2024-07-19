@@ -87,11 +87,12 @@ npm run
 
 ## API endpoints
 
-| Endpoint                       | Description  |
-| :----------------------------- | :----------- |
-| `GET: /health`                 | Health       |
-| `GET: /v1/entities`            | Entities     |
-| `GET: /v1/entities/<entityId>` | Entity by ID |
+| Endpoint                       | Description       |
+| :----------------------------- | :---------------- |
+| `GET: /health`                 | Health            |
+| `GET: /v1/entities`            | Entities          |
+| `GET: /v1/entities/<entityId>` | Entity by ID      |
+| `PATCH: /forms/<id>`           | Update Form by ID |
 
 ## Calling API endpoints
 
