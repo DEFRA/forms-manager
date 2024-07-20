@@ -59,6 +59,7 @@ const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
+  const dateUsedInFakeTime = new Date('2020-01-01')
 
   /**
    * @satisfies {FormMetadataAuthor}
@@ -197,23 +198,13 @@ describe('Forms service', () => {
       expect(dbSpy).toHaveBeenCalled()
       expect(dbOperationArgs[0]).toBe('123')
       expect(dbOperationArgs[1].$set?.live).toEqual({
-        createdAt: new Date('2020-01-01'),
-        createdBy: {
-          displayName: 'Enrique Chase',
-          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-        },
-        updatedAt: new Date('2020-01-01'),
-        updatedBy: {
-          displayName: 'Enrique Chase',
-          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-        }
+        createdAt: dateUsedInFakeTime,
+        createdBy: author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
       })
-
-      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(new Date('2020-01-01'))
-      expect(dbOperationArgs[1].$set?.updatedBy).toEqual({
-        displayName: 'Enrique Chase',
-        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-      })
+      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
+      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
     })
 
     test('should fail to create a live state from existing draft form when there is no start page', async () => {
@@ -297,13 +288,8 @@ describe('Forms service', () => {
       expect(dbSpy).toHaveBeenCalled()
       expect(dbOperationArgs[0]).toBe('661e4ca5039739ef2902b214')
       expect(dbOperationArgs[1].$set?.slug).toBe('new-title')
-      expect(dbOperationArgs[1].$set?.updatedBy).toEqual({
-        displayName: 'Enrique Chase',
-        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-      })
-      expect(
-        dbOperationArgs[1].$set?.updatedAt?.toISOString().split('T')[0]
-      ).toBe('2020-01-01')
+      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
+      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
     })
 
     test('should update organisation and return existing slug', async () => {
@@ -374,20 +360,10 @@ describe('Forms service', () => {
       const dbOperationArgs = dbSpy.mock.calls[0][0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs.createdAt.toISOString().split('T')[0]).toBe(
-        '2020-01-01'
-      )
-      expect(dbOperationArgs.createdBy).toEqual({
-        displayName: 'Enrique Chase',
-        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-      })
-      expect(dbOperationArgs.updatedBy).toEqual({
-        displayName: 'Enrique Chase',
-        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-      })
-      expect(dbOperationArgs.updatedAt.toISOString().split('T')[0]).toBe(
-        '2020-01-01'
-      )
+      expect(dbOperationArgs.createdAt).toEqual(dateUsedInFakeTime)
+      expect(dbOperationArgs.createdBy).toEqual(author)
+      expect(dbOperationArgs.updatedBy).toEqual(author)
+      expect(dbOperationArgs.updatedAt).toEqual(dateUsedInFakeTime)
     })
 
     test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
@@ -489,16 +465,10 @@ describe('Forms service', () => {
       expect(dbSpy).toHaveBeenCalled()
       expect(dbOperationArgs[0]).toBe('123')
       expect(dbOperationArgs[1].$set).toEqual({
-        'draft.updatedAt': new Date('2020-01-01'),
-        'draft.updatedBy': {
-          displayName: 'Enrique Chase',
-          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-        },
-        updatedAt: new Date('2020-01-01'),
-        updatedBy: {
-          displayName: 'Enrique Chase',
-          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
-        }
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
       })
     })
   })
