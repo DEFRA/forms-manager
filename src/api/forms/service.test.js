@@ -182,6 +182,40 @@ describe('Forms service', () => {
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
 
+    test('should check if form update DB operation is called with correct form data', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...definition,
+        outputEmail: 'test@defra.gov.uk'
+      })
+
+      const dbSpy = jest.spyOn(formMetadata, 'update')
+
+      await createLiveFromDraft('123', author)
+
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('123')
+      expect(dbOperationArgs[1].$set?.live).toEqual({
+        createdAt: new Date('2020-01-01'),
+        createdBy: {
+          displayName: 'Enrique Chase',
+          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+        },
+        updatedAt: new Date('2020-01-01'),
+        updatedBy: {
+          displayName: 'Enrique Chase',
+          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+        }
+      })
+
+      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(new Date('2020-01-01'))
+      expect(dbOperationArgs[1].$set?.updatedBy).toEqual({
+        displayName: 'Enrique Chase',
+        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+      })
+    })
+
     test('should fail to create a live state from existing draft form when there is no start page', async () => {
       const draftDefinitionNoStartPage = /** @type {FormDefinition} */ (
         definition
@@ -332,6 +366,30 @@ describe('Forms service', () => {
       )
     })
 
+    test('should check if form create DB operation is called with correct form data', async () => {
+      const dbSpy = jest.spyOn(formMetadata, 'create')
+
+      await createForm(formMetadataInput, author)
+
+      const dbOperationArgs = dbSpy.mock.calls[0][0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs.createdAt.toISOString().split('T')[0]).toBe(
+        '2020-01-01'
+      )
+      expect(dbOperationArgs.createdBy).toEqual({
+        displayName: 'Enrique Chase',
+        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+      })
+      expect(dbOperationArgs.updatedBy).toEqual({
+        displayName: 'Enrique Chase',
+        id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+      })
+      expect(dbOperationArgs.updatedAt.toISOString().split('T')[0]).toBe(
+        '2020-01-01'
+      )
+    })
+
     test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
       const input = {
         ...formMetadataInput,
@@ -389,11 +447,23 @@ describe('Forms service', () => {
       await expect(getFormDefinition('123')).resolves.toMatchObject(definition)
     })
 
-    it('should update the draft form definition with required attributes upon creation', async () => {
-      const formDefinitionCustomisedTitle = actualEmptyForm()
-      formDefinitionCustomisedTitle.name =
-        "A custom form name that shouldn't be allowed"
+    it('should throw an error if the form associated with the definition does not exist', async () => {
+      const error = Boom.notFound("Form with ID '123' not found")
 
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(
+        updateDraftFormDefinition('123', definition, author)
+      ).rejects.toThrow(error)
+    })
+  })
+
+  describe('updateDraftFormDefinition', () => {
+    const formDefinitionCustomisedTitle = actualEmptyForm()
+    formDefinitionCustomisedTitle.name =
+      "A custom form name that shouldn't be allowed"
+
+    it('should update the draft form definition with required attributes upon creation', async () => {
       await updateDraftFormDefinition(
         '123',
         formDefinitionCustomisedTitle,
@@ -405,14 +475,31 @@ describe('Forms service', () => {
       )
     })
 
-    it('should throw an error if the form associated with the definition does not exist', async () => {
-      const error = Boom.notFound("Form with ID '123' not found")
+    test('should check if form update DB operation is called with correct form data', async () => {
+      const dbSpy = jest.spyOn(formMetadata, 'update')
 
-      jest.mocked(formMetadata.get).mockRejectedValue(error)
+      await updateDraftFormDefinition(
+        '123',
+        formDefinitionCustomisedTitle,
+        author
+      )
 
-      await expect(
-        updateDraftFormDefinition('123', definition, author)
-      ).rejects.toThrow(error)
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('123')
+      expect(dbOperationArgs[1].$set).toEqual({
+        'draft.updatedAt': new Date('2020-01-01'),
+        'draft.updatedBy': {
+          displayName: 'Enrique Chase',
+          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+        },
+        updatedAt: new Date('2020-01-01'),
+        updatedBy: {
+          displayName: 'Enrique Chase',
+          id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+        }
+      })
     })
   })
 
