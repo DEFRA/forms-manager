@@ -22,7 +22,7 @@
     "lint:js": "eslint .",
     "lint:types": "tsc --noEmit",
     "postversion": "git add package.json package-lock.json && git commit -m $npm_package_version",
-    "test": "jest --coverage --verbose",
+    "test": "jest --coverage --verbose --changedSince=main",
     "test:watch": "jest --watch",
     "server:watch": "nodemon --exec tsx --enable-source-maps ./src",
     "server:debug": "nodemon --exec tsx --enable-source-maps --inspect ./src",
