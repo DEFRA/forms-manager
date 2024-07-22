@@ -20,7 +20,10 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage',
   coverageThreshold: {
     global: {
-      lines: 90
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90
     }
   },
   setupFiles: ['<rootDir>/jest.setup.js'],
