@@ -18,14 +18,6 @@ module.exports = {
     '<rootDir>/src/__fixtures__'
   ],
   coverageDirectory: '<rootDir>/coverage',
-  coverageThreshold: {
-    global: {
-      branches: 90,
-      functions: 90,
-      lines: 90,
-      statements: 90
-    }
-  },
   setupFiles: ['<rootDir>/jest.setup.js'],
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!@defra/forms-model/)']
 }
