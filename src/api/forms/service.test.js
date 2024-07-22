@@ -50,6 +50,7 @@ jest.mock('~/src/mongo.js', () => {
     }
   }
 })
+jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
@@ -58,6 +59,7 @@ const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
+  const dateUsedInFakeTime = new Date('2020-01-01')
 
   /**
    * @satisfies {FormMetadataAuthor}
@@ -181,6 +183,30 @@ describe('Forms service', () => {
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
 
+    test('should check if form update DB operation is called with correct form data', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...definition,
+        outputEmail: 'test@defra.gov.uk'
+      })
+
+      const dbSpy = jest.spyOn(formMetadata, 'update')
+
+      await createLiveFromDraft('123', author)
+
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('123')
+      expect(dbOperationArgs[1].$set?.live).toEqual({
+        createdAt: dateUsedInFakeTime,
+        createdBy: author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
+      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
+    })
+
     test('should fail to create a live state from existing draft form when there is no start page', async () => {
       const draftDefinitionNoStartPage = /** @type {FormDefinition} */ (
         definition
@@ -240,7 +266,7 @@ describe('Forms service', () => {
         title: slugIn.input
       }
 
-      await expect(updateFormMetadata(id, input)).resolves.toEqual(
+      await expect(updateFormMetadata(id, input, author)).resolves.toEqual(
         slugIn.output
       )
     })
@@ -252,8 +278,18 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const updatedSlug = await updateFormMetadata(id, input)
+      const dbSpy = jest.spyOn(formMetadata, 'update')
+
+      const updatedSlug = await updateFormMetadata(id, input, author)
       expect(updatedSlug).toBe('new-title')
+
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('661e4ca5039739ef2902b214')
+      expect(dbOperationArgs[1].$set?.slug).toBe('new-title')
+      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
+      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
     })
 
     test('should update organisation and return existing slug', async () => {
@@ -263,16 +299,16 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const slugAfterUpdate = await updateFormMetadata(id, input)
+      const slugAfterUpdate = await updateFormMetadata(id, input, author)
       expect(slugAfterUpdate).toBe('test-form')
     })
 
     it('should throw an error when writing for metadata fails', async () => {
       jest.mocked(formMetadata.update).mockRejectedValue(new Error('error'))
 
-      await expect(updateFormMetadata(id, formMetadataInput)).rejects.toThrow(
-        'error'
-      )
+      await expect(
+        updateFormMetadata(id, formMetadataInput, author)
+      ).rejects.toThrow('error')
     })
 
     it('should throw an error if form does not exist', async () => {
@@ -281,7 +317,7 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.get).mockRejectedValue(error)
 
       await expect(
-        updateFormMetadata('123', formMetadataInput)
+        updateFormMetadata('123', formMetadataInput, author)
       ).rejects.toThrow(error)
     })
 
@@ -295,7 +331,7 @@ describe('Forms service', () => {
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
       await expect(
-        updateFormMetadata('123', formMetadataInput)
+        updateFormMetadata('123', formMetadataInput, author)
       ).rejects.toThrow(error)
     })
   })
@@ -310,15 +346,33 @@ describe('Forms service', () => {
       })
     })
 
+    test('should create a new form', async () => {
+      await expect(createForm(formMetadataInput, author)).resolves.toEqual(
+        formMetadataOutput
+      )
+    })
+
+    test('should check if form create DB operation is called with correct form data', async () => {
+      const dbSpy = jest.spyOn(formMetadata, 'create')
+
+      await createForm(formMetadataInput, author)
+
+      const dbOperationArgs = dbSpy.mock.calls[0][0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs.createdAt).toEqual(dateUsedInFakeTime)
+      expect(dbOperationArgs.createdBy).toEqual(author)
+      expect(dbOperationArgs.updatedBy).toEqual(author)
+      expect(dbOperationArgs.updatedAt).toEqual(dateUsedInFakeTime)
+    })
+
     test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
       const input = {
         ...formMetadataInput,
         title: slugIn.input
       }
 
-      await expect(updateFormMetadata(id, input)).resolves.toEqual(
-        slugIn.output
-      )
+      expect((await createForm(input, author)).slug).toBe(slugIn.output)
     })
 
     it('should throw an error when schema validation fails', async () => {
@@ -369,11 +423,23 @@ describe('Forms service', () => {
       await expect(getFormDefinition('123')).resolves.toMatchObject(definition)
     })
 
-    it('should update the draft form definition with required attributes upon creation', async () => {
-      const formDefinitionCustomisedTitle = actualEmptyForm()
-      formDefinitionCustomisedTitle.name =
-        "A custom form name that shouldn't be allowed"
+    it('should throw an error if the form associated with the definition does not exist', async () => {
+      const error = Boom.notFound("Form with ID '123' not found")
 
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(
+        updateDraftFormDefinition('123', definition, author)
+      ).rejects.toThrow(error)
+    })
+  })
+
+  describe('updateDraftFormDefinition', () => {
+    const formDefinitionCustomisedTitle = actualEmptyForm()
+    formDefinitionCustomisedTitle.name =
+      "A custom form name that shouldn't be allowed"
+
+    it('should update the draft form definition with required attributes upon creation', async () => {
       await updateDraftFormDefinition(
         '123',
         formDefinitionCustomisedTitle,
@@ -385,14 +451,25 @@ describe('Forms service', () => {
       )
     })
 
-    it('should throw an error if the form associated with the definition does not exist', async () => {
-      const error = Boom.notFound("Form with ID '123' not found")
+    test('should check if form update DB operation is called with correct form data', async () => {
+      const dbSpy = jest.spyOn(formMetadata, 'update')
 
-      jest.mocked(formMetadata.get).mockRejectedValue(error)
+      await updateDraftFormDefinition(
+        '123',
+        formDefinitionCustomisedTitle,
+        author
+      )
 
-      await expect(
-        updateDraftFormDefinition('123', definition, author)
-      ).rejects.toThrow(error)
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('123')
+      expect(dbOperationArgs[1].$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
     })
   })
 

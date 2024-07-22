@@ -84,10 +84,11 @@ export default [
      * @param {RequestFormMetadataUpdateById} request
      */
     async handler(request) {
-      const { params, payload } = request
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
       const { id } = params
 
-      const slug = await updateFormMetadata(id, payload)
+      const slug = await updateFormMetadata(id, payload, author)
 
       return {
         id,
