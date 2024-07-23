@@ -14,10 +14,29 @@ const logger = createLogger()
 
 /**
  * Maps a form metadata document from MongoDB to form metadata
- * @param {WithId<FormMetadataDocument>} document - form metadata document (with ID)
+ * @param {WithId<Partial<FormMetadataDocument>>} document - form metadata document (with ID)
  * @returns {FormMetadata}
  */
 function mapForm(document) {
+  const defaultAuthor = {
+    displayName: 'Unknown',
+    id: '-1'
+  }
+
+  const defaultDate = new Date('2024-06-26T00:00:00Z') // date we went live
+
+  if (
+    !document.slug ||
+    !document.title ||
+    !document.organisation ||
+    !document.teamName ||
+    !document.teamEmail
+  ) {
+    throw Error(
+      'Form is malformed in the database. Expected fields are missing.'
+    )
+  }
+
   return {
     id: document._id.toString(),
     slug: document.slug,
@@ -27,10 +46,10 @@ function mapForm(document) {
     teamEmail: document.teamEmail,
     draft: document.draft,
     live: document.live,
-    createdBy: document.createdBy,
-    createdAt: document.createdAt,
-    updatedBy: document.updatedBy,
-    updatedAt: document.updatedAt
+    createdBy: document.createdBy ?? defaultAuthor,
+    createdAt: document.createdAt ?? defaultDate,
+    updatedBy: document.updatedBy ?? defaultAuthor,
+    updatedAt: document.updatedAt ?? defaultDate
   }
 }
 
