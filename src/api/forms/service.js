@@ -17,7 +17,7 @@ const defaultAuthor = {
   id: '-1'
 }
 
-const defaultDate = new Date('2024-06-26T00:00:00Z') // date we went live
+const defaultDate = new Date('2024-06-25T23:00:00Z') // date we went live
 
 /**
  * Maps a form metadata document from MongoDB to form metadata

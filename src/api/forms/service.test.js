@@ -527,7 +527,7 @@ describe('Forms service', () => {
     const formDate = new Date('2024-01-26T00:00:00Z')
     const liveDate = new Date('2024-02-26T00:00:00Z')
     const draftDate = new Date('2024-03-26T00:00:00Z')
-    const defaultDate = new Date('2024-06-26T00:00:00Z')
+    const defaultDate = new Date('2024-06-25T23:00:00Z')
 
     const formAuthor = { displayName: 'Joe Bloggs', id: '1' }
     const liveAuthor = { displayName: 'Jane Doe', id: '2' }
