@@ -12,19 +12,19 @@ import { client } from '~/src/mongo.js'
 
 const logger = createLogger()
 
+const defaultAuthor = {
+  displayName: 'Unknown',
+  id: '-1'
+}
+
+const defaultDate = new Date('2024-06-26T00:00:00Z') // date we went live
+
 /**
  * Maps a form metadata document from MongoDB to form metadata
  * @param {WithId<Partial<FormMetadataDocument>>} document - form metadata document (with ID)
  * @returns {FormMetadata}
  */
 function mapForm(document) {
-  const defaultAuthor = {
-    displayName: 'Unknown',
-    id: '-1'
-  }
-
-  const defaultDate = new Date('2024-06-26T00:00:00Z') // date we went live
-
   if (
     !document.slug ||
     !document.title ||
@@ -37,6 +37,8 @@ function mapForm(document) {
     )
   }
 
+  const lastUpdated = getLastUpdated(document)
+
   return {
     id: document._id.toString(),
     slug: document.slug,
@@ -48,8 +50,24 @@ function mapForm(document) {
     live: document.live,
     createdBy: document.createdBy ?? defaultAuthor,
     createdAt: document.createdAt ?? defaultDate,
-    updatedBy: document.updatedBy ?? defaultAuthor,
-    updatedAt: document.updatedAt ?? defaultDate
+    updatedBy: lastUpdated.updatedBy,
+    updatedAt: lastUpdated.updatedAt
+  }
+}
+
+/**
+ * @param {Partial<FormMetadataDocument>} document - form metadata document
+ * @returns {{ updatedAt: Date, updatedBy: FormMetadataAuthor }}
+ */
+function getLastUpdated(document) {
+  if (document.updatedAt && document.updatedBy) {
+    return { updatedAt: document.updatedAt, updatedBy: document.updatedBy }
+  } else if (document.draft) {
+    return document.draft
+  } else if (document.live) {
+    return document.live
+  } else {
+    return { updatedAt: defaultDate, updatedBy: defaultAuthor }
   }
 }
 

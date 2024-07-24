@@ -13,7 +13,8 @@ import {
   createLiveFromDraft,
   updateDraftFormDefinition,
   removeForm,
-  updateFormMetadata
+  updateFormMetadata,
+  listForms
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -519,6 +520,141 @@ describe('Forms service', () => {
       jest.mocked(formDefinition.remove).mockRejectedValueOnce('unknown error')
 
       await expect(removeForm(id, true)).resolves.toBeUndefined()
+    })
+  })
+
+  describe('listForms', () => {
+    const formDate = new Date('2024-01-26T00:00:00Z')
+    const liveDate = new Date('2024-02-26T00:00:00Z')
+    const draftDate = new Date('2024-03-26T00:00:00Z')
+    const defaultDate = new Date('2024-06-26T00:00:00Z')
+
+    const formAuthor = { displayName: 'Joe Bloggs', id: '1' }
+    const liveAuthor = { displayName: 'Jane Doe', id: '2' }
+    const draftAuthor = { displayName: 'Enrique Chase', id: '3' }
+    const defaultAuthor = { displayName: 'Unknown', id: '-1' }
+
+    /**
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     */
+    const formMetadataBaseDocument = {
+      ...formMetadataInput,
+      _id: new ObjectId(id),
+      slug: formMetadataOutput.slug
+    }
+
+    /**
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     */
+    const formMetadataLiveDocument = {
+      ...formMetadataBaseDocument,
+      live: {
+        createdAt: liveDate,
+        createdBy: liveAuthor,
+        updatedAt: liveDate,
+        updatedBy: liveAuthor
+      }
+    }
+
+    /**
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     */
+    const formMetadataDraftDocument = {
+      ...formMetadataLiveDocument,
+      draft: {
+        createdAt: draftDate,
+        createdBy: draftAuthor,
+        updatedAt: draftDate,
+        updatedBy: draftAuthor
+      }
+    }
+
+    /**
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     */
+    const formMetadataFullDocument = {
+      ...formMetadataDraftDocument,
+      createdAt: formDate,
+      createdBy: formAuthor,
+      updatedAt: formDate,
+      updatedBy: formAuthor
+    }
+
+    test('should return the last updated at/by', async () => {
+      jest
+        .mocked(formMetadata.list)
+        .mockResolvedValue([formMetadataFullDocument])
+
+      await expect(listForms()).resolves.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            updatedAt: formDate,
+            updatedBy: formAuthor,
+            createdAt: formDate,
+            createdBy: formAuthor
+          })
+        ])
+      )
+    })
+
+    test('should return the draft updated at/by', async () => {
+      jest
+        .mocked(formMetadata.list)
+        .mockResolvedValue([formMetadataDraftDocument])
+
+      await expect(listForms()).resolves.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            updatedAt: draftDate,
+            updatedBy: draftAuthor
+          })
+        ])
+      )
+    })
+
+    test('should return the live updated at/by', async () => {
+      jest
+        .mocked(formMetadata.list)
+        .mockResolvedValue([formMetadataLiveDocument])
+
+      await expect(listForms()).resolves.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            updatedAt: liveDate,
+            updatedBy: liveAuthor
+          })
+        ])
+      )
+    })
+
+    test('should return the default created/update at/by', async () => {
+      jest
+        .mocked(formMetadata.list)
+        .mockResolvedValue([formMetadataBaseDocument])
+
+      await expect(listForms()).resolves.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            updatedAt: defaultDate,
+            updatedBy: defaultAuthor,
+            createdAt: defaultDate,
+            createdBy: defaultAuthor
+          })
+        ])
+      )
+    })
+
+    test('throws if forms are malformed', async () => {
+      jest.mocked(formMetadata.list).mockResolvedValue([
+        {
+          _id: new ObjectId(id)
+          // skip required attributes. This should never happen.
+        }
+      ])
+
+      await expect(listForms()).rejects.toThrow(
+        'Form is malformed in the database. Expected fields are missing.'
+      )
     })
   })
 })

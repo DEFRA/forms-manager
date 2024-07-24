@@ -16,7 +16,7 @@ const logger = createLogger()
  * Retrieves the list of documents from the database
  */
 export function list() {
-  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
+  const coll = /** @satisfies {Collection<Partial<FormMetadataDocument>>} */ (
     db.collection(METADATA_COLLECTION_NAME)
   )
 
@@ -30,7 +30,7 @@ export function list() {
 export async function get(formId) {
   logger.info(`Getting form with ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
+  const coll = /** @satisfies {Collection<Partial<FormMetadataDocument>>} */ (
     db.collection(METADATA_COLLECTION_NAME)
   )
 
