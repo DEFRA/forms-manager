@@ -572,6 +572,19 @@ describe('Forms service', () => {
     /**
      * @satisfies {WithId<Partial<FormMetadataDocument>>}
      */
+    const formMetadataDraftNoLiveDocument = {
+      ...formMetadataBaseDocument,
+      draft: {
+        createdAt: draftDate,
+        createdBy: draftAuthor,
+        updatedAt: draftDate,
+        updatedBy: draftAuthor
+      }
+    }
+
+    /**
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     */
     const formMetadataFullDocument = {
       ...formMetadataDraftDocument,
       createdAt: formDate,
@@ -580,7 +593,7 @@ describe('Forms service', () => {
       updatedBy: formAuthor
     }
 
-    test('should return the last updated at/by', async () => {
+    test('should handle the full set of states', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataFullDocument])
@@ -597,7 +610,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should return the draft updated at/by', async () => {
+    test('should handle states when root state info is missing and live is present', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataDraftDocument])
@@ -606,13 +619,15 @@ describe('Forms service', () => {
         expect.arrayContaining([
           expect.objectContaining({
             updatedAt: draftDate,
-            updatedBy: draftAuthor
+            updatedBy: draftAuthor,
+            createdAt: liveDate,
+            createdBy: liveAuthor
           })
         ])
       )
     })
 
-    test('should return the live updated at/by', async () => {
+    test('should handle states when draft state info is missing', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataLiveDocument])
@@ -621,13 +636,32 @@ describe('Forms service', () => {
         expect.arrayContaining([
           expect.objectContaining({
             updatedAt: liveDate,
-            updatedBy: liveAuthor
+            updatedBy: liveAuthor,
+            createdAt: liveDate,
+            createdBy: liveAuthor
           })
         ])
       )
     })
 
-    test('should return the default created/update at/by', async () => {
+    test('should handle states when live state info is missing', async () => {
+      jest
+        .mocked(formMetadata.list)
+        .mockResolvedValue([formMetadataDraftNoLiveDocument])
+
+      await expect(listForms()).resolves.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            updatedAt: draftDate,
+            updatedBy: draftAuthor,
+            createdAt: draftDate,
+            createdBy: draftAuthor
+          })
+        ])
+      )
+    })
+
+    test('should handle states when all states are missing', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataBaseDocument])

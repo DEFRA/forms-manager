@@ -38,6 +38,7 @@ function mapForm(document) {
   }
 
   const lastUpdated = getLastUpdated(document)
+  const created = getCreated(document)
 
   return {
     id: document._id.toString(),
@@ -48,8 +49,8 @@ function mapForm(document) {
     teamEmail: document.teamEmail,
     draft: document.draft,
     live: document.live,
-    createdBy: document.createdBy ?? defaultAuthor,
-    createdAt: document.createdAt ?? defaultDate,
+    createdBy: created.createdBy,
+    createdAt: created.createdAt,
     updatedBy: lastUpdated.updatedBy,
     updatedAt: lastUpdated.updatedAt
   }
@@ -63,11 +64,29 @@ function getLastUpdated(document) {
   if (document.updatedAt && document.updatedBy) {
     return { updatedAt: document.updatedAt, updatedBy: document.updatedBy }
   } else if (document.draft) {
+    // draft is newer than live, handle it first
     return document.draft
   } else if (document.live) {
     return document.live
   } else {
     return { updatedAt: defaultDate, updatedBy: defaultAuthor }
+  }
+}
+
+/**
+ * @param {Partial<FormMetadataDocument>} document - form metadata document
+ * @returns {{ createdAt: Date, createdBy: FormMetadataAuthor }}
+ */
+function getCreated(document) {
+  if (document.createdAt && document.createdBy) {
+    return { createdAt: document.createdAt, createdBy: document.createdBy }
+  } else if (document.live) {
+    // live is older than draft, handle it first
+    return document.live
+  } else if (document.draft) {
+    return document.draft
+  } else {
+    return { createdAt: defaultDate, createdBy: defaultAuthor }
   }
 }
 
