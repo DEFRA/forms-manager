@@ -11,6 +11,7 @@ import {
   createForm,
   getFormDefinition,
   createLiveFromDraft,
+  createDraftFromLive,
   updateDraftFormDefinition,
   removeForm,
   updateFormMetadata,
@@ -162,6 +163,54 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = actualEmptyForm()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+  })
+
+  describe('createDraftFromLive', () => {
+    beforeEach(() => {
+      jest.mocked(formDefinition.createDraftFromLive).mockResolvedValueOnce()
+      jest.mocked(formMetadata.update).mockResolvedValueOnce({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null
+      })
+    })
+
+    test("should throw bad request if there's no live definition", async () => {
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      await expect(createDraftFromLive(id, author)).rejects.toThrow(
+        Boom.badRequest(
+          `Form with ID '${formMetadataWithLiveDocument._id.toString()}' has no live state`
+        )
+      )
+    })
+
+    test('should update the form state when creating', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValue(formMetadataWithLiveDocument)
+
+      const dbSpy = jest.spyOn(formMetadata, 'update')
+
+      await createDraftFromLive(id, author)
+
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe(id)
+      expect(dbOperationArgs[1].$set).toMatchObject({
+        draft: {
+          createdAt: dateUsedInFakeTime,
+          createdBy: author,
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author
+        },
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+    })
   })
 
   describe('createLiveFromDraft', () => {

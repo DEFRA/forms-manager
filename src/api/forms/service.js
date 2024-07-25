@@ -405,7 +405,9 @@ export async function createDraftFromLive(formId, author) {
         updatedBy: author,
         createdAt: now,
         createdBy: author
-      }
+      },
+      updatedAt: now,
+      updatedBy: author
     }
 
     const session = client.startSession()
