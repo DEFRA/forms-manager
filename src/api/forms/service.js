@@ -259,7 +259,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
  * @param {string} formId - ID of the form
  * @param {Partial<FormMetadataInput>} formUpdate - full form definition
  * @param {FormMetadataAuthor} author - the author details
- * @returns {Promise<string>}
  */
 export async function updateFormMetadata(formId, formUpdate, author) {
   logger.info(`Updating form metadata for form ID ${formId}`)
@@ -289,10 +288,12 @@ export async function updateFormMetadata(formId, formUpdate, author) {
     await formMetadata.update(formId, { $set: updatedForm })
     logger.info(`Updated form metadata for form ID ${formId}`)
 
-    return updatedForm.slug ?? form.slug
+    return { slug: updatedForm.slug ?? form.slug }
   } catch (err) {
+    if (err.code === 11000) {
+      return { error: new Error('Form title already exists') }
+    }
     logger.error(err, `Updating form metadata for form ID ${formId} failed`)
-
     throw err
   }
 }
