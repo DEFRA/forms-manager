@@ -290,7 +290,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
     return { slug: updatedForm.slug ?? form.slug }
   } catch (err) {
-    if (err.code === 11000) {
+    if (err.name === 'MongoServerError' && err.code === 11000) {
       return {
         error: new Error(`Form title ${formUpdate.title} already exists`)
       }
