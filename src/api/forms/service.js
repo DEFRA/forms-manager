@@ -290,10 +290,9 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
     return { slug: updatedForm.slug ?? form.slug }
   } catch (err) {
-    if (err.name === 'MongoServerError' && err.code === 11000) {
-      return {
-        error: new Error(`Form title ${formUpdate.title} already exists`)
-      }
+    if (Boom.isBoom(err) && err.name === 'MongoServerError') {
+      logger.error(err, `Form title ${formUpdate.title} already exists`)
+      throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
     }
     logger.error(err, `Updating form metadata for form ID ${formId} failed`)
     throw err
@@ -484,6 +483,7 @@ export async function removeForm(formId, force = false) {
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
+ * @typedef {MongoServerError} MongoServerError
  */
 
 /**
