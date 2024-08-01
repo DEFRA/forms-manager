@@ -291,11 +291,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
     return updatedForm.slug ?? form.slug
   } catch (err) {
-    if (
-      Boom.isBoom(err) &&
-      err instanceof MongoServerError &&
-      err.code === 11000
-    ) {
+    if (err instanceof MongoServerError && err.code === 11000) {
       logger.error(err, `Form title ${formUpdate.title} already exists`)
       throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
     }
