@@ -88,18 +88,18 @@ export default [
       const author = getAuthor(auth.credentials.user)
       const { id } = params
 
-      const response = await updateFormMetadata(id, payload, author)
+      const { slug, error } = await updateFormMetadata(id, payload, author)
 
-      if (response.error) {
+      if (error) {
         return {
-          message: response.error.message,
+          message: error.message,
           status: 'error'
         }
       }
 
       return {
         id,
-        slug: response.slug,
+        slug,
         status: 'updated'
       }
     },
