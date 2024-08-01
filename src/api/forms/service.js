@@ -483,7 +483,6 @@ export async function removeForm(formId, force = false) {
  * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
  * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
  * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- * @typedef {MongoServerError} MongoServerError
  */
 
 /**
