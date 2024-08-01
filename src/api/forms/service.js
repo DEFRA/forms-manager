@@ -1,5 +1,6 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
+import { MongoServerError } from 'mongodb'
 
 import { makeFormLiveErrorMessages } from './constants.js'
 
@@ -259,7 +260,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
  * @param {string} formId - ID of the form
  * @param {Partial<FormMetadataInput>} formUpdate - full form definition
  * @param {FormMetadataAuthor} author - the author details
- * @returns {Promise<string>}
  */
 export async function updateFormMetadata(formId, formUpdate, author) {
   logger.info(`Updating form metadata for form ID ${formId}`)
@@ -291,8 +291,11 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
     return updatedForm.slug ?? form.slug
   } catch (err) {
+    if (err instanceof MongoServerError && err.code === 11000) {
+      logger.error(err, `Form title ${formUpdate.title} already exists`)
+      throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
+    }
     logger.error(err, `Updating form metadata for form ID ${formId} failed`)
-
     throw err
   }
 }
