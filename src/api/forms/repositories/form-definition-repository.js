@@ -1,8 +1,7 @@
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
-import { removeById } from './helpers.js'
-
+import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { db, DEFINITION_COLLECTION_NAME } from '~/src/mongo.js'
 
@@ -142,14 +141,6 @@ export async function remove(formId, session) {
 }
 
 /**
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').Collection<Schema>} Collection
- */
-
-/**
- * @typedef {import('mongodb').ClientSession} ClientSession
+ * @import { FormDefinition } from '@defra/forms-model'
+ * @import { ClientSession, Collection } from 'mongodb'
  */

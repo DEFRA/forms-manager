@@ -4,7 +4,7 @@ import { db } from '~/src/mongo.js'
 
 /**
  * Removes a row in a MongoDB collection by its unique ID and fail if not completed.
- * @param {import('mongodb').ClientSession} session
+ * @param {ClientSession} session
  * @param {string} collectionName - name of the collection to remove from
  * @param {string} id - object _id
  */
@@ -20,3 +20,7 @@ export async function removeById(session, collectionName, id) {
     )
   }
 }
+
+/**
+ * @import { ClientSession } from 'mongodb'
+ */

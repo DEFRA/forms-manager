@@ -1,10 +1,8 @@
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
-import { FormAlreadyExistsError } from '../errors.js'
-
-import { removeById } from './helpers.js'
-
+import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
+import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { db, METADATA_COLLECTION_NAME } from '~/src/mongo.js'
 
@@ -174,20 +172,6 @@ export async function remove(formId, session) {
 }
 
 /**
- * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
- * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').Collection<Schema>} Collection
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').UpdateFilter<Schema>} UpdateFilter
- */
-
-/**
- * @typedef {import('mongodb').ClientSession} ClientSession
+ * @import { FormMetadata, FormMetadataDocument } from '@defra/forms-model'
+ * @import { ClientSession, Collection, UpdateFilter } from 'mongodb'
  */

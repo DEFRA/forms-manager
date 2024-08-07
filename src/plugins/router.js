@@ -1,7 +1,7 @@
 import routes from '~/src/routes/index.js'
 
 /**
- * @satisfies {ServerRegisterPluginObject}
+ * @satisfies {ServerRegisterPluginObject<void>}
  */
 export const router = {
   plugin: {
@@ -13,6 +13,5 @@ export const router = {
 }
 
 /**
- * @template {object | void} [PluginOptions=void]
- * @typedef {import('@hapi/hapi').ServerRegisterPluginObject<PluginOptions>} ServerRegisterPluginObject
+ * @import { ServerRegisterPluginObject } from '@hapi/hapi'
  */

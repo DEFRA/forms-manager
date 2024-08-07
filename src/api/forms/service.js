@@ -2,8 +2,7 @@ import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
-import { makeFormLiveErrorMessages } from './constants.js'
-
+import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -478,15 +477,6 @@ export async function removeForm(formId, force = false) {
 }
 
 /**
- * @typedef {import('~/src/api/forms/errors.js').FormAlreadyExistsError} FormAlreadyExistsError
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
- * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
- * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
- * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').WithId<Schema>} WithId
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
  */

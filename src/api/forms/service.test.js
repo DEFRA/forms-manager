@@ -2,8 +2,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
-import { makeFormLiveErrorMessages } from './constants.js'
-
+import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -743,14 +742,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
- * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
- * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
- * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').WithId<Schema>} WithId
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
  */
