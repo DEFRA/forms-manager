@@ -9,15 +9,7 @@
  */
 
 /**
- * @template {import('@hapi/hapi').ReqRef} [ReqRef=import('@hapi/hapi').ReqRefDefaults]
- * @typedef {import('@hapi/hapi').Request<ReqRef>} Request
- */
-
-/**
- * @typedef {import('@defra/forms-model').FormByIdInput} FormByIdInput
- * @typedef {import('@defra/forms-model').FormBySlugInput} FormBySlugInput
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
- * @typedef {import('mongodb').Db} Db
+ * @import { FormByIdInput, FormBySlugInput, FormDefinition, FormMetadataInput } from '@defra/forms-model'
+ * @import { Request } from '@hapi/hapi'
+ * @import { Db } from 'mongodb'
  */

@@ -478,15 +478,6 @@ export async function removeForm(formId, force = false) {
 }
 
 /**
- * @typedef {import('~/src/api/forms/errors.js').FormAlreadyExistsError} FormAlreadyExistsError
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
- * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
- * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
- * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').WithId<Schema>} WithId
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
  */

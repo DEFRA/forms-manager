@@ -142,14 +142,6 @@ export async function remove(formId, session) {
 }
 
 /**
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').Collection<Schema>} Collection
- */
-
-/**
- * @typedef {import('mongodb').ClientSession} ClientSession
+ * @import { FormDefinition } from '@defra/forms-model'
+ * @import { ClientSession, Collection } from 'mongodb'
  */

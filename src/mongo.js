@@ -48,6 +48,6 @@ export async function prepareDb(logger) {
 }
 
 /**
- * @typedef {import('mongodb').Db} Db
- * @typedef {import('pino').Logger} Logger
+ * @import { Db } from 'mongodb'
+ * @import { Logger } from 'pino'
  */

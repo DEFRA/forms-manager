@@ -43,5 +43,5 @@ export function empty() {
 }
 
 /**
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
+ * @import { FormDefinition } from '@defra/forms-model'
  */

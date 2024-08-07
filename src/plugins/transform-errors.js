@@ -26,6 +26,5 @@ export const transformErrors = {
 }
 
 /**
- * @template {object | void} [PluginOptions=void]
- * @typedef {import('@hapi/hapi').Plugin<PluginOptions>} Plugin
+ * @import { Plugin } from '@hapi/hapi'
  */

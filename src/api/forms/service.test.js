@@ -743,14 +743,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
- * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
- * @typedef {import('@defra/forms-model').FormMetadataDocument} FormMetadataDocument
- * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- */
-
-/**
- * @template {object} Schema
- * @typedef {import('mongodb').WithId<Schema>} WithId
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
  */

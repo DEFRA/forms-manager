@@ -611,9 +611,6 @@ describe('Forms route', () => {
 })
 
 /**
- * @typedef {import('@hapi/hapi').Server} Server
- * @typedef {import('@defra/forms-model').FormDefinition} FormDefinition
- * @typedef {import('@defra/forms-model').FormMetadata} FormMetadata
- * @typedef {import('@defra/forms-model').FormMetadataInput} FormMetadataInput
- * @typedef {import('@defra/forms-model').FormMetadataAuthor} FormMetadataAuthor
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput } from '@defra/forms-model'
+ * @import { Server } from '@hapi/hapi'
  */
