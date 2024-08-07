@@ -2,8 +2,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
-import { makeFormLiveErrorMessages } from './constants.js'
-
+import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'

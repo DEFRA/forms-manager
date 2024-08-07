@@ -1,8 +1,7 @@
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
-import { removeById } from './helpers.js'
-
+import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { db, DEFINITION_COLLECTION_NAME } from '~/src/mongo.js'
 

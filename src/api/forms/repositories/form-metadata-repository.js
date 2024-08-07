@@ -1,10 +1,8 @@
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
-import { FormAlreadyExistsError } from '../errors.js'
-
-import { removeById } from './helpers.js'
-
+import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
+import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { db, METADATA_COLLECTION_NAME } from '~/src/mongo.js'
 
