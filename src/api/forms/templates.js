@@ -1,4 +1,8 @@
-import { ComponentType } from '@defra/forms-model'
+import {
+  ComponentType,
+  ControllerPath,
+  ControllerType
+} from '@defra/forms-model'
 
 /**
  * Function to return an empty form
@@ -22,13 +26,12 @@ export function empty() {
             schema: {}
           }
         ],
-        next: [{ path: '/summary' }]
+        next: [{ path: ControllerPath.Summary }]
       },
       {
         title: 'Summary',
-        path: '/summary',
-        controller: 'SummaryPageController',
-        components: []
+        path: ControllerPath.Summary,
+        controller: ControllerType.Summary
       }
     ],
     conditions: [],
