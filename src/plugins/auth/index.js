@@ -43,29 +43,31 @@ export const auth = {
             }
           }
 
-          const { preferred_username: preferredUsername, groups = [] } = user
+          const { oid, groups = [] } = user
 
-          if (!preferredUsername) {
-            logger.error('Authentication error: Missing preferred_username')
-            return {
-              isValid: false
-            }
-          }
-
-          logger.debug(
-            `User ${preferredUsername}: validating against groups: ${groups.length ? groups.join(', ') : '[]'}`
-          )
-
-          if (!groups.includes(roleEditorGroupId)) {
-            logger.warn(
-              `User ${preferredUsername}: failed authorisation. "${roleEditorGroupId}" not in groups`
+          if (!oid || typeof oid !== 'string') {
+            logger.error(
+              'Authentication error: user.oid is not a string or is missing'
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${preferredUsername}: passed authorisation`)
+          logger.debug(
+            `User ${oid}: validating against groups: ${groups.length ? groups.join(', ') : '[]'}`
+          )
+
+          if (!groups.includes(roleEditorGroupId)) {
+            logger.warn(
+              `User ${oid}: failed authorisation. "${roleEditorGroupId}" not in groups`
+            )
+            return {
+              isValid: false
+            }
+          }
+
+          logger.debug(`User ${oid}: passed authorisation`)
           return {
             isValid: true,
             credentials: { user }
@@ -81,6 +83,5 @@ export const auth = {
 
 /**
  * @import { ServerRegisterPluginObject } from '@hapi/hapi'
- * @import { HapiJwt } from '@hapi/jwt'
  * @import { Artifacts, UserProfile } from '~/src/plugins/auth/types.js'
  */
