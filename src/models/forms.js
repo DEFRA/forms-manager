@@ -29,7 +29,12 @@ export const formBySlugSchema = Joi.object()
   .required()
 
 // Create form schema
-export const createFormSchema = formMetadataInputSchema
+export const createFormSchema = Joi.object().keys({
+  title: formMetadataInputSchema.extract('title'),
+  organisation: formMetadataInputSchema.extract('organisation'),
+  teamName: formMetadataInputSchema.extract('teamName'),
+  teamEmail: formMetadataInputSchema.extract('teamEmail')
+})
 
 // Update form definition schema
 export const updateFormDefinitionSchema = formDefinitionSchema

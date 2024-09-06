@@ -47,6 +47,7 @@ function mapForm(document) {
     organisation: document.organisation,
     teamName: document.teamName,
     teamEmail: document.teamEmail,
+    privacyNoticeUrl: document.privacyNoticeUrl,
     draft: document.draft,
     live: document.live,
     createdBy: created.createdBy,
