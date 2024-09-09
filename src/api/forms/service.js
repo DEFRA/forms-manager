@@ -320,6 +320,10 @@ export async function createLiveFromDraft(formId, author) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
     }
 
+    if (!form.privacyNoticeUrl) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
+    }
+
     const draftFormDefinition = await formDefinition.get(formId, 'draft')
 
     if (!draftFormDefinition.startPage) {
