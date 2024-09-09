@@ -47,6 +47,7 @@ function mapForm(document) {
     organisation: document.organisation,
     teamName: document.teamName,
     teamEmail: document.teamEmail,
+    privacyNoticeUrl: document.privacyNoticeUrl,
     draft: document.draft,
     live: document.live,
     createdBy: created.createdBy,
@@ -317,6 +318,10 @@ export async function createLiveFromDraft(formId, author) {
       )
 
       throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
+    }
+
+    if (!form.privacyNoticeUrl) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
     }
 
     const draftFormDefinition = await formDefinition.get(formId, 'draft')

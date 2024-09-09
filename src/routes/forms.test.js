@@ -159,6 +159,27 @@ describe('Forms route', () => {
       })
     })
 
+    test('Testing PATCH /forms/{id} route with privacyNoticeUrl returns "updated" status', async () => {
+      jest.mocked(updateFormMetadata).mockResolvedValue('test-form')
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/forms/661e4ca5039739ef2902b214',
+        payload: {
+          privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice'
+        },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        slug: 'test-form',
+        status: 'updated'
+      })
+    })
+
     test('Testing DELETE /forms/{id} route returns a "deleted" status', async () => {
       const response = await server.inject({
         method: 'DELETE',
@@ -400,6 +421,19 @@ describe('Forms route', () => {
           ]
         }
       },
+      {
+        payload: {
+          title: 'title',
+          organisation: 'Defra',
+          teamName: 'teamname',
+          teamEmail: 'defraforms@defra.gov.uk',
+          privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice'
+        },
+        error: {
+          keys: ['privacyNoticeUrl'],
+          messages: ['"privacyNoticeUrl" is not allowed']
+        }
+      },
       ...invalidPayloadErrorsTestData
     ])(
       'Testing POST /forms route with an invalid payload returns validation errors',
@@ -424,7 +458,31 @@ describe('Forms route', () => {
       }
     )
 
-    test.each(invalidPayloadErrorsTestData)(
+    test.each([
+      {
+        payload: {
+          privacyNoticeUrl: '/privacy-notice'
+        },
+        error: {
+          keys: ['privacyNoticeUrl'],
+          messages: [
+            '"privacyNoticeUrl" must be a valid uri with a scheme matching the http|https pattern'
+          ]
+        }
+      },
+      {
+        payload: {
+          privacyNoticeUrl: 'www.gov.uk/help/privacy-notice'
+        },
+        error: {
+          keys: ['privacyNoticeUrl'],
+          messages: [
+            '"privacyNoticeUrl" must be a valid uri with a scheme matching the http|https pattern'
+          ]
+        }
+      },
+      ...invalidPayloadErrorsTestData
+    ])(
       'Testing PATCH /forms/id route with an invalid payload returns validation errors',
       async ({ payload: metadata, error }) => {
         const response = await server.inject({
