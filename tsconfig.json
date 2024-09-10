@@ -18,7 +18,8 @@
     "**/*.mjs",
     ".eslintrc.*",
     ".prettierrc.*",
-    ".lintstagedrc.*"
+    ".lintstagedrc.*",
+    "src/hapi-types.d.ts"
   ],
   "exclude": ["node_modules", "coverage", ".server"]
 }

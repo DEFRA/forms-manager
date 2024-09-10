@@ -30,9 +30,9 @@ import {
  * @returns {FormMetadataAuthor}
  */
 function getAuthor(user) {
-  if (!user || !('oid' in user && typeof user.oid === 'string')) {
+  if (!user || !user.oid) {
     throw Boom.unauthorized(
-      'Failed to get the author, user is undefined or has a malformed/missing oid'
+      'Failed to get the author. User is undefined or has a malformed/missing oid.'
     )
   }
 
