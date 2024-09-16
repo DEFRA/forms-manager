@@ -201,11 +201,11 @@ describe('Forms service', () => {
 
       await createDraftFromLive(id, author)
 
-      const dbOperationArgs = dbSpy.mock.calls[0]
+      const dbMetadataOperationArgs = dbSpy.mock.calls[0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe(id)
-      expect(dbOperationArgs[1].$set).toMatchObject({
+      expect(dbMetadataOperationArgs[0]).toBe(id)
+      expect(dbMetadataOperationArgs[1].$set).toMatchObject({
         draft: {
           createdAt: dateUsedInFakeTime,
           createdBy: author,
@@ -248,18 +248,20 @@ describe('Forms service', () => {
 
       await createLiveFromDraft('123', author)
 
-      const dbOperationArgs = dbSpy.mock.calls[0]
+      const dbMetadataOperationArgs = dbSpy.mock.calls[0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe('123')
-      expect(dbOperationArgs[1].$set?.live).toEqual({
+      expect(dbMetadataOperationArgs[0]).toBe('123')
+      expect(dbMetadataOperationArgs[1].$set?.live).toEqual({
         createdAt: dateUsedInFakeTime,
         createdBy: author,
         updatedAt: dateUsedInFakeTime,
         updatedBy: author
       })
-      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
-      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
+      expect(dbMetadataOperationArgs[1].$set?.updatedAt).toEqual(
+        dateUsedInFakeTime
+      )
+      expect(dbMetadataOperationArgs[1].$set?.updatedBy).toEqual(author)
     })
 
     test('should fail to create a live state from existing draft form when there is no start page', async () => {
@@ -395,18 +397,33 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const dbSpy = jest.spyOn(formMetadata, 'update')
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateDraftName')
 
       const updatedSlug = await updateFormMetadata(id, input, author)
       expect(updatedSlug).toBe('new-title')
 
-      const dbOperationArgs = dbSpy.mock.calls[0]
+      const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
+      const dbDefinitionOperationArgs = dbDefinitionSpy.mock.calls[0]
 
-      expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe('661e4ca5039739ef2902b214')
-      expect(dbOperationArgs[1].$set?.slug).toBe('new-title')
-      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
-      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
+      // Check metadata was updated
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      expect(dbMetadataOperationArgs[0]).toBe(id)
+      expect(dbMetadataOperationArgs[1]).toMatchObject({
+        $set: {
+          slug: 'new-title',
+          title: input.title,
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author,
+          'draft.updatedAt': dateUsedInFakeTime,
+          'draft.updatedBy': author
+        }
+      })
+
+      // Check definition was updated
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      expect(dbDefinitionOperationArgs[0]).toBe(id)
+      expect(dbDefinitionOperationArgs[1]).toBe(input.title)
     })
 
     test('should update organisation and return existing slug', async () => {
@@ -474,13 +491,13 @@ describe('Forms service', () => {
 
       await createForm(formMetadataInput, author)
 
-      const dbOperationArgs = dbSpy.mock.calls[0][0]
+      const dbMetadataOperationArgs = dbSpy.mock.calls[0][0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs.createdAt).toEqual(dateUsedInFakeTime)
-      expect(dbOperationArgs.createdBy).toEqual(author)
-      expect(dbOperationArgs.updatedBy).toEqual(author)
-      expect(dbOperationArgs.updatedAt).toEqual(dateUsedInFakeTime)
+      expect(dbMetadataOperationArgs.createdAt).toEqual(dateUsedInFakeTime)
+      expect(dbMetadataOperationArgs.createdBy).toEqual(author)
+      expect(dbMetadataOperationArgs.updatedBy).toEqual(author)
+      expect(dbMetadataOperationArgs.updatedAt).toEqual(dateUsedInFakeTime)
     })
 
     test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
@@ -577,11 +594,11 @@ describe('Forms service', () => {
         author
       )
 
-      const dbOperationArgs = dbSpy.mock.calls[0]
+      const dbMetadataOperationArgs = dbSpy.mock.calls[0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe('123')
-      expect(dbOperationArgs[1].$set).toEqual({
+      expect(dbMetadataOperationArgs[0]).toBe('123')
+      expect(dbMetadataOperationArgs[1].$set).toEqual({
         'draft.updatedAt': dateUsedInFakeTime,
         'draft.updatedBy': author,
         updatedAt: dateUsedInFakeTime,

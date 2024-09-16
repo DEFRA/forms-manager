@@ -277,19 +277,34 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       )
     }
 
-    /** @type {Partial<FormMetadataDocument>} */
-    const updatedForm = {
+    const now = new Date()
+
+    /** @type {PartialFormMetadataDocument} */
+    let updatedForm = {
       ...formUpdate,
-      updatedAt: new Date(),
+      updatedAt: now,
       updatedBy: author
     }
 
     if (formUpdate.title) {
-      updatedForm.slug = slugify(formUpdate.title)
+      updatedForm = {
+        ...updatedForm,
+        slug: slugify(formUpdate.title),
+        'draft.updatedAt': now,
+        'draft.updatedBy': author
+      }
     }
 
-    // Update the form metadata
-    await formMetadata.update(formId, { $set: updatedForm })
+    const session = client.startSession()
+
+    await session.withTransaction(async () => {
+      await formMetadata.update(formId, { $set: updatedForm }, session)
+
+      if (formUpdate.title) {
+        await formDefinition.updateDraftName(formId, formUpdate.title, session)
+      }
+    })
+
     logger.info(`Updated form metadata for form ID ${formId}`)
 
     return updatedForm.slug ?? form.slug
@@ -496,4 +511,5 @@ export async function removeForm(formId, force = false) {
 /**
  * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
+ * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */

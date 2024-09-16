@@ -141,6 +141,28 @@ export async function remove(formId, session) {
 }
 
 /**
+ * Updates the name of a draft form definition
+ * @param {string} formId - the ID of the form
+ * @param {string} name - new name for the form
+ * @param {ClientSession} session
+ */
+export async function updateDraftName(formId, name, session) {
+  logger.info(`Updating form name for form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    { $set: { 'draft.name': name } },
+    { session }
+  )
+
+  logger.info(`Updated form name for form ID ${formId}`)
+}
+
+/**
  * @import { FormDefinition } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  */
