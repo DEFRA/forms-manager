@@ -31,7 +31,7 @@ export const auth = {
           exp: true
         },
         /**
-         * @param {Artifacts<UserProfile>} artifacts
+         * @param {Artifacts<UserCredentials>} artifacts
          */
         validate(artifacts) {
           const user = artifacts.decoded.payload
@@ -43,29 +43,29 @@ export const auth = {
             }
           }
 
-          const { preferred_username: preferredUsername, groups = [] } = user
+          const { oid, groups = [] } = user
 
-          if (!preferredUsername) {
-            logger.error('Authentication error: Missing preferred_username')
+          if (!oid) {
+            logger.error('Authentication error: user.oid is missing')
             return {
               isValid: false
             }
           }
 
           logger.debug(
-            `User ${preferredUsername}: validating against groups: ${groups.length ? groups.join(', ') : '[]'}`
+            `User ${oid}: validating against groups: ${groups.length ? groups.join(', ') : '[]'}`
           )
 
           if (!groups.includes(roleEditorGroupId)) {
             logger.warn(
-              `User ${preferredUsername}: failed authorisation. "${roleEditorGroupId}" not in groups`
+              `User ${oid}: failed authorisation. "${roleEditorGroupId}" not in groups`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${preferredUsername}: passed authorisation`)
+          logger.debug(`User ${oid}: passed authorisation`)
           return {
             isValid: true,
             credentials: { user }
@@ -80,7 +80,6 @@ export const auth = {
 }
 
 /**
- * @import { ServerRegisterPluginObject } from '@hapi/hapi'
- * @import { HapiJwt } from '@hapi/jwt'
- * @import { Artifacts, UserProfile } from '~/src/plugins/auth/types.js'
+ * @import { ServerRegisterPluginObject, UserCredentials } from '@hapi/hapi'
+ * @import { Artifacts } from '~/src/plugins/auth/types.js'
  */
