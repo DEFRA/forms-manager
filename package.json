@@ -76,8 +76,8 @@
   "optionalDependencies": {
     "@types/convict": "^6.1.6",
     "@types/eslint": "^9.6.1",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^22.5.2",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^22.5.5",
     "@types/slug": "^5.0.9",
     "oidc-client-ts": "^3.0.1"
   },
