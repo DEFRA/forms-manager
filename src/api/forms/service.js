@@ -48,6 +48,7 @@ function mapForm(document) {
     teamName: document.teamName,
     teamEmail: document.teamEmail,
     privacyNoticeUrl: document.privacyNoticeUrl,
+    contact: document.contact,
     draft: document.draft,
     live: document.live,
     createdBy: created.createdBy,
@@ -318,6 +319,10 @@ export async function createLiveFromDraft(formId, author) {
       )
 
       throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
+    }
+
+    if (!form.contact) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingContact)
     }
 
     if (!form.privacyNoticeUrl) {

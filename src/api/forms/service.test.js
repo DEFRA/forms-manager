@@ -78,7 +78,10 @@ describe('Forms service', () => {
     organisation: 'Defra',
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk',
-    privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice'
+    privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice',
+    contact: {
+      phone: '0800 000 1234'
+    }
   }
 
   /**
@@ -301,6 +304,23 @@ describe('Forms service', () => {
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
+      )
+    })
+
+    test('should fail to create a live state from existing draft form when there is no contact', async () => {
+      const metadataNoContact = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+
+      delete metadataNoContact.contact
+      jest.mocked(formMetadata.get).mockResolvedValue(metadataNoContact)
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(/** @type {FormDefinition} */ (definition))
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingContact)
       )
     })
   })
