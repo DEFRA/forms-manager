@@ -145,8 +145,13 @@ export async function remove(formId, session) {
  * @param {string} formId - the ID of the form
  * @param {string} name - new name for the form
  * @param {ClientSession} session
+ * @param {string} [state] - state of the form to update
  */
-export async function updateDraftName(formId, name, session) {
+export async function updateName(formId, name, session, state = 'draft') {
+  if (state === 'live') {
+    throw Boom.badRequest('Cannot update the name of a live form')
+  }
+
   logger.info(`Updating form name for form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
@@ -155,7 +160,7 @@ export async function updateDraftName(formId, name, session) {
 
   await coll.updateOne(
     { _id: new ObjectId(formId) },
-    { $set: { 'draft.name': name } },
+    { $set: { [`${state}.name`]: name } },
     { session }
   )
 

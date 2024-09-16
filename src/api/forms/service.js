@@ -301,7 +301,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       await formMetadata.update(formId, { $set: updatedForm }, session)
 
       if (formUpdate.title) {
-        await formDefinition.updateDraftName(formId, formUpdate.title, session)
+        await formDefinition.updateName(formId, formUpdate.title, session)
       }
     })
 

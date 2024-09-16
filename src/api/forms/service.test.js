@@ -398,7 +398,7 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
-      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateDraftName')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateName')
 
       const updatedSlug = await updateFormMetadata(id, input, author)
       expect(updatedSlug).toBe('new-title')
