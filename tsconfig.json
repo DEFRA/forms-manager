@@ -10,7 +10,8 @@
     "baseUrl": "./",
     "paths": {
       "~/*": ["./*"]
-    }
+    },
+    "typeRoots": ["./src/typings", "./node_modules/@types"]
   },
   "include": [
     "**/*.cjs",
@@ -18,8 +19,7 @@
     "**/*.mjs",
     ".eslintrc.*",
     ".prettierrc.*",
-    ".lintstagedrc.*",
-    "src/hapi-types.d.ts"
+    ".lintstagedrc.*"
   ],
   "exclude": ["node_modules", "coverage", ".server"]
 }
