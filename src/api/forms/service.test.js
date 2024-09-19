@@ -82,7 +82,8 @@ describe('Forms service', () => {
       phone: '0800 000 1234'
     },
     submissionGuidance: 'We’ll send you an email to let you know the outcome.',
-    privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice'
+    privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice',
+    notificationEmail: 'defraforms@defra.gov.uk'
   }
 
   /**
@@ -277,14 +278,23 @@ describe('Forms service', () => {
     })
 
     test('should fail to create a live state from existing draft form when there is no output email', async () => {
-      const draftDefinitionNoStartPage = /** @type {FormDefinition} */ (
+      const draftDefinitionNoOutputEmail = /** @type {FormDefinition} */ (
         definition
       )
-      delete draftDefinitionNoStartPage.outputEmail
+      delete draftDefinitionNoOutputEmail.outputEmail
+
+      const metadataNoNotificationEmail = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+      delete metadataNoNotificationEmail.notificationEmail
 
       jest
         .mocked(formDefinition.get)
-        .mockResolvedValueOnce(draftDefinitionNoStartPage)
+        .mockResolvedValue(draftDefinitionNoOutputEmail)
+
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(metadataNoNotificationEmail)
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
