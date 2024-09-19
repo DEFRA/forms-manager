@@ -78,10 +78,11 @@ describe('Forms service', () => {
     organisation: 'Defra',
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk',
-    privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice',
     contact: {
       phone: '0800 000 1234'
-    }
+    },
+    submissionGuidance: 'We’ll send you an email to let you know the outcome.',
+    privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice'
   }
 
   /**
@@ -290,23 +291,6 @@ describe('Forms service', () => {
       )
     })
 
-    test('should fail to create a live state from existing draft form when there is no privacy notice url', async () => {
-      const metadataNoPrivacyNotice = {
-        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
-      }
-
-      delete metadataNoPrivacyNotice.privacyNoticeUrl
-      jest.mocked(formMetadata.get).mockResolvedValue(metadataNoPrivacyNotice)
-
-      jest
-        .mocked(formDefinition.get)
-        .mockResolvedValueOnce(/** @type {FormDefinition} */ (definition))
-
-      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
-        Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
-      )
-    })
-
     test('should fail to create a live state from existing draft form when there is no contact', async () => {
       const metadataNoContact = {
         .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
@@ -321,6 +305,42 @@ describe('Forms service', () => {
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingContact)
+      )
+    })
+
+    test('should fail to create a live state from existing draft form when there is no submission guidance', async () => {
+      const metadataNoSubmissionGuidance = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+
+      delete metadataNoSubmissionGuidance.submissionGuidance
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValue(metadataNoSubmissionGuidance)
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(/** @type {FormDefinition} */ (definition))
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingSubmissionGuidance)
+      )
+    })
+
+    test('should fail to create a live state from existing draft form when there is no privacy notice url', async () => {
+      const metadataNoPrivacyNotice = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+
+      delete metadataNoPrivacyNotice.privacyNoticeUrl
+      jest.mocked(formMetadata.get).mockResolvedValue(metadataNoPrivacyNotice)
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(/** @type {FormDefinition} */ (definition))
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
       )
     })
   })
