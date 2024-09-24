@@ -50,6 +50,7 @@ function mapForm(document) {
     contact: document.contact,
     submissionGuidance: document.submissionGuidance,
     privacyNoticeUrl: document.privacyNoticeUrl,
+    notificationEmail: document.notificationEmail,
     draft: document.draft,
     live: document.live,
     createdBy: created.createdBy,
@@ -340,7 +341,8 @@ export async function createLiveFromDraft(formId, author) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
     }
 
-    if (!draftFormDefinition.outputEmail) {
+    if (!draftFormDefinition.outputEmail && !form.notificationEmail) {
+      // TODO: remove the form def check once all forms have a notification email
       throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
     }
 
