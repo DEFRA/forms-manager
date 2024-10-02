@@ -5,6 +5,16 @@ on:
     branches:
       - main
 
+    paths:
+      - '.browserslistrc'
+      - 'babel.config.*'
+      - 'Dockerfile'
+      - 'src/**'
+      - '!**/*.test.*'
+
+concurrency:
+  group: publish
+
 permissions:
   id-token: write
   contents: write
