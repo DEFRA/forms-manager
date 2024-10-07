@@ -1,8 +1,8 @@
 import {
-  idSchema,
-  slugSchema,
+  formDefinitionSchema,
   formMetadataInputSchema,
-  formDefinitionSchema
+  idSchema,
+  slugSchema
 } from '@defra/forms-model'
 import Joi from 'joi'
 
