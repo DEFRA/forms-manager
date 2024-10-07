@@ -4,7 +4,7 @@ import { MongoServerError, ObjectId } from 'mongodb'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
-import { db, METADATA_COLLECTION_NAME } from '~/src/mongo.js'
+import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 export const MAX_RESULTS = 500
 

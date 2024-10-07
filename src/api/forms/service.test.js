@@ -7,14 +7,14 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
-  createForm,
-  getFormDefinition,
-  createLiveFromDraft,
   createDraftFromLive,
-  updateDraftFormDefinition,
+  createForm,
+  createLiveFromDraft,
+  getFormDefinition,
+  listForms,
   removeForm,
-  updateFormMetadata,
-  listForms
+  updateDraftFormDefinition,
+  updateFormMetadata
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { prepareDb } from '~/src/mongo.js'
