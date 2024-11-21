@@ -182,7 +182,7 @@ describe('Forms service', () => {
       })
     })
 
-    test("should throw bad request if there's no live definition", async () => {
+    it("should throw bad request if there's no live definition", async () => {
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
       await expect(createDraftFromLive(id, author)).rejects.toThrow(
@@ -192,7 +192,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should update the form state when creating', async () => {
+    it('should update the form state when creating', async () => {
       jest
         .mocked(formMetadata.get)
         .mockResolvedValue(formMetadataWithLiveDocument)
@@ -201,11 +201,11 @@ describe('Forms service', () => {
 
       await createDraftFromLive(id, author)
 
-      const dbOperationArgs = dbSpy.mock.calls[0]
+      const dbMetadataOperationArgs = dbSpy.mock.calls[0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe(id)
-      expect(dbOperationArgs[1].$set).toMatchObject({
+      expect(dbMetadataOperationArgs[0]).toBe(id)
+      expect(dbMetadataOperationArgs[1].$set).toMatchObject({
         draft: {
           createdAt: dateUsedInFakeTime,
           createdBy: author,
@@ -230,7 +230,7 @@ describe('Forms service', () => {
       })
     })
 
-    test('should create a live state from existing draft form', async () => {
+    it('should create a live state from existing draft form', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce({
         ...definition,
         outputEmail: 'test@defra.gov.uk'
@@ -238,7 +238,7 @@ describe('Forms service', () => {
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
 
-    test('should check if form update DB operation is called with correct form data', async () => {
+    it('should check if form update DB operation is called with correct form data', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce({
         ...definition,
         outputEmail: 'test@defra.gov.uk'
@@ -248,21 +248,23 @@ describe('Forms service', () => {
 
       await createLiveFromDraft('123', author)
 
-      const dbOperationArgs = dbSpy.mock.calls[0]
+      const dbMetadataOperationArgs = dbSpy.mock.calls[0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe('123')
-      expect(dbOperationArgs[1].$set?.live).toEqual({
+      expect(dbMetadataOperationArgs[0]).toBe('123')
+      expect(dbMetadataOperationArgs[1].$set?.live).toEqual({
         createdAt: dateUsedInFakeTime,
         createdBy: author,
         updatedAt: dateUsedInFakeTime,
         updatedBy: author
       })
-      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
-      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
+      expect(dbMetadataOperationArgs[1].$set?.updatedAt).toEqual(
+        dateUsedInFakeTime
+      )
+      expect(dbMetadataOperationArgs[1].$set?.updatedBy).toEqual(author)
     })
 
-    test('should fail to create a live state from existing draft form when there is no start page', async () => {
+    it('should fail to create a live state from existing draft form when there is no start page', async () => {
       const draftDefinitionNoStartPage = /** @type {FormDefinition} */ (
         definition
       )
@@ -277,7 +279,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should fail to create a live state from existing draft form when there is no output email', async () => {
+    it('should fail to create a live state from existing draft form when there is no output email', async () => {
       const draftDefinitionNoOutputEmail = /** @type {FormDefinition} */ (
         definition
       )
@@ -301,7 +303,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should fail to create a live state from existing draft form when there is no contact', async () => {
+    it('should fail to create a live state from existing draft form when there is no contact', async () => {
       const metadataNoContact = {
         .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
       }
@@ -318,7 +320,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should fail to create a live state from existing draft form when there is no submission guidance', async () => {
+    it('should fail to create a live state from existing draft form when there is no submission guidance', async () => {
       const metadataNoSubmissionGuidance = {
         .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
       }
@@ -337,7 +339,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should fail to create a live state from existing draft form when there is no privacy notice url', async () => {
+    it('should fail to create a live state from existing draft form when there is no privacy notice url', async () => {
       const metadataNoPrivacyNotice = {
         .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
       }
@@ -377,7 +379,7 @@ describe('Forms service', () => {
       })
     })
 
-    test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
+    it.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
       const input = {
         ...formMetadataInput,
         title: slugIn.input
@@ -388,36 +390,75 @@ describe('Forms service', () => {
       )
     })
 
-    test('should update slug when title is updated', async () => {
+    it('should update slug and draft.updatedAt/draft.updatedBy when title is updated', async () => {
       const input = {
         title: 'new title'
       }
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const dbSpy = jest.spyOn(formMetadata, 'update')
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateName')
 
       const updatedSlug = await updateFormMetadata(id, input, author)
       expect(updatedSlug).toBe('new-title')
 
-      const dbOperationArgs = dbSpy.mock.calls[0]
+      const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
+      const dbDefinitionOperationArgs = dbDefinitionSpy.mock.calls[0]
 
-      expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe('661e4ca5039739ef2902b214')
-      expect(dbOperationArgs[1].$set?.slug).toBe('new-title')
-      expect(dbOperationArgs[1].$set?.updatedBy).toEqual(author)
-      expect(dbOperationArgs[1].$set?.updatedAt).toEqual(dateUsedInFakeTime)
+      // Check metadata was updated
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      expect(dbMetadataOperationArgs[0]).toBe(id)
+      expect(dbMetadataOperationArgs[1]).toMatchObject({
+        $set: {
+          slug: 'new-title',
+          title: input.title,
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author,
+          'draft.updatedAt': dateUsedInFakeTime,
+          'draft.updatedBy': author
+        }
+      })
+
+      // Check definition was updated
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      expect(dbDefinitionOperationArgs[0]).toBe(id)
+      expect(dbDefinitionOperationArgs[1]).toBe(input.title)
     })
 
-    test('should update organisation and return existing slug', async () => {
+    it('should not update draft.updatedAt and draft.updatedBy when title is not updated', async () => {
       const input = {
         organisation: 'new organisation'
       }
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateName')
+
       const slugAfterUpdate = await updateFormMetadata(id, input, author)
       expect(slugAfterUpdate).toBe('test-form')
+
+      const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
+
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      expect(dbMetadataOperationArgs[0]).toBe(id)
+      expect(dbMetadataOperationArgs[1]).toMatchObject({
+        $set: {
+          organisation: 'new organisation',
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author
+        }
+      })
+
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedAt']
+      ).toBeUndefined()
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedBy']
+      ).toBeUndefined()
+
+      expect(dbDefinitionSpy).not.toHaveBeenCalled()
     })
 
     it('should throw an error when writing for metadata fails', async () => {
@@ -439,7 +480,7 @@ describe('Forms service', () => {
     })
 
     it('should throw an error if form is live and trying to update title', async () => {
-      const error = Boom.notFound(
+      const error = Boom.badRequest(
         `Form with ID '123' is live so 'title' cannot be updated`
       )
 
@@ -448,7 +489,7 @@ describe('Forms service', () => {
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
       await expect(
-        updateFormMetadata('123', formMetadataInput, author)
+        updateFormMetadata('123', { title: 'new title' }, author)
       ).rejects.toThrow(error)
     })
   })
@@ -463,24 +504,24 @@ describe('Forms service', () => {
       })
     })
 
-    test('should create a new form', async () => {
+    it('should create a new form', async () => {
       await expect(createForm(formMetadataInput, author)).resolves.toEqual(
         formMetadataOutput
       )
     })
 
-    test('should check if form create DB operation is called with correct form data', async () => {
+    it('should check if form create DB operation is called with correct form data', async () => {
       const dbSpy = jest.spyOn(formMetadata, 'create')
 
       await createForm(formMetadataInput, author)
 
-      const dbOperationArgs = dbSpy.mock.calls[0][0]
+      const dbMetadataOperationArgs = dbSpy.mock.calls[0][0]
 
       expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs.createdAt).toEqual(dateUsedInFakeTime)
-      expect(dbOperationArgs.createdBy).toEqual(author)
-      expect(dbOperationArgs.updatedBy).toEqual(author)
-      expect(dbOperationArgs.updatedAt).toEqual(dateUsedInFakeTime)
+      expect(dbMetadataOperationArgs.createdAt).toEqual(dateUsedInFakeTime)
+      expect(dbMetadataOperationArgs.createdBy).toEqual(author)
+      expect(dbMetadataOperationArgs.updatedBy).toEqual(author)
+      expect(dbMetadataOperationArgs.updatedAt).toEqual(dateUsedInFakeTime)
     })
 
     test.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
@@ -557,11 +598,22 @@ describe('Forms service', () => {
       "A custom form name that shouldn't be allowed"
 
     it('should update the draft form definition with required attributes upon creation', async () => {
+      const upsertSpy = jest.spyOn(formDefinition, 'upsert')
+      const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
+
       await updateDraftFormDefinition(
         '123',
         formDefinitionCustomisedTitle,
         author
       )
+
+      expect(upsertSpy).toHaveBeenCalledWith(
+        '123',
+        { ...formDefinitionCustomisedTitle, name: formMetadataDocument.title },
+        expect.anything()
+      )
+
+      expect(formMetadataGetSpy).toHaveBeenCalledWith('123')
 
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
@@ -588,31 +640,46 @@ describe('Forms service', () => {
         updatedBy: author
       })
     })
+
+    it('should throw an error if the form has no draft state', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValueOnce({
+        ...formMetadataDocument,
+        draft: undefined
+      })
+
+      const formDefinitionCustomised = actualEmptyForm()
+
+      await expect(
+        updateDraftFormDefinition('123', formDefinitionCustomised, author)
+      ).rejects.toThrow(
+        Boom.badRequest(`Form with ID '123' has no draft state`)
+      )
+    })
   })
 
   describe('removeForm', () => {
-    test('should succeed if both operations succeed', async () => {
+    it('should succeed if both operations succeed', async () => {
       jest.mocked(formMetadata.remove).mockResolvedValueOnce()
       jest.mocked(formDefinition.remove).mockResolvedValueOnce()
 
       await expect(removeForm(id)).resolves.toBeUndefined()
     })
 
-    test('should fail if form metadata remove fails', async () => {
+    it('should fail if form metadata remove fails', async () => {
       jest.mocked(formMetadata.remove).mockRejectedValueOnce('unknown error')
       jest.mocked(formDefinition.remove).mockResolvedValueOnce()
 
       await expect(removeForm(id)).rejects.toBeDefined()
     })
 
-    test('should fail if form definition remove fails', async () => {
+    it('should fail if form definition remove fails', async () => {
       jest.mocked(formMetadata.remove).mockResolvedValueOnce()
       jest.mocked(formDefinition.remove).mockRejectedValueOnce('unknown error')
 
       await expect(removeForm(id)).rejects.toBeDefined()
     })
 
-    test('should fail if the form is live but not being force deleted', async () => {
+    it('should fail if the form is live but not being force deleted', async () => {
       jest
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
@@ -620,7 +687,7 @@ describe('Forms service', () => {
       await expect(removeForm(id)).rejects.toBeDefined()
     })
 
-    test('should succeed if the form is live and being force deleted', async () => {
+    it('should succeed if the form is live and being force deleted', async () => {
       jest
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
@@ -628,7 +695,7 @@ describe('Forms service', () => {
       await expect(removeForm(id, true)).resolves.toBeUndefined()
     })
 
-    test('should succeed if form definition deletion fails and the form is being force deleted', async () => {
+    it('should succeed if form definition deletion fails and the form is being force deleted', async () => {
       jest
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
@@ -709,7 +776,7 @@ describe('Forms service', () => {
       updatedBy: formAuthor
     }
 
-    test('should handle the full set of states', async () => {
+    it('should handle the full set of states', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataFullDocument])
@@ -726,7 +793,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should handle states when root state info is missing and live is present', async () => {
+    it('should handle states when root state info is missing and live is present', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataDraftDocument])
@@ -743,7 +810,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should handle states when draft state info is missing', async () => {
+    it('should handle states when draft state info is missing', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataLiveDocument])
@@ -760,7 +827,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should handle states when live state info is missing', async () => {
+    it('should handle states when live state info is missing', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataDraftNoLiveDocument])
@@ -777,7 +844,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('should handle states when all states are missing', async () => {
+    it('should handle states when all states are missing', async () => {
       jest
         .mocked(formMetadata.list)
         .mockResolvedValue([formMetadataBaseDocument])
@@ -794,7 +861,7 @@ describe('Forms service', () => {
       )
     })
 
-    test('throws if forms are malformed', async () => {
+    it('throws if forms are malformed', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue([
         {
           _id: new ObjectId(id)

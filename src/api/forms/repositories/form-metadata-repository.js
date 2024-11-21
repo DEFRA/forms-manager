@@ -122,13 +122,13 @@ export async function create(document, session) {
 /**
  * Update a document in the database
  * @param {string} formId - ID of the form
- * @param {UpdateFilter<FormMetadataDocument>} update - form metadata document update filter
+ * @param {UpdateFilter<PartialFormMetadataDocument>} update - form metadata document update filter
  * @param {ClientSession} [session] - mongo transaction session
  */
 export async function update(formId, update, session) {
   logger.info(`Updating form with ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
+  const coll = /** @satisfies {Collection<PartialFormMetadataDocument>} */ (
     db.collection(METADATA_COLLECTION_NAME)
   )
 
@@ -172,6 +172,7 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadata, FormMetadataDocument } from '@defra/forms-model'
+ * @import { FormMetadataDocument } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter } from 'mongodb'
+ * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

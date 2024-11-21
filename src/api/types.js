@@ -9,7 +9,11 @@
  */
 
 /**
- * @import { FormByIdInput, FormBySlugInput, FormDefinition, FormMetadataInput } from '@defra/forms-model'
+ * @typedef {Partial<FormMetadataDocument & { 'draft.updatedAt': Date, 'draft.updatedBy': FormMetadataAuthor }>} PartialFormMetadataDocument
+ */
+
+/**
+ * @import { FormByIdInput, FormBySlugInput, FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadataState } from '@defra/forms-model'
  * @import { Request } from '@hapi/hapi'
  * @import { Db } from 'mongodb'
  */
