@@ -593,45 +593,52 @@ describe('Forms service', () => {
   })
 
   describe('updateDraftFormDefinition', () => {
-    it('should update the draft form definition as provided without altering the name', async () => {
-      const formDefinitionCustomised = actualEmptyForm()
-      formDefinitionCustomised.name = 'A custom form name'
+    const formDefinitionCustomisedTitle = actualEmptyForm()
+    formDefinitionCustomisedTitle.name =
+      "A custom form name that shouldn't be allowed"
 
+    it('should update the draft form definition with required attributes upon creation', async () => {
       const upsertSpy = jest.spyOn(formDefinition, 'upsert')
       const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
 
-      await updateDraftFormDefinition('123', formDefinitionCustomised, author)
+      await updateDraftFormDefinition(
+        '123',
+        formDefinitionCustomisedTitle,
+        author
+      )
 
       expect(upsertSpy).toHaveBeenCalledWith(
         '123',
-        formDefinitionCustomised,
+        { ...formDefinitionCustomisedTitle, name: formMetadataDocument.title },
         expect.anything()
       )
 
       expect(formMetadataGetSpy).toHaveBeenCalledWith('123')
 
-      expect(formDefinitionCustomised.name).toBe('A custom form name')
+      expect(formDefinitionCustomisedTitle.name).toBe(
+        formMetadataDocument.title
+      )
     })
 
-    it('should update the draft metadata updatedAt and updatedBy fields', async () => {
-      const formDefinitionCustomised = actualEmptyForm()
-
+    test('should check if form update DB operation is called with correct form data', async () => {
       const dbSpy = jest.spyOn(formMetadata, 'update')
 
-      await updateDraftFormDefinition('123', formDefinitionCustomised, author)
-
-      expect(dbSpy).toHaveBeenCalledWith(
+      await updateDraftFormDefinition(
         '123',
-        {
-          $set: {
-            'draft.updatedAt': dateUsedInFakeTime,
-            'draft.updatedBy': author,
-            updatedAt: dateUsedInFakeTime,
-            updatedBy: author
-          }
-        },
-        expect.anything()
+        formDefinitionCustomisedTitle,
+        author
       )
+
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('123')
+      expect(dbOperationArgs[1].$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
     })
 
     it('should throw an error if the form has no draft state', async () => {
