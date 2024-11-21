@@ -216,10 +216,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
     }
 
-    // some definition attributes shouldn't be customised by users, so patch
-    // them on every write to prevent imported forms drifting (e.g. JSON upload)
-    definition.name = form.title
-
     const session = client.startSession()
 
     try {
@@ -260,6 +256,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 }
 
 /**
+ * Updates the form metadata.
+ * Note: If the 'title' is updated, this method also updates the form definition's 'name' to keep them in sync.
  * @param {string} formId - ID of the form
  * @param {Partial<FormMetadataInput>} formUpdate - full form definition
  * @param {FormMetadataAuthor} author - the author details
@@ -301,6 +299,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       await formMetadata.update(formId, { $set: updatedForm }, session)
 
       if (formUpdate.title) {
+        // Also update the form definition's name to keep them in sync
         await formDefinition.updateName(formId, formUpdate.title, session)
       }
     })
