@@ -18,7 +18,14 @@ export function list() {
     db.collection(METADATA_COLLECTION_NAME)
   )
 
-  return coll.find().limit(MAX_RESULTS).toArray()
+  return coll
+    .find()
+    .sort({
+      updatedAt: -1, // Primary sort: most recently updated documents first (-1 = descending order)
+      'updatedBy.displayName': 1 // Secondary sort: if update times are equal, sort by author name (1 = ascending order)
+    })
+    .limit(MAX_RESULTS)
+    .toArray()
 }
 
 /**
