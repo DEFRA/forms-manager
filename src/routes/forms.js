@@ -51,6 +51,9 @@ export default [
     path: '/forms',
     handler() {
       return listForms()
+    },
+    options: {
+      auth: false
     }
   },
   {

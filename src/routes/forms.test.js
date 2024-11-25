@@ -107,6 +107,19 @@ describe('Forms route', () => {
       expect(response.result).toEqual([])
     })
 
+    test('Testing GET /forms route without auth returns empty array', async () => {
+      jest.mocked(listForms).mockResolvedValue([])
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms'
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual([])
+    })
+
     test('Testing GET /forms route returns a list of forms', async () => {
       jest.mocked(listForms).mockResolvedValue([stubFormMetadataOutput])
 
