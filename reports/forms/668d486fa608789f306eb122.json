@@ -1,0 +1,4567 @@
+{
+  "id": "668d486fa608789f306eb122",
+  "metadata": {
+    "id": "668d486fa608789f306eb122",
+    "slug": "request-fire-service-equipment-from-the-environment-agency",
+    "title": "Request fire service equipment from the Environment Agency",
+    "organisation": "Environment Agency",
+    "teamName": "Environment Incident Preparedness",
+    "teamEmail": "FRS.orders@environment-agency.gov.uk",
+    "contact": {
+      "phone": "*   Telephone: 087 0850 6506",
+      "email": {
+        "address": "frs.orders@environment-agency.gov.uk",
+        "responseTime": "We aim to respond as soon as possible."
+      }
+    },
+    "submissionGuidance": "Our team will process your request within 5 working days.\r\n\r\nWe’ll send you an acknowledgement email when we've confirmed the order with our supplier.",
+    "privacyNoticeUrl": "https://www.gov.uk/government/publications/request-environmental-protection-equipment-privacy-notice",
+    "notificationEmail": "frs.orders@environment-agency.gov.uk",
+    "draft": {
+      "updatedAt": "2024-11-20T15:37:25.408Z",
+      "updatedBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "createdAt": "2024-11-20T15:37:25.408Z",
+      "createdBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "live": {
+      "updatedAt": "2024-11-18T15:07:21.935Z",
+      "updatedBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "createdAt": "2024-08-13T13:10:01.371Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-08-13T13:10:01.371Z",
+    "updatedBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "updatedAt": "2024-11-20T15:37:25.408Z"
+  },
+  "draft": {
+    "name": "Request fire service equipment from the Environment Agency",
+    "pages": [
+      {
+        "title": "What fire service are you ordering environmental equipment for?",
+        "path": "/what-fire-service-are-you-ordering-environmental-equipment-for",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-station-or-distribution-centre"
+          },
+          {
+            "path": "/what-other-fire-service-are-you-ordering-environmental-equipment-for",
+            "condition": "nkXoOM"
+          }
+        ],
+        "components": [
+          {
+            "name": "MNGSur",
+            "options": {},
+            "schema": {},
+            "type": "AutocompleteField",
+            "title": "Fire service",
+            "list": "GFMJZg",
+            "hint": "If a fire service is not listed, enter 'other'.",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Check your answers before submitting this form",
+        "path": "/summary",
+        "controller": "SummaryPageController",
+        "components": [],
+        "next": []
+      },
+      {
+        "title": "What's the name of the station or distribution centre?",
+        "path": "/whats-the-name-of-the-station-or-distribution-centre",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-address-of-the-station-or-distribution-centre"
+          }
+        ],
+        "components": [
+          {
+            "name": "kaWhIC",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Name of station or distribution centre",
+            "hint": "The Environment Agency's supplier will send the equipment to this fire station or distribution centre."
+          }
+        ]
+      },
+      {
+        "title": "What's the address of the station or distribution centre?",
+        "path": "/whats-the-address-of-the-station-or-distribution-centre",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-contact-name-for-the-delivery"
+          }
+        ],
+        "components": [
+          {
+            "name": "qlHXuM",
+            "options": {},
+            "schema": {},
+            "type": "UkAddressField",
+            "hint": "The Environment Agency's supplier will send the equipment to this address.",
+            "title": "Delivery address"
+          }
+        ]
+      },
+      {
+        "title": "What's the contact name for the delivery?",
+        "path": "/whats-the-contact-name-for-the-delivery",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-phone-number-for-the-contact-who-will-receive-the-delivery"
+          }
+        ],
+        "components": [
+          {
+            "name": "Zrqfpd",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Contact name for delivery",
+            "hint": "The Environment Agency's supplier will address the delivery to this contact."
+          }
+        ]
+      },
+      {
+        "title": "What's the phone number for the contact who will receive the delivery?",
+        "path": "/whats-the-phone-number-for-the-contact-who-will-receive-the-delivery",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-email-address-for-the-contact-who-will-receive-the-delivery"
+          }
+        ],
+        "components": [
+          {
+            "name": "EspIYf",
+            "options": {},
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Telephone number"
+          }
+        ]
+      },
+      {
+        "path": "/grab-bag-items",
+        "title": "Grab bag items",
+        "components": [
+          {
+            "name": "nfnfxA",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "pZzwmn",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Grab pack bag with Environment Agency England logo, no pocket (1 bag) (EA code: 5071/EA/E)",
+            "hint": ""
+          },
+          {
+            "name": "tmSdFn",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Leak sealing paste, DAMMIT X ready mix, 500g tub (18 per pack) (EA code: 4037/X)",
+            "hint": ""
+          },
+          {
+            "name": "JNRUAo",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Leak sealing device, DAMMIT X ready mix applicator packs, 400g (6 per box) (EA code: 4047/X)",
+            "hint": ""
+          },
+          {
+            "name": "vdnaum",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Disposable DAMMIT X drain sealing mats (2 per box) 45 x 45cm (EA code: 4010/X)",
+            "hint": ""
+          },
+          {
+            "name": "toVuME",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Disposable DAMMIT X drain sealing mats (2 per box) 65 x 45cm (EA code: 4000/X)",
+            "hint": ""
+          },
+          {
+            "name": "ukaqbC",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "STOPPIT drain mat carry bags (EA code: 4610/CARRIER/120)",
+            "hint": ""
+          },
+          {
+            "name": "AYuiQk",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small blue oil sorbent pads size 30 x 30 cm (200 per pack) (EA code: PDB17MB200BG/1)",
+            "hint": ""
+          },
+          {
+            "name": "Bagtnz",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium blue oil sorbent pads size 30 x 35 cm (200 per pack) (EA code: PDB17MB200BG/2)",
+            "hint": ""
+          },
+          {
+            "name": "bueDAc",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil sorbent pads size 52 x 40 cm (200 per pack) (EA code: PDB17MB200BG)",
+            "hint": ""
+          },
+          {
+            "name": "VaWXhQ",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Three section yellow polythene land boom, 10 meter roll, 500 gauge 1000 x 16 cm (EA code: 0419/500/10)",
+            "hint": ""
+          },
+          {
+            "name": "itlIjy",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Heavy duty clear polythene waste bag, 500g, 1200mm x 1800mm, (100 per pack) (EA code: 5089/EA/100)",
+            "hint": ""
+          },
+          {
+            "name": "wjnLwg",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "T50I black cable ties 4.5mm x 250mm (500 per pack) (EA code: 5159/300MM)",
+            "hint": ""
+          },
+          {
+            "name": "qACAQm",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Roll of adhesive tape with Environment Agency logo (EA code: 0900/CUSTOM/EA)",
+            "hint": ""
+          },
+          {
+            "name": "hwBSpk",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Hazard warning diamond: to mark bagged waste from equipment use (per label) (EA code: SL/24557UA)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/blue-oil-absorbents"
+          }
+        ],
+        "section": "rMSqUZ"
+      },
+      {
+        "path": "/blue-oil-absorbents",
+        "title": "Blue oil absorbents",
+        "components": [
+          {
+            "name": "ccYyfo",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "LZFuVk",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 1.5 metre oil absorbent boom 12.5cm x 1.5m (8 per pack) (EA code: 0105/1.5)",
+            "hint": ""
+          },
+          {
+            "name": "RpxsxA",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 2 metre oil absorbent boom 12.5cm x 2m (6 per pack) (EA code: 0105/2)",
+            "hint": ""
+          },
+          {
+            "name": "yJtfia",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 3 metre oil absorbent boom 12.5cm x 3m with ties (4 per pack) (EA code: 0105/3)",
+            "hint": ""
+          },
+          {
+            "name": "VYAepb",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 4 metre oil absorbent boom 12.5cm x 4m (4 per pack) (EA code: 0105/4)",
+            "hint": ""
+          },
+          {
+            "name": "PymnlS",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 5 metre oil absorbent boom, 12.5cm x 5m (2 per pack) (A code: 0105/5)",
+            "hint": ""
+          },
+          {
+            "name": "XylQiX",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil absorbent mini roll 4200 x 50cm single thickness (1 per pack) (EA code: MRB17MB001BG)",
+            "hint": ""
+          },
+          {
+            "name": "iyuNOF",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil sorbent roll 4200 x 100cm single thickness (1 per pack) (EA code: LRB17MB001BG)",
+            "hint": ""
+          },
+          {
+            "name": "ksFFYz",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil absorbent mini cushions 21 x 33 x 6cm (20 per pack) (EA code: 0111/20)",
+            "hint": ""
+          },
+          {
+            "name": "qIEqVD",
+            "options": {
+              "hideTitle": false,
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil sorbent cushion sorbent cushion 35 x 55 x 10cm (10 per pack) (EA code: 0110)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/yellow-chemical-absorbents"
+          }
+        ],
+        "section": "pSHTZV"
+      },
+      {
+        "path": "/yellow-chemical-absorbents",
+        "title": "Yellow chemical absorbents",
+        "components": [
+          {
+            "name": "DnpfJk",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "VYURUu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow 1.5 metre chemical absorbent midi boom, 12.5cm x 1.5m (8 per pack) (EA code: 0205/1.5)",
+            "hint": ""
+          },
+          {
+            "name": "NfDbAu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow 3 metre chemical absorbent midi boom 300 x 12.5cm (4 per pack) (EA code: 0205/3)",
+            "hint": ""
+          },
+          {
+            "name": "zQLdaO",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow 4 metre chemical absorbent midi boom 400 x 12.5cm (4 per pack) (EA code: 0205/4)",
+            "hint": ""
+          },
+          {
+            "name": "RoQQPa",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow active chemical absorbent pads size 52 x 40cm (200 per pack) (EA code: PDY17MD200BG)",
+            "hint": ""
+          },
+          {
+            "name": "nugUAP",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow small active chemical absorbent pads size 30 x 30cm (200 per pack) (EA code: PDY17MD200BG/1)",
+            "hint": ""
+          },
+          {
+            "name": "frOpFG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow medium active chemical absorbent pads size 30 x 35cm (200 per pack) (EA code: PDY17MD200BG/2)",
+            "hint": ""
+          },
+          {
+            "name": "ZcqLXj",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow chemical absorbent mini cushions  21 x 33 x  6cm (20 per pack) (EA code: 0211/20)",
+            "hint": ""
+          },
+          {
+            "name": "libVFO",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow chemical absorbent mini cushions 35 x 55 x 10cm (10 per pack) (EA code: 0210)",
+            "hint": ""
+          },
+          {
+            "name": "oGGalu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow active chemical sorbent mini roll 4200 x 50cm single thickness (1 per pack) (EA code: MRY17MD001BG)",
+            "hint": ""
+          },
+          {
+            "name": "fmKBYG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow active chemical sorbent roll 4200 x 100cm (1 per pack) (EA code: LRY17MD001BG)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/non-absorbent-booms-and-stakes"
+          }
+        ],
+        "section": "NhsVLX"
+      },
+      {
+        "path": "/non-absorbent-booms-and-stakes",
+        "title": "Non absorbent booms and stakes",
+        "components": [
+          {
+            "name": "JQwaGP",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "EREzih",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Three section yellow disposable polythene land boom 10000 x 16cm roll (EA code: 0419/500/100)",
+            "hint": ""
+          },
+          {
+            "name": "uWDrII",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Reusable buoyancy boom, yellow, comes with secure ties at both ends, supplied with wooden stakes to secure to ground, 25cm x 3m (4 per pack) (EA code: 0421/F/25)",
+            "hint": ""
+          },
+          {
+            "name": "luYwvv",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Wooden stake (square) (EA code: 5330)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/drain-sealing-bag-and-spares"
+          }
+        ],
+        "section": "neWqcm"
+      },
+      {
+        "path": "/drain-sealing-bag-and-spares",
+        "title": "Drain sealing bag and spares",
+        "components": [
+          {
+            "name": "HrkLFg",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "TFpsSo",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Inflatable drain sealing bag (375mm bladder) set, manual Envirovalve (EA code: 4400/FB)",
+            "hint": ""
+          },
+          {
+            "name": "oyfYJp",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Drain seal bag spares set, comes with foot pump (inflation pump), air regulator set (inflation hoses), crimps, cable ties, polybag and label (EA code: 4800/PUMP/FB)",
+            "hint": ""
+          },
+          {
+            "name": "VTuxsD",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Inflation pump, floor stirrup pump to fit Envirovalve drain seal bag (EA code: 4890/P/PUMP)",
+            "hint": ""
+          },
+          {
+            "name": "WetpvM",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Inflation hose, air regulator set, preset 5psi, assembled hose fitting and quick release coupling plug - to fit Envirovalve drain seal bag (EA code: 4890/P/REGSET)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/over-pack-drums"
+          }
+        ],
+        "section": "ZBaCjK"
+      },
+      {
+        "path": "/over-pack-drums",
+        "title": "Over pack drums",
+        "components": [
+          {
+            "name": "jRzmno",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "xGWlAI",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "25 to 113L poly over drum salvage drum 30 (yellow), 58.1 x 76.5cm, capacity: 113 litres (EA code: 1850/30)",
+            "hint": ""
+          },
+          {
+            "name": "JphWmU",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "50 to 247L poly over drum salvage drum 65 (yellow), 73.7 x 92.1cm, capacity: 247 litres (EA code: 1849)",
+            "hint": ""
+          },
+          {
+            "name": "PnfoXb",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "205 to 359L poly over drum salvage drum 95 (yellow), 82 x 104.9cm, capacity: 359 litres (EA code: 1850)",
+            "hint": ""
+          },
+          {
+            "name": "jDvabu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Flexible storage tank liner for 6000L tank (EA code: 0415/LINER/6000)",
+            "hint": ""
+          },
+          {
+            "name": "NLERaV",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small plant nappy 68.5 x 50 x 7cm absorbency (pack), up to 2 litres (EA code: 0411/PN/1)",
+            "hint": ""
+          },
+          {
+            "name": "yqwIJs",
+            "options": {
+              "hideTitle": false,
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small plant nappy liner 50 x 68.5 x 1.2cm absorbency pack, up to 2 litres (EA code: 0411/NL/1)",
+            "hint": ""
+          },
+          {
+            "name": "NmkWCT",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium plant nappy 100 x 68.5 x 7cm absorbency pack, up to 4.5 litres (EA code: 0411/PN/2)",
+            "hint": ""
+          },
+          {
+            "name": "cQpqsG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium plant nappy liner 100 x 68.5 x 1.2cm, absorbency pack, up to 4.5 litres (EA code: 0411/NL/2)",
+            "hint": ""
+          },
+          {
+            "name": "GnstxC",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Large plant nappy 200 x 137 x 7cm absorbency pack, up to 16 litres (EA code: 0411/PN/3)",
+            "hint": ""
+          },
+          {
+            "name": "kHRGKL",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Large plant nappy liner 200 x 137 x 1.2cm absorbency pack, up to 16 litres (EA code: 0411/NL/3)",
+            "hint": ""
+          },
+          {
+            "name": "NnCqLG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small Enviropad, plant spill pad 61 x 46cm absorbency pack, up to 4.5 litres (EA code: 0411/PSP/1)",
+            "hint": ""
+          },
+          {
+            "name": "DoqMdT",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium Enviropad, plant spill pad 90 x 69cm absorbency pack, up to 10.5 litres (EA code: 0411/PSP/2)",
+            "hint": ""
+          },
+          {
+            "name": "kBOell",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Large Enviropad, plant spill pad 218 x 137cm absorbency pack, up to 44 litres (EA code: 0411/PSP/3)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/pop-up-pools"
+          }
+        ],
+        "section": "UxThFi"
+      },
+      {
+        "path": "/pop-up-pools",
+        "title": "Pop up pools",
+        "components": [
+          {
+            "name": "dJCJYh",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "twvkeW",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100 litre Trident pop up tank (EA code: 0412/100)",
+            "hint": ""
+          },
+          {
+            "name": "oyFyqN",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Carry bag for 100L litre popup tank, PVC (EA code: 0412/100/BAG)",
+            "hint": ""
+          },
+          {
+            "name": "zBHNCw",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "250 litre Trident pop up tank (EA code: 0412/250)",
+            "hint": ""
+          },
+          {
+            "name": "nhwiUx",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Carry bag for 250 litre pop up tank, PVC (EA code: 0412/250/BAG)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/portable-tanks"
+          }
+        ],
+        "section": "BFFZMz"
+      },
+      {
+        "path": "/portable-tanks",
+        "title": "Portable tanks",
+        "components": [
+          {
+            "name": "qZSPWb",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "oGlVdW",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "6000 litre Trident inflatable rollover tank 200 x 1000 x 37cm (EA code: 0451/06000/PU)",
+            "hint": ""
+          },
+          {
+            "name": "rrcZHl",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "1000 litre PVC Trident expander tank (EA code: 0415/01000/PVC)",
+            "hint": ""
+          },
+          {
+            "name": "CKXUlJ",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "5000 litre PVC Trident expander tank (orange) (EA code: 0415/07500/PVC)",
+            "hint": ""
+          },
+          {
+            "name": "gqIFSS",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Carrier bag for 6000 litre flexible tank (EA code: 0415/06000/CARRIER)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/drain-tracing-dye"
+          }
+        ],
+        "section": "fjFVrC"
+      },
+      {
+        "path": "/drain-tracing-dye",
+        "title": "Drain tracing dye",
+        "components": [
+          {
+            "name": "JCxxZO",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "ZmOiWb",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100g pot green drain tracing dye (EA code: 5347/D/G",
+            "hint": ""
+          },
+          {
+            "name": "trKGYO",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100g pot red drain tracing dye (EA code: 5347/D/R)",
+            "hint": ""
+          },
+          {
+            "name": "vyFtLe",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100g pot blue drain tracing dye (EA code: 5347/D/B)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "section": "QTIalw"
+      },
+      {
+        "path": "/do-you-want-to-order-pump-spare-parts",
+        "title": "Do you want to order pump spare parts?",
+        "components": [
+          {
+            "name": "kravFI",
+            "title": "Order pump spares",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/pump-spares"
+          },
+          {
+            "path": "/environmental-protection-equipment",
+            "condition": "cmBqsH"
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "path": "/pump-spares",
+        "title": "Pump spares",
+        "components": [
+          {
+            "name": "Rynxdq",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "uPTpwF",
+            "title": "Silicone lubricant, pump chamber (2 litre) (EA code: 0438/W/S)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "sfffIz",
+            "title": "5 litre silicone lubricant AK350 for peristaltic pumps (EA code: 0438/W/S/5)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "pWsCmN",
+            "title": "Front cover O ring set (EA code: 0438/FP/O RING)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "tMOaAC",
+            "title": "Port connection O ring (1 per pack) (EA code: 0438/CONN/O RING)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "MNWhax",
+            "title": "Internal nitrile peristaltic hose, bare for peristaltic pumps (EA code: 0438/HN)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "TzczkD",
+            "title": "Front cover eyelet nut pack for peristaltic pumps (4 per pack) (EA code: 0438/ENFC)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "xCLsvl",
+            "title": "Hose support for peristaltic pumps (EA code: 0438/CLAMP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "hoKoqv",
+            "title": "Separator belt M300 724+/-1mm for peristaltic pumps (EA code: 0438/SEPARATOR)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "wKELpe",
+            "title": "Pump front cover (face plate) (M300) for peristaltic pumps (EA code: 0438/FP/FC)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "PdKQvq",
+            "title": "Vacuum gauge for peristaltic pumps (EA code: 0438/VG)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "fLYPBf",
+            "title": "Dosing valve for peristaltic pumps (EA code: 0438/DH)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "PkXjKE",
+            "title": "Connection port KL male (aluminium) for peristaltic pumps (EA code: 0438/CPKL/AL)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "tUKcvr",
+            "title": "Rotor Screw for peristaltic pump (EA code: 0438/SCREW/ROTOR)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "GdwQts",
+            "title": "Suction pipe for peristaltic pumps (EA code: 0438/SP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "dVUAhS",
+            "title": "Adaptor for peristaltic pumps (EA code: 0438/AD)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "WuDOSD",
+            "title": "Vacuum strainer for peristaltic pumps (EA code: 0438/VS)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "ZkksXD",
+            "title": "Suction strainer for peristaltic pumps (EA code: 0438/SS/BSP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "Jwmxsn",
+            "title": "Disk strainer (elephant foot), male or female for peristaltic pumps (EA code: 0438/DS/2BSP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/environmental-protection-equipment"
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "title": "Environmental protection equipment",
+        "path": "/environmental-protection-equipment",
+        "next": [
+          {
+            "path": "/grab-bag-items"
+          },
+          {
+            "path": "/summary",
+            "condition": "sfOYRb"
+          }
+        ],
+        "components": [
+          {
+            "name": "WaJaUT",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou can use this section of the form to order:\n\n<ul class=\"govuk-list govuk-list--bullet\">\n<li>grab bag items</li>\n<li>blue oil absorbents</li>\n<li>yellow chemical absorbents</li>\n<li>non absorbent booms and stakes</li>\n<li>drain sealing bag and spares</li>\n<li>over pack drums</li>\n<li>pop up pools</li>\n<li>portable tanks</li>\n<li>drain tracing dye</li>\n</ul>\n\n<p class=\"govuk-body\">\nEach type of equipment is listed on a separate page.\n\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "ZKwbOf",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Do you want to order environmental protection equipment?",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "path": "/do-you-want-to-request-a-pump-service",
+        "title": "Do you want to request a pump service?",
+        "components": [
+          {
+            "name": "wOVBnZ",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Pump service required"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-many-pumps-do-you-want-serviced"
+          },
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts",
+            "condition": "pJSCsm"
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "title": "What other fire service are you ordering environmental equipment for?",
+        "path": "/what-other-fire-service-are-you-ordering-environmental-equipment-for",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-station-or-distribution-centre"
+          }
+        ],
+        "components": [
+          {
+            "name": "vUoukT",
+            "title": "Fire service (other)",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/how-many-pumps-do-you-want-serviced",
+        "title": "How many pumps do you want serviced?",
+        "components": [
+          {
+            "name": "OsiLTz",
+            "title": "Number of pumps to service",
+            "type": "RadiosField",
+            "hint": "",
+            "options": {},
+            "schema": {},
+            "list": "yXexWx"
+          }
+        ],
+        "next": [
+          {
+            "path": "/pump-location",
+            "condition": ""
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "title": "Pump location",
+        "path": "/pump-location",
+        "section": "pUzSCv",
+        "next": [
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts",
+            "condition": "TTlbiF"
+          },
+          {
+            "path": "/are-the-second-and-third-pumps-located-at-the-same-address",
+            "condition": "XedsQM"
+          }
+        ],
+        "components": [
+          {
+            "name": "YdJqTB",
+            "title": "Where would you like the pump to be serviced?",
+            "type": "TextField",
+            "hint": "The Environment Agency's supplier will send an engineer to this location to service the pump.",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "UOLvzL",
+            "title": "What's the address for where the pump is located?",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Location of second pump",
+        "path": "/location-of-second-pump",
+        "section": "pUzSCv",
+        "next": [
+          {
+            "path": "/location-of-third-pump",
+            "condition": "luQYgp"
+          },
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZxykQe",
+            "title": "Where would you like the second pump to be serviced?",
+            "type": "TextField",
+            "hint": "The Environment Agency's supplier will send an engineer to this location to service the second pump.",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "Yjohkp",
+            "title": "What's the address for where the second pump is located?",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Location of third pump",
+        "path": "/location-of-third-pump",
+        "section": "pUzSCv",
+        "next": [
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts"
+          }
+        ],
+        "components": [
+          {
+            "name": "myASBa",
+            "title": "Where would you like the third pump to be serviced?",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "DdCWUR",
+            "title": "What's the address for where the third pump is located?",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the email address for the contact who will receive the delivery?",
+        "path": "/whats-the-email-address-for-the-contact-who-will-receive-the-delivery",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/do-you-want-to-request-a-pump-service"
+          }
+        ],
+        "components": [
+          {
+            "name": "HsfGFs",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "We’ll use this email address if we have a question about an order and to send an order confirmation email.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/are-the-second-and-third-pumps-located-at-the-same-address",
+        "title": "Are the second and  third pumps located  at the same address?",
+        "components": [
+          {
+            "name": "ukCIIp",
+            "title": "Pumps located at the same address",
+            "type": "YesNoField",
+            "hint": "You can move the pumps to the same address to be serviced at the same time or provide an address for each pump.",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/location-of-second-pump"
+          },
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts",
+            "condition": "FrzlNk"
+          }
+        ],
+        "section": "pUzSCv"
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "yes - pump service or parts required",
+        "name": "iZizaa",
+        "value": {
+          "name": "yes - pump service or parts required",
+          "conditions": [
+            {
+              "field": {
+                "name": "feYegO",
+                "type": "YesNoField",
+                "display": "Pump service or spare parts required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "No service or pump",
+        "name": "Vtoued",
+        "value": {
+          "name": "No service or pump",
+          "conditions": [
+            {
+              "field": {
+                "name": "xsmnVd",
+                "type": "YesNoField",
+                "display": "Pump service or spare parts required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "No pump service or spares",
+        "name": "EaKwsR",
+        "value": {
+          "name": "No pump service or spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "wOVBnZ",
+                "type": "YesNoField",
+                "display": "Pump service or spares"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Pump spares only",
+        "name": "rwbwwX",
+        "value": {
+          "name": "Pump spares only",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Order parts for a pump",
+                "display": "Order parts for a pump"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "No - not a pump service or spares",
+        "name": "rxsVTY",
+        "value": {
+          "name": "No - not a pump service or spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "wOVBnZ",
+                "type": "YesNoField",
+                "display": "Pump service or spares"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "XKDfYM",
+        "displayName": "Pump service only",
+        "value": {
+          "name": "Pump service only",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Request a pump service",
+                "display": "Request a pump service only"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "hnrukC",
+        "displayName": "Order parts for a pump only ",
+        "value": {
+          "name": "Order parts for a pump only ",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Order parts for a pump\t",
+                "display": "Order parts for a pump\t"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "mAgejI",
+        "displayName": "Pump service and spares",
+        "value": {
+          "name": "Pump service and spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Request a pump service and order replacement parts for a pump",
+                "display": "Request a pump service and order replacement parts for a pump"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "cmBqsH",
+        "displayName": "no pump spares",
+        "value": {
+          "name": "no pump spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "kravFI",
+                "type": "YesNoField",
+                "display": "Pump service and spares: Order pump spares"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "pJSCsm",
+        "displayName": "No pump service required",
+        "value": {
+          "name": "No pump service required",
+          "conditions": [
+            {
+              "field": {
+                "name": "wOVBnZ",
+                "type": "YesNoField",
+                "display": "Pump service and spares: Pump service required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "nkXoOM",
+        "displayName": "Is other",
+        "value": {
+          "name": "Is other",
+          "conditions": [
+            {
+              "field": {
+                "name": "MNGSur",
+                "type": "AutocompleteField",
+                "display": "Delivery details: What fire service do you work for?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Other",
+                "display": "Other"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "TTlbiF",
+        "displayName": "1 pump to service",
+        "value": {
+          "name": "1 pump to service",
+          "conditions": [
+            {
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "1",
+                "display": "1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "luQYgp",
+        "displayName": "3 pumps to service",
+        "value": {
+          "name": "3 pumps to service",
+          "conditions": [
+            {
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "3",
+                "display": "3"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "FrzlNk",
+        "displayName": "Pumps located at same address",
+        "value": {
+          "name": "Pumps located at same address",
+          "conditions": [
+            {
+              "field": {
+                "name": "ukCIIp",
+                "type": "YesNoField",
+                "display": "Pump service and spares: Pumps located at the same address"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "XedsQM",
+        "displayName": "2 or 3 pumps to service",
+        "value": {
+          "name": "2 or 3 pumps to service",
+          "conditions": [
+            {
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "2",
+                "display": "2"
+              }
+            },
+            {
+              "coordinator": "or",
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "3",
+                "display": "3"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "MjMozw",
+        "displayName": "Yes - order equipment",
+        "value": {
+          "name": "Yes - order equipment",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZKwbOf",
+                "type": "YesNoField",
+                "display": "Order environmental protection equipment: Do you want to order environmental protection equipment?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "sfOYRb",
+        "displayName": "No - do not order equipment",
+        "value": {
+          "name": "No - do not order equipment",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZKwbOf",
+                "type": "YesNoField",
+                "display": "Do you want to order environmental protection equipment?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "iLtfob",
+        "title": "Contact details",
+        "hideTitle": false
+      },
+      {
+        "name": "GpRKzL",
+        "title": "Order items",
+        "hideTitle": false
+      },
+      {
+        "name": "pLakEV",
+        "title": "Delivery details",
+        "hideTitle": false
+      },
+      {
+        "name": "pUzSCv",
+        "title": "Pump service and spares",
+        "hideTitle": false
+      },
+      {
+        "name": "rMSqUZ",
+        "title": "Grab bag items",
+        "hideTitle": true
+      },
+      {
+        "name": "pSHTZV",
+        "title": "Blue oil absorbents",
+        "hideTitle": true
+      },
+      {
+        "name": "NhsVLX",
+        "title": "Yellow chemical absorbents",
+        "hideTitle": true
+      },
+      {
+        "name": "ZBaCjK",
+        "title": "Drain sealing bag and spares",
+        "hideTitle": true
+      },
+      {
+        "name": "neWqcm",
+        "title": "Non absorbent booms and stakes",
+        "hideTitle": true
+      },
+      {
+        "name": "UxThFi",
+        "title": "Over pack drums",
+        "hideTitle": true
+      },
+      {
+        "name": "BFFZMz",
+        "title": "Pop up pools",
+        "hideTitle": true
+      },
+      {
+        "name": "fjFVrC",
+        "title": "Portable tanks",
+        "hideTitle": true
+      },
+      {
+        "name": "QTIalw",
+        "title": "Drain tracing dye",
+        "hideTitle": true
+      },
+      {
+        "name": "LXEKKp",
+        "title": "Order environmental protection equipment",
+        "hideTitle": true
+      }
+    ],
+    "lists": [
+      {
+        "title": "Pump service and parts",
+        "name": "EcRvTu",
+        "type": "string",
+        "items": [
+          {
+            "text": "Request a pump service only",
+            "value": "Request a pump service"
+          },
+          {
+            "text": "Order parts for a pump\t",
+            "value": "Order parts for a pump\t"
+          },
+          {
+            "text": "Request a pump service and order replacement parts for a pump",
+            "value": "Request a pump service and order replacement parts for a pump"
+          }
+        ]
+      },
+      {
+        "title": "Fire service name",
+        "name": "GFMJZg",
+        "type": "string",
+        "items": [
+          {
+            "text": "Avon",
+            "value": "Avon"
+          },
+          {
+            "text": "Bedfordshire",
+            "value": "Bedfordshire"
+          },
+          {
+            "text": "Buckinghamshire",
+            "value": "Buckinghamshire"
+          },
+          {
+            "text": "Cambridgeshire",
+            "value": "Cambridgeshire"
+          },
+          {
+            "text": "Cheshire",
+            "value": "Cheshire"
+          },
+          {
+            "text": "Cleveland",
+            "value": "Cleveland"
+          },
+          {
+            "text": "Cornwall",
+            "value": "Cornwall"
+          },
+          {
+            "text": "Cumbria",
+            "value": "Cumbria"
+          },
+          {
+            "text": "Derbyshire",
+            "value": "Derbyshire"
+          },
+          {
+            "text": "Devon and Somerset",
+            "value": "Devon and Somerset"
+          },
+          {
+            "text": "Dorset and Wiltshire",
+            "value": "Dorset and Wiltshire"
+          },
+          {
+            "text": "Durham",
+            "value": "Durham"
+          },
+          {
+            "text": "East Sussex",
+            "value": "East Sussex"
+          },
+          {
+            "text": "Essex",
+            "value": "Essex"
+          },
+          {
+            "text": "Greater Manchester",
+            "value": "Greater Manchester"
+          },
+          {
+            "text": "Gloucestershire",
+            "value": "Gloucestershire"
+          },
+          {
+            "text": "Hampshire and Isle of Wight",
+            "value": "Hampshire and Isle of Wight"
+          },
+          {
+            "text": "Hereford and Worcester",
+            "value": "Hereford and Worcester"
+          },
+          {
+            "text": "Hertfordshire",
+            "value": "Hertfordshire"
+          },
+          {
+            "text": "Humberside",
+            "value": "Humberside"
+          },
+          {
+            "text": "Isle of Man",
+            "value": "Isle of Man"
+          },
+          {
+            "text": "Isles of Scilly",
+            "value": "Isles of Scilly"
+          },
+          {
+            "text": "Kent",
+            "value": "Kent"
+          },
+          {
+            "text": "Lancashire",
+            "value": "Lancashire"
+          },
+          {
+            "text": "Leicestershire",
+            "value": "Leicestershire"
+          },
+          {
+            "text": "Lincolnshire",
+            "value": "Lincolnshire"
+          },
+          {
+            "text": "London Fire Brigade",
+            "value": "London Fire Brigade"
+          },
+          {
+            "text": "Merseyside",
+            "value": "Merseyside"
+          },
+          {
+            "text": "North Yorkshire",
+            "value": "North Yorkshire"
+          },
+          {
+            "text": "Northumberland",
+            "value": "Northumberland"
+          },
+          {
+            "text": "Northamptonshire",
+            "value": "Northamptonshire"
+          },
+          {
+            "text": "Nottinghamshire",
+            "value": "Nottinghamshire"
+          },
+          {
+            "text": "Oxfordshire",
+            "value": "Oxfordshire"
+          },
+          {
+            "text": "Other",
+            "value": "Other"
+          },
+          {
+            "text": "Royal Berkshire",
+            "value": "Royal Berkshire"
+          },
+          {
+            "text": "Shropshire",
+            "value": "Shropshire"
+          },
+          {
+            "text": "South Yorkshire",
+            "value": "South Yorkshire"
+          },
+          {
+            "text": "Staffordshire",
+            "value": "Staffordshire"
+          },
+          {
+            "text": "Suffolk",
+            "value": "Suffolk"
+          },
+          {
+            "text": "Surrey",
+            "value": "Surrey"
+          },
+          {
+            "text": "Tyne and Wear",
+            "value": "Tyne and Wear"
+          },
+          {
+            "text": "Warwickshire",
+            "value": "Warwickshire"
+          },
+          {
+            "text": "West Midlands",
+            "value": "West Midlands"
+          },
+          {
+            "text": "West Sussex",
+            "value": "West Sussex"
+          },
+          {
+            "text": "West Yorkshire",
+            "value": "West Yorkshire"
+          }
+        ]
+      },
+      {
+        "title": "Number of pumps to service",
+        "name": "yXexWx",
+        "type": "string",
+        "items": [
+          {
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "text": "2",
+            "value": "2"
+          },
+          {
+            "text": "3",
+            "value": "3"
+          }
+        ]
+      },
+      {
+        "title": "Address is the same",
+        "name": "rstpQn",
+        "type": "string",
+        "items": [
+          {
+            "text": "Same as address 1",
+            "value": "Same as address 1"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "outputEmail": "FRS.orders@environment-agency.gov.uk",
+    "startPage": "/what-fire-service-are-you-ordering-environmental-equipment-for"
+  },
+  "live": {
+    "name": "Request fire service equipment from the Environment Agency",
+    "pages": [
+      {
+        "title": "What fire service are you ordering environmental equipment for?",
+        "path": "/what-fire-service-are-you-ordering-environmental-equipment-for",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-station-or-distribution-centre"
+          },
+          {
+            "path": "/what-other-fire-service-are-you-ordering-environmental-equipment-for",
+            "condition": "nkXoOM"
+          }
+        ],
+        "components": [
+          {
+            "name": "MNGSur",
+            "options": {},
+            "schema": {},
+            "type": "AutocompleteField",
+            "title": "Fire service",
+            "list": "GFMJZg",
+            "hint": "If a fire service is not listed, enter 'other'.",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Check your answers before submitting this form",
+        "path": "/summary",
+        "controller": "SummaryPageController",
+        "components": [],
+        "next": []
+      },
+      {
+        "title": "What's the name of the station or distribution centre?",
+        "path": "/whats-the-name-of-the-station-or-distribution-centre",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-address-of-the-station-or-distribution-centre"
+          }
+        ],
+        "components": [
+          {
+            "name": "kaWhIC",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Name of station or distribution centre",
+            "hint": "The Environment Agency's supplier will send the equipment to this fire station or distribution centre."
+          }
+        ]
+      },
+      {
+        "title": "What's the address of the station or distribution centre?",
+        "path": "/whats-the-address-of-the-station-or-distribution-centre",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-contact-name-for-the-delivery"
+          }
+        ],
+        "components": [
+          {
+            "name": "qlHXuM",
+            "options": {},
+            "schema": {},
+            "type": "UkAddressField",
+            "hint": "The Environment Agency's supplier will send the equipment to this address.",
+            "title": "Delivery address"
+          }
+        ]
+      },
+      {
+        "title": "What's the contact name for the delivery?",
+        "path": "/whats-the-contact-name-for-the-delivery",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-phone-number-for-the-contact-who-will-receive-the-delivery"
+          }
+        ],
+        "components": [
+          {
+            "name": "Zrqfpd",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Contact name for delivery",
+            "hint": "The Environment Agency's supplier will address the delivery to this contact."
+          }
+        ]
+      },
+      {
+        "title": "What's the phone number for the contact who will receive the delivery?",
+        "path": "/whats-the-phone-number-for-the-contact-who-will-receive-the-delivery",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-email-address-for-the-contact-who-will-receive-the-delivery"
+          }
+        ],
+        "components": [
+          {
+            "name": "EspIYf",
+            "options": {},
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Telephone number"
+          }
+        ]
+      },
+      {
+        "path": "/grab-bag-items",
+        "title": "Grab bag items",
+        "components": [
+          {
+            "name": "nfnfxA",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "pZzwmn",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Grab pack bag with Environment Agency England logo, no pocket (1 bag) (EA code: 5071/EA/E)",
+            "hint": ""
+          },
+          {
+            "name": "tmSdFn",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Leak sealing paste, DAMMIT X ready mix, 500g tub (18 per pack) (EA code: 4037/X)",
+            "hint": ""
+          },
+          {
+            "name": "JNRUAo",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Leak sealing device, DAMMIT X ready mix applicator packs, 400g (6 per box) (EA code: 4047/X)",
+            "hint": ""
+          },
+          {
+            "name": "vdnaum",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Disposable DAMMIT X drain sealing mats (2 per box) 45 x 45cm (EA code: 4010/X)",
+            "hint": ""
+          },
+          {
+            "name": "toVuME",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Disposable DAMMIT X drain sealing mats (2 per box) 65 x 45cm (EA code: 4000/X)",
+            "hint": ""
+          },
+          {
+            "name": "ukaqbC",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "STOPPIT drain mat carry bags (EA code: 4610/CARRIER/120)",
+            "hint": ""
+          },
+          {
+            "name": "AYuiQk",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small blue oil sorbent pads size 30 x 30 cm (200 per pack) (EA code: PDB17MB200BG/1)",
+            "hint": ""
+          },
+          {
+            "name": "Bagtnz",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium blue oil sorbent pads size 30 x 35 cm (200 per pack) (EA code: PDB17MB200BG/2)",
+            "hint": ""
+          },
+          {
+            "name": "bueDAc",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil sorbent pads size 52 x 40 cm (200 per pack) (EA code: PDB17MB200BG)",
+            "hint": ""
+          },
+          {
+            "name": "VaWXhQ",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Three section yellow polythene land boom, 10 meter roll, 500 gauge 1000 x 16 cm (EA code: 0419/500/10)",
+            "hint": ""
+          },
+          {
+            "name": "itlIjy",
+            "options": {
+              "required": false,
+              "classes": "govuk-input--width-3",
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Heavy duty clear polythene waste bag, 500g, 1200mm x 1800mm, (100 per pack) (EA code: 5089/EA/100)",
+            "hint": ""
+          },
+          {
+            "name": "wjnLwg",
+            "options": {
+              "classes": "govuk-input--width-3",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "T50I black cable ties 4.5mm x 250mm (500 per pack) (EA code: 5159/300MM)",
+            "hint": ""
+          },
+          {
+            "name": "qACAQm",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Roll of adhesive tape with Environment Agency logo (EA code: 0900/CUSTOM/EA)",
+            "hint": ""
+          },
+          {
+            "name": "hwBSpk",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Hazard warning diamond: to mark bagged waste from equipment use (per label) (EA code: SL/24557UA)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/blue-oil-absorbents"
+          }
+        ],
+        "section": "rMSqUZ"
+      },
+      {
+        "path": "/blue-oil-absorbents",
+        "title": "Blue oil absorbents",
+        "components": [
+          {
+            "name": "ccYyfo",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "LZFuVk",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 1.5 metre oil absorbent boom 12.5cm x 1.5m (8 per pack) (EA code: 0105/1.5)",
+            "hint": ""
+          },
+          {
+            "name": "RpxsxA",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 2 metre oil absorbent boom 12.5cm x 2m (6 per pack) (EA code: 0105/2)",
+            "hint": ""
+          },
+          {
+            "name": "yJtfia",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 3 metre oil absorbent boom 12.5cm x 3m with ties (4 per pack) (EA code: 0105/3)",
+            "hint": ""
+          },
+          {
+            "name": "VYAepb",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 4 metre oil absorbent boom 12.5cm x 4m (4 per pack) (EA code: 0105/4)",
+            "hint": ""
+          },
+          {
+            "name": "PymnlS",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue 5 metre oil absorbent boom, 12.5cm x 5m (2 per pack) (A code: 0105/5)",
+            "hint": ""
+          },
+          {
+            "name": "XylQiX",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil absorbent mini roll 4200 x 50cm single thickness (1 per pack) (EA code: MRB17MB001BG)",
+            "hint": ""
+          },
+          {
+            "name": "iyuNOF",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil sorbent roll 4200 x 100cm single thickness (1 per pack) (EA code: LRB17MB001BG)",
+            "hint": ""
+          },
+          {
+            "name": "ksFFYz",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil absorbent mini cushions 21 x 33 x 6cm (20 per pack) (EA code: 0111/20)",
+            "hint": ""
+          },
+          {
+            "name": "qIEqVD",
+            "options": {
+              "hideTitle": false,
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Blue oil sorbent cushion sorbent cushion 35 x 55 x 10cm (10 per pack) (EA code: 0110)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/yellow-chemical-absorbents"
+          }
+        ],
+        "section": "pSHTZV"
+      },
+      {
+        "path": "/yellow-chemical-absorbents",
+        "title": "Yellow chemical absorbents",
+        "components": [
+          {
+            "name": "DnpfJk",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "VYURUu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow 1.5 metre chemical absorbent midi boom, 12.5cm x 1.5m (8 per pack) (EA code: 0205/1.5)",
+            "hint": ""
+          },
+          {
+            "name": "NfDbAu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow 3 metre chemical absorbent midi boom 300 x 12.5cm (4 per pack) (EA code: 0205/3)",
+            "hint": ""
+          },
+          {
+            "name": "zQLdaO",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow 4 metre chemical absorbent midi boom 400 x 12.5cm (4 per pack) (EA code: 0205/4)",
+            "hint": ""
+          },
+          {
+            "name": "RoQQPa",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow active chemical absorbent pads size 52 x 40cm (200 per pack) (EA code: PDY17MD200BG)",
+            "hint": ""
+          },
+          {
+            "name": "nugUAP",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow small active chemical absorbent pads size 30 x 30cm (200 per pack) (EA code: PDY17MD200BG/1)",
+            "hint": ""
+          },
+          {
+            "name": "frOpFG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow medium active chemical absorbent pads size 30 x 35cm (200 per pack) (EA code: PDY17MD200BG/2)",
+            "hint": ""
+          },
+          {
+            "name": "ZcqLXj",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow chemical absorbent mini cushions  21 x 33 x  6cm (20 per pack) (EA code: 0211/20)",
+            "hint": ""
+          },
+          {
+            "name": "libVFO",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow chemical absorbent mini cushions 35 x 55 x 10cm (10 per pack) (EA code: 0210)",
+            "hint": ""
+          },
+          {
+            "name": "oGGalu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow active chemical sorbent mini roll 4200 x 50cm single thickness (1 per pack) (EA code: MRY17MD001BG)",
+            "hint": ""
+          },
+          {
+            "name": "fmKBYG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Yellow active chemical sorbent roll 4200 x 100cm (1 per pack) (EA code: LRY17MD001BG)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/non-absorbent-booms-and-stakes"
+          }
+        ],
+        "section": "NhsVLX"
+      },
+      {
+        "path": "/non-absorbent-booms-and-stakes",
+        "title": "Non absorbent booms and stakes",
+        "components": [
+          {
+            "name": "JQwaGP",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "EREzih",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Three section yellow disposable polythene land boom 10000 x 16cm roll (EA code: 0419/500/100)",
+            "hint": ""
+          },
+          {
+            "name": "uWDrII",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Reusable buoyancy boom, yellow, comes with secure ties at both ends, supplied with wooden stakes to secure to ground, 25cm x 3m (4 per pack) (EA code: 0421/F/25)",
+            "hint": ""
+          },
+          {
+            "name": "luYwvv",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Wooden stake (square) (EA code: 5330)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/drain-sealing-bag-and-spares"
+          }
+        ],
+        "section": "neWqcm"
+      },
+      {
+        "path": "/drain-sealing-bag-and-spares",
+        "title": "Drain sealing bag and spares",
+        "components": [
+          {
+            "name": "HrkLFg",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "TFpsSo",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Inflatable drain sealing bag (375mm bladder) set, manual Envirovalve (EA code: 4400/FB)",
+            "hint": ""
+          },
+          {
+            "name": "oyfYJp",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Drain seal bag spares set, comes with foot pump (inflation pump), air regulator set (inflation hoses), crimps, cable ties, polybag and label (EA code: 4800/PUMP/FB)",
+            "hint": ""
+          },
+          {
+            "name": "VTuxsD",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Inflation pump, floor stirrup pump to fit Envirovalve drain seal bag (EA code: 4890/P/PUMP)",
+            "hint": ""
+          },
+          {
+            "name": "WetpvM",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Inflation hose, air regulator set, preset 5psi, assembled hose fitting and quick release coupling plug - to fit Envirovalve drain seal bag (EA code: 4890/P/REGSET)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/over-pack-drums"
+          }
+        ],
+        "section": "ZBaCjK"
+      },
+      {
+        "path": "/over-pack-drums",
+        "title": "Over pack drums",
+        "components": [
+          {
+            "name": "jRzmno",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "xGWlAI",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "25 to 113L poly over drum salvage drum 30 (yellow), 58.1 x 76.5cm, capacity: 113 litres (EA code: 1850/30)",
+            "hint": ""
+          },
+          {
+            "name": "JphWmU",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "50 to 247L poly over drum salvage drum 65 (yellow), 73.7 x 92.1cm, capacity: 247 litres (EA code: 1849)",
+            "hint": ""
+          },
+          {
+            "name": "PnfoXb",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "205 to 359L poly over drum salvage drum 95 (yellow), 82 x 104.9cm, capacity: 359 litres (EA code: 1850)",
+            "hint": ""
+          },
+          {
+            "name": "jDvabu",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Flexible storage tank liner for 6000L tank (EA code: 0415/LINER/6000)",
+            "hint": ""
+          },
+          {
+            "name": "NLERaV",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small plant nappy 68.5 x 50 x 7cm absorbency (pack), up to 2 litres (EA code: 0411/PN/1)",
+            "hint": ""
+          },
+          {
+            "name": "yqwIJs",
+            "options": {
+              "hideTitle": false,
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small plant nappy liner 50 x 68.5 x 1.2cm absorbency pack, up to 2 litres (EA code: 0411/NL/1)",
+            "hint": ""
+          },
+          {
+            "name": "NmkWCT",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium plant nappy 100 x 68.5 x 7cm absorbency pack, up to 4.5 litres (EA code: 0411/PN/2)",
+            "hint": ""
+          },
+          {
+            "name": "cQpqsG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium plant nappy liner 100 x 68.5 x 1.2cm, absorbency pack, up to 4.5 litres (EA code: 0411/NL/2)",
+            "hint": ""
+          },
+          {
+            "name": "GnstxC",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Large plant nappy 200 x 137 x 7cm absorbency pack, up to 16 litres (EA code: 0411/PN/3)",
+            "hint": ""
+          },
+          {
+            "name": "kHRGKL",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Large plant nappy liner 200 x 137 x 1.2cm absorbency pack, up to 16 litres (EA code: 0411/NL/3)",
+            "hint": ""
+          },
+          {
+            "name": "NnCqLG",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Small Enviropad, plant spill pad 61 x 46cm absorbency pack, up to 4.5 litres (EA code: 0411/PSP/1)",
+            "hint": ""
+          },
+          {
+            "name": "DoqMdT",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Medium Enviropad, plant spill pad 90 x 69cm absorbency pack, up to 10.5 litres (EA code: 0411/PSP/2)",
+            "hint": ""
+          },
+          {
+            "name": "kBOell",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Large Enviropad, plant spill pad 218 x 137cm absorbency pack, up to 44 litres (EA code: 0411/PSP/3)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/pop-up-pools"
+          }
+        ],
+        "section": "UxThFi"
+      },
+      {
+        "path": "/pop-up-pools",
+        "title": "Pop up pools",
+        "components": [
+          {
+            "name": "dJCJYh",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "twvkeW",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100 litre Trident pop up tank (EA code: 0412/100)",
+            "hint": ""
+          },
+          {
+            "name": "oyFyqN",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Carry bag for 100L litre popup tank, PVC (EA code: 0412/100/BAG)",
+            "hint": ""
+          },
+          {
+            "name": "zBHNCw",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "250 litre Trident pop up tank (EA code: 0412/250)",
+            "hint": ""
+          },
+          {
+            "name": "nhwiUx",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Carry bag for 250 litre pop up tank, PVC (EA code: 0412/250/BAG)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/portable-tanks"
+          }
+        ],
+        "section": "BFFZMz"
+      },
+      {
+        "path": "/portable-tanks",
+        "title": "Portable tanks",
+        "components": [
+          {
+            "name": "qZSPWb",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "oGlVdW",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "6000 litre Trident inflatable rollover tank 200 x 1000 x 37cm (EA code: 0451/06000/PU)",
+            "hint": ""
+          },
+          {
+            "name": "rrcZHl",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "1000 litre PVC Trident expander tank (EA code: 0415/01000/PVC)",
+            "hint": ""
+          },
+          {
+            "name": "CKXUlJ",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "5000 litre PVC Trident expander tank (orange) (EA code: 0415/07500/PVC)",
+            "hint": ""
+          },
+          {
+            "name": "gqIFSS",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Carrier bag for 6000 litre flexible tank (EA code: 0415/06000/CARRIER)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/drain-tracing-dye"
+          }
+        ],
+        "section": "fjFVrC"
+      },
+      {
+        "path": "/drain-tracing-dye",
+        "title": "Drain tracing dye",
+        "components": [
+          {
+            "name": "JCxxZO",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n<br><br>\nView images of these items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab)</a>\n</p>"
+          },
+          {
+            "name": "ZmOiWb",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100g pot green drain tracing dye (EA code: 5347/D/G",
+            "hint": ""
+          },
+          {
+            "name": "trKGYO",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100g pot red drain tracing dye (EA code: 5347/D/R)",
+            "hint": ""
+          },
+          {
+            "name": "vyFtLe",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "100g pot blue drain tracing dye (EA code: 5347/D/B)",
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "section": "QTIalw"
+      },
+      {
+        "path": "/do-you-want-to-order-pump-spare-parts",
+        "title": "Do you want to order pump spare parts?",
+        "components": [
+          {
+            "name": "kravFI",
+            "title": "Order pump spares",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/pump-spares"
+          },
+          {
+            "path": "/environmental-protection-equipment",
+            "condition": "cmBqsH"
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "path": "/pump-spares",
+        "title": "Pump spares",
+        "components": [
+          {
+            "name": "Rynxdq",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Enter the number of each item you need. All fields are optional.\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "uPTpwF",
+            "title": "Silicone lubricant, pump chamber (2 litre) (EA code: 0438/W/S)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "sfffIz",
+            "title": "5 litre silicone lubricant AK350 for peristaltic pumps (EA code: 0438/W/S/5)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "pWsCmN",
+            "title": "Front cover O ring set (EA code: 0438/FP/O RING)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "tMOaAC",
+            "title": "Port connection O ring (1 per pack) (EA code: 0438/CONN/O RING)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "MNWhax",
+            "title": "Internal nitrile peristaltic hose, bare for peristaltic pumps (EA code: 0438/HN)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "TzczkD",
+            "title": "Front cover eyelet nut pack for peristaltic pumps (4 per pack) (EA code: 0438/ENFC)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "xCLsvl",
+            "title": "Hose support for peristaltic pumps (EA code: 0438/CLAMP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "hoKoqv",
+            "title": "Separator belt M300 724+/-1mm for peristaltic pumps (EA code: 0438/SEPARATOR)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "wKELpe",
+            "title": "Pump front cover (face plate) (M300) for peristaltic pumps (EA code: 0438/FP/FC)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "PdKQvq",
+            "title": "Vacuum gauge for peristaltic pumps (EA code: 0438/VG)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "fLYPBf",
+            "title": "Dosing valve for peristaltic pumps (EA code: 0438/DH)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "PkXjKE",
+            "title": "Connection port KL male (aluminium) for peristaltic pumps (EA code: 0438/CPKL/AL)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "tUKcvr",
+            "title": "Rotor Screw for peristaltic pump (EA code: 0438/SCREW/ROTOR)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "GdwQts",
+            "title": "Suction pipe for peristaltic pumps (EA code: 0438/SP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "dVUAhS",
+            "title": "Adaptor for peristaltic pumps (EA code: 0438/AD)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "WuDOSD",
+            "title": "Vacuum strainer for peristaltic pumps (EA code: 0438/VS)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "ZkksXD",
+            "title": "Suction strainer for peristaltic pumps (EA code: 0438/SS/BSP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          },
+          {
+            "name": "Jwmxsn",
+            "title": "Disk strainer (elephant foot), male or female for peristaltic pumps (EA code: 0438/DS/2BSP)",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/environmental-protection-equipment"
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "title": "Environmental protection equipment",
+        "path": "/environmental-protection-equipment",
+        "next": [
+          {
+            "path": "/grab-bag-items"
+          },
+          {
+            "path": "/summary",
+            "condition": "sfOYRb"
+          }
+        ],
+        "components": [
+          {
+            "name": "WaJaUT",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou can use this section of the form to order:\n\n<ul class=\"govuk-list govuk-list--bullet\">\n<li>grab bag items</li>\n<li>blue oil absorbents</li>\n<li>yellow chemical absorbents</li>\n<li>non absorbent booms and stakes</li>\n<li>drain sealing bag and spares</li>\n<li>over pack drums</li>\n<li>pop up pools</li>\n<li>portable tanks</li>\n<li>drain tracing dye</li>\n</ul>\n\n<p class=\"govuk-body\">\nEach type of equipment is listed on a separate page.\n\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "ZKwbOf",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Do you want to order environmental protection equipment?",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "path": "/do-you-want-to-request-a-pump-service",
+        "title": "Do you want to request a pump service?",
+        "components": [
+          {
+            "name": "wOVBnZ",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Pump service required"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-many-pumps-do-you-want-serviced"
+          },
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts",
+            "condition": "pJSCsm"
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "title": "What other fire service are you ordering environmental equipment for?",
+        "path": "/what-other-fire-service-are-you-ordering-environmental-equipment-for",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-station-or-distribution-centre"
+          }
+        ],
+        "components": [
+          {
+            "name": "vUoukT",
+            "title": "Fire service (other)",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/how-many-pumps-do-you-want-serviced",
+        "title": "How many pumps do you want serviced?",
+        "components": [
+          {
+            "name": "OsiLTz",
+            "title": "Number of pumps to service",
+            "type": "RadiosField",
+            "hint": "",
+            "options": {},
+            "schema": {},
+            "list": "yXexWx"
+          }
+        ],
+        "next": [
+          {
+            "path": "/pump-location",
+            "condition": ""
+          }
+        ],
+        "section": "pUzSCv"
+      },
+      {
+        "title": "Pump location",
+        "path": "/pump-location",
+        "section": "pUzSCv",
+        "next": [
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts",
+            "condition": "TTlbiF"
+          },
+          {
+            "path": "/are-the-second-and-third-pumps-located-at-the-same-address",
+            "condition": "XedsQM"
+          }
+        ],
+        "components": [
+          {
+            "name": "YdJqTB",
+            "title": "Where would you like the pump to be serviced?",
+            "type": "TextField",
+            "hint": "The Environment Agency's supplier will send an engineer to this location to service the pump.",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "UOLvzL",
+            "title": "What's the address for where the pump is located?",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Location of second pump",
+        "path": "/location-of-second-pump",
+        "section": "pUzSCv",
+        "next": [
+          {
+            "path": "/location-of-third-pump",
+            "condition": "luQYgp"
+          },
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZxykQe",
+            "title": "Where would you like the second pump to be serviced?",
+            "type": "TextField",
+            "hint": "The Environment Agency's supplier will send an engineer to this location to service the second pump.",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "Yjohkp",
+            "title": "What's the address for where the second pump is located?",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Location of third pump",
+        "path": "/location-of-third-pump",
+        "section": "pUzSCv",
+        "next": [
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts"
+          }
+        ],
+        "components": [
+          {
+            "name": "myASBa",
+            "title": "Where would you like the third pump to be serviced?",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "DdCWUR",
+            "title": "What's the address for where the third pump is located?",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the email address for the contact who will receive the delivery?",
+        "path": "/whats-the-email-address-for-the-contact-who-will-receive-the-delivery",
+        "section": "pLakEV",
+        "next": [
+          {
+            "path": "/do-you-want-to-request-a-pump-service"
+          }
+        ],
+        "components": [
+          {
+            "name": "HsfGFs",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "We’ll use this email address if we have a question about an order and to send an order confirmation email.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/are-the-second-and-third-pumps-located-at-the-same-address",
+        "title": "Are the second and  third pumps located  at the same address?",
+        "components": [
+          {
+            "name": "ukCIIp",
+            "title": "Pumps located at the same address",
+            "type": "YesNoField",
+            "hint": "You can move the pumps to the same address to be serviced at the same time or provide an address for each pump.",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/location-of-second-pump"
+          },
+          {
+            "path": "/do-you-want-to-order-pump-spare-parts",
+            "condition": "FrzlNk"
+          }
+        ],
+        "section": "pUzSCv"
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "yes - pump service or parts required",
+        "name": "iZizaa",
+        "value": {
+          "name": "yes - pump service or parts required",
+          "conditions": [
+            {
+              "field": {
+                "name": "feYegO",
+                "type": "YesNoField",
+                "display": "Pump service or spare parts required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "No service or pump",
+        "name": "Vtoued",
+        "value": {
+          "name": "No service or pump",
+          "conditions": [
+            {
+              "field": {
+                "name": "xsmnVd",
+                "type": "YesNoField",
+                "display": "Pump service or spare parts required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "No pump service or spares",
+        "name": "EaKwsR",
+        "value": {
+          "name": "No pump service or spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "wOVBnZ",
+                "type": "YesNoField",
+                "display": "Pump service or spares"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Pump spares only",
+        "name": "rwbwwX",
+        "value": {
+          "name": "Pump spares only",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Order parts for a pump",
+                "display": "Order parts for a pump"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "No - not a pump service or spares",
+        "name": "rxsVTY",
+        "value": {
+          "name": "No - not a pump service or spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "wOVBnZ",
+                "type": "YesNoField",
+                "display": "Pump service or spares"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "XKDfYM",
+        "displayName": "Pump service only",
+        "value": {
+          "name": "Pump service only",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Request a pump service",
+                "display": "Request a pump service only"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "hnrukC",
+        "displayName": "Order parts for a pump only ",
+        "value": {
+          "name": "Order parts for a pump only ",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Order parts for a pump\t",
+                "display": "Order parts for a pump\t"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "mAgejI",
+        "displayName": "Pump service and spares",
+        "value": {
+          "name": "Pump service and spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "Atcwal",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Pump service, pump spares or both"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Request a pump service and order replacement parts for a pump",
+                "display": "Request a pump service and order replacement parts for a pump"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "cmBqsH",
+        "displayName": "no pump spares",
+        "value": {
+          "name": "no pump spares",
+          "conditions": [
+            {
+              "field": {
+                "name": "kravFI",
+                "type": "YesNoField",
+                "display": "Pump service and spares: Order pump spares"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "pJSCsm",
+        "displayName": "No pump service required",
+        "value": {
+          "name": "No pump service required",
+          "conditions": [
+            {
+              "field": {
+                "name": "wOVBnZ",
+                "type": "YesNoField",
+                "display": "Pump service and spares: Pump service required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "nkXoOM",
+        "displayName": "Is other",
+        "value": {
+          "name": "Is other",
+          "conditions": [
+            {
+              "field": {
+                "name": "MNGSur",
+                "type": "AutocompleteField",
+                "display": "Delivery details: What fire service do you work for?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Other",
+                "display": "Other"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "TTlbiF",
+        "displayName": "1 pump to service",
+        "value": {
+          "name": "1 pump to service",
+          "conditions": [
+            {
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "1",
+                "display": "1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "luQYgp",
+        "displayName": "3 pumps to service",
+        "value": {
+          "name": "3 pumps to service",
+          "conditions": [
+            {
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "3",
+                "display": "3"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "FrzlNk",
+        "displayName": "Pumps located at same address",
+        "value": {
+          "name": "Pumps located at same address",
+          "conditions": [
+            {
+              "field": {
+                "name": "ukCIIp",
+                "type": "YesNoField",
+                "display": "Pump service and spares: Pumps located at the same address"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "XedsQM",
+        "displayName": "2 or 3 pumps to service",
+        "value": {
+          "name": "2 or 3 pumps to service",
+          "conditions": [
+            {
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "2",
+                "display": "2"
+              }
+            },
+            {
+              "coordinator": "or",
+              "field": {
+                "name": "OsiLTz",
+                "type": "RadiosField",
+                "display": "Pump service and spares: Number of pumps to service"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "3",
+                "display": "3"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "MjMozw",
+        "displayName": "Yes - order equipment",
+        "value": {
+          "name": "Yes - order equipment",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZKwbOf",
+                "type": "YesNoField",
+                "display": "Order environmental protection equipment: Do you want to order environmental protection equipment?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "sfOYRb",
+        "displayName": "No - do not order equipment",
+        "value": {
+          "name": "No - do not order equipment",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZKwbOf",
+                "type": "YesNoField",
+                "display": "Do you want to order environmental protection equipment?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "iLtfob",
+        "title": "Contact details",
+        "hideTitle": false
+      },
+      {
+        "name": "GpRKzL",
+        "title": "Order items",
+        "hideTitle": false
+      },
+      {
+        "name": "pLakEV",
+        "title": "Delivery details",
+        "hideTitle": false
+      },
+      {
+        "name": "pUzSCv",
+        "title": "Pump service and spares",
+        "hideTitle": false
+      },
+      {
+        "name": "rMSqUZ",
+        "title": "Grab bag items",
+        "hideTitle": true
+      },
+      {
+        "name": "pSHTZV",
+        "title": "Blue oil absorbents",
+        "hideTitle": true
+      },
+      {
+        "name": "NhsVLX",
+        "title": "Yellow chemical absorbents",
+        "hideTitle": true
+      },
+      {
+        "name": "ZBaCjK",
+        "title": "Drain sealing bag and spares",
+        "hideTitle": true
+      },
+      {
+        "name": "neWqcm",
+        "title": "Non absorbent booms and stakes",
+        "hideTitle": true
+      },
+      {
+        "name": "UxThFi",
+        "title": "Over pack drums",
+        "hideTitle": true
+      },
+      {
+        "name": "BFFZMz",
+        "title": "Pop up pools",
+        "hideTitle": true
+      },
+      {
+        "name": "fjFVrC",
+        "title": "Portable tanks",
+        "hideTitle": true
+      },
+      {
+        "name": "QTIalw",
+        "title": "Drain tracing dye",
+        "hideTitle": true
+      },
+      {
+        "name": "LXEKKp",
+        "title": "Order environmental protection equipment",
+        "hideTitle": true
+      }
+    ],
+    "lists": [
+      {
+        "title": "Pump service and parts",
+        "name": "EcRvTu",
+        "type": "string",
+        "items": [
+          {
+            "text": "Request a pump service only",
+            "value": "Request a pump service"
+          },
+          {
+            "text": "Order parts for a pump\t",
+            "value": "Order parts for a pump\t"
+          },
+          {
+            "text": "Request a pump service and order replacement parts for a pump",
+            "value": "Request a pump service and order replacement parts for a pump"
+          }
+        ]
+      },
+      {
+        "title": "Fire service name",
+        "name": "GFMJZg",
+        "type": "string",
+        "items": [
+          {
+            "text": "Avon",
+            "value": "Avon"
+          },
+          {
+            "text": "Bedfordshire",
+            "value": "Bedfordshire"
+          },
+          {
+            "text": "Buckinghamshire",
+            "value": "Buckinghamshire"
+          },
+          {
+            "text": "Cambridgeshire",
+            "value": "Cambridgeshire"
+          },
+          {
+            "text": "Cheshire",
+            "value": "Cheshire"
+          },
+          {
+            "text": "Cleveland",
+            "value": "Cleveland"
+          },
+          {
+            "text": "Cornwall",
+            "value": "Cornwall"
+          },
+          {
+            "text": "Cumbria",
+            "value": "Cumbria"
+          },
+          {
+            "text": "Derbyshire",
+            "value": "Derbyshire"
+          },
+          {
+            "text": "Devon and Somerset",
+            "value": "Devon and Somerset"
+          },
+          {
+            "text": "Dorset and Wiltshire",
+            "value": "Dorset and Wiltshire"
+          },
+          {
+            "text": "Durham",
+            "value": "Durham"
+          },
+          {
+            "text": "East Sussex",
+            "value": "East Sussex"
+          },
+          {
+            "text": "Essex",
+            "value": "Essex"
+          },
+          {
+            "text": "Greater Manchester",
+            "value": "Greater Manchester"
+          },
+          {
+            "text": "Gloucestershire",
+            "value": "Gloucestershire"
+          },
+          {
+            "text": "Hampshire and Isle of Wight",
+            "value": "Hampshire and Isle of Wight"
+          },
+          {
+            "text": "Hereford and Worcester",
+            "value": "Hereford and Worcester"
+          },
+          {
+            "text": "Hertfordshire",
+            "value": "Hertfordshire"
+          },
+          {
+            "text": "Humberside",
+            "value": "Humberside"
+          },
+          {
+            "text": "Isle of Man",
+            "value": "Isle of Man"
+          },
+          {
+            "text": "Isles of Scilly",
+            "value": "Isles of Scilly"
+          },
+          {
+            "text": "Kent",
+            "value": "Kent"
+          },
+          {
+            "text": "Lancashire",
+            "value": "Lancashire"
+          },
+          {
+            "text": "Leicestershire",
+            "value": "Leicestershire"
+          },
+          {
+            "text": "Lincolnshire",
+            "value": "Lincolnshire"
+          },
+          {
+            "text": "London Fire Brigade",
+            "value": "London Fire Brigade"
+          },
+          {
+            "text": "Merseyside",
+            "value": "Merseyside"
+          },
+          {
+            "text": "North Yorkshire",
+            "value": "North Yorkshire"
+          },
+          {
+            "text": "Northumberland",
+            "value": "Northumberland"
+          },
+          {
+            "text": "Northamptonshire",
+            "value": "Northamptonshire"
+          },
+          {
+            "text": "Nottinghamshire",
+            "value": "Nottinghamshire"
+          },
+          {
+            "text": "Oxfordshire",
+            "value": "Oxfordshire"
+          },
+          {
+            "text": "Other",
+            "value": "Other"
+          },
+          {
+            "text": "Royal Berkshire",
+            "value": "Royal Berkshire"
+          },
+          {
+            "text": "Shropshire",
+            "value": "Shropshire"
+          },
+          {
+            "text": "South Yorkshire",
+            "value": "South Yorkshire"
+          },
+          {
+            "text": "Staffordshire",
+            "value": "Staffordshire"
+          },
+          {
+            "text": "Suffolk",
+            "value": "Suffolk"
+          },
+          {
+            "text": "Surrey",
+            "value": "Surrey"
+          },
+          {
+            "text": "Tyne and Wear",
+            "value": "Tyne and Wear"
+          },
+          {
+            "text": "Warwickshire",
+            "value": "Warwickshire"
+          },
+          {
+            "text": "West Midlands",
+            "value": "West Midlands"
+          },
+          {
+            "text": "West Sussex",
+            "value": "West Sussex"
+          },
+          {
+            "text": "West Yorkshire",
+            "value": "West Yorkshire"
+          }
+        ]
+      },
+      {
+        "title": "Number of pumps to service",
+        "name": "yXexWx",
+        "type": "string",
+        "items": [
+          {
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "text": "2",
+            "value": "2"
+          },
+          {
+            "text": "3",
+            "value": "3"
+          }
+        ]
+      },
+      {
+        "title": "Address is the same",
+        "name": "rstpQn",
+        "type": "string",
+        "items": [
+          {
+            "text": "Same as address 1",
+            "value": "Same as address 1"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "outputEmail": "FRS.orders@environment-agency.gov.uk",
+    "startPage": "/what-fire-service-are-you-ordering-environmental-equipment-for"
+  }
+}

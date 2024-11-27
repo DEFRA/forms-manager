@@ -1,0 +1,849 @@
+{
+  "id": "66e7eb0cecfda16e6aa00271",
+  "metadata": {
+    "id": "66e7eb0cecfda16e6aa00271",
+    "slug": "apply-for-a-certificate-of-exemption-for-a-dog",
+    "title": "Apply for a certificate of exemption for a dog",
+    "organisation": "Defra",
+    "teamName": "Animal welfare team",
+    "teamEmail": "Claire.Miller@defra.gov.uk",
+    "draft": {
+      "createdAt": "2024-09-16T08:23:40.615Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-09-16T16:23:48.718Z",
+      "updatedBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-09-16T08:23:40.615Z",
+    "updatedBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "updatedAt": "2024-09-16T16:23:48.718Z"
+  },
+  "draft": {
+    "name": "Apply for a certificate of exemption for a dog",
+    "pages": [
+      {
+        "title": "Have you received a court order information pack?",
+        "path": "/have-you-received-a-court-order-information-pack",
+        "next": [
+          {
+            "path": "/are-you-18-or-over"
+          },
+          {
+            "path": "/you-can-only-use-this-service-if-youve-received-a-court-order-pack",
+            "condition": "fwRGDw"
+          }
+        ],
+        "components": [
+          {
+            "name": "KXVuiz",
+            "title": "Court order information pack received",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Check your answers",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      },
+      {
+        "title": "You can only use this service if you've received a court order pack",
+        "path": "/you-can-only-use-this-service-if-youve-received-a-court-order-pack",
+        "controller": "PageController",
+        "next": [],
+        "components": [
+          {
+            "name": "cEgyDs",
+            "title": "Html",
+            "type": "Html",
+            "content": "[Extra guidance here]",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Are you 18 or over?",
+        "path": "/are-you-18-or-over",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/what-country-do-you-live-in"
+          },
+          {
+            "path": "/you-must-be-18-or-over-to-use-this-service",
+            "condition": "eWKcqN"
+          }
+        ],
+        "components": [
+          {
+            "name": "enafIW",
+            "title": "Over 18",
+            "type": "YesNoField",
+            "hint": "You must be aged 18 or over to apply for a certificate of exemption for a dog.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What country do you live in?",
+        "path": "/what-country-do-you-live-in",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/what-breeds-are-your-dogs"
+          }
+        ],
+        "components": [
+          {
+            "name": "Eykhfi",
+            "title": "Country",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "hOsBqz",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What breeds are your dogs?",
+        "path": "/what-breeds-are-your-dogs",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/you-cannot-use-this-service"
+          },
+          {
+            "path": "/have-you-paid-the-application-fee"
+          }
+        ],
+        "components": [
+          {
+            "name": "vqRFaO",
+            "title": "Dog breeds",
+            "type": "CheckboxesField",
+            "hint": "",
+            "list": "YFMNfm",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "You cannot use this service",
+        "path": "/you-cannot-use-this-service",
+        "controller": "PageController",
+        "next": [],
+        "components": [
+          {
+            "name": "whYhSq",
+            "title": "Html",
+            "type": "Html",
+            "content": "[Extra guidance here]",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Have you paid the application fee?",
+        "path": "/have-you-paid-the-application-fee",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/you-must-pay-before-using-this-service",
+            "condition": "xAkZeS"
+          },
+          {
+            "path": "/whats-the-payment-reference-number-for-the-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "Hawgyt",
+            "title": "Paid fee",
+            "type": "YesNoField",
+            "hint": "You must pay the £92.40 fee for each dog you're applying for a certificate for.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "You must pay before using this service",
+        "path": "/you-must-pay-before-using-this-service",
+        "controller": "PageController",
+        "next": [],
+        "components": []
+      },
+      {
+        "title": "What's the payment reference number for the dog?",
+        "path": "/whats-the-payment-reference-number-for-the-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "EXqTTt",
+            "title": "Payment reference number",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the dog?",
+        "path": "/whats-the-name-of-the-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-the-index-number-of-the-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "hEgWBT",
+            "title": "Dog name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the index number of the dog?",
+        "path": "/whats-the-index-number-of-the-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-the-dogs-microchip-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "OByCyk",
+            "title": "Index number",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the dog's microchip number?",
+        "path": "/whats-the-dogs-microchip-number",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-the-dogs-date-of-birth"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZuuFCG",
+            "title": "Microchip number",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the dog's date of birth?",
+        "path": "/whats-the-dogs-date-of-birth",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/what-colour-is-the-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "QMFAEv",
+            "title": "Dog date of birth",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What colour is the dog?",
+        "path": "/what-colour-is-the-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/what-sex-is-the-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "irlSzM",
+            "title": "Colour of dog",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What sex is the dog?",
+        "path": "/what-sex-is-the-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-insurance-company-that-insurers-the-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "UjGKum",
+            "title": "Sex of dog",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "iwUAIr",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the insurance company that insurers the dog?",
+        "path": "/whats-the-name-of-the-insurance-company-that-insurers-the-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/when-does-the-insurance-policy-expire"
+          }
+        ],
+        "components": [
+          {
+            "name": "VrUjjW",
+            "title": "Insurance company name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "When does the insurance policy expire?",
+        "path": "/when-does-the-insurance-policy-expire",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/do-you-want-to-add-a-second-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "xOClZh",
+            "title": "Insurance expiry date",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "You must be 18 or over to use this  service",
+        "path": "/you-must-be-18-or-over-to-use-this-service",
+        "controller": "PageController",
+        "next": [],
+        "components": [
+          {
+            "name": "VUovgY",
+            "title": "Html",
+            "type": "Html",
+            "content": "reason here",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you want to add a second dog?",
+        "path": "/do-you-want-to-add-a-second-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/second-dog-questions",
+            "condition": "OKLxjj"
+          },
+          {
+            "path": "/upload-your-insurance-certificates",
+            "condition": "tuVJCS"
+          }
+        ],
+        "components": [
+          {
+            "name": "NvjTyb",
+            "title": "Second dog",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Second dog questions",
+        "path": "/second-dog-questions",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/do-you-want-to-add-a-third-dog"
+          }
+        ],
+        "components": [
+          {
+            "name": "POCPpB",
+            "title": "Repeat second dog questions",
+            "type": "TextField",
+            "hint": "",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you want to add a third dog?",
+        "path": "/do-you-want-to-add-a-third-dog",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/third-dog-questions",
+            "condition": "fgMPaX"
+          },
+          {
+            "path": "/upload-your-insurance-certificates",
+            "condition": "KKAkUm"
+          }
+        ],
+        "components": [
+          {
+            "name": "ahAFUF",
+            "title": "Add third dog",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Third dog questions",
+        "path": "/third-dog-questions",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/upload-your-insurance-certificates"
+          }
+        ],
+        "components": [
+          {
+            "name": "CAdPsr",
+            "title": "Third dog questions",
+            "type": "TextField",
+            "hint": "",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Upload your  insurance certificates",
+        "path": "/upload-your-insurance-certificates",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-your-name"
+          }
+        ],
+        "components": [
+          {
+            "name": "WhxCFR",
+            "title": "Html",
+            "type": "Html",
+            "content": "Placeholder for upload component\n<br><br>\n[We can only have one upload component per form - I've added it at the end of the 3 dog journey]\n<br><br>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "dBDwxG",
+            "title": "Document upload",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your name?",
+        "path": "/whats-your-name",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-your-date-of-birth"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZntmQW",
+            "title": "Owner name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your date of birth?",
+        "path": "/whats-your-date-of-birth",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-your-address"
+          }
+        ],
+        "components": [
+          {
+            "name": "dcQcdM",
+            "title": "Owner date of birth",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your address?",
+        "path": "/whats-your-address",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "tyahQH",
+            "title": "Owner address",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your phone number?",
+        "path": "/whats-your-phone-number",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ],
+        "components": [
+          {
+            "name": "SQtjGU",
+            "title": "Phone number",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your email address?",
+        "path": "/whats-your-email-address",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "WrwpzG",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "fwRGDw",
+        "displayName": "Not received a court order information pack",
+        "value": {
+          "name": "Not received a court order information pack",
+          "conditions": [
+            {
+              "field": {
+                "name": "KXVuiz",
+                "type": "YesNoField",
+                "display": "Court order information pack received"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "eWKcqN",
+        "displayName": "Not 18",
+        "value": {
+          "name": "Not 18",
+          "conditions": [
+            {
+              "field": {
+                "name": "enafIW",
+                "type": "YesNoField",
+                "display": "Over 18"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "xAkZeS",
+        "displayName": "Not paid fee",
+        "value": {
+          "name": "Not paid fee",
+          "conditions": [
+            {
+              "field": {
+                "name": "Hawgyt",
+                "type": "YesNoField",
+                "display": "Paid fee"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "KKAkUm",
+        "displayName": "No third dog",
+        "value": {
+          "name": "No third dog",
+          "conditions": [
+            {
+              "field": {
+                "name": "ahAFUF",
+                "type": "YesNoField",
+                "display": "Add third dog"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "tuVJCS",
+        "displayName": "No second dog",
+        "value": {
+          "name": "No second dog",
+          "conditions": [
+            {
+              "field": {
+                "name": "NvjTyb",
+                "type": "YesNoField",
+                "display": "Second dog"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "OKLxjj",
+        "displayName": "Yes - add second dog",
+        "value": {
+          "name": "Yes - add second dog",
+          "conditions": [
+            {
+              "field": {
+                "name": "NvjTyb",
+                "type": "YesNoField",
+                "display": "Second dog"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "fgMPaX",
+        "displayName": "Yes - add third dog",
+        "value": {
+          "name": "Yes - add third dog",
+          "conditions": [
+            {
+              "field": {
+                "name": "ahAFUF",
+                "type": "YesNoField",
+                "display": "Add third dog"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Country",
+        "name": "hOsBqz",
+        "type": "string",
+        "items": [
+          {
+            "text": "England",
+            "value": "England"
+          },
+          {
+            "text": "Scotland",
+            "value": "Scotland"
+          },
+          {
+            "text": "Wales",
+            "value": "Wales"
+          },
+          {
+            "text": "Northern Ireland",
+            "value": "Northern Ireland"
+          }
+        ]
+      },
+      {
+        "title": "Dogs",
+        "name": "YFMNfm",
+        "type": "string",
+        "items": [
+          {
+            "text": "Pit Bull Terrier",
+            "value": "Pit Bull Terrier"
+          },
+          {
+            "text": "Japanese Tosa",
+            "value": "Japanese Tosa"
+          },
+          {
+            "text": "Dogo Argentino",
+            "value": "Dogo Argentino"
+          },
+          {
+            "text": "Fila Brasileiro",
+            "value": "Fila Brasileiro"
+          },
+          {
+            "text": "XL Bully",
+            "value": "XL Bully"
+          }
+        ]
+      },
+      {
+        "title": "Sex of dog",
+        "name": "iwUAIr",
+        "type": "string",
+        "items": [
+          {
+            "text": "Male",
+            "value": "Male"
+          },
+          {
+            "text": "Female",
+            "value": "Female"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "startPage": "/have-you-received-a-court-order-information-pack"
+  }
+}

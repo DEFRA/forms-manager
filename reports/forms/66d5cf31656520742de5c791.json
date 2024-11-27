@@ -1,0 +1,1872 @@
+{
+  "id": "66d5cf31656520742de5c791",
+  "metadata": {
+    "id": "66d5cf31656520742de5c791",
+    "slug": "tell-the-environment-agency-about-your-material-facility",
+    "title": "Tell the Environment Agency about your material facility",
+    "organisation": "Environment Agency",
+    "teamName": "Environment Agency Materials Facilities team",
+    "teamEmail": "MFRegs@environment-agency.gov.uk",
+    "contact": {
+      "email": {
+        "address": "MFregs@environment-agency.gov.uk",
+        "responseTime": "Email the Environment Agency if you have any question about materials facility regulations."
+      }
+    },
+    "submissionGuidance": "The Environment Agency will process your form and send you a confirmation email within 10 working days.\r\n\r\nIf you asked for the details of where waste material is sent to be excluded from the public register, we will process this and send you a determination within 20 working days.",
+    "privacyNoticeUrl": "https://www.gov.uk/government/publications/privacy-notice-national-operator-waste-returns",
+    "notificationEmail": "mfregs@environment-agency.gov.uk",
+    "draft": {
+      "updatedAt": "2024-10-18T13:33:37.027Z",
+      "updatedBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "createdAt": "2024-10-18T13:33:37.027Z",
+      "createdBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "live": {
+      "updatedAt": "2024-10-18T12:27:54.767Z",
+      "updatedBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "createdAt": "2024-09-24T09:48:33.115Z",
+      "createdBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-09-02T14:44:01.764Z",
+    "updatedBy": {
+      "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+      "displayName": "Alex Luckett"
+    },
+    "updatedAt": "2024-11-25T16:38:54.582Z"
+  },
+  "draft": {
+    "name": "Tell the Environment Agency about your material facility",
+    "pages": [
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      },
+      {
+        "title": "Is the site you're notifying or withdrawing a notification for in England?",
+        "path": "/is-the-site-youre-notifying-or-withdrawing-a-notification-for-in-england",
+        "next": [
+          {
+            "path": "/notify-or-withdraw-an-existing-notification"
+          },
+          {
+            "path": "/you-cannot-use-this-service-lDnnPe",
+            "condition": "pVhljS"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZpVhnG",
+            "title": "Site in England",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/you-cannot-use-this-service-lDnnPe",
+        "title": "You cannot use this service",
+        "components": [
+          {
+            "name": "TbGNwd",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nThe site must be in England to use this service. You should contact the environmental regulator for the country where your material facility is based.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": []
+      },
+      {
+        "title": "Notify or withdraw an existing notification",
+        "path": "/notify-or-withdraw-an-existing-notification",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-site-youre-withdrawing-notification-for",
+            "condition": "jXMTVi"
+          },
+          {
+            "path": "/has-your-assessment-concluded-your-site-is-likely-to-receive-1000-tonnes-or-more-of-waste-material-in-the-next-12-months",
+            "condition": "YPLTdw"
+          }
+        ],
+        "components": [
+          {
+            "name": "aZjMHN",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou must notify the Environment Agency in writing if you are likely to receive 1,000 tonnes or more of waste material in the next 12 months. You should do this before the end of the reporting period in which you made the assessment.\n<br><br>\nYou may withdraw your notification if you believe that you will receive less than 1,000 tonnes of waste material in the next 12 months.\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "lWNdqU",
+            "title": "Do you want to notify the Environment Agency or withdraw an existing notification?",
+            "type": "RadiosField",
+            "hint": "",
+            "options": {},
+            "schema": {},
+            "list": "lcBcSg"
+          }
+        ]
+      },
+      {
+        "title": "Has your assessment concluded your site is likely to receive 1,000 tonnes or more of waste material in the next 12 months?",
+        "path": "/has-your-assessment-concluded-your-site-is-likely-to-receive-1000-tonnes-or-more-of-waste-material-in-the-next-12-months",
+        "next": [
+          {
+            "path": "/you-do-not-need-to-notify-the-environment-agency",
+            "condition": "yODJtE"
+          },
+          {
+            "path": "/whats-the-name-of-the-site-youre-notifying-for",
+            "condition": "RHwLWa"
+          }
+        ],
+        "components": [
+          {
+            "name": "nxPoUF",
+            "title": "Over 1,000 tonnes of waste material in 12 months",
+            "type": "YesNoField",
+            "hint": "To continue, your assessment must show that your site is likely to receive 1,000 tonnes or more of waste material in the next 12 months.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the address of the site you're notifying for?",
+        "path": "/whats-the-address-of-the-site-youre-notifying-for",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-permit-holder"
+          }
+        ],
+        "components": [
+          {
+            "name": "Hsebzz",
+            "title": "Site address",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/you-do-not-need-to-notify-the-environment-agency",
+        "title": "You do not need to notify the  Environment Agency",
+        "components": [
+          {
+            "name": "fknwhP",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou only need to notify the regulator in writing if you are likely to receive 1,000 tonnes or more of waste material in the next 12 months.\n<br><br>\nRead about <a href=\"https://www.gov.uk/guidance/materials-facilities-waste-sampling-and-reporting-from-october-2024\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">waste sampling and reporting from October 2024 (opens in new tab)</a>.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": []
+      },
+      {
+        "title": "What's the address of the site you're withdrawing notification for?",
+        "path": "/whats-the-address-of-the-site-youre-withdrawing-notification-for",
+        "next": [
+          {
+            "path": "/in-which-reporting-period-will-your-notification-end"
+          }
+        ],
+        "components": [
+          {
+            "name": "PCDrxM",
+            "title": "Site address",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "name": "OWMVho",
+            "title": "Your name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-email-address",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "cNLXlj",
+            "title": "Your email address",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-job-title"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-phone-number",
+        "title": "What's your phone number?",
+        "components": [
+          {
+            "name": "EFKcWN",
+            "title": "Your telephone number",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/are-you-the-main-contact-for-this-permitted-waste-facility"
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the permit holder?",
+        "path": "/whats-the-name-of-the-permit-holder",
+        "next": [
+          {
+            "path": "/permit-reference-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "rjzgla",
+            "title": "Permit holder name",
+            "type": "TextField",
+            "hint": "Provide the details of the operator or the company, individual or organisation who holds the permit.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Permit reference number",
+        "path": "/permit-reference-number",
+        "next": [
+          {
+            "path": "/whats-your-name"
+          }
+        ],
+        "components": [
+          {
+            "name": "jiNCAa",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou can <a href=\"https://environment.data.gov.uk/public-register/view/search-waste-operations\" class=\"govuk-link\" class=\"govuk-link\" target=\"_blank\">search the waste opersations register (opens in new tab)</a> if you do not know your Environmental Permitting Regulations (EPR) permit reference number.\n</p>\n\n\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "HiLYRx",
+            "title": "What's your EPR permit reference number?",
+            "type": "TextField",
+            "hint": "Permit reference numbers usually contain 2 letters, 4 numbers and 2 letters, for example, AB1234AB.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Public register",
+        "path": "/public-register",
+        "next": [
+          {
+            "path": "/why-are-the-destinations-for-waste-material-that-leaves-the-site-commercially-confidential"
+          },
+          {
+            "path": "/summary",
+            "condition": "fHLjwC"
+          }
+        ],
+        "components": [
+          {
+            "name": "yyBlhM",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nFrom 1 October 2024, notified material facilities will need to provide additional information as part of the required reporting. This information will be held on the Environment Agency's public register.\n<br><br>\nThe Environment Agency considers the name, address and date of where output material that leaves the facility is sent may be commercially or industrially confidential information.\n</p>\n\n\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "yPOgnx",
+            "title": "Do you consent to including the date, name and address of where output material is sent on the Environment Agency's public register?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Why are the destinations for waste material that leaves the site commercially confidential?",
+        "path": "/why-are-the-destinations-for-waste-material-that-leaves-the-site-commercially-confidential",
+        "next": [
+          {
+            "path": "/what-other-reasons-do-you-have-to-object-to-the-inclusion-of-this-information-on-the-environment-agencys-public-register",
+            "condition": "LytywO"
+          },
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "IxloES",
+            "title": "Reason to exclude customer name and address",
+            "type": "CheckboxesField",
+            "hint": "Select all that apply.",
+            "list": "gogrxO",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-job-title",
+        "title": "What's your job title?",
+        "components": [
+          {
+            "name": "iricjO",
+            "title": "Job title",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ]
+      },
+      {
+        "title": "Are you the main contact for this permitted waste facility?",
+        "path": "/are-you-the-main-contact-for-this-permitted-waste-facility",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-main-contact",
+            "condition": "RyBESS"
+          },
+          {
+            "path": "/public-register",
+            "condition": "wGYZku"
+          },
+          {
+            "path": "/summary",
+            "condition": "QIIoZk"
+          }
+        ],
+        "components": [
+          {
+            "name": "wUeRyR",
+            "title": "Main contact",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-name-of-the-main-contact",
+        "title": "What's the name of the main contact?",
+        "components": [
+          {
+            "name": "ngKjLm",
+            "title": "Name of main contact",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-email-address-of-the-main-contact"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-email-address-of-the-main-contact",
+        "title": "What's the email address of the main contact?",
+        "components": [
+          {
+            "name": "KeJHGd",
+            "title": "Email address of main contact",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-phone-number-of-the-main-contact"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-phone-number-of-the-main-contact",
+        "title": "What's the phone number of the main contact?",
+        "components": [
+          {
+            "name": "ZlocBX",
+            "title": "Main contact phone number ",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/public-register",
+            "condition": "ekjQED"
+          },
+          {
+            "path": "/summary",
+            "condition": "nCDMFn"
+          }
+        ]
+      },
+      {
+        "title": "What other reasons do you have to object to the inclusion of this information on the Environment Agency's public register?",
+        "path": "/what-other-reasons-do-you-have-to-object-to-the-inclusion-of-this-information-on-the-environment-agencys-public-register",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "avcdFO",
+            "title": "Other reason to exclude customer name and address from the public register",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the site you're notifying for?",
+        "path": "/whats-the-name-of-the-site-youre-notifying-for",
+        "next": [
+          {
+            "path": "/whats-the-address-of-the-site-youre-notifying-for"
+          }
+        ],
+        "components": [
+          {
+            "name": "HMoLXP",
+            "title": "Site name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the site you're withdrawing notification for?",
+        "path": "/whats-the-name-of-the-site-youre-withdrawing-notification-for",
+        "next": [
+          {
+            "path": "/whats-the-address-of-the-site-youre-withdrawing-notification-for"
+          }
+        ],
+        "components": [
+          {
+            "name": "Lscmun",
+            "title": "Site name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "In which reporting period will your notification end?",
+        "path": "/in-which-reporting-period-will-your-notification-end",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-permit-holder"
+          }
+        ],
+        "components": [
+          {
+            "name": "rGICEQ",
+            "title": "Reporting period",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "xWjdoP",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "PDGwjK",
+        "displayName": "No - not a materials facility",
+        "value": {
+          "name": "No - not a materials facility",
+          "conditions": [
+            {
+              "field": {
+                "name": "LEXcXP",
+                "type": "YesNoField",
+                "display": "Materials facility"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "pVhljS",
+        "displayName": "No - not based in England",
+        "value": {
+          "name": "No - not based in England",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZpVhnG",
+                "type": "YesNoField",
+                "display": "Based in England"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "YPLTdw",
+        "displayName": "Notify",
+        "value": {
+          "name": "Notify",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Notify the Environment Agency",
+                "display": "Notify the Environment Agency"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "fHLjwC",
+        "displayName": "Yes - consent to details added to public register",
+        "value": {
+          "name": "Yes - consent to details added to public register",
+          "conditions": [
+            {
+              "field": {
+                "name": "yPOgnx",
+                "type": "YesNoField",
+                "display": "Exclude name and address from public register"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "wGYZku",
+        "displayName": "Yes -main contact and notify - not withdraw",
+        "value": {
+          "name": "Yes -main contact and notify - not withdraw",
+          "conditions": [
+            {
+              "field": {
+                "name": "wUeRyR",
+                "type": "YesNoField",
+                "display": "Main contact"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Notify the Environment Agency",
+                "display": "Notify the Environment Agency"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "RyBESS",
+        "displayName": "No - not main contact",
+        "value": {
+          "name": "No - not main contact",
+          "conditions": [
+            {
+              "field": {
+                "name": "wUeRyR",
+                "type": "YesNoField",
+                "display": "Main contact"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "jXMTVi",
+        "displayName": "Withdraw",
+        "value": {
+          "name": "Withdraw",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Withdraw an existing notification",
+                "display": "Withdraw an existing notification"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "fbJVQi",
+        "displayName": "Not notifying on behalf od a permitted waste operation",
+        "value": {
+          "name": "Not notifying on behalf od a permitted waste operation",
+          "conditions": [
+            {
+              "field": {
+                "name": "ypORzB",
+                "type": "YesNoField",
+                "display": "Permitted waste facility"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "nCDMFn",
+        "displayName": "Withdraw journey",
+        "value": {
+          "name": "Withdraw journey",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Withdraw an existing notification",
+                "display": "Withdraw an existing notification"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ekjQED",
+        "displayName": "Not withdraw journey",
+        "value": {
+          "name": "Not withdraw journey",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Notify the Environment Agency",
+                "display": "Notify the Environment Agency"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "yODJtE",
+        "displayName": "No - less than 1,000 tonnes",
+        "value": {
+          "name": "No - less than 1,000 tonnes",
+          "conditions": [
+            {
+              "field": {
+                "name": "nxPoUF",
+                "type": "YesNoField",
+                "display": "Over 1,000 tonnes of waste material in 12 months"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "RHwLWa",
+        "displayName": "Yes - over 1,000 tonnes",
+        "value": {
+          "name": "Yes - over 1,000 tonnes",
+          "conditions": [
+            {
+              "field": {
+                "name": "nxPoUF",
+                "type": "YesNoField",
+                "display": "Over 1,000 tonnes of waste material in 12 months"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "QIIoZk",
+        "displayName": "Withdraw and main contact",
+        "value": {
+          "name": "Withdraw and main contact",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Withdraw an existing notification",
+                "display": "Withdraw an existing notification"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "wUeRyR",
+                "type": "YesNoField",
+                "display": "Main contact"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "LytywO",
+        "displayName": "Other",
+        "value": {
+          "name": "Other",
+          "conditions": [
+            {
+              "field": {
+                "name": "IxloES",
+                "type": "CheckboxesField",
+                "display": "Reason to exclude customer name and address"
+              },
+              "operator": "contains",
+              "value": {
+                "type": "Value",
+                "value": "Other",
+                "display": "Other"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Reporting periods",
+        "name": "xWjdoP",
+        "type": "string",
+        "items": [
+          {
+            "text": "1 January to 31 March",
+            "value": "1 January to 31 March"
+          },
+          {
+            "text": "1 April to 30 June",
+            "value": "1 April to 30 June"
+          },
+          {
+            "text": "1 July to 30 September",
+            "value": "1 July to 30 September"
+          },
+          {
+            "text": "1 October to 31 December",
+            "value": "1 October to 31 December"
+          }
+        ]
+      },
+      {
+        "title": "Notify or withdraw",
+        "name": "lcBcSg",
+        "type": "string",
+        "items": [
+          {
+            "text": "Notify the Environment Agency",
+            "value": "Notify the Environment Agency"
+          },
+          {
+            "text": "Withdraw an existing notification",
+            "value": "Withdraw an existing notification"
+          }
+        ]
+      },
+      {
+        "title": "Reason for excluding from public register",
+        "name": "gogrxO",
+        "type": "string",
+        "items": [
+          {
+            "text": "The customer address has an economic value and could cause econmic harm if made available through the public register ",
+            "value": "The customer address has an economic value and could cause econmic harm if made available through the public register "
+          },
+          {
+            "text": "The public interest in maintaining the confidentiality of the name and address of the customer outweighs the public interest of disclosing it through the public register",
+            "value": "The public interest in maintaining the confidentiality of the name and address of the customer outweighs the public interest of disclosing it through the public register"
+          },
+          {
+            "text": "Other",
+            "value": "Other"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "outputEmail": "MFRegs@environment-agency.gov.uk",
+    "startPage": "/is-the-site-youre-notifying-or-withdrawing-a-notification-for-in-england"
+  },
+  "live": {
+    "name": "Tell the Environment Agency about your material facility",
+    "pages": [
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      },
+      {
+        "title": "Is the site you're notifying or withdrawing a notification for in England?",
+        "path": "/is-the-site-youre-notifying-or-withdrawing-a-notification-for-in-england",
+        "next": [
+          {
+            "path": "/notify-or-withdraw-an-existing-notification"
+          },
+          {
+            "path": "/you-cannot-use-this-service-lDnnPe",
+            "condition": "pVhljS"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZpVhnG",
+            "title": "Site in England",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/you-cannot-use-this-service-lDnnPe",
+        "title": "You cannot use this service",
+        "components": [
+          {
+            "name": "TbGNwd",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nThe site must be in England to use this service. You should contact the environmental regulator for the country where your material facility is based.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": []
+      },
+      {
+        "title": "Notify or withdraw an existing notification",
+        "path": "/notify-or-withdraw-an-existing-notification",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-site-youre-withdrawing-notification-for",
+            "condition": "jXMTVi"
+          },
+          {
+            "path": "/has-your-assessment-concluded-your-site-is-likely-to-receive-1000-tonnes-or-more-of-waste-material-in-the-next-12-months",
+            "condition": "YPLTdw"
+          }
+        ],
+        "components": [
+          {
+            "name": "aZjMHN",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou must notify the Environment Agency in writing if you are likely to receive 1,000 tonnes or more of waste material in the next 12 months. You should do this before the end of the reporting period in which you made the assessment.\n<br><br>\nYou may withdraw your notification if you believe that you will receive less than 1,000 tonnes of waste material in the next 12 months.\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "lWNdqU",
+            "title": "Do you want to notify the Environment Agency or withdraw an existing notification?",
+            "type": "RadiosField",
+            "hint": "",
+            "options": {},
+            "schema": {},
+            "list": "lcBcSg"
+          }
+        ]
+      },
+      {
+        "title": "Has your assessment concluded your site is likely to receive 1,000 tonnes or more of waste material in the next 12 months?",
+        "path": "/has-your-assessment-concluded-your-site-is-likely-to-receive-1000-tonnes-or-more-of-waste-material-in-the-next-12-months",
+        "next": [
+          {
+            "path": "/you-do-not-need-to-notify-the-environment-agency",
+            "condition": "yODJtE"
+          },
+          {
+            "path": "/whats-the-name-of-the-site-youre-notifying-for",
+            "condition": "RHwLWa"
+          }
+        ],
+        "components": [
+          {
+            "name": "nxPoUF",
+            "title": "Over 1,000 tonnes of waste material in 12 months",
+            "type": "YesNoField",
+            "hint": "To continue, your assessment must show that your site is likely to receive 1,000 tonnes or more of waste material in the next 12 months.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the address of the site you're notifying for?",
+        "path": "/whats-the-address-of-the-site-youre-notifying-for",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-permit-holder"
+          }
+        ],
+        "components": [
+          {
+            "name": "Hsebzz",
+            "title": "Site address",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/you-do-not-need-to-notify-the-environment-agency",
+        "title": "You do not need to notify the  Environment Agency",
+        "components": [
+          {
+            "name": "fknwhP",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou only need to notify the regulator in writing if you are likely to receive 1,000 tonnes or more of waste material in the next 12 months.\n<br><br>\nRead about <a href=\"https://www.gov.uk/guidance/materials-facilities-waste-sampling-and-reporting-from-october-2024\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">waste sampling and reporting from October 2024 (opens in new tab)</a>.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": []
+      },
+      {
+        "title": "What's the address of the site you're withdrawing notification for?",
+        "path": "/whats-the-address-of-the-site-youre-withdrawing-notification-for",
+        "next": [
+          {
+            "path": "/in-which-reporting-period-will-your-notification-end"
+          }
+        ],
+        "components": [
+          {
+            "name": "PCDrxM",
+            "title": "Site address",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "name": "OWMVho",
+            "title": "Your name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-email-address",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "cNLXlj",
+            "title": "Your email address",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-job-title"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-phone-number",
+        "title": "What's your phone number?",
+        "components": [
+          {
+            "name": "EFKcWN",
+            "title": "Your telephone number",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/are-you-the-main-contact-for-this-permitted-waste-facility"
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the permit holder?",
+        "path": "/whats-the-name-of-the-permit-holder",
+        "next": [
+          {
+            "path": "/permit-reference-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "rjzgla",
+            "title": "Permit holder name",
+            "type": "TextField",
+            "hint": "Provide the details of the operator or the company, individual or organisation who holds the permit.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Permit reference number",
+        "path": "/permit-reference-number",
+        "next": [
+          {
+            "path": "/whats-your-name"
+          }
+        ],
+        "components": [
+          {
+            "name": "jiNCAa",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou can <a href=\"https://environment.data.gov.uk/public-register/view/search-waste-operations\" class=\"govuk-link\" class=\"govuk-link\" target=\"_blank\">search the waste opersations register (opens in new tab)</a> if you do not know your Environmental Permitting Regulations (EPR) permit reference number.\n</p>\n\n\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "HiLYRx",
+            "title": "What's your EPR permit reference number?",
+            "type": "TextField",
+            "hint": "Permit reference numbers usually contain 2 letters, 4 numbers and 2 letters, for example, AB1234AB.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Public register",
+        "path": "/public-register",
+        "next": [
+          {
+            "path": "/why-are-the-destinations-for-waste-material-that-leaves-the-site-commercially-confidential"
+          },
+          {
+            "path": "/summary",
+            "condition": "fHLjwC"
+          }
+        ],
+        "components": [
+          {
+            "name": "yyBlhM",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nFrom 1 October 2024, notified material facilities will need to provide additional information as part of the required reporting. This information will be held on the Environment Agency's public register.\n<br><br>\nThe Environment Agency considers the name, address and date of where output material that leaves the facility is sent may be commercially or industrially confidential information.\n</p>\n\n\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "yPOgnx",
+            "title": "Do you consent to including the date, name and address of where output material is sent on the Environment Agency's public register?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Why are the destinations for waste material that leaves the site commercially confidential?",
+        "path": "/why-are-the-destinations-for-waste-material-that-leaves-the-site-commercially-confidential",
+        "next": [
+          {
+            "path": "/what-other-reasons-do-you-have-to-object-to-the-inclusion-of-this-information-on-the-environment-agencys-public-register",
+            "condition": "LytywO"
+          },
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "IxloES",
+            "title": "Reason to exclude customer name and address",
+            "type": "CheckboxesField",
+            "hint": "Select all that apply.",
+            "list": "gogrxO",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-job-title",
+        "title": "What's your job title?",
+        "components": [
+          {
+            "name": "iricjO",
+            "title": "Job title",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ]
+      },
+      {
+        "title": "Are you the main contact for this permitted waste facility?",
+        "path": "/are-you-the-main-contact-for-this-permitted-waste-facility",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-main-contact",
+            "condition": "RyBESS"
+          },
+          {
+            "path": "/public-register",
+            "condition": "wGYZku"
+          },
+          {
+            "path": "/summary",
+            "condition": "QIIoZk"
+          }
+        ],
+        "components": [
+          {
+            "name": "wUeRyR",
+            "title": "Main contact",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-name-of-the-main-contact",
+        "title": "What's the name of the main contact?",
+        "components": [
+          {
+            "name": "ngKjLm",
+            "title": "Name of main contact",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-email-address-of-the-main-contact"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-email-address-of-the-main-contact",
+        "title": "What's the email address of the main contact?",
+        "components": [
+          {
+            "name": "KeJHGd",
+            "title": "Email address of main contact",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-phone-number-of-the-main-contact"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-phone-number-of-the-main-contact",
+        "title": "What's the phone number of the main contact?",
+        "components": [
+          {
+            "name": "ZlocBX",
+            "title": "Main contact phone number ",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/public-register",
+            "condition": "ekjQED"
+          },
+          {
+            "path": "/summary",
+            "condition": "nCDMFn"
+          }
+        ]
+      },
+      {
+        "title": "What other reasons do you have to object to the inclusion of this information on the Environment Agency's public register?",
+        "path": "/what-other-reasons-do-you-have-to-object-to-the-inclusion-of-this-information-on-the-environment-agencys-public-register",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "avcdFO",
+            "title": "Other reason to exclude customer name and address from the public register",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the site you're notifying for?",
+        "path": "/whats-the-name-of-the-site-youre-notifying-for",
+        "next": [
+          {
+            "path": "/whats-the-address-of-the-site-youre-notifying-for"
+          }
+        ],
+        "components": [
+          {
+            "name": "HMoLXP",
+            "title": "Site name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the site you're withdrawing notification for?",
+        "path": "/whats-the-name-of-the-site-youre-withdrawing-notification-for",
+        "next": [
+          {
+            "path": "/whats-the-address-of-the-site-youre-withdrawing-notification-for"
+          }
+        ],
+        "components": [
+          {
+            "name": "Lscmun",
+            "title": "Site name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "In which reporting period will your notification end?",
+        "path": "/in-which-reporting-period-will-your-notification-end",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-permit-holder"
+          }
+        ],
+        "components": [
+          {
+            "name": "rGICEQ",
+            "title": "Reporting period",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "xWjdoP",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "PDGwjK",
+        "displayName": "No - not a materials facility",
+        "value": {
+          "name": "No - not a materials facility",
+          "conditions": [
+            {
+              "field": {
+                "name": "LEXcXP",
+                "type": "YesNoField",
+                "display": "Materials facility"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "pVhljS",
+        "displayName": "No - not based in England",
+        "value": {
+          "name": "No - not based in England",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZpVhnG",
+                "type": "YesNoField",
+                "display": "Based in England"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "YPLTdw",
+        "displayName": "Notify",
+        "value": {
+          "name": "Notify",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Notify the Environment Agency",
+                "display": "Notify the Environment Agency"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "fHLjwC",
+        "displayName": "Yes - consent to details added to public register",
+        "value": {
+          "name": "Yes - consent to details added to public register",
+          "conditions": [
+            {
+              "field": {
+                "name": "yPOgnx",
+                "type": "YesNoField",
+                "display": "Exclude name and address from public register"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "wGYZku",
+        "displayName": "Yes -main contact and notify - not withdraw",
+        "value": {
+          "name": "Yes -main contact and notify - not withdraw",
+          "conditions": [
+            {
+              "field": {
+                "name": "wUeRyR",
+                "type": "YesNoField",
+                "display": "Main contact"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Notify the Environment Agency",
+                "display": "Notify the Environment Agency"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "RyBESS",
+        "displayName": "No - not main contact",
+        "value": {
+          "name": "No - not main contact",
+          "conditions": [
+            {
+              "field": {
+                "name": "wUeRyR",
+                "type": "YesNoField",
+                "display": "Main contact"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "jXMTVi",
+        "displayName": "Withdraw",
+        "value": {
+          "name": "Withdraw",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Withdraw an existing notification",
+                "display": "Withdraw an existing notification"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "fbJVQi",
+        "displayName": "Not notifying on behalf od a permitted waste operation",
+        "value": {
+          "name": "Not notifying on behalf od a permitted waste operation",
+          "conditions": [
+            {
+              "field": {
+                "name": "ypORzB",
+                "type": "YesNoField",
+                "display": "Permitted waste facility"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "nCDMFn",
+        "displayName": "Withdraw journey",
+        "value": {
+          "name": "Withdraw journey",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Withdraw an existing notification",
+                "display": "Withdraw an existing notification"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ekjQED",
+        "displayName": "Not withdraw journey",
+        "value": {
+          "name": "Not withdraw journey",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Notify the Environment Agency",
+                "display": "Notify the Environment Agency"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "yODJtE",
+        "displayName": "No - less than 1,000 tonnes",
+        "value": {
+          "name": "No - less than 1,000 tonnes",
+          "conditions": [
+            {
+              "field": {
+                "name": "nxPoUF",
+                "type": "YesNoField",
+                "display": "Over 1,000 tonnes of waste material in 12 months"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "RHwLWa",
+        "displayName": "Yes - over 1,000 tonnes",
+        "value": {
+          "name": "Yes - over 1,000 tonnes",
+          "conditions": [
+            {
+              "field": {
+                "name": "nxPoUF",
+                "type": "YesNoField",
+                "display": "Over 1,000 tonnes of waste material in 12 months"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "QIIoZk",
+        "displayName": "Withdraw and main contact",
+        "value": {
+          "name": "Withdraw and main contact",
+          "conditions": [
+            {
+              "field": {
+                "name": "lWNdqU",
+                "type": "RadiosField",
+                "display": "Notify or denotify"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Withdraw an existing notification",
+                "display": "Withdraw an existing notification"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "wUeRyR",
+                "type": "YesNoField",
+                "display": "Main contact"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "LytywO",
+        "displayName": "Other",
+        "value": {
+          "name": "Other",
+          "conditions": [
+            {
+              "field": {
+                "name": "IxloES",
+                "type": "CheckboxesField",
+                "display": "Reason to exclude customer name and address"
+              },
+              "operator": "contains",
+              "value": {
+                "type": "Value",
+                "value": "Other",
+                "display": "Other"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Reporting periods",
+        "name": "xWjdoP",
+        "type": "string",
+        "items": [
+          {
+            "text": "1 January to 31 March",
+            "value": "1 January to 31 March"
+          },
+          {
+            "text": "1 April to 30 June",
+            "value": "1 April to 30 June"
+          },
+          {
+            "text": "1 July to 30 September",
+            "value": "1 July to 30 September"
+          },
+          {
+            "text": "1 October to 31 December",
+            "value": "1 October to 31 December"
+          }
+        ]
+      },
+      {
+        "title": "Notify or withdraw",
+        "name": "lcBcSg",
+        "type": "string",
+        "items": [
+          {
+            "text": "Notify the Environment Agency",
+            "value": "Notify the Environment Agency"
+          },
+          {
+            "text": "Withdraw an existing notification",
+            "value": "Withdraw an existing notification"
+          }
+        ]
+      },
+      {
+        "title": "Reason for excluding from public register",
+        "name": "gogrxO",
+        "type": "string",
+        "items": [
+          {
+            "text": "The customer address has an economic value and could cause econmic harm if made available through the public register ",
+            "value": "The customer address has an economic value and could cause econmic harm if made available through the public register "
+          },
+          {
+            "text": "The public interest in maintaining the confidentiality of the name and address of the customer outweighs the public interest of disclosing it through the public register",
+            "value": "The public interest in maintaining the confidentiality of the name and address of the customer outweighs the public interest of disclosing it through the public register"
+          },
+          {
+            "text": "Other",
+            "value": "Other"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "outputEmail": "MFRegs@environment-agency.gov.uk",
+    "startPage": "/is-the-site-youre-notifying-or-withdrawing-a-notification-for-in-england"
+  }
+}

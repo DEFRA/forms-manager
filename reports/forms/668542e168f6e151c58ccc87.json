@@ -1,0 +1,457 @@
+{
+  "id": "668542e168f6e151c58ccc87",
+  "metadata": {
+    "id": "668542e168f6e151c58ccc87",
+    "slug": "apply-for-a-research-import-certificate",
+    "title": "Apply for a research import certificate",
+    "organisation": "Veterinary Medicines Directorate – VMD",
+    "teamName": "VMD",
+    "teamEmail": "defraforms@defra.gov.uk",
+    "draft": {
+      "createdAt": "2024-07-03T12:24:01.552Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-07-09T07:53:31.440Z",
+      "updatedBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-07-03T12:24:01.552Z",
+    "updatedBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "updatedAt": "2024-07-09T07:53:31.440Z"
+  },
+  "draft": {
+    "name": "Apply for a research import certificate",
+    "pages": [
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "Name",
+            "hint": "",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController",
+        "components": [],
+        "next": []
+      },
+      {
+        "path": "/whats-your-email-address",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "FKKMZt",
+            "options": {},
+            "schema": {},
+            "type": "EmailAddressField",
+            "hint": "We will send your research import certificate to this email address",
+            "title": "Email address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-organisations-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-organisations-address",
+        "title": "What's your organisation's address?",
+        "components": [
+          {
+            "name": "NgpWlf",
+            "options": {},
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "UK address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-country-are-you-importing-from"
+          }
+        ]
+      },
+      {
+        "path": "/what-country-are-you-importing-from",
+        "title": "What country are you importing from?",
+        "components": [
+          {
+            "name": "oHQuyW",
+            "options": {},
+            "schema": {},
+            "type": "AutocompleteField",
+            "list": "pjivwS",
+            "title": "Import country"
+          }
+        ],
+        "next": [
+          {
+            "path": "/is-the-importer-the-same-as-the-applicant"
+          }
+        ]
+      },
+      {
+        "path": "/is-the-importer-the-same-as-the-applicant",
+        "title": "Is the importer the same as the applicant?",
+        "components": [
+          {
+            "name": "ExAdsc",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Different name"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-aspa-project-licence-number"
+          },
+          {
+            "path": "/whats-the-name-of-the-importer",
+            "condition": "ttfVui"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-aspa-project-licence-number",
+        "title": "What's your A(SP)A project licence number?",
+        "components": [
+          {
+            "name": "zwGEIp",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "A(SP)A project licence number"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-aspa-pcd-number"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-name-of-the-importer",
+        "title": "What's the name of the importer?",
+        "components": [
+          {
+            "name": "yyipPD",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Importer name"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-aspa-project-licence-number"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-aspa-pcd-number",
+        "title": "What's your A(SP)A PCD number?",
+        "components": [
+          {
+            "name": "LLYPFT",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "A(SP)A PCD number"
+          }
+        ],
+        "next": [
+          {
+            "path": "/is-the-product-youre-requesting-a-certificate-for-unauthorised"
+          }
+        ]
+      },
+      {
+        "path": "/is-the-product-youre-requesting-a-certificate-for-unauthorised",
+        "title": "Is the product you're requesting a certificate for unauthorised?",
+        "components": [
+          {
+            "name": "Hdtafk",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Product unauthorised"
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-are-the-active-substances-in-the-product"
+          },
+          {
+            "path": "/whats-the-name-of-the-product",
+            "condition": "luFuKv"
+          }
+        ]
+      },
+      {
+        "path": "/what-are-the-active-substances-in-the-product",
+        "title": "What are the active substances in the product?",
+        "components": [
+          {
+            "name": "UnWBUS",
+            "options": {},
+            "schema": {},
+            "type": "MultilineTextField",
+            "title": "Active substance",
+            "hint": "Enter 1 active substance per line [tabular data would improve this page when available]"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-pharmaceutical-form"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-name-of-the-product",
+        "title": "What's the name of the product?",
+        "components": [
+          {
+            "name": "oduXll",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Product name"
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-are-the-active-substances-in-the-product"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-pharmaceutical-form",
+        "title": "What's the pharmaceutical form?",
+        "components": [
+          {
+            "name": "KXXgZI",
+            "options": {},
+            "schema": {},
+            "type": "RadiosField",
+            "list": "tKmbUN",
+            "title": "Pharmaceutical form",
+            "hint": "",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/total"
+          }
+        ]
+      },
+      {
+        "path": "/total",
+        "title": "Total",
+        "components": [
+          {
+            "name": "pOCnrj",
+            "options": {
+              "classes": "govuk-input govuk-!-width-one-quarter"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "What's the total amount?"
+          },
+          {
+            "name": "XpLOVD",
+            "options": {},
+            "schema": {},
+            "type": "SelectField",
+            "title": "What unit is the total measured in?",
+            "list": "KGdGEx",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "No - different name",
+        "name": "ttfVui",
+        "value": {
+          "name": "No - different name",
+          "conditions": [
+            {
+              "field": {
+                "name": "ExAdsc",
+                "type": "YesNoField",
+                "display": "Different name"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Yes - unauthorised",
+        "name": "luFuKv",
+        "value": {
+          "name": "Yes - unauthorised",
+          "conditions": [
+            {
+              "field": {
+                "name": "Hdtafk",
+                "type": "YesNoField",
+                "display": "Product unauthorised"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Country list",
+        "name": "pjivwS",
+        "type": "string",
+        "items": [
+          {
+            "text": "United states of America",
+            "value": "United states of America"
+          },
+          {
+            "text": "Spain",
+            "value": "Spain"
+          },
+          {
+            "value": "France",
+            "text": "France"
+          },
+          {
+            "text": "UK",
+            "value": "UK"
+          }
+        ]
+      },
+      {
+        "title": "Pharmaceutical form",
+        "name": "tKmbUN",
+        "type": "string",
+        "items": [
+          {
+            "text": "Bolus",
+            "value": "Bolus"
+          },
+          {
+            "text": "Capsule",
+            "value": "Capsule"
+          },
+          {
+            "text": "Granules",
+            "value": "Granules"
+          },
+          {
+            "text": "Implant",
+            "value": "Implant"
+          },
+          {
+            "text": "Inhalant",
+            "value": "Inhalant"
+          },
+          {
+            "text": "Intranasal",
+            "value": "Intranasal"
+          }
+        ]
+      },
+      {
+        "title": "Unit type",
+        "name": "KGdGEx",
+        "type": "string",
+        "items": [
+          {
+            "text": "mg",
+            "value": "mg"
+          },
+          {
+            "text": "ml",
+            "value": "ml"
+          },
+          {
+            "text": "iu",
+            "value": "iu"
+          },
+          {
+            "text": "vials",
+            "value": "vials"
+          },
+          {
+            "text": "g",
+            "value": "g"
+          },
+          {
+            "text": "kg",
+            "value": "kg"
+          },
+          {
+            "text": " individual units",
+            "value": " individual units"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "startPage": "/whats-your-name"
+  }
+}

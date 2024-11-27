@@ -1,0 +1,1988 @@
+{
+  "id": "66a0e3b1a91f987f5ffc7672",
+  "metadata": {
+    "id": "66a0e3b1a91f987f5ffc7672",
+    "slug": "submit-a-complaint-for-weeds-that-are-causing-damage-or-harm",
+    "title": "Submit a complaint for weeds that are causing damage or harm",
+    "organisation": "Natural England",
+    "teamName": "Weed Enquiries",
+    "teamEmail": "weedenquiries@naturalengland.org.uk",
+    "contact": {
+      "email": {
+        "address": "weedenquiries@naturalengland.org.uk",
+        "responseTime": "We aim to respond as soon as possible."
+      }
+    },
+    "submissionGuidance": "If your complaint is valid, the Injurious Weeds Complaints team at Natural England will aim to acknowledge it within 10 working days.\r\n\r\nNatural England will not act on complaints received between 1 October and 31 March. If you submit a complaint form during this period, it will not be acknowledged until after 1 April. \r\n\r\nIf we consider the weeds to be high risk, we’ll contact the landowner or occupier to ask them to remove the weeds by a specific date. We’ll let you know about this action.\r\n\r\nIf we consider the weeds to be low risk, we’ll not usually act straight away but will ask you to:\r\n\r\n* continue to monitor the spread of the weeds\r\n* contact an adviser again within 12 months if you think the risk of weeds spreading is increasing",
+    "privacyNoticeUrl": "https://www.gov.uk/government/organisations/natural-england/about/personal-information-charter",
+    "notificationEmail": "weedenquiries@naturalengland.org.uk",
+    "draft": {
+      "updatedAt": "2024-10-18T13:12:41.456Z",
+      "updatedBy": {
+        "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+        "displayName": "Alex Luckett"
+      },
+      "createdAt": "2024-10-10T17:25:45.422Z",
+      "createdBy": {
+        "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+        "displayName": "Alex Luckett"
+      }
+    },
+    "live": {
+      "updatedAt": "2024-10-10T17:25:44.223Z",
+      "updatedBy": {
+        "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+        "displayName": "Alex Luckett"
+      },
+      "createdAt": "2024-07-25T09:24:49.502Z",
+      "createdBy": {
+        "id": "sIWOu06rf7dj0GT0s7-revYHAsDhdgYGnudOvL5XW2w",
+        "displayName": "Anna Scott"
+      }
+    },
+    "createdBy": {
+      "id": "sIWOu06rf7dj0GT0s7-revYHAsDhdgYGnudOvL5XW2w",
+      "displayName": "Anna Scott"
+    },
+    "createdAt": "2024-07-24T11:21:21.082Z",
+    "updatedBy": {
+      "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+      "displayName": "Alex Luckett"
+    },
+    "updatedAt": "2024-10-18T13:12:41.456Z"
+  },
+  "draft": {
+    "name": "Submit a complaint for weeds that are causing damage or harm",
+    "pages": [
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "name": "WWFUFB",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "TextField",
+            "title": "Name"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-email-address",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "MmHYOl",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "EmailAddressField",
+            "title": "Email address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-phone-number",
+        "title": "What's your phone number?",
+        "components": [
+          {
+            "name": "JEkTTD",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Phone number"
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "path": "/which-injurious-weed-are-you-reporting",
+        "title": "Which injurious weed are you reporting?",
+        "components": [
+          {
+            "name": "mWsiIu",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "CheckboxesField",
+            "title": "Injurious weeds you're reporting",
+            "list": "DJXXvJ",
+            "values": {
+              "type": "listRef"
+            },
+            "hint": "Select all that apply."
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-many-weeds-plants-are-there-per-10-meters-squared-on-the-land-where-the-weeds-are-spreading-from"
+          }
+        ]
+      },
+      {
+        "path": "/does-the-location-where-the-weeds-are-spreading-from-have-an-address",
+        "title": "Does the location where the weeds are spreading from have an address?",
+        "components": [
+          {
+            "name": "hVcRhO",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "YesNoField",
+            "title": "The location where the weeds are spreading from has an address",
+            "hint": "If the location does not have an address or you do not know it, you must provide either a what3words location, grid reference number, or Rural Land Register field parcel number on the next page."
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-address-of-where-the-weeds-are-spreading-from",
+            "condition": "ANrJRb"
+          },
+          {
+            "path": "/location-of-where-the-weeds-are-spreading-from",
+            "condition": "Pszpgd"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-address-of-where-the-weeds-are-spreading-from",
+        "title": "What's the address of where the weeds are spreading from?",
+        "components": [
+          {
+            "name": "FHNcez",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Address of where the weeds are spreading from"
+          }
+        ],
+        "next": [
+          {
+            "path": "/does-your-land-that-is-threatened-by-injurious-weeds-have-an-address"
+          }
+        ]
+      },
+      {
+        "path": "/location-of-where-the-weeds-are-spreading-from",
+        "title": "Location of  where the  weeds are  spreading from",
+        "components": [
+          {
+            "name": "ggqVVq",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\n\nIf the land does not have an address, you must provide one of the following:\n\n<ul class=\"govuk-list govuk-list--bullet\">\n<li><a href=\"https://what3words.com\" class=\"govuk-link\" target=\"_blank\">what3words location (opens in new tab)</a></li>\n<li><a href=\"https://magic.defra.gov.uk/magicmap.aspx\" class=\"govuk-link\" target=\"_blank\">grid reference number (opens in new tab)</a></li>\n<li>RLR field parcel number</li>\n</ul>"
+          },
+          {
+            "name": "LYXBEn",
+            "options": {
+              "hideTitle": false,
+              "required": true
+            },
+            "schema": {},
+            "type": "TextField",
+            "hint": "",
+            "title": "What's the grid reference number, what3words location or Rural Land Register field parcel number for location where the weeds are spreading from?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/does-your-land-that-is-threatened-by-injurious-weeds-have-an-address"
+          }
+        ]
+      },
+      {
+        "path": "/how-many-weeds-plants-are-there-per-10-meters-squared-on-the-land-where-the-weeds-are-spreading-from",
+        "title": "How many weeds plants are there per 10 meters squared on the land where the weeds are spreading from?",
+        "components": [
+          {
+            "name": "gYfgkN",
+            "options": {
+              "hideTitle": true,
+              "required": true
+            },
+            "schema": {},
+            "type": "RadiosField",
+            "title": "Weeds plants per 10 meters squared (10m2)",
+            "list": "yvRBmi",
+            "values": {
+              "type": "listRef"
+            },
+            "hint": "A square meter is equivalent to an area of a square with sides one meter in length."
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-advanced-are-the-weeds"
+          }
+        ]
+      },
+      {
+        "path": "/how-advanced-are-the-weeds",
+        "title": "How advanced are the weeds?",
+        "components": [
+          {
+            "name": "DXPiHj",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "RadiosField",
+            "list": "ZcdIpU",
+            "title": "How advanced the weeds are",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-is-the-land-where-the-weeds-are-spreading-from-currently-used-for"
+          }
+        ]
+      },
+      {
+        "path": "/what-is-the-land-where-the-weeds-are-spreading-from-currently-used-for",
+        "title": "What is the land where the weeds are spreading from currently used for?",
+        "components": [
+          {
+            "name": "gLxbLB",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "TextField",
+            "title": "Use of the weed infested land"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-close-are-the-weeds-to-your-land-boundary"
+          }
+        ]
+      },
+      {
+        "path": "/how-the-weeds-are-spreading",
+        "title": "How the weeds are spreading",
+        "components": [
+          {
+            "name": "FauLmU",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nUse Defra Magic maps to help us understand how the weeds are spreading.\n\n<ol class=\"govuk-list govuk-list--number\">\n<li>Go to <a href=\"https://magic.defra.gov.uk/magicmap.aspx\" class=\"govuk-link\" target=\"_blank\">Defra Magic maps (opens in new tab)</a>.\n<li>Search the location to bring up the area.<br></li>\n<li>Select 'Drawing Tools' in the toolbar at the top.<br></li>\n<li>Use the line tool to draw a line around the boundary of your land in blue and the land from which the weeds are spreading from in red.</li>\n<li>To download your map, select the 'Print' icon in the toolbar at the top.<br></li>\n<li>Enter a map title (your last name) in the text box.<br></li>\n<li>Select 'Format' then select 'JPG'.<br></li>\n<li> Select 'Print'.<br></li>\n<li> Select the 'Printout' link that appears below. This will bring up a new window.<br></li>\n<li>In the new window, right-click and then select 'Save image as', name your file with your last name then select 'Save'.</li>\n</ol> \n<br>\n</p>"
+          },
+          {
+            "name": "kQFTLP",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "RadiosField",
+            "title": "Can you send us a Magic map?",
+            "list": "gqyIHi",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/map-outlining-the-land-where-the-weeds-are-spreading-from",
+            "condition": "BigWBD"
+          },
+          {
+            "path": "/upload-a-map",
+            "condition": "lwpGeq"
+          }
+        ]
+      },
+      {
+        "path": "/details-of-who-owns-or-occupies-the-land",
+        "title": "Details of who owns or occupies the land",
+        "components": [
+          {
+            "name": "Qiyxah",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Natural England need to know who owns or occupies the land where the weeds are spreading from. If you do not provide the details of the landowner or occupier, Natural England will not be able to investigate your complaint.\n<br><br>\nUse the <a href=\"https://www.gov.uk/search-property-information-land-registry\" class=\"govuk-link\" target=\"_blank\">Search for land and property information service (opens in new tab)</a> to find out who owns the land or property.\n\n\n\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "zkKRoO",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "hint": "These include their name, address, contact number and email address.",
+            "title": "Do you know contact details of the landowner or occupier?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/youre-not-eligible-to-submit-a-complaint-LqyPGD",
+            "condition": "VmqnBs"
+          },
+          {
+            "path": "/whats-the-name-of-the-landowner-or-occupier",
+            "condition": "hvxnMz"
+          }
+        ]
+      },
+      {
+        "path": "/have-you-attempted-to-contact-the-landowner-or-occupier",
+        "title": "Have you attempted to contact the landowner or occupier?",
+        "components": [
+          {
+            "name": "lyiJVd",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "You have attempted to contact the landowner"
+          }
+        ],
+        "next": [
+          {
+            "path": "/why-have-you-not-attempted-to-contact-the-landowner-or-occupier",
+            "condition": "PYMJWG"
+          },
+          {
+            "path": "/what-did-the-landowner-or-occupier-say-when-you-contacted-them",
+            "condition": "dnHQHe"
+          }
+        ]
+      },
+      {
+        "path": "/does-your-land-that-is-threatened-by-injurious-weeds-have-an-address",
+        "title": "Does your land that is threatened by injurious weeds have an address?",
+        "components": [
+          {
+            "name": "CfFhAH",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Do you know the address of the location that's threatened by the weeds?",
+            "hint": "If the location does not have an address, you must provide either a what3words location, grid reference number, or Rural Land Register field parcel number on the next page."
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-is-the-address-of-the-location-thats-threatened-by-the-weeds",
+            "condition": "ZdytNq"
+          },
+          {
+            "path": "/location-thats-threatened-by-the-weeds",
+            "condition": "perweD"
+          }
+        ]
+      },
+      {
+        "path": "/what-is-the-address-of-the-location-thats-threatened-by-the-weeds",
+        "title": "What is the address of the location that's threatened by the weeds?",
+        "components": [
+          {
+            "name": "DjhgTQ",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Address of location that's threatened by the weeds"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-the-weeds-are-spreading"
+          }
+        ]
+      },
+      {
+        "path": "/what-is-your-threatened-land-used-for",
+        "title": "What is your threatened land used for?",
+        "components": [
+          {
+            "name": "QNQrAL",
+            "options": {
+              "hideTitle": true,
+              "required": false
+            },
+            "schema": {},
+            "type": "CheckboxesField",
+            "title": "What is the threatened land used for?",
+            "list": "xIJIhw",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/youre-not-eligible-to-submit-a-complaint-clqVzR",
+            "condition": "TsHmfo"
+          },
+          {
+            "path": "/details-of-who-owns-or-occupies-the-land"
+          }
+        ]
+      },
+      {
+        "path": "/how-close-are-the-weeds-to-your-land-boundary",
+        "title": "How close are the weeds to your land boundary?",
+        "components": [
+          {
+            "name": "cETmMV",
+            "options": {},
+            "schema": {},
+            "type": "RadiosField",
+            "title": "How close are the weeds to the land that's threatened?",
+            "list": "TNwKML"
+          }
+        ],
+        "next": [
+          {
+            "path": "/does-the-location-where-the-weeds-are-spreading-from-have-an-address"
+          }
+        ]
+      },
+      {
+        "path": "/summary",
+        "title": "Check your answers",
+        "components": [],
+        "next": [],
+        "controller": "./pages/summary.js"
+      },
+      {
+        "path": "/location-thats-threatened-by-the-weeds",
+        "title": "Location that's threatened by the weeds",
+        "components": [
+          {
+            "name": "YeqpSi",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\n\nIf your land does not have an address, you must provide one of the following:\n\n<ul class=\"govuk-list govuk-list--bullet\">\n<li><a href=\"https://what3words.com\" class=\"govuk-link\" target=\"_blank\">what3words location (opens in new tab)</a></li>\n<li><a href=\"https://magic.defra.gov.uk/magicmap.aspx\" class=\"govuk-link\" target=\"_blank\">grid reference number (opens in new tab)</a></li>\n<li>RLR field parcel number</li>\n</ul>"
+          },
+          {
+            "name": "aBWflD",
+            "options": {
+              "hideTitle": true,
+              "required": true
+            },
+            "schema": {},
+            "type": "TextField",
+            "title": "What3words location, grid reference number or RLR field parcel number for where's threatened by the weeds"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-the-weeds-are-spreading"
+          }
+        ]
+      },
+      {
+        "path": "/landowner-or-occupier-contact-details",
+        "title": "Landowner or occupier contact details",
+        "components": [
+          {
+            "name": "TRjRkz",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You must provide an address for the landowner or occupier and either their:\n\n<br>\n<ul class=\"govuk-list govuk-list--bullet\">\n<li>phone number</li>\n<li>email address</li>\n</ul>\n\n<p class=\"govuk-body\">\nProviding an email address will reduce delays when communicating with the landowner or occupier.\n<br><br>\nNatural England will be unable to investigate your complaint if you do not provide a way to contact the landowner or occupier.\n</p>"
+          },
+          {
+            "name": "JshbLv",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "type": "EmailAddressField",
+            "title": "Email address of the landowner or occupier"
+          },
+          {
+            "name": "OGUsuT",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Phone number of the landowner or occupier"
+          },
+          {
+            "name": "tcWmCo",
+            "options": {
+              "required": true
+            },
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Address of the landowner or occupier"
+          }
+        ],
+        "next": [
+          {
+            "path": "/have-you-attempted-to-contact-the-landowner-or-occupier"
+          }
+        ]
+      },
+      {
+        "path": "/are-you-the-owner-or-occupier-of-land-threatened-by-injurious-weeds",
+        "title": "Are you the owner or occupier of land threatened by injurious weeds?",
+        "components": [
+          {
+            "name": "vKISeM",
+            "title": "Owner or occupier of land threatened by injurious weeds",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/youre-not-eligible-to-submit-a-complaint"
+          },
+          {
+            "path": "/what-is-your-threatened-land-used-for",
+            "condition": "PmQqyj"
+          }
+        ]
+      },
+      {
+        "path": "/youre-not-eligible-to-submit-a-complaint",
+        "title": "You're not eligible to submit a complaint",
+        "components": [
+          {
+            "name": "cZGbak",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">To submit a complaint, you must be the owner or occupier of the land threatened by injurious weeds. Natural England do not investigate the spread of injurious weeds onto the land of a third party.</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": []
+      },
+      {
+        "path": "/youre-not-eligible-to-submit-a-complaint-clqVzR",
+        "title": "You're not eligible to submit a complaint",
+        "components": [
+          {
+            "name": "BuWiQG",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">To submit a complaint, the land must be:\n\n<ul class=\"govuk-list govuk-list--bullet\">\n<li>used for keeping or grazing horses or other livestock</li>\n<li>farmland used to produce conserved forage</li>\n<li>used for other agricultural activities</li>\n</ul>\n\n<p class=\"govuk-body\">\nNatural England will not investigate complaints for land used for other purposes.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": []
+      },
+      {
+        "path": "/youre-not-eligible-to-submit-a-complaint-LqyPGD",
+        "title": "You're not eligible to submit a complaint",
+        "components": [
+          {
+            "name": "SQRQZj",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">To submit a complaint, you must know the contact details of the landowner or occupier.</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": []
+      },
+      {
+        "path": "/why-have-you-not-attempted-to-contact-the-landowner-or-occupier",
+        "title": "Why have you not attempted to contact the landowner or occupier?",
+        "components": [
+          {
+            "name": "BLEyWn",
+            "title": "Reason for not contacting land owner",
+            "type": "MultilineTextField",
+            "hint": "You should have attempted to resolve the matter with the landowner or occupier before submitting a complaint.",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/which-injurious-weed-are-you-reporting"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-name-of-the-landowner-or-occupier",
+        "title": "What's the name of the landowner or occupier?",
+        "components": [
+          {
+            "name": "OMpCSp",
+            "title": "Name of land owner",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/landowner-or-occupier-contact-details"
+          }
+        ]
+      },
+      {
+        "path": "/map-outlining-the-land-where-the-weeds-are-spreading-from",
+        "title": "Map outlining the land where the weeds are spreading from",
+        "components": [
+          {
+            "name": "TXTuJo",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nIf you cannot create a map with Magic Maps, an alternative map of any kind will help Natural England identity the affected areas. \n<br><br>\nMark the alternative map to show:\n\n\n<ul class=\"govuk-list govuk-list--bullet\">\n<li>the land infested with injurious weeds in one colour</li>\n<li>your land at risk (within 100 metres) in a different colour</li>\n</ul>\n</p>\n\n<p class=\"govuk-body\">   \nWhen you've submitted your complaint, email your map to <a href=\"mailto:weedenquiries@naturalengland.org.uk\" class=\"govuk-link\" target=\"_blank\">weedenquiries@naturalengland.org.uk</a>\n<br><br>\nYou must include your name in the email subject and the date you submitted your complaint.\n\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-name"
+          }
+        ]
+      },
+      {
+        "path": "/what-did-the-landowner-or-occupier-say-when-you-contacted-them",
+        "title": "What did the landowner or occupier say when you contacted them?",
+        "components": [
+          {
+            "name": "jlZjRY",
+            "title": "Landowner response",
+            "type": "MultilineTextField",
+            "hint": "Provide contact dates and a summary of any action taken.",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/which-injurious-weed-are-you-reporting"
+          }
+        ]
+      },
+      {
+        "title": "Upload a map",
+        "path": "/upload-a-map",
+        "controller": "FileUploadPageController",
+        "next": [
+          {
+            "path": "/whats-your-name"
+          }
+        ],
+        "components": [
+          {
+            "name": "dLzALM",
+            "title": "Documents",
+            "type": "FileUploadField",
+            "hint": "You can upload one file.",
+            "options": {},
+            "schema": {
+              "length": 1
+            }
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "user knows the address of where the weeds are",
+        "name": "ANrJRb",
+        "value": {
+          "name": "user knows the address of where the weeds are",
+          "conditions": [
+            {
+              "field": {
+                "name": "hVcRhO",
+                "type": "YesNoField",
+                "display": "Do you know the address of where the weeds are? Yes or no"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "user doesn't know the address of where the weeds are",
+        "name": "Pszpgd",
+        "value": {
+          "name": "user doesn't know the address of where the weeds are",
+          "conditions": [
+            {
+              "field": {
+                "name": "hVcRhO",
+                "type": "YesNoField",
+                "display": "Do you know the address of where the weeds are? Yes or no"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "user knows some landowner details",
+        "name": "yUkYZN",
+        "value": {
+          "name": "user knows some landowner details",
+          "conditions": [
+            {
+              "field": {
+                "name": "uGaYBf",
+                "type": "YesNoField",
+                "display": "Do you know any of the landowner details?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User knows some of the landowner's details",
+        "name": "hvxnMz",
+        "value": {
+          "name": "User knows some of the landowner's details",
+          "conditions": [
+            {
+              "field": {
+                "name": "zkKRoO",
+                "type": "YesNoField",
+                "display": "Do you know any of the landowner's details?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User doesn't know any landowner details",
+        "name": "VmqnBs",
+        "value": {
+          "name": "User doesn't know any landowner details",
+          "conditions": [
+            {
+              "field": {
+                "name": "zkKRoO",
+                "type": "YesNoField",
+                "display": "Do you know any of the landowner's details?"
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User knows the address of the location that's threatened",
+        "name": "ZdytNq",
+        "value": {
+          "name": "User knows the address of the location that's threatened",
+          "conditions": [
+            {
+              "field": {
+                "name": "CfFhAH",
+                "type": "YesNoField",
+                "display": "Do you know the address of the place that's threatened by the spread of weeds?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User doesn't know the address of the threatened location",
+        "name": "perweD",
+        "value": {
+          "name": "User doesn't know the address of the threatened location",
+          "conditions": [
+            {
+              "field": {
+                "name": "CfFhAH",
+                "type": "YesNoField",
+                "display": "Do you know the address of the location that's threatened?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "PmQqyj",
+        "displayName": "Is the owner or occupier of land threatened by Injurious weeds",
+        "value": {
+          "name": "Is the owner or occupier of land threatened by Injurious weeds",
+          "conditions": [
+            {
+              "field": {
+                "name": "vKISeM",
+                "type": "YesNoField",
+                "display": "Owner or occupier of land threatened by Injurious weeds"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "PYMJWG",
+        "displayName": "Not attempted to contact land owner",
+        "value": {
+          "name": "Not attempted to contact land owner",
+          "conditions": [
+            {
+              "field": {
+                "name": "lyiJVd",
+                "type": "YesNoField",
+                "display": "You have attempted to contact the landowner"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "dnHQHe",
+        "displayName": "Yes - contacted landowner",
+        "value": {
+          "name": "Yes - contacted landowner",
+          "conditions": [
+            {
+              "field": {
+                "name": "lyiJVd",
+                "type": "YesNoField",
+                "display": "You have attempted to contact the landowner"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "TsHmfo",
+        "displayName": "Contains none of the above",
+        "value": {
+          "name": "Contains none of the above",
+          "conditions": [
+            {
+              "field": {
+                "name": "QNQrAL",
+                "type": "CheckboxesField",
+                "display": "What is the threatened land used for?"
+              },
+              "operator": "contains",
+              "value": {
+                "type": "Value",
+                "value": "None of the above",
+                "display": "None of the above"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "BigWBD",
+        "displayName": "Cannot create a magic map",
+        "value": {
+          "name": "Cannot create a magic map",
+          "conditions": [
+            {
+              "field": {
+                "name": "kQFTLP",
+                "type": "RadiosField",
+                "display": "Can you send us a Magic map?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "I cannot create a Magic map",
+                "display": "I cannot create a Magic map"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "lwpGeq",
+        "displayName": "Upload a magic map",
+        "value": {
+          "name": "Upload a magic map",
+          "conditions": [
+            {
+              "field": {
+                "name": "kQFTLP",
+                "type": "RadiosField",
+                "display": "Can you send us a Magic map?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "I will upload a Magic map ",
+                "display": "I will upload a Magic map "
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Which injurious weed are you reporting?",
+        "name": "DJXXvJ",
+        "type": "string",
+        "items": [
+          {
+            "description": "",
+            "text": "Common Ragwort (Senecio jacobaea)",
+            "value": "Common Ragwort (Senecio jacobaea)"
+          },
+          {
+            "text": "Creeping Thistle (Cirsium arvense)",
+            "value": "Creeping Thistle (Cirsium arvense)"
+          },
+          {
+            "text": " Spear Thistle (Cirsium vulgare)",
+            "value": " Spear Thistle (Cirsium vulgare)"
+          },
+          {
+            "text": "Curled Dock (Rumex crispus)",
+            "value": "Curled Dock (Rumex crispus)"
+          },
+          {
+            "text": "Broad-Leaved Dock (Rumex obtusifolius)",
+            "value": "Broad-Leaved Dock (Rumex obtusifolius)"
+          }
+        ]
+      },
+      {
+        "title": "How many plants are there per 10 meters squared (10m2)?",
+        "name": "yvRBmi",
+        "type": "string",
+        "items": [
+          {
+            "text": "Less than 5 plants",
+            "value": "Less than 5 plants"
+          },
+          {
+            "text": "5 to 9 plants",
+            "value": "5 to 9 plants"
+          },
+          {
+            "text": "10 or more plants",
+            "value": "10 or more plants"
+          }
+        ]
+      },
+      {
+        "title": "How advanced are the weeds?",
+        "name": "ZcdIpU",
+        "type": "string",
+        "items": [
+          {
+            "text": "Close to the ground",
+            "value": "Close to the ground"
+          },
+          {
+            "text": "In bud",
+            "value": "In bud"
+          },
+          {
+            "text": "Flowering or seeding",
+            "value": "Flowering or seeding"
+          }
+        ]
+      },
+      {
+        "title": "Can you send us a Magic map?",
+        "name": "gqyIHi",
+        "type": "string",
+        "items": [
+          {
+            "text": "I cannot create a Magic map",
+            "value": "I cannot create a Magic map"
+          },
+          {
+            "text": "I will upload a Magic map ",
+            "value": "I will upload a Magic map "
+          }
+        ]
+      },
+      {
+        "title": "Landowner's details",
+        "name": "rlrQyE",
+        "type": "string",
+        "items": [
+          {
+            "text": "I know the landowner's name",
+            "value": "I know the landowner's name"
+          },
+          {
+            "text": "I know the landowner's contact number",
+            "value": "I know the landowner's contact number"
+          }
+        ]
+      },
+      {
+        "title": "List of things the threatened land could be used for",
+        "name": "xIJIhw",
+        "type": "string",
+        "items": [
+          {
+            "text": "Keeping or grazing horses or other livestock",
+            "description": "",
+            "value": "Keeping or grazing horses or other livestock"
+          },
+          {
+            "text": "Farmland used to produce conserved forage",
+            "description": "",
+            "value": "Farmland used to produce conserved forage"
+          },
+          {
+            "text": "Other agricultural activities",
+            "value": "Other agricultural activities"
+          },
+          {
+            "text": "None of the above",
+            "value": "None of the above"
+          }
+        ]
+      },
+      {
+        "title": "How close are the weeds to this land?",
+        "name": "TNwKML",
+        "type": "string",
+        "items": [
+          {
+            "text": "Less than 50 metres away",
+            "description": "",
+            "value": "Less than 50 metres away"
+          },
+          {
+            "text": "50 to 100 metres away",
+            "description": "",
+            "value": "50 to 100 metres away"
+          },
+          {
+            "text": "More than 100 metres away",
+            "value": "More than 100 metres away"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "declaration": "<p class=\"govuk-body\">By submitting this form you’re confirming that:\n\n<ul class=\"govuk-list govuk-list--bullet\">\n<li>to the best of your knowledge, the answers you’re providing are correct</li>\n<li>you've read and agreed to the <a href=\"https://www.gov.uk/government/publications/natural-england-privacy-notices/weeds-act-privacy-notice\" class=\"govuk-link\" target=\"_blank\">injurious weeds privacy notice (opens in new tab)</a>\n</ul>\n</p>\n",
+    "outputEmail": "weedenquiries@naturalengland.org.uk",
+    "startPage": "/are-you-the-owner-or-occupier-of-land-threatened-by-injurious-weeds"
+  },
+  "live": {
+    "name": "Submit a complaint for weeds that are causing damage or harm",
+    "pages": [
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "name": "WWFUFB",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "TextField",
+            "title": "Name"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-email-address",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "MmHYOl",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "EmailAddressField",
+            "title": "Email address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-phone-number",
+        "title": "What's your phone number?",
+        "components": [
+          {
+            "name": "JEkTTD",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Phone number"
+          }
+        ],
+        "next": [
+          {
+            "path": "/which-injurious-weed-are-you-reporting"
+          }
+        ]
+      },
+      {
+        "path": "/which-injurious-weed-are-you-reporting",
+        "title": "Which injurious weed are you reporting?",
+        "components": [
+          {
+            "name": "mWsiIu",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "CheckboxesField",
+            "title": "Injurious weeds you're reporting",
+            "list": "DJXXvJ",
+            "values": {
+              "type": "listRef"
+            },
+            "hint": "Select all that apply."
+          }
+        ],
+        "next": [
+          {
+            "path": "/do-you-know-the-address-of-where-the-weeds-are"
+          }
+        ]
+      },
+      {
+        "path": "/do-you-know-the-address-of-where-the-weeds-are",
+        "title": "Do you know the address of where the weeds are?",
+        "components": [
+          {
+            "name": "hVcRhO",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "YesNoField",
+            "title": "You know the address of where the weeds are"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-address-of-where-the-weeds-are",
+            "condition": "ANrJRb"
+          },
+          {
+            "path": "/where-the-weeds-are",
+            "condition": "Pszpgd"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-address-of-where-the-weeds-are",
+        "title": "What's the address of where the weeds are?",
+        "components": [
+          {
+            "name": "FHNcez",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Address of where the weeds are"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-many-weeds-plants-are-there-per-10-meters-squared"
+          }
+        ]
+      },
+      {
+        "path": "/where-the-weeds-are",
+        "title": "Where the weeds are",
+        "components": [
+          {
+            "name": "ggqVVq",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\n\nIf you don't know the address of where the weeds are, you can show its location using what3words or Defra Magic maps.\n<br>\n<br>\n\nGet a <a href=\"https://what3words.com/pretty.needed.chill?redirect=true\" class=\"govuk-link\" target=\"_blank\">what3words (opens in new tab)</a> location. \n<br>\n<br>\n\nOr use <a href=\"https://magic.defra.gov.uk/magicmap.aspx\" class=\"govuk-link\" target=\"_blank\">Defra Magic maps (opens in new tab)</a> to get a grid reference number.\n</p>\n\n"
+          },
+          {
+            "name": "LYXBEn",
+            "options": {
+              "hideTitle": false,
+              "required": false
+            },
+            "schema": {},
+            "type": "TextField",
+            "hint": "",
+            "title": "Grid reference number or what3words location"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-many-weeds-plants-are-there-per-10-meters-squared"
+          }
+        ]
+      },
+      {
+        "path": "/how-many-weeds-plants-are-there-per-10-meters-squared",
+        "title": "How many weeds plants are there per 10 meters squared?",
+        "components": [
+          {
+            "name": "zcyGgf",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nA square meter is equivalent to an area of a square with sides one meter in length.</p>\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "gYfgkN",
+            "options": {
+              "hideTitle": true,
+              "required": true
+            },
+            "schema": {},
+            "type": "RadiosField",
+            "title": "Weeds plants per 10 meters squared (10m2)",
+            "list": "yvRBmi",
+            "values": {
+              "type": "listRef"
+            },
+            "hint": ""
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-advanced-are-the-weeds"
+          }
+        ]
+      },
+      {
+        "path": "/how-advanced-are-the-weeds",
+        "title": "How advanced are the weeds?",
+        "components": [
+          {
+            "name": "DXPiHj",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "RadiosField",
+            "list": "ZcdIpU",
+            "title": "How advanced the weeds are",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-is-the-weed-infested-land-currently-used-for"
+          }
+        ]
+      },
+      {
+        "path": "/what-is-the-weed-infested-land-currently-used-for",
+        "title": "What is the weed infested land currently used for?",
+        "components": [
+          {
+            "name": "gLxbLB",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "TextField",
+            "title": "Use of the weed infested land"
+          }
+        ],
+        "next": [
+          {
+            "path": "/approximately-how-much-land-is-currently-infested-by-weeds-in-metres-squared-m2"
+          }
+        ]
+      },
+      {
+        "path": "/approximately-how-much-land-is-currently-infested-by-weeds-in-metres-squared-m2",
+        "title": "Approximately how much land is currently infested by weeds in metres squared (m2)?",
+        "components": [
+          {
+            "name": "sXcmnO",
+            "options": {
+              "hideTitle": false
+            },
+            "schema": {},
+            "type": "NumberField",
+            "hint": "",
+            "title": "Land currently infested by weeds (in metres squared)"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-the-weeds-are-spreading"
+          }
+        ]
+      },
+      {
+        "path": "/how-the-weeds-are-spreading",
+        "title": "How the weeds are spreading",
+        "components": [
+          {
+            "name": "FauLmU",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nUse Defra Magic maps to help us understand how the weeds are spreading.\n\n<ol class=\"govuk-list govuk-list--number\">\n<li>Go to <a href=\"https://magic.defra.gov.uk/magicmap.aspx\" class=\"govuk-link\" target=\"_blank\">Defra Magic maps (opens in new tab)</a>.\n<li>Search the location to bring up the area.<br></li>\n<li>Select 'Drawing Tools' in the toolbar at the top.<br></li>\n<li>Use the line tool to draw an arrow or arrows to show how the weeds are spreading.</li>\n<li>To download your map, select the 'Print' icon in the toolbar at the top.<br></li>\n<li>Enter a map title in the text box.<br></li>\n<li>Select 'Format' then select 'JPG'.<br></li>\n<li> Select 'Print'.<br></li>\n<li> Select the 'Printout' link that appears below. This will bring up a new window.<br></li>\n<li>In the new window, right-click and then select 'Save  image as', name your file then select 'Save'.</li>\n</ol> \n\n<p class=\"govuk-body\">\nEmail your saved image to <a href=\"mailto:weedenquiries@naturalengland.org.uk\" class=\"govuk-link\" target=\"_blank\">weedenquiries@naturalengland.org.uk</a>.\n<br>\n</p>"
+          },
+          {
+            "name": "kQFTLP",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "RadiosField",
+            "title": "Can you send us a Magic map?",
+            "list": "gqyIHi",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/do-you-know-any-of-the-landowners-details"
+          }
+        ]
+      },
+      {
+        "path": "/do-you-know-any-of-the-landowners-details",
+        "title": "Do you know any of the landowner's details?",
+        "components": [
+          {
+            "name": "zkKRoO",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "hint": "These include their name, address, contact number and email address.",
+            "title": "Do you know any of the landowner's details?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/have-you-attempted-to-contact-the-landowner",
+            "condition": "VmqnBs"
+          },
+          {
+            "path": "/landowners-details-KqGMwe",
+            "condition": "hvxnMz"
+          }
+        ]
+      },
+      {
+        "path": "/have-you-attempted-to-contact-the-landowner",
+        "title": "Have you attempted to contact the landowner?",
+        "components": [
+          {
+            "name": "lyiJVd",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "You have attempted to contact the landowner"
+          }
+        ],
+        "next": [
+          {
+            "path": "/do-you-know-the-address-of-the-location-thats-threatened-by-the-weeds"
+          }
+        ]
+      },
+      {
+        "path": "/do-you-know-the-address-of-the-location-thats-threatened-by-the-weeds",
+        "title": "Do you know the address of the location that's threatened by the weeds?",
+        "components": [
+          {
+            "name": "CfFhAH",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Do you know the address of the location that's threatened by the weeds?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-is-the-address-of-the-location-thats-threatened-by-the-weeds",
+            "condition": "ZdytNq"
+          },
+          {
+            "path": "/location-thats-threatened-by-the-weeds",
+            "condition": "perweD"
+          }
+        ]
+      },
+      {
+        "path": "/what-is-the-address-of-the-location-thats-threatened-by-the-weeds",
+        "title": "What is the address of the location that's threatened by the weeds?",
+        "components": [
+          {
+            "name": "DjhgTQ",
+            "options": {
+              "hideTitle": true
+            },
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Address of location that's threatened by the weeds"
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-is-the-threatened-land-used-for"
+          }
+        ]
+      },
+      {
+        "path": "/what-is-the-threatened-land-used-for",
+        "title": "What is the threatened land used for?",
+        "components": [
+          {
+            "name": "QNQrAL",
+            "options": {
+              "hideTitle": true,
+              "required": false
+            },
+            "schema": {},
+            "type": "CheckboxesField",
+            "title": "What is the threatened land used for?",
+            "list": "xIJIhw",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-close-are-the-weeds-to-the-land-thats-threatened"
+          }
+        ]
+      },
+      {
+        "path": "/how-close-are-the-weeds-to-the-land-thats-threatened",
+        "title": "How close are the weeds to the land that's threatened?",
+        "components": [
+          {
+            "name": "cETmMV",
+            "options": {},
+            "schema": {},
+            "type": "RadiosField",
+            "title": "How close are the weeds to the land that's threatened?",
+            "list": "TNwKML"
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "path": "/summary",
+        "title": "Check your answers",
+        "components": [],
+        "next": [],
+        "controller": "./pages/summary.js"
+      },
+      {
+        "path": "/location-thats-threatened-by-the-weeds",
+        "title": "Location that's threatened by the weeds",
+        "components": [
+          {
+            "name": "YeqpSi",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\n\nIf you don't know the address of where's threatened by the weeds, you can get its location using what3words or Defra Magic maps.\n<br>\n<br>\n\nGet a <a href=\"https://what3words.com/pretty.needed.chill?redirect=true\" class=\"govuk-link\" target=\"_blank\">what3words (opens in new tab)</a> location. \n<br>\n<br>\n\nOr use <a href=\"https://magic.defra.gov.uk/magicmap.aspx\" class=\"govuk-link\" target=\"_blank\">Defra Magic maps (opens in new tab)</a> to get a grid reference number.\n</p>"
+          },
+          {
+            "name": "aBWflD",
+            "options": {
+              "hideTitle": true,
+              "required": true
+            },
+            "schema": {},
+            "type": "TextField",
+            "title": "What3words location or grid reference number for where's threatened by the weeds."
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-is-the-threatened-land-used-for"
+          }
+        ]
+      },
+      {
+        "path": "/landowners-details-KqGMwe",
+        "title": "Landowner's details",
+        "components": [
+          {
+            "name": "TRjRkz",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> Add as much as you know.</p>"
+          },
+          {
+            "name": "yRiMCD",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "type": "TextField",
+            "title": "Landowner's name"
+          },
+          {
+            "name": "JshbLv",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "type": "EmailAddressField",
+            "title": "Landowner's email address"
+          },
+          {
+            "name": "OGUsuT",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Landowner's phone number"
+          },
+          {
+            "name": "tcWmCo",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Landowner's address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/have-you-attempted-to-contact-the-landowner"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "user knows the address of where the weeds are",
+        "name": "ANrJRb",
+        "value": {
+          "name": "user knows the address of where the weeds are",
+          "conditions": [
+            {
+              "field": {
+                "name": "hVcRhO",
+                "type": "YesNoField",
+                "display": "Do you know the address of where the weeds are? Yes or no"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "user doesn't know the address of where the weeds are",
+        "name": "Pszpgd",
+        "value": {
+          "name": "user doesn't know the address of where the weeds are",
+          "conditions": [
+            {
+              "field": {
+                "name": "hVcRhO",
+                "type": "YesNoField",
+                "display": "Do you know the address of where the weeds are? Yes or no"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "user knows some landowner details",
+        "name": "yUkYZN",
+        "value": {
+          "name": "user knows some landowner details",
+          "conditions": [
+            {
+              "field": {
+                "name": "uGaYBf",
+                "type": "YesNoField",
+                "display": "Do you know any of the landowner details?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User knows some of the landowner's details",
+        "name": "hvxnMz",
+        "value": {
+          "name": "User knows some of the landowner's details",
+          "conditions": [
+            {
+              "field": {
+                "name": "zkKRoO",
+                "type": "YesNoField",
+                "display": "Do you know any of the landowner's details?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User doesn't know any landowner details",
+        "name": "VmqnBs",
+        "value": {
+          "name": "User doesn't know any landowner details",
+          "conditions": [
+            {
+              "field": {
+                "name": "zkKRoO",
+                "type": "YesNoField",
+                "display": "Do you know any of the landowner's details?"
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User knows the address of the location that's threatened",
+        "name": "ZdytNq",
+        "value": {
+          "name": "User knows the address of the location that's threatened",
+          "conditions": [
+            {
+              "field": {
+                "name": "CfFhAH",
+                "type": "YesNoField",
+                "display": "Do you know the address of the place that's threatened by the spread of weeds?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "User doesn't know the address of the threatened location",
+        "name": "perweD",
+        "value": {
+          "name": "User doesn't know the address of the threatened location",
+          "conditions": [
+            {
+              "field": {
+                "name": "CfFhAH",
+                "type": "YesNoField",
+                "display": "Do you know the address of the location that's threatened?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Which injurious weed are you reporting?",
+        "name": "DJXXvJ",
+        "type": "string",
+        "items": [
+          {
+            "description": "",
+            "text": "Common Ragwort (Senecio jacobaea)",
+            "value": "Common Ragwort (Senecio jacobaea)"
+          },
+          {
+            "text": "Creeping Thistle (Cirsium arvense)",
+            "value": "Creeping Thistle (Cirsium arvense)"
+          },
+          {
+            "text": " Spear Thistle (Cirsium vulgare)",
+            "value": " Spear Thistle (Cirsium vulgare)"
+          },
+          {
+            "text": "Curled Dock (Rumex crispus)",
+            "value": "Curled Dock (Rumex crispus)"
+          },
+          {
+            "text": "Broad-Leaved Dock (Rumex obtusifolius)",
+            "value": "Broad-Leaved Dock (Rumex obtusifolius)"
+          }
+        ]
+      },
+      {
+        "title": "How many plants are there per 10 meters squared (10m2)?",
+        "name": "yvRBmi",
+        "type": "string",
+        "items": [
+          {
+            "text": "Less than 5 plants",
+            "value": "Less than 5 plants"
+          },
+          {
+            "text": "5 to 9 plants",
+            "value": "5 to 9 plants"
+          },
+          {
+            "text": "10 or more plants",
+            "value": "10 or more plants"
+          }
+        ]
+      },
+      {
+        "title": "How advanced are the weeds?",
+        "name": "ZcdIpU",
+        "type": "string",
+        "items": [
+          {
+            "text": "Close to the ground",
+            "value": "Close to the ground"
+          },
+          {
+            "text": "In bud",
+            "value": "In bud"
+          },
+          {
+            "text": "Flowering or seeding",
+            "value": "Flowering or seeding"
+          }
+        ]
+      },
+      {
+        "title": "Can you send us a Magic map?",
+        "name": "gqyIHi",
+        "type": "string",
+        "items": [
+          {
+            "text": "I cannot create a Magic map",
+            "value": "I cannot create a Magic map"
+          },
+          {
+            "text": "I will send the Magic map by email",
+            "value": "I will send the Magic map by email"
+          }
+        ]
+      },
+      {
+        "title": "Landowner's details",
+        "name": "rlrQyE",
+        "type": "string",
+        "items": [
+          {
+            "text": "I know the landowner's name",
+            "value": "I know the landowner's name"
+          },
+          {
+            "text": "I know the landowner's contact number",
+            "value": "I know the landowner's contact number"
+          }
+        ]
+      },
+      {
+        "title": "List of things the threatened land could be used for",
+        "name": "xIJIhw",
+        "type": "string",
+        "items": [
+          {
+            "text": "Keeping or grazing horses or other livestock",
+            "description": "",
+            "value": "Keeping or grazing horses or other livestock"
+          },
+          {
+            "text": "Farmland used to produce conserved forage",
+            "description": "",
+            "value": "Farmland used to produce conserved forage"
+          },
+          {
+            "text": "Other agricultural activities",
+            "value": "Other agricultural activities"
+          },
+          {
+            "text": "None of the above",
+            "value": "None of the above"
+          }
+        ]
+      },
+      {
+        "title": "How close are the weeds to this land?",
+        "name": "TNwKML",
+        "type": "string",
+        "items": [
+          {
+            "text": "Less than 50 metres away",
+            "description": "",
+            "value": "Less than 50 metres away"
+          },
+          {
+            "text": "50 to 100 metres away",
+            "description": "",
+            "value": "50 to 100 metres away"
+          },
+          {
+            "text": "More than 100 metres away",
+            "value": "More than 100 metres away"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "startPage": "/whats-your-name",
+    "declaration": "<p class=\"govuk-body\">By submitting this form you’re confirming that:\n\n- to the best of your knowledge, the answers you’re providing are correct\n- you've read and agreed to the <a href=\"https://www.gov.uk/government/publications/natural-england-privacy-notices/weeds-act-privacy-notice\" class=\"govuk-link\" target=\"_blank\">injurious weeds privacy notice</a>. </p>\n",
+    "outputEmail": "weedenquiries@naturalengland.org.uk"
+  }
+}
