@@ -1,0 +1,72 @@
+{
+  "id": "6716145e4909dc24d69c43ba",
+  "metadata": {
+    "id": "6716145e4909dc24d69c43ba",
+    "slug": "take-part-in-user-research-for-the-defra-forms-team",
+    "title": "Take part in user research for the Defra Forms team",
+    "organisation": "Defra",
+    "teamName": "Defra Forms team",
+    "teamEmail": "defraforms@defra.gov.uk",
+    "draft": {
+      "createdAt": "2024-10-21T08:44:14.636Z",
+      "createdBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-10-21T08:44:14.636Z",
+      "updatedBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-10-21T08:44:14.636Z",
+    "updatedBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "updatedAt": "2024-10-21T08:44:14.636Z"
+  },
+  "draft": {
+    "name": "Take part in user research for the Defra Forms team",
+    "startPage": "/page-one",
+    "pages": [
+      {
+        "path": "/page-one",
+        "title": "Page one",
+        "section": "section",
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "This is your first field",
+            "hint": "Help text",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      }
+    ],
+    "conditions": [],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title"
+      }
+    ],
+    "lists": []
+  }
+}

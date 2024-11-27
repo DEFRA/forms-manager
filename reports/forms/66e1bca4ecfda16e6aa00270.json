@@ -1,0 +1,144 @@
+{
+  "id": "66e1bca4ecfda16e6aa00270",
+  "metadata": {
+    "id": "66e1bca4ecfda16e6aa00270",
+    "slug": "authorised-person-travelling-with-a-pet-from-great-britain-to-northern-ireland",
+    "title": "Authorised person travelling with a pet from Great Britain to Northern Ireland",
+    "organisation": "Defra",
+    "teamName": "Animal travel team",
+    "teamEmail": "alex.webballen@defra.gov.uk",
+    "contact": {
+      "phone": "Pet Travel helpline  \r\nTelephone: 0370 241 1710  \r\nMonday to Friday, 8.30am to 5pm (closed on bank holidays)  \r\n[Find out about call charges](https://www.gov.uk/call-charges)",
+      "email": {
+        "address": "pettravel@apha.gov.uk",
+        "responseTime": "We aim to respond within 5 working days"
+      }
+    },
+    "privacyNoticeUrl": "https://www.gov.uk/government/publications/animal-and-plant-heath-agency-privacy-notices/pet-travel-scheme-privacy-notice",
+    "draft": {
+      "createdAt": "2024-09-11T15:52:04.677Z",
+      "createdBy": {
+        "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+        "displayName": "Andrew Jackson - Kirby"
+      },
+      "updatedAt": "2024-09-20T16:01:04.245Z",
+      "updatedBy": {
+        "id": "91c9d87a-17c3-421f-a03c-41fb597545a1",
+        "displayName": "Andrew Jackson - Kirby"
+      }
+    },
+    "createdBy": {
+      "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "createdAt": "2024-09-11T15:52:04.677Z",
+    "updatedBy": {
+      "id": "91c9d87a-17c3-421f-a03c-41fb597545a1",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "updatedAt": "2024-09-24T09:21:34.939Z"
+  },
+  "draft": {
+    "name": "Authorised person travelling with a pet from Great Britain to Northern Ireland",
+    "pages": [
+      {
+        "title": "What's your name?",
+        "path": "/whats-your-name",
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ],
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "What's your name?",
+            "hint": "Your name must be the same as it is on your Pet Travel Document.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      },
+      {
+        "title": "What's your email address?",
+        "path": "/whats-your-email-address",
+        "controller": "PageController",
+        "next": [
+          {
+            "path": "/whats-the-pet-travel-document-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "KXXpgR",
+            "title": "What's your email address? ",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the Pet Travel Document number?",
+        "path": "/whats-the-pet-travel-document-number",
+        "next": [
+          {
+            "path": "/whats-name-of-the-pet-owner"
+          }
+        ],
+        "components": [
+          {
+            "name": "JJzDYZ",
+            "title": "Pet Travel document number",
+            "type": "TextField",
+            "hint": "The pet owner should have provided you with this number. It must match the number written on the Pet Travel Document \nexactly.\n\nThe Pet travel  number should be 11 characters long, starting with 'GB826' followed by a mix of numbers and letters. For example, GB826A1B2C3.",
+            "options": {
+              "customValidationMessage": "The Pet travel  number should be 11 characters long, starting with 'GB826' followed by a mix of numbers and letters. For example, GB826A1B2C3."
+            },
+            "schema": {
+              "regex": "GB826(( [0-9a-zA-Z]{3}){2}|([0-9a-zA-Z]{6}))"
+            }
+          }
+        ]
+      },
+      {
+        "title": "What's name of the pet owner?",
+        "path": "/whats-name-of-the-pet-owner",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "cLGhjd",
+            "title": "Pet owner's name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [],
+    "skipSummary": false,
+    "declaration": "<p class=\"govuk-body\">I declare that:</p>\n<ul class=\"govuk-list govuk-list--bullet\">\n<li>I am the person nominated by the pet owner to travel with their pet</li>\n<li>the answers I have given are true and correct to the best of my knowledge</li>\n<li>I understand that I can travel with this pet to and from Northern Ireland only and not to an EU member state (the Republic of Ireland is an EU member state)</li>\n<li>I am not taking the animal as part of a commercial movement</li>\n<li>I have read and understood the<a href class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\"=\"https://www.gov.uk/government/publications/animal-and-plant-heath-agency-privacy-notices/pet-travel-scheme-privacy-notice\"> Pet travel scheme privacy notice (opens new tab)</a></li>\n</ul>",
+    "startPage": "/whats-your-name"
+  }
+}

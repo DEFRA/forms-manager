@@ -1,0 +1,84 @@
+{
+  "id": "6685458da608789f306eb120",
+  "metadata": {
+    "id": "6685458da608789f306eb120",
+    "slug": "test-bethan",
+    "title": "Test Bethan",
+    "organisation": "Defra",
+    "teamName": "Reform team",
+    "teamEmail": "z@z.gov.uk",
+    "draft": {
+      "createdAt": "2024-07-03T12:35:25.359Z",
+      "createdBy": {
+        "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+        "displayName": "Andrew Jackson - Kirby"
+      },
+      "updatedAt": "2024-07-03T12:46:34.766Z",
+      "updatedBy": {
+        "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+        "displayName": "Andrew Jackson - Kirby"
+      }
+    },
+    "createdBy": {
+      "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "createdAt": "2024-07-03T12:35:25.359Z",
+    "updatedBy": {
+      "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "updatedAt": "2024-07-03T12:46:34.766Z"
+  },
+  "draft": {
+    "name": "Test Bethan",
+    "startPage": "/dddd",
+    "pages": [
+      {
+        "path": "/dddd",
+        "title": "dddd",
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "This is your first field",
+            "hint": "Help text",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "PgGrEi",
+            "options": {
+              "suffix": "km"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Number ffgfgf"
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController",
+        "components": [],
+        "next": []
+      }
+    ],
+    "conditions": [],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [],
+    "skipSummary": false
+  }
+}

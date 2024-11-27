@@ -1,0 +1,1942 @@
+{
+  "id": "6684168c4682daf93da2587b",
+  "metadata": {
+    "id": "6684168c4682daf93da2587b",
+    "slug": "apply-for-consent-for-a-planned-activity-on-a-site-of-special-scientific-interest-sssi",
+    "title": "Apply for consent for a planned activity on a site of special scientific interest (SSSI)",
+    "organisation": "Natural England",
+    "teamName": "Reform team",
+    "teamEmail": "defraforms@defraforms.gov.uk",
+    "contact": {
+      "email": {
+        "address": "ProtectedSites@naturalengland.org.uk",
+        "responseTime": "We aim to respond within 5 working days"
+      },
+      "phone": "0300 060 3900"
+    },
+    "submissionGuidance": "Natural England aims to make consent decisions within 28 working days but can take up to 4 calendar months.",
+    "privacyNoticeUrl": "https://www.gov.uk/government/publications/natural-england-privacy-notices",
+    "notificationEmail": "defraforms@defra.gov.uk",
+    "draft": {
+      "createdAt": "2024-07-02T15:02:36.486Z",
+      "createdBy": {
+        "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+        "displayName": "Andrew Jackson - Kirby"
+      },
+      "updatedAt": "2024-11-22T12:45:20.561Z",
+      "updatedBy": {
+        "id": "91c9d87a-17c3-421f-a03c-41fb597545a1",
+        "displayName": "Andrew Jackson - Kirby"
+      }
+    },
+    "createdBy": {
+      "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "createdAt": "2024-07-02T15:02:36.486Z",
+    "updatedBy": {
+      "id": "91c9d87a-17c3-421f-a03c-41fb597545a1",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "updatedAt": "2024-11-26T10:01:23.380Z"
+  },
+  "draft": {
+    "name": "Apply for consent for a planned activity on a site of special scientific interest (SSSI)",
+    "pages": [
+      {
+        "path": "/whats-the-owner-or-occupiers-name-UzJCYF",
+        "title": "What's the owner or occupier's name?",
+        "components": [
+          {
+            "name": "JZrJgO",
+            "options": {},
+            "type": "TextField",
+            "title": "Owner or occupier's name",
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-owner-or-occupiers-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-owner-or-occupiers-email-address",
+        "title": "What's the owner or occupier's email address?",
+        "components": [
+          {
+            "name": "nQtkjy",
+            "options": {},
+            "schema": {},
+            "type": "EmailAddressField",
+            "title": "Owner or occupier's email address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-owner-or-occupiers-phone-number"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-owner-or-occupiers-phone-number",
+        "title": "What's the owner or occupier's phone number?",
+        "components": [
+          {
+            "name": "MOeGhs",
+            "options": {},
+            "type": "TelephoneNumberField",
+            "title": "Owner or occupier's phone number",
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-owner-or-occupiers-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-owner-or-occupiers-address",
+        "title": "What's  the owner or occupier's address?",
+        "components": [
+          {
+            "name": "UzQkaG",
+            "options": {},
+            "type": "UkAddressField",
+            "title": "Owner or occupier's address",
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/are-you-seeking-consent-for-planned-activities-that-are-connected-to-an-existing-agreement-planning-permission-or-license"
+          },
+          {
+            "path": "/do-you-have-an-existing-consent-for-the-same-planned-activity-you-intend-to-carry-out-on-your-land"
+          }
+        ]
+      },
+      {
+        "title": "SSSI's you intend to carry out operations on",
+        "path": "/sssis-you-intend-to-carry-out-operations-on",
+        "next": [
+          {
+            "path": "/will-the-planned-activities-take-place-in-multiple-locations"
+          }
+        ],
+        "components": [
+          {
+            "name": "laMRNc",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Tell us the names of the SSSIs where activities are planned to be carried out.</p>\n\n<p class=\"govuk-body\">You can also use the <a href=\"https://magic.defra.gov.uk/MagicMap.aspx?chosenLayers=sssiPIndex,sssiIndex,backdropDIndex,backdropIndex,europeIndex,vmlBWIndex,25kBWIndex,50kBWIndex,250kBWIndex,miniscaleBWIndex,baseIndex&box=-187122:5095:1034155:705095&useDefaultbackgroundMapping=false\" class=\"govuk-link rel=\"noreferrer noopener\" target=\"_blank\">MAGIC map system (opens a new tab)</a> to find out the name of the SSSI you are proposing to carry out the activities on: </p> <ol class=\"govuk-list govuk-list--number\"> <li>Click on the '+' symbol below the on-screen compass to zoom in on the detail.</li> <li>Drag the map to your location using your mouse or mouse pad.</li> <li>Click on the 'i' identify tool in the toolbar at the top of the screen.</li> <li>Using the crosshair, click on the map to find out the name of the SSSI.</li> </ol>"
+          },
+          {
+            "name": "XiQBkC",
+            "options": {},
+            "schema": {},
+            "type": "MultilineTextField",
+            "title": "What's the names of the SSSIs?",
+            "hint": "For example, I will gain access to do the operations by going through Hartland SSSI and be carrying out the activities on Arne SSSI. "
+          }
+        ]
+      },
+      {
+        "title": "Location of the planned activities within the SSSI",
+        "path": "/location-of-the-planned-activities-within-the-sssi",
+        "next": [
+          {
+            "path": "/accessing-the-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "rlaQWg",
+            "options": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> You must provide the Easting and Northing coordinates for the centre of the site, where you intent to carry out planned activities  within the SSSI. </p>\n\n<p class=\"govuk-body\">Easting and Northing coordinates are 6 digits long, for example,'Easting = 458595' and 'Northing = 482886.'</p>",
+            "schema": {}
+          },
+          {
+            "name": "XLNaja",
+            "options": {},
+            "type": "Details",
+            "title": "You can use Defra Magic Maps  to find the coordinates for by following these instructions:",
+            "content": "<ol class=\"govuk-list govuk-list--number\">\n<li>Visit <a class:\"govuk-link\" href=\"https://magic.defra.gov.uk/MagicMap.aspx?chosenLayers=sssiPIndex,sssiIndex,backdropDIndex,backdropIndex,europeIndex,vmlBWIndex,25kBWIndex,50kBWIndex,250kBWIndex,miniscaleBWIndex,baseIndex&amp;box=-187122:5095:1034155:705095&amp;useDefaultbackgroundMapping=false\">Defra magic maps</a></p></li>\n<li>Search for a postcode or place.</li>\n<li>Using the map, locate the land or building. Use the +/- icons to zoom in and out.</li>\n<li>In the top toolbar, select the fourth icon along ('Where am I?') - it looks like a target.</li>\n<li>Click on the land or building.</li>\n<li>A pop-up box will appear showing the land details for this location.  You will need the Easting and Northing coordinates It&rsquo;s which are 6 numbers long each, for example, Easting = 458595 and Northing = 482886.</li>\n</ol>",
+            "schema": {}
+          },
+          {
+            "name": "SYTNcg",
+            "options": {},
+            "schema": {},
+            "type": "NumberField",
+            "title": "Eastings coordinates"
+          },
+          {
+            "name": "vkyvjh",
+            "options": {},
+            "schema": {},
+            "type": "NumberField",
+            "title": "Northing coordinates"
+          }
+        ]
+      },
+      {
+        "path": "/operation-timings",
+        "title": "Operation timings",
+        "components": [
+          {
+            "name": "ZDrTNf",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> Natural England has up to 4 months to consider a notice and decide whether to grant consent. <br><br>Operations should not commence until consent has been granted by Natural England. <br><br> You must consider this when deciding the start and end dates for the operations.</p>"
+          },
+          {
+            "name": "Dnryot",
+            "options": {
+              "condition": "xmAXlA"
+            },
+            "schema": {},
+            "type": "DatePartsField",
+            "title": "When are the operations going to start?"
+          },
+          {
+            "name": "KOesPL",
+            "options": {},
+            "schema": {},
+            "type": "DatePartsField",
+            "title": "When are the operations going to finish?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/supporting-documents"
+          }
+        ]
+      },
+      {
+        "title": "How you intend to carry out the operations",
+        "path": "/how-you-intend-to-carry-out-the-operations",
+        "next": [
+          {
+            "path": "/timing-considerations"
+          }
+        ],
+        "components": [
+          {
+            "name": "mzpuTS",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> You should include as much detail as possible about how you intend to carry out the operations, such as:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>how you are going to carry out the operations, for example, cutting, digging, an event, blocking up or repairing</li> <li>details of any equipment or materials you intend to use, including the type and how, when and where they will be used</li><li>•\thow you will remove any waste materials, such as cut branches or debris, from the site</li> <li>the number of people who will undertake the operations</li> <li>details of all planned construction, maintenance, operation, or removal works, including how, where and when they will be undertaken</li> <li>any protection measures you intend to introduce to help protect the SSSI during the operations</li> <li>is the work going to be one off, phased or ongoing over many years</li> </ul>"
+          },
+          {
+            "name": "yaIZhX",
+            "options": {
+              "classes": "",
+              "rows": 25
+            },
+            "schema": {},
+            "type": "MultilineTextField",
+            "title": "Describe how you plan to carry out  the  proposed operations",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "Supporting documents",
+        "path": "/supporting-documents",
+        "controller": "FileUploadPageController",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "lruAEb",
+            "options": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You can upload additional information using the form to support your application. This will help Natural England assess your notice for consent fully and efficiently,such as:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>site management plan</li> <li>supplementary methodology statements</li> <li>survey results</li> </ul> <p class=\"govuk-body\">This information will help Natural England to be able to make decision about giving consent for the operation to be carried out or permitted.</p> ",
+            "schema": {}
+          },
+          {
+            "name": "dRVHy",
+            "type": "FileUploadField",
+            "hint": "Upload  your supporting documents in either a Word, PDF or JPEG format. The maximum file size for each file is 100MB",
+            "title": "Upload your supporting documents",
+            "options": {
+              "required": false,
+              "multiple": false,
+              "accept": "application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/csv,application/vnd.oasis.opendocument.text,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/rtf,text/rtf,text/plain,application/pdf,image/jpeg,image/png"
+            },
+            "schema": {
+              "min": 1,
+              "max": 4
+            }
+          }
+        ]
+      },
+      {
+        "title": "Owner or occupier of the SSSI land",
+        "path": "/owner-or-occupier-of-the-sssi-land",
+        "next": [
+          {
+            "path": "/whats-the-owner-or-occupiers-name-UzJCYF",
+            "condition": "syXaoJ"
+          },
+          {
+            "path": "/do-you-have-an-existing-consent-for-the-same-planned-activity-you-intend-to-carry-out-on-your-land"
+          }
+        ],
+        "components": [
+          {
+            "name": "gfQccF",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">To submit this notice for consent to Natural England you must be either:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>the registered owner or occupier of the SSSI land where operations are planned to be carried out</li> <li>an agent officially appointed to act on behalf of the owner or occupier</li> </ul> <p class=\"govuk-body\">You must be the registered owner or occupier of the land with Natural England to submit a notice. If the ownership or occupation of the land has changed.</p> <p class=\"govuk-body\"> If you are not current registered owner or occupier, for example you just bought the land, then you must update <a href=\"#\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">your land's records (opens in new tab)</a>  with Natural England before submitting this notice.</p> <p class=\"govuk-body\">If you are a third party (for example, a member of the public or an event organiser) wishing to carry out an operation that requires consent, you must ask the registered owner or occupier of the land to submit the owner or occupier permission form to show they given permission to you to carry out the activity on their land.</p> <p class=\"govuk-body\"> If the operations will extend onto SSSI land that you do not own or manage, such as a neighbouring farm, the owner or occupier of that land will need to apply for consent separately.</p>"
+          },
+          {
+            "name": "qnUssW",
+            "options": {},
+            "schema": {},
+            "type": "RadiosField",
+            "title": "In what capacity are you submitting this notice ?",
+            "list": "wCUaIE",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "name": "nPEvvP",
+            "options": {},
+            "type": "TextField",
+            "title": "Applicant's name",
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-address",
+        "title": "What's your address?",
+        "components": [
+          {
+            "name": "bCOJhb",
+            "options": {
+              "required": true
+            },
+            "type": "UkAddressField",
+            "title": "What's your address?",
+            "hint": "",
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address-aXTSIW"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-email-address-aXTSIW",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "LDBjur",
+            "options": {},
+            "type": "EmailAddressField",
+            "title": "What's your email address?",
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ]
+      },
+      {
+        "title": "What's your phone number?",
+        "path": "/whats-your-phone-number",
+        "next": [
+          {
+            "path": "/owner-or-occupier-of-the-sssi-land"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZcKrCv",
+            "options": {},
+            "type": "TelephoneNumberField",
+            "title": "What's your phone number?",
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/summary",
+        "title": "Summary",
+        "components": [],
+        "next": [],
+        "controller": "./pages/summary.js"
+      },
+      {
+        "title": "Locations of  the planned activities within the SSSI",
+        "path": "/locations-of-the-planned-activities-within-the-sssi",
+        "next": [
+          {
+            "path": "/planned-activities-map-optional"
+          }
+        ],
+        "components": [
+          {
+            "name": "AzidSB",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> You must provide Easting and Northing coordinates of the exact location of where you will gain access and for where you carry out the planned activities within each SSSI. </p>\n\n"
+          },
+          {
+            "name": "dDVkOU",
+            "options": {},
+            "schema": {},
+            "type": "Details",
+            "title": "You can use Defra Magic Maps  to find the coordinates for by following these instructions:",
+            "content": "<ol class=\"govuk-list govuk-list--number\">\n<li>Visit <a class:\"govuk-link\" href=\"https://magic.defra.gov.uk/MagicMap.aspx?chosenLayers=sssiPIndex,sssiIndex,backdropDIndex,backdropIndex,europeIndex,vmlBWIndex,25kBWIndex,50kBWIndex,250kBWIndex,miniscaleBWIndex,baseIndex&amp;box=-187122:5095:1034155:705095&amp;useDefaultbackgroundMapping=false\">Defra magic maps</a></p></li>\n<li>Search for a postcode or place.</li>\n<li>Using the map, locate the land or building. Use the +/- icons to zoom in and out.</li>\n<li>In the top toolbar, select the fourth icon along ('Where am I?') - it looks like a target.</li>\n<li>Click on the land or building.</li>\n<li>A pop-up box will appear showing the land details for this location.  You will need the Easting and Northing coordinates It&rsquo;s which are 6 numbers long each, for example, Easting = 458595 and Northing = 482886.</li>\n</ol>"
+          },
+          {
+            "name": "XwNUya",
+            "options": {},
+            "schema": {},
+            "type": "MultilineTextField",
+            "title": "What are the coordinates for each location?"
+          }
+        ]
+      },
+      {
+        "title": "Planned activities map (optional)",
+        "path": "/planned-activities-map-optional",
+        "controller": "FileUploadPageController",
+        "next": [
+          {
+            "path": "/gaining-access-to-carry-out-the-planned-activities"
+          }
+        ],
+        "components": [
+          {
+            "name": "NVYPdc",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You can provide a map of planned activities to support your application for consent this will help our advisors assess the scope, potential environmental impacts, and regulatory compliance.</p> <p class=\"govuk-body\">Submitting a detailed map of the operations you intend to carry out will allow us to process your application more efficiently and respond to it more quickly.</p> <p class=\"govuk-body\">Your map should include:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>the specific locations of all  of the operations</li> <li>any access locations and routes to be used throughout the planned activities.</li> <li>storage areas for materials and vehicles</li> <li>the boundaries of any sites of SSSI's involved in your planned activities</li> </ul>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "EFBNfj",
+            "title": "You can use Defra magic maps to create the map of your operations by following these instructions:",
+            "type": "Details",
+            "content": "<ol class=\"govuk-list govuk-list--number\"> <li>Find the Site of Special Interest (SSSI) you will be working on.</li> <li>Zoom out on the map to encompass all the land involved in your planned activities.</li> <li>Click on the drawing tool icon (it looks like a paint palette with a brush). It's the icon on the far left at the top of the screen.</li> <li>Select the point dot tool (it looks like a bullet point).</li> <li>Mark the location where you want to add a point by clicking on the map. For example, mark where you will access the land or where an operation will be carried out.</li> <li>Click to add a red dot at that location.</li> <li>Click back to the drawing tools.</li> <li>Select the text tool icon (it looks like an uppercase A).</li> <li>Enter the text for the label you want to add, for example, \"vehicle storage.\"</li> <li>Click OK.</li> <li>Click on the red dot where you want to add the label.</li> <li>To export the map, click the print icon in the top toolbar.</li> <li>Enter a name for the map, for example, 'RSPB drone surveillance map'.</li> <li>Choose a layout for the exported map by selecting from the \"choose layout\" drop-down box.</li> <li>Select the appropriate layout for your map.</li> <li>Select PDF from the second drop-down box.</li> <li>Click 'print' to download the map as a PDF or JPEG, ready to upload it to the form.</li> </ol>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "XIwyEs",
+            "type": "FileUploadField",
+            "hint": "Upload up to 2 copies of your map in either in a Word or PDF format. The maximum file size for each file is 100MB. ",
+            "title": "Upload the map of  your operations",
+            "options": {
+              "required": false,
+              "multiple": false,
+              "accept": "application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/csv,application/vnd.oasis.opendocument.text,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/rtf,text/rtf,text/plain,application/pdf,image/jpeg,image/png"
+            },
+            "schema": {
+              "min": 1,
+              "max": 4
+            }
+          }
+        ]
+      },
+      {
+        "title": "Timing considerations",
+        "path": "/timing-considerations",
+        "next": [
+          {
+            "path": "/operation-timings"
+          }
+        ],
+        "components": [
+          {
+            "name": "rqKCKT",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You must tell us about any considerations or restrictions that might affect the timing of your planned activities that you intend to carry out. You should explain:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>the specific factor or restriction</li> <li>how it impacts when you can schedule the planned activities</li> <li>any adjustments you may need to make to your timings</li> </ul> <p class=\"govuk-body\">For example, you may need to account for:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>specific weather or ground conditions needed to carry out the operations</li> <li>the need to carry out operations outside of any animals or birds breeding or hibernating season</li> </ul>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "QOfEXf",
+            "options": {
+              "required": false,
+              "optionalText": true,
+              "rows": 10
+            },
+            "schema": {},
+            "type": "MultilineTextField",
+            "title": "Is there anything that could delay the start of this work or may require you to make a change to the operational timings?",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "Are you seeking consent for planned activities that are connected to an existing agreement, planning permission, or license?",
+        "path": "/are-you-seeking-consent-for-planned-activities-that-are-connected-to-an-existing-agreement-planning-permission-or-license",
+        "next": [
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          },
+          {
+            "path": "/what-existing-land-management-agreement-are-you-applying-for-consent-under",
+            "condition": "EepnuX"
+          },
+          {
+            "path": "/which-wildlife-licence-are-you-applying-for-consent-under",
+            "condition": "tykAEN"
+          },
+          {
+            "path": "/supplementary-notice-of-operations-within-a-site-of-special-scientific-interest-sssi",
+            "condition": "UujaOB"
+          },
+          {
+            "path": "/which-authority-has-or-is-going-to-grant-the-planning-permission",
+            "condition": "FsuMPa"
+          },
+          {
+            "path": "/what-scheme-or-licence-are-you-applying-for-consent-under",
+            "condition": "lcUJdJ"
+          },
+          {
+            "path": "/have-you-sought-advice-from-natural-england-about-this-notice-for-consent",
+            "condition": "vDuQhc"
+          }
+        ],
+        "components": [
+          {
+            "name": "powOIp",
+            "title": "Are you applying for consent as part of a land management agreement or licence",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "NmfzIf",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Countryside Stewardship reference number",
+        "path": "/countryside-stewardship-reference-number",
+        "next": [
+          {
+            "path": "/land-management-scheme-agreement"
+          }
+        ],
+        "components": [
+          {
+            "name": "JpYiNK",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> You must provide your Countryside Stewardship agreement reference number. It is 7 numbers long, for example, '1643456. </p>"
+          },
+          {
+            "name": "XJZjZt",
+            "title": "What's your Countryside Stewardship reference number?",
+            "type": "TextField",
+            "hint": " This reference number will be 7 numbers long, for example, 1642356. ",
+            "options": {
+              "customValidationMessage": "Your Countryside Stewardship reference number should be 7 digits long."
+            },
+            "schema": {
+              "regex": "[0-9]{7}"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Land management scheme agreement",
+        "path": "/land-management-scheme-agreement",
+        "controller": "FileUploadPageController",
+        "next": [
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "aNLWNi",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">As you intend to carry out activities within a SSSI under your existing land management agreement, you need to upload the following with this form, a copy of:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li> your land management agreement document</li> <li> the map from your land management agreement</li> </ul>"
+          },
+          {
+            "name": "FqmRMn",
+            "type": "FileUploadField",
+            "hint": "Upload  a copy of your  land management agreement and agreement map in either as a Word document or a PDF. The maximum file size for each file is 100MB",
+            "title": "Upload your existing land management agreement and agreement map ",
+            "options": {
+              "required": true,
+              "multiple": false,
+              "accept": "application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/csv,application/vnd.oasis.opendocument.text,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/rtf,text/rtf,text/plain,application/pdf,image/jpeg,image/png"
+            },
+            "schema": {
+              "min": 1,
+              "max": 4
+            }
+          }
+        ]
+      },
+      {
+        "title": "Are the planned activities going to be carried out over more than one SSSI?",
+        "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi",
+        "next": [
+          {
+            "path": "/sssis-you-intend-to-carry-out-operations-on",
+            "condition": ""
+          },
+          {
+            "path": "/sssi-you-intend-to-carry-out-the-operations-on",
+            "condition": "LSZrHM"
+          }
+        ],
+        "components": [
+          {
+            "name": "YGkDFj",
+            "title": "Are the planned activities going to be carried out over more than one SSSI?",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "IfeOoc",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "SSSI you intend to carry out  the operations on",
+        "path": "/sssi-you-intend-to-carry-out-the-operations-on",
+        "next": [
+          {
+            "path": "/will-the-planned-activities-take-place-in-multiple-locations"
+          }
+        ],
+        "components": [
+          {
+            "name": "gVmvXU",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Tell us the name of the SSSI where activities are planned to be carried out.</p>\n\n<p class=\"govuk-body\">You can also use the <a href=\"https://magic.defra.gov.uk/MagicMap.aspx?chosenLayers=sssiPIndex,sssiIndex,backdropDIndex,backdropIndex,europeIndex,vmlBWIndex,25kBWIndex,50kBWIndex,250kBWIndex,miniscaleBWIndex,baseIndex&box=-187122:5095:1034155:705095&useDefaultbackgroundMapping=false\" class=\"govuk-link rel=\"noreferrer noopener\" target=\"_blank\">MAGIC map system (opens a new tab)</a>  to find out the name of the SSSI's you are proposing to carry out the activities on:</p> <ol class=\"govuk-list govuk-list--number\"> <li>Click on the '+' symbol below the on-screen compass to zoom in on the detail.</li> <li>Drag the map to your location using your mouse or mouse pad.</li> <li>Click on the 'i' identify tool in the toolbar at the top of the screen.</li> <li>Using the crosshair, click on the map to find out the name of the SSSI.</li> </ol>"
+          },
+          {
+            "name": "MUKaqr",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "What's the SSSI's name?"
+          }
+        ]
+      },
+      {
+        "title": "Will the planned activities take place in multiple locations?",
+        "path": "/will-the-planned-activities-take-place-in-multiple-locations",
+        "next": [
+          {
+            "path": "/location-of-the-planned-activities-within-the-sssi"
+          },
+          {
+            "path": "/locations-of-the-planned-activities-within-the-sssi",
+            "condition": "Qlzwue"
+          },
+          {
+            "path": "/locations-of-the-planned-activities",
+            "condition": "QEkcFW"
+          }
+        ],
+        "components": [
+          {
+            "name": "utZAJb",
+            "title": "Will the operations take place in multiple locations?",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "zdFnrY",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Your planned activities",
+        "path": "/your-planned-activities",
+        "next": [
+          {
+            "path": "/how-you-intend-to-carry-out-the-operations"
+          }
+        ],
+        "components": [
+          {
+            "name": "OsNpcJ",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You must provide a summary of the planned activities you intend to carry out on the land within an SSSI.</p>\n\n  <p class=\"govuk-body\">The summary should include:</p>\n\n  <ul class=\"govuk-list govuk-list--bullet\">\n    <li>information on the specific types of activities  involved in your planned activities (not just the intended outcome), for example, cutting, digging, events, blocking up or repairing</li>\n    <li>details of all planned construction, maintenance, operation, or removal works, including how, where, and when the works will be undertaken, as well as what materials or equipment will be used</li>\n  </ul>\n\n<p class=\"govuk-body\">Each SSSI has a list of activities that require consent, known as ‘operations requiring Natural England’s consent’ (ORNEC). Read our <a href=\"https://www.gov.uk/guidance/protected-areas-sites-of-special-scientific-interest\" target=\"_blank\">managing your land on SSSI guidance (opens in a new tab)</a> to find out which ORNEC's apply to land within an SSSI.</p>\n\n</div>"
+          },
+          {
+            "name": "PEjHlv",
+            "options": {},
+            "schema": {},
+            "type": "MultilineTextField",
+            "title": "Describe the activities you intend to carry out on the SSSIs and list any ORNECs that apply",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "What existing land management agreement are you applying for consent under?",
+        "path": "/what-existing-land-management-agreement-are-you-applying-for-consent-under",
+        "next": [
+          {
+            "path": "/countryside-stewardship-reference-number",
+            "condition": "WMILuk"
+          },
+          {
+            "path": "/whats-your-higher-level-stewardship-hls-agreement-reference-number",
+            "condition": "POcTng"
+          },
+          {
+            "path": "/minor-and-temporary-adjustments-mta",
+            "condition": "kjIjHr"
+          },
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "ORPvhz",
+            "title": " What are you applying for consent under?",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "zNFkBG",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Minor and Temporary Adjustments (MTA)",
+        "path": "/minor-and-temporary-adjustments-mta",
+        "controller": "FileUploadPageController",
+        "next": [
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "WATgja",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">As you are applying consent to carry out work under a Minor and Temporary Adjustments (MTA) linked to Countryside Stewardship (CS) or Environmental Stewardship (ES) agreements.</p> <p class=\"govuk-body\">You must attach a copy of your MTA form with this notice for consent that shows that the adjustments to existing agreements have been approved by the Rural Payments Agency.</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "XIwyEs",
+            "type": "FileUploadField",
+            "hint": "Upload a copy of your approved Minor and Temporary Adjustment (MTA) form in Word or PDF format. The maximum file size for each file is 100MB. The maximum file size for each file is 100MB",
+            "title": "Upload your Minor and Temporary Adjustments (MTA)",
+            "options": {
+              "required": true,
+              "multiple": false,
+              "accept": "application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/csv,application/vnd.oasis.opendocument.text,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/rtf,text/plain,application/pdf,image/jpeg,image/png"
+            },
+            "schema": {
+              "min": 1,
+              "max": 10
+            }
+          }
+        ]
+      },
+      {
+        "title": "Have you sought advice from Natural England about this notice for consent?",
+        "path": "/have-you-sought-advice-from-natural-england-about-this-notice-for-consent",
+        "next": [
+          {
+            "path": "/whats-your-natural-england-advice-reference-number",
+            "condition": "HoTNFD"
+          },
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "IfTuVx",
+            "title": "Have you sought advice from Natural England about your notice? ",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "QWKDOo",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your Natural England advice reference number?",
+        "path": "/whats-your-natural-england-advice-reference-number",
+        "next": [
+          {
+            "path": "/who-did-you-discuss-this-notice-with-at-natural-england"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZrQAWR",
+            "title": " Natural England advice reference number",
+            "type": "TextField",
+            "hint": "This is the reference number Natural England gave you when you discussed this consent notice with them.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Who did you discuss this notice with at Natural England ?",
+        "path": "/who-did-you-discuss-this-notice-with-at-natural-england",
+        "next": [
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "rKOesg",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">For example, did you speak to</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>an advisor from one of Natural England's area teams</li> <li>an advisor from the Farm and Conservation Service</li> <li>an advisor from another Natural England team related to why you are applying for consent</li> </ul>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "sVXoSF",
+            "title": "Name of the person you spoke to",
+            "type": "TextField",
+            "hint": "",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          },
+          {
+            "name": "eciNkF",
+            "title": "Name of the team you spoke to",
+            "type": "TextField",
+            "hint": "",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Supplementary Notice of Operations within a Site of Special Scientific Interest (SSSI)",
+        "path": "/supplementary-notice-of-operations-within-a-site-of-special-scientific-interest-sssi",
+        "next": [],
+        "components": [
+          {
+            "name": "uXkcWn",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nAs you applying for grant aid or a licence to fell trees from the Forestry commission for operations or activities that  have a might impact on a SSSI.</p> <p class=\"govuk-body\">You will need to fill in the Forestry Commission's <a class=\"govuk-link\" href=\"https://www.gov.uk/government/publications/supplementary-notice-of-operations-within-an-sssi\"rel=\"noreferrer noopener\" target=\"_blank\">Supplementary notice of operations within an SSSI (opens a new tab)</a> form to give notice for consent instead of this form.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your Higher Level Stewardship (HLS) agreement reference number?",
+        "path": "/whats-your-higher-level-stewardship-hls-agreement-reference-number",
+        "next": [
+          {
+            "path": "/land-management-scheme-agreement"
+          }
+        ],
+        "components": [
+          {
+            "name": "gilLWX",
+            "title": "What is your HLS reference number?",
+            "type": "TextField",
+            "hint": "It will be 10 characters long starting with 'AG00' followed  by 6 numbers, for example, AG00323883.",
+            "options": {
+              "customValidationMessage": "Your HLS number should start with 'AG00' followed  by 6 numbers"
+            },
+            "schema": {
+              "regex": "AG00[0-9]{6}"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Which wildlife licence are you applying for consent under?",
+        "path": "/which-wildlife-licence-are-you-applying-for-consent-under",
+        "next": [
+          {
+            "path": "/whats-your-wildlife-licence-reference-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "RQuEmo",
+            "title": "Which wildlife licence are you applying under?",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your wildlife licence reference number?",
+        "path": "/whats-your-wildlife-licence-reference-number",
+        "next": [
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "Wsekuk",
+            "title": "Wildlife licence reference number",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Accessing the SSSI",
+        "path": "/accessing-the-sssi",
+        "next": [
+          {
+            "path": "/gaining-access-to-carry-out-the-planned-activities"
+          }
+        ],
+        "components": [
+          {
+            "name": "rlaQWg",
+            "options": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> You must provide the Easting and Northing coordinates for the location where you will access the SSSI. </p>\n\n\n<p class=\"govuk-body\">Easting and Northing coordinates are 6 digits long, for example,'Easting = 458595' and 'Northing = 482886.'</p>",
+            "schema": {}
+          },
+          {
+            "name": "XLNaja",
+            "options": {},
+            "type": "Details",
+            "title": "You can use Defra Magic Maps  to find the coordinates by following these instructions:",
+            "content": "<ol class=\"govuk-list govuk-list--number\">\n<li>Visit <a class:\"govuk-link\" href=\"https://magic.defra.gov.uk/MagicMap.aspx?chosenLayers=sssiPIndex,sssiIndex,backdropDIndex,backdropIndex,europeIndex,vmlBWIndex,25kBWIndex,50kBWIndex,250kBWIndex,miniscaleBWIndex,baseIndex&amp;box=-187122:5095:1034155:705095&amp;useDefaultbackgroundMapping=false\">Defra magic maps</a></p></li>\n<li>Search for a postcode or place.</li>\n<li>Using the map, locate the land or building. Use the +/- icons to zoom in and out.</li>\n<li>In the top toolbar, select the fourth icon along ('Where am I?') - it looks like a target.</li>\n<li>Click on the land or building.</li>\n<li>A pop-up box will appear showing the land details for this location.  You will need the Easting and Northing coordinates It&rsquo;s which are 6 numbers long each, for example,Easting = 458595 and Northing = 482886.</p></li>\n</ol>",
+            "schema": {}
+          },
+          {
+            "name": "pVbkqX",
+            "title": "Where are you going to gain access to the SSSIs?",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Gaining access to carry out the planned activities",
+        "path": "/gaining-access-to-carry-out-the-planned-activities",
+        "next": [
+          {
+            "path": "/your-planned-activities"
+          }
+        ],
+        "components": [
+          {
+            "name": "XDahis",
+            "title": "Html",
+            "type": "Html",
+            "content": " <p class=\"govuk-body\">Tell us how you intend to gain access to the SSSI to carry out the planned activities, including:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>whether you will be on foot or using a vehicle</li> <li>if using a vehicle, provide the type,for example, a 4x4 car or a tractor</li> <li>whether you will stick to existing access points and tracks</li> <li>if you plan to use any machinery, for example, if you are going to use an excavator, tell us the weight of the machinery</li> </ul> <p class=\"govuk-body\">We recommend using low-tyre pressure vehicles to minimise soil compaction. However, this may not be relevant for sites with geological features only.</p> ",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "VhHBfJ",
+            "title": "How do you intend gain access to carry out the planned activities?",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Locations of the planned activities",
+        "path": "/locations-of-the-planned-activities",
+        "next": [
+          {
+            "path": "/gaining-access-to-carry-out-the-planned-activities"
+          }
+        ],
+        "components": [
+          {
+            "name": "fnpbpa",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> Tell us the land parcels number for where the planned activities will be carried on SSSI's and where you gain access to carry out the planned activities.</p> <p class=\"govuk-body\">The land parcel numbers will usually start with 2 letters and are then followed by 8 numbers, for example, SY 9089 7061.</p> <p class=\"govuk-body\">You can usually find the land parcel numbers in your existing land management agreement documents.</p> ",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "AbtbFz",
+            "title": "What are the SSSI land parcel numbers?",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Which authority has or  is going to grant the planning permission?",
+        "path": "/which-authority-has-or-is-going-to-grant-the-planning-permission",
+        "next": [
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "LKqNIy",
+            "title": "Which authority did you apply for planning permission with? ",
+            "type": "TextField",
+            "hint": "For example, a local authority, a National Park authority, or another official authority",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you have an existing consent for the same planned activity you intend to carry out on your land?",
+        "path": "/do-you-have-an-existing-consent-for-the-same-planned-activity-you-intend-to-carry-out-on-your-land",
+        "next": [
+          {
+            "path": "/are-you-seeking-consent-for-planned-activities-that-are-connected-to-an-existing-agreement-planning-permission-or-license"
+          }
+        ],
+        "components": [
+          {
+            "name": "hwWKYH",
+            "title": "Do you have an existing consent for the same planned activity you intend to carry out on your land?",
+            "type": "RadiosField",
+            "hint": "For example, if you already have consent to graze a certain number of cattle per hectare on your land, it would be helpful to mention this if you are now applying for consent to increase the number of cattle.",
+            "list": "TjSoKV",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What scheme or licence are you applying for consent under?",
+        "path": "/what-scheme-or-licence-are-you-applying-for-consent-under",
+        "next": [
+          {
+            "path": "/are-the-planned-activities-going-to-be-carried-out-over-more-than-one-sssi"
+          }
+        ],
+        "components": [
+          {
+            "name": "CvKaTU",
+            "title": "Scheme or licence are you applying for consent under",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "Agent positive",
+        "name": "VZGbHH",
+        "value": {
+          "name": "Agent positive",
+          "conditions": [
+            {
+              "field": {
+                "name": "qnUssW",
+                "type": "RadiosField",
+                "display": "In what capacity are you submitting the notice ?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Someone working on behalf of the owner or occupier",
+                "display": "Someone working on behalf of the owner or occupier"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "qnUssW",
+                "type": "RadiosField",
+                "display": "In what capacity are you submitting this notice ?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Third party",
+                "display": "Third party"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Agent",
+        "name": "uTNQqT",
+        "value": {
+          "name": "Agent",
+          "conditions": [
+            {
+              "field": {
+                "name": "qnUssW",
+                "type": "RadiosField",
+                "display": "In what capacity are you submitting the notice ?"
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "Someone working on behalf of the owner or occupier",
+                "display": "Someone working on behalf of the owner or occupier"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "ELM",
+        "name": "RcXXAN",
+        "value": {
+          "name": "ELM",
+          "conditions": [
+            {
+              "field": {
+                "name": "XLfgSn",
+                "type": "YesNoField",
+                "display": "Are the proposed operations being carried out as part of a land management agreement ?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "SSSI",
+        "name": "uVtgky",
+        "value": {
+          "name": "SSSI",
+          "conditions": [
+            {
+              "field": {
+                "name": "YcDplu",
+                "type": "YesNoField",
+                "display": "Operations on multiple SSSI's"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Operations over multiple locations",
+        "name": "Qlzwue",
+        "value": {
+          "name": "Operations over multiple locations",
+          "conditions": [
+            {
+              "field": {
+                "name": "utZAJb",
+                "type": "RadiosField",
+                "display": "Will the operations take place in multiple locations?"
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "Carrying out all operations at one location",
+                "display": "Carrying out all operations at one location"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Are you applying for consent as part of a land management agreement or licence"
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "existing_land_management_scheme_agreement",
+                "display": "An existing land management scheme agreement"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "syXaoJ",
+        "displayName": "Not owner or occupier",
+        "value": {
+          "name": "Not owner or occupier",
+          "conditions": [
+            {
+              "field": {
+                "name": "qnUssW",
+                "type": "RadiosField",
+                "display": "In what capacity are you submitting this notice ?"
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "Owner",
+                "display": "Owner"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "qnUssW",
+                "type": "RadiosField",
+                "display": "In what capacity are you submitting this notice ?"
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "Occupier",
+                "display": "Occupier"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "xmAXlA",
+        "displayName": "Notification date",
+        "value": {
+          "name": "Notification date",
+          "conditions": [
+            {
+              "field": {
+                "name": "Dnryot",
+                "type": "DatePartsField",
+                "display": "When are the operations going to start?"
+              },
+              "operator": "is less than",
+              "value": {
+                "type": "RelativeDate",
+                "period": "28",
+                "unit": "days",
+                "direction": "in the future"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "kjIjHr",
+        "displayName": "MTA",
+        "value": {
+          "name": "MTA",
+          "conditions": [
+            {
+              "field": {
+                "name": "ORPvhz",
+                "type": "RadiosField",
+                "display": " What are you applying for consent under?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Minor and Temporary Adjustments (MTA) linked to Countryside Stewardship (CS) and Environmental Stewardship (ES) agreements",
+                "display": "Minor and Temporary Adjustments (MTA) linked to a Countryside Stewardship (CS) or a Environmental Stewardship (ES) agreements"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "HoTNFD",
+        "displayName": "Sought advice",
+        "value": {
+          "name": "Sought advice",
+          "conditions": [
+            {
+              "field": {
+                "name": "IfTuVx",
+                "type": "RadiosField",
+                "display": "Have you sought advice from Natural England about your notice? "
+              },
+              "operator": "is not",
+              "value": {
+                "type": "Value",
+                "value": "None of the above",
+                "display": "None of the above"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "UujaOB",
+        "displayName": "Tree felling",
+        "value": {
+          "name": "Tree felling",
+          "conditions": [
+            {
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Land management or agreement"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "forestry_commission_tree_felling_licence",
+                "display": "A Forestry Commission tree felling licence"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "WMILuk",
+        "displayName": "Countryside Stewardship reference number",
+        "value": {
+          "name": "Countryside Stewardship reference number",
+          "conditions": [
+            {
+              "field": {
+                "name": "ORPvhz",
+                "type": "RadiosField",
+                "display": " What are you applying for consent under?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Countryside Stewardship Capital Grants agreement",
+                "display": "Countryside Stewardship Capital Grants agreement"
+              }
+            },
+            {
+              "coordinator": "or",
+              "field": {
+                "name": "ORPvhz",
+                "type": "RadiosField",
+                "display": " What are you applying for consent under?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Higher Tier Countryside Stewardship agreement",
+                "display": "Higher Tier Countryside Stewardship agreement"
+              }
+            },
+            {
+              "coordinator": "or",
+              "field": {
+                "name": "ORPvhz",
+                "type": "RadiosField",
+                "display": " What are you applying for consent under?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Mid-Tier Countryside Stewardship agreement",
+                "display": "Mid-Tier Countryside Stewardship agreement"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "POcTng",
+        "displayName": "HLS",
+        "value": {
+          "name": "HLS",
+          "conditions": [
+            {
+              "field": {
+                "name": "ORPvhz",
+                "type": "RadiosField",
+                "display": " What are you applying for consent under?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Higher Level Stewardship (HLS) agreement",
+                "display": "Higher Level Stewardship (HLS) agreement"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "LSZrHM",
+        "displayName": "Single SSSI",
+        "value": {
+          "name": "Single SSSI",
+          "conditions": [
+            {
+              "field": {
+                "name": "YGkDFj",
+                "type": "RadiosField",
+                "display": "Are the planned activities going to be carried out over more than one SSSI?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "1 SSSI",
+                "display": "1 SSSI"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "tykAEN",
+        "displayName": "WL licence",
+        "value": {
+          "name": "WL licence",
+          "conditions": [
+            {
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Land management or agreement"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "natural_england_wildlife_licence",
+                "display": "A Natural England wildlife licence"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "QEkcFW",
+        "displayName": "Land management agreement",
+        "value": {
+          "name": "Land management agreement",
+          "conditions": [
+            {
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Are you applying for consent as part of a land management agreement or licence"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "existing_land_management_scheme_agreement",
+                "display": "An existing land management scheme agreement"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "EepnuX",
+        "displayName": "Consent under an agreement",
+        "value": {
+          "name": "Consent under an agreement",
+          "conditions": [
+            {
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Land management or agreement"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "existing_land_management_scheme_agreement",
+                "display": "An existing land management scheme agreement"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "FsuMPa",
+        "displayName": "Planning permission",
+        "value": {
+          "name": "Planning permission",
+          "conditions": [
+            {
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Are you applying for consent as part of a land management agreement or licence"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Planning permission",
+                "display": "Planning permission"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "lcUJdJ",
+        "displayName": "Other scheme",
+        "value": {
+          "name": "Other scheme",
+          "conditions": [
+            {
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Are you applying for consent as part of a land management agreement or licence"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Other scheme or licence",
+                "display": "Other scheme or licence"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "vDuQhc",
+        "displayName": "Advice",
+        "value": {
+          "name": "Advice",
+          "conditions": [
+            {
+              "field": {
+                "name": "powOIp",
+                "type": "RadiosField",
+                "display": "Are you applying for consent as part of a land management agreement or licence"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "None of the above",
+                "display": "None of the above"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Owner or occupier",
+        "name": "qDDJMD",
+        "type": "string",
+        "items": [
+          {
+            "text": "Owner",
+            "value": "Owner"
+          },
+          {
+            "text": "Occupier",
+            "value": "Occupier"
+          },
+          {
+            "text": "Agent appointed by the owner or occupier",
+            "value": "Someone working on behalf of the owner or occupier"
+          },
+          {
+            "text": "Third party",
+            "value": "Third party"
+          }
+        ]
+      },
+      {
+        "title": "ORNEC's",
+        "name": "DTVIzB",
+        "type": "string",
+        "items": [
+          {
+            "text": "Cultivation, including ploughing, rotovating, harrowing and re-seeding",
+            "value": "Cultivation, including ploughing, rotovating, harrowing and re-seeding"
+          },
+          {
+            "text": "Grazing, the introduction of grazing and alterations to the grazing regime (including type of stock, intensity or seasonal pattern of grazing)",
+            "value": "grazing"
+          },
+          {
+            "text": "Stock feeding, the introduction of stock feeding or alterations to stock feeding practices",
+            "value": "stock_feeding"
+          },
+          {
+            "text": "Mowing or cutting vegetation , the introduction of mowing and alterations to the mowing or cutting regime (such as from haymaking to silage)",
+            "value": "mowing",
+            "description": ""
+          },
+          {
+            "text": "Application of manure, slurry, silage liquor, fertilisers and lime",
+            "value": "fertilizers"
+          },
+          {
+            "text": "Application of pesticides, including herbicides (weedkillers) whether terrestrial or aquatic, and veterinary products",
+            "value": "pesticides"
+          },
+          {
+            "text": "Dumping, spreading or discharging of any materials",
+            "value": "dumping"
+          },
+          {
+            "text": "Burning and alterations to the pattern or frequency of burning ",
+            "value": "burning"
+          },
+          {
+            "text": "Release into the site of any wild, feral, captive-bred or domestic animal, plant, seed or micro-organism (including genetically modified organisms)",
+            "value": "release_of_organisms"
+          },
+          {
+            "text": "Killing, injuring, taking or removal of any wild animal (including dead animals), or their eggs and nests, including or excluding pest control and disturbing them in their places of shelter",
+            "value": "wildlife_removal"
+          },
+          {
+            "text": "Destruction, displacement, removal or cutting of any plant or plant remains including a tree, shrub, herb, hedge, dead or decaying wood, moss, lichen, fungus, leaf-mould, turf or peat",
+            "value": "plant_removal",
+            "description": ""
+          },
+          {
+            "text": "Tree or woodland management, the introduction of tree or woodland management and alterations to existing management including planting, felling, pruning and tree surgery, thinning, coppicing, changes in species composition or  removal of fallen timber ",
+            "value": "woodland_management",
+            "description": ""
+          },
+          {
+            "text": "Draining this includes moor-gripping, the use of mole, tile, tunnel or other artificial drains",
+            "value": "draining",
+            "description": ""
+          },
+          {
+            "text": "Modification to the structure of water courses including their banks and beds, as by re-alignment, regrading, damming or dredging",
+            "value": "watercourse_modification",
+            "description": "For example, making changes to rivers, streams, springs, ditches, dykes or drains."
+          },
+          {
+            "text": "Management of aquatic and bank vegetation for drainage purposes",
+            "value": "aquatic_vegetation_management"
+          },
+          {
+            "text": "Alterations to water levels and tables and water utilisation including irrigation, storage and abstraction from existing water bodies and through boreholes. As well as the modification of current drainage operations",
+            "value": "water_management",
+            "description": ""
+          },
+          {
+            "text": "Infilling or digging of ditches, dykes, drains, ponds, pools, marshes or pits ",
+            "value": "infilling_or_digging"
+          },
+          {
+            "text": "Freshwater fishery production and/or management, including sporting fishing and angling (where already damaging), the introduction of freshwater production and/or management and alterations to freshwater fishery production and/or management",
+            "value": "freshwater_fishery"
+          },
+          {
+            "text": "Coastal fishing, fisheries management and seafood or marine life collection, including the use of traps or fish cages , the introduction of coastal fishing, alterations to coastal fishing practice or fisheries management and seafood or marine life collection",
+            "value": "coastal-fishing"
+          },
+          {
+            "text": "Reclamation of land from sea, estuary or marsh",
+            "value": "land-reclamation"
+          },
+          {
+            "text": "Bait digging in intertidal areas (England and Wales only)",
+            "value": "bait-digging"
+          },
+          {
+            "text": "Erection and repair of sea defences or coast protection works, including cliff or landslip drainage or stabilisation measures",
+            "value": "sea-defence"
+          },
+          {
+            "text": "Extraction of minerals including peat, shingle, hard rock, sand and gravel, topsoil, subsoil, chalk, lime, limestone pavement, shells and spoil ",
+            "value": "mineral-extraction"
+          },
+          {
+            "text": "Construction, removal or destruction of roads, tracks, walls, fences, hardstands,  banks, ditches or other earthworks, or the laying, maintenance or removal of  pipelines and cables, above or below ground.",
+            "value": "road-works"
+          },
+          {
+            "text": "Storage of materials ",
+            "value": "material-storage"
+          },
+          {
+            "text": "Erection of permanent or temporary structures or the undertaking of engineering works, including drilling",
+            "value": "structure-erection"
+          },
+          {
+            "text": "Modification of natural or man-made features (including cave entrances) and clearance of boulders, large stones, loose rock or scree.",
+            "value": "feature-modification"
+          },
+          {
+            "text": "Removal of geological specimens, including rock samples, minerals and fossils",
+            "value": "specimen-removal"
+          },
+          {
+            "text": "Use of vehicles or craft",
+            "value": "vehicle-use"
+          },
+          {
+            "text": "Recreational or other activities ",
+            "value": "recreational-activities"
+          },
+          {
+            "text": "Game and waterfowl management and hunting practices and changes in game and  waterfowl management and hunting practices",
+            "value": "game-management"
+          },
+          {
+            "text": "Use of lead shot (only to be applied where species will be harmed)",
+            "value": "lead-shot"
+          }
+        ]
+      },
+      {
+        "title": "Owner or occupier of the land",
+        "name": "wCUaIE",
+        "type": "string",
+        "items": [
+          {
+            "text": "Owner",
+            "value": "Owner"
+          },
+          {
+            "text": "Occupier",
+            "value": "Occupier"
+          },
+          {
+            "text": "Agent appointed by the owner or occupier",
+            "value": "Someone working on behalf of the owner or occupier",
+            "description": "For example, a land manager."
+          },
+          {
+            "text": "Third party",
+            "value": "Third party"
+          }
+        ]
+      },
+      {
+        "title": "Environmental Land Management schemes",
+        "name": "OpcAIQ",
+        "type": "string",
+        "items": [
+          {
+            "text": "Sustainable Farming Incentive (SFI) ",
+            "value": "SFI"
+          },
+          {
+            "text": "Countryside Stewardship (CS) ",
+            "value": "Countryside Stewardship (CS) "
+          },
+          {
+            "text": "Landscape Recovery ",
+            "value": "Landscape Recovery "
+          },
+          {
+            "text": "None of the above",
+            "value": "None of the above"
+          }
+        ]
+      },
+      {
+        "title": "What are you applying for consent under?",
+        "name": "zNFkBG",
+        "type": "string",
+        "items": [
+          {
+            "text": "Mid-Tier Countryside Stewardship agreement  ",
+            "value": "Mid-Tier Countryside Stewardship agreement  "
+          },
+          {
+            "text": "Higher Tier Countryside Stewardship agreement",
+            "value": "Higher Tier Countryside Stewardship agreement"
+          },
+          {
+            "text": "Higher Level Stewardship (HLS) agreement",
+            "value": "Higher Level Stewardship (HLS) agreement"
+          },
+          {
+            "text": "Sustainable Farming Incentive (SFI) agreement",
+            "value": "Sustainable Farming Incentive (SFI) agreement"
+          },
+          {
+            "text": "Countryside Stewardship Capital Grants agreement",
+            "value": "Countryside Stewardship Capital Grants agreement"
+          },
+          {
+            "text": "Minor and Temporary Adjustments (MTA) linked to a Countryside Stewardship (CS) or a Environmental Stewardship (ES) agreements",
+            "value": "Minor and Temporary Adjustments (MTA) linked to Countryside Stewardship (CS) and Environmental Stewardship (ES) agreements"
+          }
+        ]
+      },
+      {
+        "title": "More than 1 SSSI",
+        "name": "IfeOoc",
+        "type": "string",
+        "items": [
+          {
+            "text": "1 SSSI",
+            "value": "1 SSSI"
+          },
+          {
+            "text": "More than 1 SSSI",
+            "value": "More than 1 SSSI",
+            "description": "This includes if you are carrying out the planned activities on one SSSI and gaining access via another SSSI to carry out those planned activities."
+          }
+        ]
+      },
+      {
+        "title": "planned activities are taking place in multiple locations",
+        "name": "zdFnrY",
+        "type": "string",
+        "items": [
+          {
+            "text": "Carrying out all planned activities at one location",
+            "value": "Carrying out all operations at one location"
+          },
+          {
+            "text": "Carrying out the planned activities across multiple locations",
+            "value": "Carrying out operations across multiple locations"
+          }
+        ]
+      },
+      {
+        "title": "Land management agreement or licence",
+        "name": "NmfzIf",
+        "type": "string",
+        "items": [
+          {
+            "text": "An existing land management scheme agreement",
+            "value": "existing_land_management_scheme_agreement",
+            "description": "This includes  any Minor and Temporary Adjustment (MTA) approvals from the Rural Payments agency."
+          },
+          {
+            "text": "A Natural England wildlife licence",
+            "value": "natural_england_wildlife_licence"
+          },
+          {
+            "text": "A Forestry Commission tree felling licence",
+            "value": "forestry_commission_tree_felling_licence"
+          },
+          {
+            "text": "Planning permission",
+            "value": "Planning permission",
+            "description": "This includes applications for planning permission, or for existing permissions that require consent from Natural England for planned activities on Sites of Special Scientific Interest (SSSI)."
+          },
+          {
+            "text": "Other scheme or licence",
+            "value": "Other scheme or licence"
+          },
+          {
+            "text": "None of the above",
+            "value": "None of the above"
+          }
+        ]
+      },
+      {
+        "title": "Advice",
+        "name": "QWKDOo",
+        "type": "string",
+        "items": [
+          {
+            "text": "Paid advice",
+            "value": "Paid advice"
+          },
+          {
+            "text": "Free advice",
+            "value": "Free advice"
+          },
+          {
+            "text": "Other",
+            "value": "Other"
+          },
+          {
+            "text": "None of the above",
+            "value": "None of the above"
+          }
+        ]
+      },
+      {
+        "title": "Existing consent",
+        "name": "TjSoKV",
+        "type": "string",
+        "items": [
+          {
+            "text": "Yes",
+            "value": "Yes"
+          },
+          {
+            "text": "No",
+            "value": "No"
+          },
+          {
+            "text": "Not sure",
+            "value": "Not sure"
+          }
+        ]
+      }
+    ],
+    "declaration": "In providing this information, I hereby give notice to Natural England in accordance with Section 28E (1)(a) of the Wildlife and Countryside Act 1981 (as amended) of my proposal to carry out, cause or permit the operations within an SSSI.",
+    "startPage": "/whats-your-name",
+    "skipSummary": false
+  }
+}

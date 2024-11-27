@@ -1,0 +1,483 @@
+{
+  "id": "670d13c71690ba2ca2dccbe7",
+  "metadata": {
+    "id": "670d13c71690ba2ca2dccbe7",
+    "slug": "request-a-manual-release-for-a-consignment-held-at-a-port-or-border-control-post",
+    "title": "Request a manual release for a consignment held at a port or border control post",
+    "organisation": "Defra",
+    "teamName": "Biosecurity, Borders and Trade Programme",
+    "teamEmail": "phsi-importers@apha.gov.uk",
+    "contact": {
+      "phone": "Use these contacts if your consignment is being held for longer than you expect.\r\n\r\n<h3 class=\"govuk-heading-m\">Products of animal origin (POAO) and animal by-products (ABP)</h3>\r\n\r\nContact the Port of Health Authority (PHA) at the point of entry. Use the [PHA map to find the contact details](https://www.porthealthassociation.co.uk/port-directory/) (opens in new tab) for the PHA where your consignment is being held.\r\n\r\n<h3 class=\"govuk-heading-m\">Plants and plant products</h3>\r\n\r\nYou should contact the Animal and Plant Health Agency (APHA) inspector at the point of entry. Alternatively you can phone +44 (0) 3000 200 301  or email <phsi-importers@apha.gov.uk> (opens in new tab)\r\n\r\n<h3 class=\"govuk-heading-m\">Import of products, animals, food and feed system (IPAFFS)</h3>\r\n<p class=\"govuk-body\">\r\nFor technical help with IPAFFS, contact the APHA helpline on 0330 041 6999 or email: <a href=\"mailto:APHAServiceDesk@apha.gov.uk \" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">APHAServiceDesk@apha.gov.uk </a> (opens in new tab)\r\n</p>"
+    },
+    "submissionGuidance": "We’ll send you an email to let you know the outcome. You’ll usually get a response within XX working days.",
+    "notificationEmail": "bbtp-issue-mrr-temp@defra.gov.uk",
+    "draft": {
+      "createdAt": "2024-10-14T12:51:19.199Z",
+      "createdBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-11-08T15:16:11.341Z",
+      "updatedBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-10-14T12:51:19.199Z",
+    "updatedBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "updatedAt": "2024-11-08T15:16:11.341Z"
+  },
+  "draft": {
+    "name": "Request a manual release for a consignment held at a port or border control post",
+    "pages": [
+      {
+        "title": "What's your name?",
+        "path": "/whats-your-name",
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          },
+          {
+            "path": "/service-is-not-available",
+            "condition": "OVwFwF"
+          }
+        ],
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "Name",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      },
+      {
+        "title": "What's your email address?",
+        "path": "/whats-your-email-address",
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "vARWaO",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your phone number?",
+        "path": "/whats-your-phone-number",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-company-importing-the-consignment"
+          }
+        ],
+        "components": [
+          {
+            "name": "LrHlsk",
+            "title": "Phone number ",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the company importing the consignment?",
+        "path": "/whats-the-name-of-the-company-importing-the-consignment",
+        "next": [
+          {
+            "path": "/what-port-or-border-control-post-is-the-consignment-being-held-at"
+          }
+        ],
+        "components": [
+          {
+            "name": "pJkFNB",
+            "title": "Company name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What port or border control post is the consignment being held at?",
+        "path": "/what-port-or-border-control-post-is-the-consignment-being-held-at",
+        "next": [
+          {
+            "path": "/whats-the-movement-reference-number-mrn"
+          },
+          {
+            "path": "/what-other-port-or-border-control-post-is-the-consignment-being-held-at",
+            "condition": "pqPRFf"
+          }
+        ],
+        "components": [
+          {
+            "name": "NPHlth",
+            "title": "Port or border control post where the consignment is being held",
+            "type": "SelectField",
+            "hint": "If the port is not listed, select 'other",
+            "list": "FvQAZb",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the movement reference number (MRN)?",
+        "path": "/whats-the-movement-reference-number-mrn",
+        "next": [
+          {
+            "path": "/whats-the-common-health-entry-document-ched-number-for-the-consignment"
+          }
+        ],
+        "components": [
+          {
+            "name": "vyxdsK",
+            "title": "Movement reference number",
+            "type": "TextField",
+            "hint": "A MRN is usually 18 characters long and starts with the year the consignment was sent. The year is followed by the code of the country where the consignment originated, for example, 24GB12345678912345",
+            "options": {
+              "customValidationMessage": ""
+            },
+            "schema": {
+              "regex": "\\d\\d[A-Za-z][A-Za-z]\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d"
+            }
+          }
+        ]
+      },
+      {
+        "title": "What's the common health entry document (CHED) number for the consignment?",
+        "path": "/whats-the-common-health-entry-document-ched-number-for-the-consignment",
+        "controller": "RepeatPageController",
+        "repeat": {
+          "options": {
+            "name": "qPiTql",
+            "title": "CHED"
+          },
+          "schema": {
+            "min": 1,
+            "max": 25
+          }
+        },
+        "next": [
+          {
+            "path": "/upload-the-common-health-entry-documents-ched"
+          }
+        ],
+        "components": [
+          {
+            "name": "ISbUfM",
+            "title": "CHED number",
+            "type": "TextField",
+            "hint": "For example, CHEDP.GB.2020.1869339",
+            "options": {},
+            "schema": {
+              "regex": "CHED(?:P|PP|D|A)\\.?[A-Za-z]{2}\\.?\\d{4}\\.?\\d{7}"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Upload the common health entry documents (CHED)",
+        "path": "/upload-the-common-health-entry-documents-ched",
+        "controller": "FileUploadPageController",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "lSxTFO",
+            "title": "Supporting documents",
+            "type": "FileUploadField",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "hint": "You can upload a copy of each CHED"
+          }
+        ]
+      },
+      {
+        "title": "Request a manual release for a consignment held at a port or border control post",
+        "path": "/start",
+        "controller": "StartPageController",
+        "next": [
+          {
+            "path": "/whats-your-name"
+          }
+        ],
+        "components": [
+          {
+            "name": "zuwmiF",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nUse this form to request a manual release of a consignment during a live service incident.\n<br><br>\nIf the Import of products, animals, food and feed system (IPAFFS) is working, you cannot use this form.\n<br><br>\nIf you use this form when a live service incident is not taking place, Defra will not process your request.\n<br><br>\nRead how to <a href=\"https://www.gov.uk/guidance/importing-sps-controlled-goods-that-interact-with-alvs\"class=\" govuk-link\" target=\"_blank\">fix inconsistencies between customs declarations and CHED notifications (opens in new tab)</a> that may result in a delay in the release of your consignments.      \n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Service is not available",
+        "path": "/service-is-not-available",
+        "next": [],
+        "components": [
+          {
+            "name": "tpGqiG",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou can only use this form to request a manual release of a consignment during a live service incident.\n</p>\n<h2 class=\"govuk-heading-m\">Contact points for urgent border target operating model (BTOM) queries</h2>\n<p class=\"govuk-body\">\nUse these contacts if your consignment is being held for longer than you expect.\n</p>\n<h3 class=\"govuk-heading-s\">Products of animal origin (POAO) and animal by-products (ABP)</h3>\n<p class=\"govuk-body\">\nContact the Port of Health Authority (PHA) at the point of entry. Use the <a href=\"https://www.porthealthassociation.co.uk/port-directory/\"class=\" govuk-link\" target=\"_blank\">PHA map to find the contact details (opens in new tab)</a> for the PHA where your consignment is being held.\n</p>\n<h3 class=\"govuk-heading-s\">Plants and plant products</h3>\n<p class=\"govuk-body\">\nYou should contact the Animal and Plant Health Agency (APHA) inspector at the point of entry. Alternatively you can phone +44 (0) 3000 200 301  or email <a href=\"mailto:phsi-importers@apha.gov.uk\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">phsi-importers@apha.gov.uk (opens in new tab)</a>\n</p>\n<h3 class=\"govuk-heading-s\">Import of products, animals, food and feed system (IPAFFS)</h3>\n<p class=\"govuk-body\">\nFor technical help with IPAFFS, contact the APHA helpline on 0330 041 6999 or email: <a href=\"mailto:APHAServiceDesk@apha.gov.uk \" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">APHAServiceDesk@apha.gov.uk  (opens in new tab)</a>\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What other port or border control post is the consignment being held at?",
+        "path": "/what-other-port-or-border-control-post-is-the-consignment-being-held-at",
+        "next": [
+          {
+            "path": "/whats-the-movement-reference-number-mrn"
+          }
+        ],
+        "components": [
+          {
+            "name": "ndrssj",
+            "title": "Other port or border control post",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "OVwFwF",
+        "displayName": "Service not available",
+        "value": {
+          "name": "Service not available",
+          "conditions": [
+            {
+              "field": {
+                "name": "textField",
+                "type": "TextField",
+                "display": "Name"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Service not available",
+                "display": "Service not available"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "pqPRFf",
+        "displayName": "Port is other",
+        "value": {
+          "name": "Port is other",
+          "conditions": [
+            {
+              "field": {
+                "name": "NPHlth",
+                "type": "SelectField",
+                "display": "Port or border control post where the consignment is being held"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Other",
+                "display": "Other"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Port and border control posts",
+        "name": "FvQAZb",
+        "type": "string",
+        "items": [
+          {
+            "text": "Belfast Port",
+            "value": "Belfast Port"
+          },
+          {
+            "text": "Bristol",
+            "value": "Bristol"
+          },
+          {
+            "text": "Dover",
+            "value": "Dover"
+          },
+          {
+            "text": "East Midlands Airport",
+            "value": "East Midlands Airport"
+          },
+          {
+            "text": "Edinburgh Airport",
+            "value": "Edinburgh Airport"
+          },
+          {
+            "text": "Felixstowe",
+            "value": "Felixstowe"
+          },
+          {
+            "text": "Gatwick Airport",
+            "value": "Gatwick Airport"
+          },
+          {
+            "text": "Grangemouth",
+            "value": "Grangemouth"
+          },
+          {
+            "text": "Grimsby and Immingham",
+            "value": "Grimsby and Immingham"
+          },
+          {
+            "text": "Harwich",
+            "value": "Harwich"
+          },
+          {
+            "text": "Heathrow Airport",
+            "value": "Heathrow Airport"
+          },
+          {
+            "text": "Hull",
+            "value": "Hull"
+          },
+          {
+            "text": "Invergordon",
+            "value": "Invergordon"
+          },
+          {
+            "text": "Killingholme",
+            "value": "Killingholme"
+          },
+          {
+            "text": "Liverpool",
+            "value": "Liverpool"
+          },
+          {
+            "text": "London Gateway",
+            "value": "London Gateway"
+          },
+          {
+            "text": "Manchester Airport",
+            "value": "Manchester Airport"
+          },
+          {
+            "text": "Newhaven",
+            "value": "Newhaven"
+          },
+          {
+            "text": "Peterhead",
+            "value": "Peterhead"
+          },
+          {
+            "text": "Plymouth",
+            "value": "Plymouth"
+          },
+          {
+            "text": "Poole",
+            "value": "Poole"
+          },
+          {
+            "text": "Portsmouth",
+            "value": "Portsmouth"
+          },
+          {
+            "text": "Prestwick Airport",
+            "value": "Prestwick Airport"
+          },
+          {
+            "text": "Purfleet",
+            "value": "Purfleet"
+          },
+          {
+            "text": "Rosyth",
+            "value": "Rosyth"
+          },
+          {
+            "text": "Sevington",
+            "value": "Sevington"
+          },
+          {
+            "text": "Southampton",
+            "value": "Southampton"
+          },
+          {
+            "text": "Stansted Airport",
+            "value": "Stansted Airport"
+          },
+          {
+            "text": "Teesport",
+            "value": "Teesport"
+          },
+          {
+            "text": "Teesside Airport",
+            "value": "Teesside Airport"
+          },
+          {
+            "text": "Thamesport",
+            "value": "Thamesport"
+          },
+          {
+            "text": "Tilbury",
+            "value": "Tilbury"
+          },
+          {
+            "text": "Tyne",
+            "value": "Tyne"
+          },
+          {
+            "text": "Other",
+            "value": "Other"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "startPage": "/start"
+  }
+}

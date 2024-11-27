@@ -1,0 +1,243 @@
+{
+  "id": "66b600d22614247c09f31da5",
+  "metadata": {
+    "id": "66b600d22614247c09f31da5",
+    "slug": "report-a-bug-or-issue-with-a-form",
+    "title": "Report a bug or issue with a form",
+    "organisation": "Defra",
+    "teamName": "Defra Forms team",
+    "teamEmail": "defraforms@defra.gov.uk",
+    "contact": {
+      "email": {
+        "address": "defraforms@defra.gov.uk",
+        "responseTime": "We aim to respond as soon as possible."
+      }
+    },
+    "submissionGuidance": "The Defra Forms team aim to respond to you within 5 working days.",
+    "privacyNoticeUrl": "https://defra.sharepoint.com/sites/Community4442/SitePages/Privacy-notice--Defra-Forms.aspx",
+    "draft": {
+      "createdAt": "2024-08-09T11:43:14.309Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-08-12T15:29:06.468Z",
+      "updatedBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-08-09T11:43:14.309Z",
+    "updatedBy": {
+      "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+      "displayName": "Alex Luckett"
+    },
+    "updatedAt": "2024-09-26T15:24:39.413Z"
+  },
+  "draft": {
+    "name": "Report a bug or issue with a form",
+    "pages": [
+      {
+        "path": "/does-the-bug-appear-on-a-specific-page",
+        "title": "Does the bug  appear on a  specific page?",
+        "components": [
+          {
+            "name": "KHaYWA",
+            "title": "Specific page",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-link-to-the-page"
+          },
+          {
+            "path": "/describe-the-bug-or-issue",
+            "condition": "dXxRDM"
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController",
+        "components": [],
+        "next": []
+      },
+      {
+        "path": "/whats-the-link-to-the-page",
+        "title": "What's the link to the page?",
+        "components": [
+          {
+            "name": "kXBNOV",
+            "title": "Page link",
+            "type": "TextField",
+            "hint": "If you do not know the page link, enter the page title or question instead",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/describe-the-bug-or-issue"
+          }
+        ]
+      },
+      {
+        "path": "/describe-the-bug-or-issue",
+        "title": "Describe the bug or issue",
+        "components": [
+          {
+            "name": "frutpJ",
+            "title": "Affect of issue or bug",
+            "type": "MultilineTextField",
+            "hint": "Include what's affected, for example, a specific feature or journey through a form",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-should-have-happened"
+          }
+        ]
+      },
+      {
+        "path": "/what-should-have-happened",
+        "title": "What should have happened?",
+        "components": [
+          {
+            "name": "jZNFZM",
+            "title": "What should have happened",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "name": "QXZcPD",
+            "title": "Name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-email-address",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "FWREEr",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-link-for-the-form"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-link-for-the-form",
+        "title": "What's the link for the form?",
+        "components": [
+          {
+            "name": "jHoAKj",
+            "title": "Form link",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/does-the-bug-or-issue-prevent-users-from-submitting-a-form"
+          }
+        ]
+      },
+      {
+        "path": "/does-the-bug-or-issue-prevent-users-from-submitting-a-form",
+        "title": "Does the bug or issue prevent users from submitting a form?",
+        "components": [
+          {
+            "name": "AtDqSG",
+            "title": "Bug or issue prevents users from submitting a form",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/does-the-bug-appear-on-a-specific-page"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "dXxRDM",
+        "displayName": "Not a specific page",
+        "value": {
+          "name": "Not a specific page",
+          "conditions": [
+            {
+              "field": {
+                "name": "KHaYWA",
+                "type": "YesNoField",
+                "display": "Specific page"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [],
+    "skipSummary": false,
+    "startPage": "/whats-your-name"
+  }
+}

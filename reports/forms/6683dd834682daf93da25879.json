@@ -1,0 +1,723 @@
+{
+  "id": "6683dd834682daf93da25879",
+  "metadata": {
+    "id": "6683dd834682daf93da25879",
+    "slug": "register-a-boat-at-rye-harbour",
+    "title": "Register a boat at Rye Harbour",
+    "organisation": "Environment Agency",
+    "teamName": "Rye Harbour Authority",
+    "teamEmail": "rye.harbour@environment-agency.gov.uk",
+    "contact": {
+      "phone": "*   Telephone: 01797 225 225",
+      "email": {
+        "address": "rye.harbour@environment-agency.gov.uk",
+        "responseTime": "We aim to respond as soon as possible."
+      }
+    },
+    "submissionGuidance": "We’ll send you an invoice for your boat’s annual harbour dues. We aim to process your application within 14 working days.\r\n\r\nWhen we receive your payment, we’ll post your harbour dues disc to you. Please display the disc clearly on your boat, preferably on a forward-facing window.",
+    "privacyNoticeUrl": "https://www.gov.uk/government/publications/rye-harbour-privacy-notice",
+    "notificationEmail": "rye.harbour@environment-agency.gov.uk",
+    "draft": {
+      "updatedAt": "2024-07-09T11:07:23.698Z",
+      "updatedBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      },
+      "createdAt": "2024-07-09T11:07:23.698Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "live": {
+      "updatedAt": "2024-07-05T13:41:20.173Z",
+      "updatedBy": {
+        "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+        "displayName": "Andrew Jackson - Kirby"
+      },
+      "createdAt": "2024-07-05T12:46:05.695Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-07-05T12:46:05.695Z",
+    "updatedBy": {
+      "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+      "displayName": "Alex Luckett"
+    },
+    "updatedAt": "2024-09-26T15:39:18.336Z"
+  },
+  "draft": {
+    "name": "Register a boat at Rye Harbour",
+    "startPage": "/whats-the-boat-owners-name",
+    "pages": [
+      {
+        "path": "/whats-the-boat-owners-name",
+        "title": "What's the boat owner's name?",
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "Boat owner's name",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boat-owners-address"
+          }
+        ]
+      },
+      {
+        "title": "Check your answers before sending your application",
+        "path": "/summary",
+        "controller": "./pages/summary.js",
+        "components": [],
+        "next": []
+      },
+      {
+        "path": "/whats-the-boat-owners-address",
+        "title": "What's the boat owner's address?",
+        "components": [
+          {
+            "name": "tqBsut",
+            "options": {},
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Boat owner's address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boat-owners-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-boat-owners-email-address",
+        "title": "What's the boat owner's email address?",
+        "components": [
+          {
+            "name": "ZhyvQf",
+            "options": {},
+            "schema": {},
+            "type": "EmailAddressField",
+            "title": "Boat owner's email address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boat-owners-phone-number"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-boat-owners-phone-number",
+        "title": "What's the boat owner's phone number?",
+        "components": [
+          {
+            "name": "zlmXyr",
+            "options": {},
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Boat owner's phone number"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boats-name"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-boats-name",
+        "title": "What's the boat's name?",
+        "components": [
+          {
+            "name": "pzCarF",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Boat registered name",
+            "hint": "This is the name written on the hull of the boat."
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-type-of-boat-are-you-registering"
+          }
+        ]
+      },
+      {
+        "path": "/what-type-of-boat-are-you-registering",
+        "title": "What type of boat are you registering?",
+        "components": [
+          {
+            "name": "zOKCBX",
+            "options": {},
+            "schema": {},
+            "type": "RadiosField",
+            "title": "Type of boat",
+            "hint": "Fishing boats are considered to be commercial vessels for this question. Powered boats include speed boats and cruisers.",
+            "list": "zZCJmu",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/when-is-the-boat-going-to-enter-rye-harbour"
+          }
+        ]
+      },
+      {
+        "path": "/when-is-the-boat-going-to-enter-rye-harbour",
+        "title": "When is the boat going to enter Rye Harbour?",
+        "components": [
+          {
+            "name": "LFiWon",
+            "options": {},
+            "schema": {},
+            "type": "DatePartsField",
+            "title": "When the boat will enter Rye Harbour"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-long-is-the-boat-in-metres"
+          }
+        ]
+      },
+      {
+        "path": "/how-long-is-the-boat-in-metres",
+        "title": "How long is the boat in metres?",
+        "components": [
+          {
+            "name": "kRQwWs",
+            "options": {
+              "suffix": "metres",
+              "classes": "govuk-!-width-one-quarter"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Length of boat",
+            "hint": "Measure from the bow to the stern. If your boat has a bowsprit, you must include it in the measurement. The harbour master may verify the length of the boat."
+          }
+        ],
+        "next": [
+          {
+            "path": "/mooring"
+          }
+        ]
+      },
+      {
+        "path": "/mooring",
+        "title": "Mooring",
+        "components": [
+          {
+            "name": "OEAqmP",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> When the boat is registered at Rye Harbour it must have a mooring. This can be either an Environment Agency mooring or a private mooring.\n<br><br> The harbour master will use this information to record boats that leave for winter and return in spring.</p>"
+          },
+          {
+            "name": "theoPm",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Where is the boat going to be moored?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/is-the-boat-insured"
+          }
+        ]
+      },
+      {
+        "path": "/what-company-insures-the-boat",
+        "title": "What company insures the boat?",
+        "components": [
+          {
+            "name": "WqIeiY",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "hint": "To register a boat with an engine (known as a powered boat), you must have third-party liability insurance.",
+            "title": "Boat insurance"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-insurers-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-insurers-address",
+        "title": "What's the insurer's address?",
+        "components": [
+          {
+            "name": "cjFAAt",
+            "options": {},
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Insurance company address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/insurance-policy-expiration"
+          }
+        ]
+      },
+      {
+        "path": "/insurance-policy-expiration",
+        "title": "Insurance policy expiration",
+        "components": [
+          {
+            "name": "lspsjR",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> If your insurance policy expires before you receive your harbour dues disc, you must renew it or get a new insurance policy that covers the boat.</p>"
+          },
+          {
+            "name": "zzIrNa",
+            "options": {},
+            "schema": {},
+            "type": "DatePartsField",
+            "title": "When does the insurance policy expire?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "path": "/is-the-boat-insured",
+        "title": "Is the boat insured?",
+        "components": [
+          {
+            "name": "tMsgnG",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Boat insured",
+            "hint": "You must have third-party liability insurance, to register a powered boat."
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-company-insures-the-boat"
+          },
+          {
+            "path": "/summary",
+            "condition": "smXrfq"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "Insurance negative",
+        "name": "smXrfq",
+        "value": {
+          "name": "Insurance negative",
+          "conditions": [
+            {
+              "field": {
+                "name": "tMsgnG",
+                "type": "YesNoField",
+                "display": "Is the boat insured?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Type of boat",
+        "name": "zZCJmu",
+        "type": "string",
+        "items": [
+          {
+            "text": "Commercial vessel",
+            "description": "",
+            "value": "Commercial vessel"
+          },
+          {
+            "text": "Sailing boat",
+            "value": "Sailing boat"
+          },
+          {
+            "text": "Powered boat",
+            "value": "Powered boat"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "declaration": "<p class=\"govuk-body\">I confirm that:</p>\n<ul class=\"govuk-list govuk-list--bullet\">\n<li> I will adhere to the <a href=\"https://www.gov.uk/government/publications/rye-harbour-boat-registration/rye-harbour-registration-terms-and-conditions\" class=\"govuk-link\">Rye Harbour registration terms and conditions</a> </li>\n<li> The boat will always have a current harbour dues disc on display</li>\n<li> I will let the harbour master check the length of the boat</li>\n<li> I will contact the harbour office immediately if any of my details change</li>\n<li> I will use the boat detailed in this form in Rye Harbour and pay harbour dues</li>\n<li> I will abide by the byelaws and legislation in force in Rye Harbour and will comply with all directions given by the harbour master in the execution of their duties</li>\n</ul>",
+    "outputEmail": "rye.harbour@environment-agency.gov.uk"
+  },
+  "live": {
+    "name": "Register a boat at Rye Harbour",
+    "startPage": "/whats-the-boat-owners-name",
+    "pages": [
+      {
+        "path": "/whats-the-boat-owners-name",
+        "title": "What's the boat owner's name?",
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "Boat owner's name",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boat-owners-address"
+          }
+        ]
+      },
+      {
+        "title": "Check your answers before sending your application",
+        "path": "/summary",
+        "controller": "./pages/summary.js",
+        "components": [],
+        "next": []
+      },
+      {
+        "path": "/whats-the-boat-owners-address",
+        "title": "What's the boat owner's address?",
+        "components": [
+          {
+            "name": "tqBsut",
+            "options": {},
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Boat owner's address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boat-owners-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-boat-owners-email-address",
+        "title": "What's the boat owner's email address?",
+        "components": [
+          {
+            "name": "ZhyvQf",
+            "options": {},
+            "schema": {},
+            "type": "EmailAddressField",
+            "title": "Boat owner's email address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boat-owners-phone-number"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-boat-owners-phone-number",
+        "title": "What's the boat owner's phone number?",
+        "components": [
+          {
+            "name": "zlmXyr",
+            "options": {},
+            "schema": {},
+            "type": "TelephoneNumberField",
+            "title": "Boat owner's phone number"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-boats-name"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-boats-name",
+        "title": "What's the boat's name?",
+        "components": [
+          {
+            "name": "pzCarF",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Boat registered name",
+            "hint": "This is the name written on the hull of the boat."
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-type-of-boat-are-you-registering"
+          }
+        ]
+      },
+      {
+        "path": "/what-type-of-boat-are-you-registering",
+        "title": "What type of boat are you registering?",
+        "components": [
+          {
+            "name": "zOKCBX",
+            "options": {},
+            "schema": {},
+            "type": "RadiosField",
+            "title": "Type of boat",
+            "hint": "Fishing boats are considered to be commercial vessels for this question. Powered boats include speed boats and cruisers.",
+            "list": "zZCJmu",
+            "values": {
+              "type": "listRef"
+            }
+          }
+        ],
+        "next": [
+          {
+            "path": "/when-is-the-boat-going-to-enter-rye-harbour"
+          }
+        ]
+      },
+      {
+        "path": "/when-is-the-boat-going-to-enter-rye-harbour",
+        "title": "When is the boat going to enter Rye Harbour?",
+        "components": [
+          {
+            "name": "LFiWon",
+            "options": {},
+            "schema": {},
+            "type": "DatePartsField",
+            "title": "When the boat will enter Rye Harbour"
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-long-is-the-boat-in-metres"
+          }
+        ]
+      },
+      {
+        "path": "/how-long-is-the-boat-in-metres",
+        "title": "How long is the boat in metres?",
+        "components": [
+          {
+            "name": "kRQwWs",
+            "options": {
+              "suffix": "metres",
+              "classes": "govuk-!-width-one-quarter"
+            },
+            "schema": {},
+            "type": "NumberField",
+            "title": "Length of boat",
+            "hint": "Measure from the bow to the stern. If your boat has a bowsprit, you must include it in the measurement. The harbour master may verify the length of the boat."
+          }
+        ],
+        "next": [
+          {
+            "path": "/mooring"
+          }
+        ]
+      },
+      {
+        "path": "/mooring",
+        "title": "Mooring",
+        "components": [
+          {
+            "name": "OEAqmP",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> When the boat is registered at Rye Harbour it must have a mooring. This can be either an Environment Agency mooring or a private mooring.\n<br><br> The harbour master will use this information to record boats that leave for winter and return in spring.</p>"
+          },
+          {
+            "name": "theoPm",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "title": "Where is the boat going to be moored?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/is-the-boat-insured"
+          }
+        ]
+      },
+      {
+        "path": "/what-company-insures-the-boat",
+        "title": "What company insures the boat?",
+        "components": [
+          {
+            "name": "WqIeiY",
+            "options": {},
+            "schema": {},
+            "type": "TextField",
+            "hint": "To register a boat with an engine (known as a powered boat), you must have third-party liability insurance.",
+            "title": "Boat insurance"
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-insurers-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-insurers-address",
+        "title": "What's the insurer's address?",
+        "components": [
+          {
+            "name": "cjFAAt",
+            "options": {},
+            "schema": {},
+            "type": "UkAddressField",
+            "title": "Insurance company address"
+          }
+        ],
+        "next": [
+          {
+            "path": "/insurance-policy-expiration"
+          }
+        ]
+      },
+      {
+        "path": "/insurance-policy-expiration",
+        "title": "Insurance policy expiration",
+        "components": [
+          {
+            "name": "lspsjR",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "<p class=\"govuk-body\"> If your insurance policy expires before you receive your harbour dues disc, you must renew it or get a new insurance policy that covers the boat.</p>"
+          },
+          {
+            "name": "zzIrNa",
+            "options": {},
+            "schema": {},
+            "type": "DatePartsField",
+            "title": "When does the insurance policy expire?"
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "path": "/is-the-boat-insured",
+        "title": "Is the boat insured?",
+        "components": [
+          {
+            "name": "tMsgnG",
+            "options": {},
+            "schema": {},
+            "type": "YesNoField",
+            "title": "Boat insured",
+            "hint": "You must have third-party liability insurance, to register a powered boat."
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-company-insures-the-boat"
+          },
+          {
+            "path": "/summary",
+            "condition": "smXrfq"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "Insurance negative",
+        "name": "smXrfq",
+        "value": {
+          "name": "Insurance negative",
+          "conditions": [
+            {
+              "field": {
+                "name": "tMsgnG",
+                "type": "YesNoField",
+                "display": "Is the boat insured?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Type of boat",
+        "name": "zZCJmu",
+        "type": "string",
+        "items": [
+          {
+            "text": "Commercial vessel",
+            "description": "",
+            "value": "Commercial vessel"
+          },
+          {
+            "text": "Sailing boat",
+            "value": "Sailing boat"
+          },
+          {
+            "text": "Powered boat",
+            "value": "Powered boat"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "declaration": "<p class=\"govuk-body\">I confirm that:</p>\n<ul class=\"govuk-list govuk-list--bullet\">\n<li> I will adhere to the <a href=\"https://www.gov.uk/government/publications/rye-harbour-boat-registration/rye-harbour-registration-terms-and-conditions\" class=\"govuk-link\">Rye Harbour registration terms and conditions</a> </li>\n<li> The boat will always have a current harbour dues disc on display</li>\n<li> I will let the harbour master check the length of the boat</li>\n<li> I will contact the harbour office immediately if any of my details change</li>\n<li> I will use the boat detailed in this form in Rye Harbour and pay harbour dues</li>\n<li> I will abide by the byelaws and legislation in force in Rye Harbour and will comply with all directions given by the harbour master in the execution of their duties</li>\n</ul>",
+    "outputEmail": "rye.harbour@environment-agency.gov.uk"
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "id": "667d3db83e15d218b60db446",
+  "metadata": {
+    "id": "667d3db83e15d218b60db446",
+    "slug": "test-form-andrew",
+    "title": "Test form Andrew",
+    "organisation": "Defra",
+    "teamName": "z",
+    "teamEmail": "defraforms@defraforms.gov.uk",
+    "draft": {
+      "createdAt": "2024-06-27T10:23:52.365Z",
+      "createdBy": {
+        "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+        "displayName": "Andrew Jackson - Kirby"
+      },
+      "updatedAt": "2024-10-25T15:22:54.843Z",
+      "updatedBy": {
+        "id": "91c9d87a-17c3-421f-a03c-41fb597545a1",
+        "displayName": "Andrew Jackson - Kirby"
+      }
+    },
+    "createdBy": {
+      "id": "7SB8fIeK4lxlhaVK06U_jDt6OasmXhhY2mm8foHFjRk",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "createdAt": "2024-06-27T10:23:52.365Z",
+    "updatedBy": {
+      "id": "91c9d87a-17c3-421f-a03c-41fb597545a1",
+      "displayName": "Andrew Jackson - Kirby"
+    },
+    "updatedAt": "2024-10-25T15:22:54.843Z"
+  },
+  "draft": {
+    "name": "Test form Andrew",
+    "startPage": "/page-one",
+    "pages": [
+      {
+        "path": "/page-one",
+        "title": "Page one",
+        "section": "section",
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "This is your first field",
+            "hint": "Help text",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "owfFnu",
+            "options": {},
+            "schema": {},
+            "type": "Html",
+            "content": "gggg"
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          },
+          {
+            "path": "/operations"
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController",
+        "components": [],
+        "next": []
+      },
+      {
+        "path": "/operations",
+        "title": "Operations",
+        "components": [
+          {
+            "name": "dXxzKB",
+            "title": "Html",
+            "type": "Html",
+            "content": " <p class=\"govuk-body\">You must provide detailed description about how you plan to carry out the operations. This will help Natural England fully assess your application for consent.</p> <p class=\"govuk-body\">Include the following details, where relevant:</p> <ul class=\"govuk-list govuk-list--bullet\"> <li>a description of the operations, such as cutting, digging, holding an event, blocking up, or repairing</li> <li>the equipment or materials you'll use, including type of equipment or materials as well as how, when, and where they'll be used</li> <li>the number of people involved in the operations</li> <li>details of any planned construction, maintenance, operation, or removal work, including what will be done, where it will take place and when it will happen</li> <li>protection measures you'll put in place to prevent any environment impact to the SSSI, such as: <ul class=\"govuk-list govuk-list--bullet\"> <li>implementing biosecurity measures to prevent the introduction or spread of harmful organisms</li> <li>storing materials away from the site</li> <li>preserving and replacing soil and turf</li> <li>avoiding chemicals where possible</li> <li>managing waste properly</li> <li>treating cut stumps</li> </ul> <li> whether the work will be a one-time event, phased, or ongoing over several years </li>  </ul> ",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "BZuqZs",
+            "options": {},
+            "schema": {},
+            "type": "CheckboxesField",
+            "title": "List 1",
+            "list": "kFWAKs"
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          },
+          {
+            "path": "/will-there-be-any-construction-maintenance-or-removal-work-involved-in-your-operations"
+          }
+        ]
+      },
+      {
+        "title": "Will there be any construction, maintenance, or removal work involved in your operations?",
+        "path": "/will-there-be-any-construction-maintenance-or-removal-work-involved-in-your-operations",
+        "next": [
+          {
+            "path": "/planned-construction-maintenance-operation-or-removal-works"
+          },
+          {
+            "path": "/d"
+          }
+        ],
+        "components": [
+          {
+            "name": "ejIXCY",
+            "title": "planned construction, maintenance, operation, or removal works",
+            "type": "YesNoField",
+            "hint": "For example, building new shelters for birds, cleaning ditches, clearing reeds from a fen, digging and removing soil, cutting vegetation and removing it from the site or any activity on the protected site that affects operations.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Planned construction, maintenance, operation, or removal works",
+        "path": "/planned-construction-maintenance-operation-or-removal-works",
+        "next": [],
+        "components": [
+          {
+            "name": "yeXMYj",
+            "title": "Planned construction, maintenance, operation, or removal works",
+            "type": "MultilineTextField",
+            "hint": "You should include details on what will be done, where it will take place and when it will happen.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "d",
+        "path": "/d",
+        "controller": "RepeatPageController",
+        "repeat": {
+          "options": {
+            "name": "dktYss",
+            "title": "Details"
+          },
+          "schema": {
+            "min": 1,
+            "max": 25
+          }
+        },
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "OtiwDl",
+            "title": "Date field",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "List 1",
+        "name": "kFWAKs",
+        "type": "string",
+        "items": [
+          {
+            "text": "item 1",
+            "value": "item 1"
+          }
+        ]
+      },
+      {
+        "title": "list 2",
+        "name": "iWWPSq",
+        "type": "string",
+        "items": [
+          {
+            "text": "item 1",
+            "value": "item 1"
+          }
+        ]
+      },
+      {
+        "title": "List 3",
+        "name": "HnFRfs",
+        "type": "string",
+        "items": [
+          {
+            "text": "item 1",
+            "value": "item 1"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false
+  }
+}

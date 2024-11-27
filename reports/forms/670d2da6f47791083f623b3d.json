@@ -1,0 +1,1723 @@
+{
+  "id": "670d2da6f47791083f623b3d",
+  "metadata": {
+    "id": "670d2da6f47791083f623b3d",
+    "slug": "report-the-use-of-environmental-protection-equipment",
+    "title": "Report the use of environmental protection equipment",
+    "organisation": "Environment Agency",
+    "teamName": "Environment Incident Preparedness",
+    "teamEmail": "FRS.orders@environment-agency.gov.uk",
+    "contact": {
+      "phone": "*   Telephone: 087 0850 6506",
+      "email": {
+        "address": "frs.orders@environment-agency.gov.uk",
+        "responseTime": "We aim to respond as soon as possible."
+      }
+    },
+    "submissionGuidance": "Thank you for reporting the environmental equipment used at an incident. \r\n\r\nIf you've requested a copy of the report, we'll send it to the email address you provided within 10 working days.",
+    "privacyNoticeUrl": "https://www.gov.uk/government/publications/request-environmental-protection-equipment-privacy-notice",
+    "notificationEmail": "frs.orders@environment-agency.gov.uk",
+    "draft": {
+      "createdAt": "2024-10-14T14:41:42.451Z",
+      "createdBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-11-22T11:24:39.755Z",
+      "updatedBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-10-14T14:41:42.451Z",
+    "updatedBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "updatedAt": "2024-11-22T11:24:39.755Z"
+  },
+  "draft": {
+    "name": "Report the use of environmental protection equipment",
+    "pages": [
+      {
+        "title": "What fire and rescue service attended the incident?",
+        "path": "/what-fire-and-rescue-service-attended-the-incident",
+        "section": "section",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-fire-station-that-attended-the-incident"
+          },
+          {
+            "path": "/what-other-fire-and-rescue-service-attended-the-incident",
+            "condition": "VZAgOn"
+          }
+        ],
+        "components": [
+          {
+            "name": "PysKZe",
+            "title": "Fire and rescue service name",
+            "type": "AutocompleteField",
+            "hint": "If a fire and rescue service is not listed, enter 'other'.",
+            "list": "flTrBm",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Summary",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      },
+      {
+        "title": "What's the name of the fire station that attended the incident?",
+        "path": "/whats-the-name-of-the-fire-station-that-attended-the-incident",
+        "section": "section",
+        "next": [
+          {
+            "path": "/do-you-know-who-was-the-incident-commander"
+          }
+        ],
+        "components": [
+          {
+            "name": "aOBXBx",
+            "title": "The fire station's name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Who was the incident commander?",
+        "path": "/who-was-the-incident-commander",
+        "section": "section",
+        "next": [
+          {
+            "path": "/do-you-have-contact-details-for-the-incident-commander"
+          }
+        ],
+        "components": [
+          {
+            "name": "zJyTtL",
+            "title": "Incident commander's name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the phone number for the incident commander?",
+        "path": "/whats-the-phone-number-for-the-incident-commander",
+        "section": "section",
+        "next": [
+          {
+            "path": "/whats-the-email-address-for-the-incident-commander"
+          }
+        ],
+        "components": [
+          {
+            "name": "jqWBhO",
+            "title": "Incident commander phone number",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the email address for the incident commander?",
+        "path": "/whats-the-email-address-for-the-incident-commander",
+        "section": "section",
+        "next": [
+          {
+            "path": "/is-the-incident-commander-the-main-contact-to-discuss-the-environmental-protection-equipment-used-during-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "veuEZS",
+            "title": "Incident commander email address",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Was the Environment Agency contacted during the incident?",
+        "path": "/was-the-environment-agency-contacted-during-the-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/did-an-environment-agency-officer-attend-the-incident",
+            "condition": "WtWsWo"
+          },
+          {
+            "path": "/has-the-incident-commander-told-the-environment-agency-about-this-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "vOQxqz",
+            "title": "Environment Agency contacted during the incident",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Did an Environment Agency officer attend the incident?",
+        "path": "/did-an-environment-agency-officer-attend-the-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-environment-agency-officer-who-attended-the-incident",
+            "condition": "iksIoZ"
+          },
+          {
+            "path": "/do-you-know-the-fire-and-rescue-service-incident-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "CZOIom",
+            "title": "Environment Agency officer in attendance   ",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the Environment Agency officer who attended the incident?",
+        "path": "/whats-the-name-of-the-environment-agency-officer-who-attended-the-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/do-you-know-the-fire-and-rescue-service-incident-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "nzZeRT",
+            "title": "Name of the Environment Agency officer who attended the incident",
+            "type": "TextField",
+            "hint": "Enter 'Do not know' if you do not know the name of the Environment Agency officer who attended the incident.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Has the incident commander told the Environment Agency about this incident?",
+        "path": "/has-the-incident-commander-told-the-environment-agency-about-this-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/do-you-know-the-fire-and-rescue-service-incident-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "sHBhhw",
+            "title": "Has Incident commander told the Environment Agency about this incident?",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "APCLrt",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you know the fire and rescue service incident number?",
+        "path": "/do-you-know-the-fire-and-rescue-service-incident-number",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/whats-the-date-of-the-incident"
+          },
+          {
+            "path": "/whats-the-fire-and-rescue-service-incident-number",
+            "condition": "JDltyk"
+          }
+        ],
+        "components": [
+          {
+            "name": "mcTmYC",
+            "title": "Fire and rescue service incident number known",
+            "type": "YesNoField",
+            "hint": "This is the number your fire service assigns to each incident.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the date of the incident?",
+        "path": "/whats-the-date-of-the-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/do-you-know-the-address-for-where-the-incident-occurred"
+          }
+        ],
+        "components": [
+          {
+            "name": "BDHPPA",
+            "title": "Date of incident",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the fire and rescue service incident number?",
+        "path": "/whats-the-fire-and-rescue-service-incident-number",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/whats-the-date-of-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "NGIMXx",
+            "title": "The incident number",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you know the address for where the incident occurred?",
+        "path": "/do-you-know-the-address-for-where-the-incident-occurred",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/whats-the-address-where-the-incident-occurred",
+            "condition": "ktTidK"
+          },
+          {
+            "path": "/incident-location"
+          }
+        ],
+        "components": [
+          {
+            "name": "LRuDag",
+            "title": "Address where incident occurred is known",
+            "type": "YesNoField",
+            "hint": "If you do not know the address, you can provide a grid reference number or what3words instead.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the address where the incident occurred?",
+        "path": "/whats-the-address-where-the-incident-occurred",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/provide-a-brief-description-of-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "XfAyhp",
+            "title": "Address where the incident occurred",
+            "type": "MultilineTextField",
+            "hint": "Include the postcode if you know it.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Incident location",
+        "path": "/incident-location",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/provide-a-brief-description-of-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "nshGYk",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nIf you do not have an address for the location, we need to know where the incident took place. \n<br><br>\nYou can use <a href=\"https://what3words.com/pretty.needed.chill?redirect=true\" class=\"govuk-link\" target=\"_blank\">what3words (opens in new tab)</a> or <a href=\"https://magic.defra.gov.uk/magicmap.aspx\" class=\"govuk-link\" target=\"_blank\">Defra Magic Maps (opens in new tab)</a> to get a grid reference number.\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "AnhkBq",
+            "title": "What3words",
+            "type": "TextField",
+            "hint": "For example, ///zoom.harder.swaps",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          },
+          {
+            "name": "pEuemp",
+            "title": "Grid reference number",
+            "type": "TextField",
+            "hint": "For example, SS 8492 8459",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Provide a brief description of the incident",
+        "path": "/provide-a-brief-description-of-the-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/pollution-details"
+          }
+        ],
+        "components": [
+          {
+            "name": "efhxoP",
+            "title": "A description of the incident",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Pollution details",
+        "path": "/pollution-details",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/are-there-any-extenuating-circumstances-about-this-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "vwiuuy",
+            "title": "What's the pollution type?",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "FAENej",
+            "title": "How much of this pollution type was spilled? ",
+            "type": "TextField",
+            "hint": "Add the amount and the measurement if you know it, for example, 5 litres. If you do not know it, enter 'not known'",
+            "options": {
+              "required": true
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Are there any extenuating circumstances about this incident?",
+        "path": "/are-there-any-extenuating-circumstances-about-this-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/what-are-the-extenuating-circumstances-for-this-incident",
+            "condition": "zdfugF"
+          },
+          {
+            "path": "/what-caused-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "NNjFLF",
+            "title": "Extenuating circumstances",
+            "type": "YesNoField",
+            "hint": "The Environment Agency will attempt to claim the cost of providing the equipment from the polluter. If there's an extenuating circumstance, the Environment Agency is less likely to recover the cost. For example, if an owner of a parked car was not aware their vehicle was leaking oil into a storm drain, causing pollution to enter a river.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What are the extenuating circumstances for this incident?",
+        "path": "/what-are-the-extenuating-circumstances-for-this-incident",
+        "section": "MUhHwC",
+        "next": [
+          {
+            "path": "/what-caused-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "gmPufq",
+            "title": "Extenuating circumstances for this incident",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Is the incident commander the main contact to discuss the environmental protection equipment used during the incident?",
+        "path": "/is-the-incident-commander-the-main-contact-to-discuss-the-environmental-protection-equipment-used-during-the-incident",
+        "section": "section",
+        "next": [
+          {
+            "path": "/who-can-we-contact-about-the-incident",
+            "condition": "pqbfzL"
+          },
+          {
+            "path": "/was-the-environment-agency-contacted-during-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "yPAyQU",
+            "title": "Incident commander can provide details of equipment used",
+            "type": "YesNoField",
+            "hint": "The Environment Agency may need to discuss the equipment used during an incident. You can nominate a contact to have these discussions.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Who can we contact about the incident?",
+        "path": "/who-can-we-contact-about-the-incident",
+        "section": "section",
+        "next": [
+          {
+            "path": "/whats-the-email-address-for-the-main-contact"
+          }
+        ],
+        "components": [
+          {
+            "name": "dCHXoG",
+            "title": "Name of contact for the incident",
+            "type": "TextField",
+            "hint": "The Environment Agency  will contact this person if they need more information about the equipment used at an incident.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the email address for the main contact?",
+        "path": "/whats-the-email-address-for-the-main-contact",
+        "section": "section",
+        "next": [
+          {
+            "path": "/whats-the-phone-number-for-the-main-contact"
+          }
+        ],
+        "components": [
+          {
+            "name": "fjcaMK",
+            "title": "Email address of contact for the incident",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What caused the incident?",
+        "path": "/what-caused-the-incident",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/what-was-responsible-for-the-incident",
+            "condition": "WgnomX"
+          },
+          {
+            "path": "/contact-details",
+            "condition": "pIQnPe"
+          },
+          {
+            "path": "/do-you-know-the-registration-number-of-the-vehicle-that-caused-the-incident",
+            "condition": "UdEKKw"
+          },
+          {
+            "path": "/do-you-have-any-information-that-could-enable-the-environment-agency-to-identify-the-polluter",
+            "condition": "aSysez"
+          }
+        ],
+        "components": [
+          {
+            "name": "VlRuKe",
+            "title": "Cause of the incident",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "ljJHBG",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you have any contact details for the polluter?",
+        "path": "/do-you-have-any-contact-details-for-the-polluter",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/contact-details",
+            "condition": "mlqRAM"
+          },
+          {
+            "path": "/equipment-used-at-the-incident",
+            "condition": "CRAezO"
+          }
+        ],
+        "components": [
+          {
+            "name": "PKjapp",
+            "title": "Can provide contact details",
+            "type": "YesNoField",
+            "hint": "To reclaim the cost of providing equipment to fire and rescue services, the Environment Agency needs the contact details of the polluter. ",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Contact details",
+        "path": "/contact-details",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/equipment-used-at-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "SXmLAc",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nPlease provide the contact details of the polluter. The Environment Agency will use these contact details to pursue the polluter for payment of the equipment used during the incident.\n<br><br>\nAll fields are optional.\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "zpAkIG",
+            "title": "Name of the polluter",
+            "type": "TextField",
+            "hint": "This can be an individual's name or a company name",
+            "options": {
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {}
+          },
+          {
+            "name": "egChJm",
+            "title": "Phone number of the polluter",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {}
+          },
+          {
+            "name": "BFCgyh",
+            "title": "Address of the polluter",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Equipment used at the incident",
+        "path": "/equipment-used-at-the-incident",
+        "controller": "RepeatPageController",
+        "repeat": {
+          "options": {
+            "name": "PjARMZ",
+            "title": "item"
+          },
+          "schema": {
+            "min": 1,
+            "max": 25
+          }
+        },
+        "section": "qWnCAP",
+        "next": [
+          {
+            "path": "/do-you-want-a-copy-of-this-report-for-your-records"
+          }
+        ],
+        "components": [
+          {
+            "name": "kGKmVS",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nView images and descriptions of the items in our <a href=\"https://assets.publishing.service.gov.uk/media/66b3470ea3c2a28abb50de1e/pollution-control-equipment-catalogue.pdf\" class=\"govuk-link\" target=\"_blank\">equipment catalogue (opens in new tab).</a>\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "HFqdzt",
+            "title": "What equipment was used?",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "BRazkH",
+            "title": "How many of this item were used?",
+            "type": "NumberField",
+            "hint": "",
+            "options": {
+              "classes": "govuk-input--width-3"
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What other fire and rescue service attended the incident?",
+        "path": "/what-other-fire-and-rescue-service-attended-the-incident",
+        "section": "section",
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-fire-station-that-attended-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "KltifE",
+            "title": "The other fire and rescue service's name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What was responsible for the incident?",
+        "path": "/what-was-responsible-for-the-incident",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/do-you-have-any-contact-details-for-the-polluter"
+          }
+        ],
+        "components": [
+          {
+            "name": "UazPTI",
+            "title": "Name of person or company that caused the pollution",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the phone number for the main contact?",
+        "path": "/whats-the-phone-number-for-the-main-contact",
+        "section": "section",
+        "next": [
+          {
+            "path": "/was-the-environment-agency-contacted-during-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "niNIaj",
+            "title": "Phone number for contact for the incident",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you know the registration number of the vehicle that caused the incident?",
+        "path": "/do-you-know-the-registration-number-of-the-vehicle-that-caused-the-incident",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/whats-the-registration-number-of-the-vehicle-that-caused-the-incident",
+            "condition": "lUtDyI"
+          },
+          {
+            "path": "/do-you-know-who-owns-the-vehicle",
+            "condition": "uOTvHU"
+          }
+        ],
+        "components": [
+          {
+            "name": "PIxNop",
+            "title": "Vehicle registration number is known",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the registration number of the vehicle that caused the incident?",
+        "path": "/whats-the-registration-number-of-the-vehicle-that-caused-the-incident",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/do-you-know-who-owns-the-vehicle"
+          }
+        ],
+        "components": [
+          {
+            "name": "JvoetV",
+            "title": "Vehicle registration number",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you know who owns the vehicle?",
+        "path": "/do-you-know-who-owns-the-vehicle",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/contact-details",
+            "condition": "FZGxjB"
+          },
+          {
+            "path": "/do-you-have-any-contact-details-for-the-polluter",
+            "condition": "zkvXKz"
+          }
+        ],
+        "components": [
+          {
+            "name": "WthCqC",
+            "title": "Owner of vehicle is known",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you know who was the incident commander?",
+        "path": "/do-you-know-who-was-the-incident-commander",
+        "section": "section",
+        "next": [
+          {
+            "path": "/who-was-the-incident-commander",
+            "condition": "uXumzl"
+          },
+          {
+            "path": "/who-can-we-contact-about-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "aYfbpQ",
+            "title": "Incident commander known",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you have contact details for the incident commander?",
+        "path": "/do-you-have-contact-details-for-the-incident-commander",
+        "section": "section",
+        "next": [
+          {
+            "path": "/whats-the-phone-number-for-the-incident-commander",
+            "condition": "FoTapV"
+          },
+          {
+            "path": "/is-the-incident-commander-the-main-contact-to-discuss-the-environmental-protection-equipment-used-during-the-incident"
+          }
+        ],
+        "components": [
+          {
+            "name": "srSMnJ",
+            "title": "Incident commander contact details known",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you want a copy of this report for your records?",
+        "path": "/do-you-want-a-copy-of-this-report-for-your-records",
+        "section": "OEogFO",
+        "next": [
+          {
+            "path": "/summary"
+          },
+          {
+            "path": "/whats-the-email-address-for-receiving-a-copy-of-this-report",
+            "condition": "TeQaSJ"
+          }
+        ],
+        "components": [
+          {
+            "name": "nbLBJW",
+            "title": "Copy of report required",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you have any information that could enable the Environment Agency to identify the polluter?",
+        "path": "/do-you-have-any-information-that-could-enable-the-environment-agency-to-identify-the-polluter",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/provide-any-information-you-have-that-could-help-the-environment-agency-determine-the-polluter",
+            "condition": "GRaFIQ"
+          },
+          {
+            "path": "/do-you-have-any-contact-details-for-the-polluter"
+          }
+        ],
+        "components": [
+          {
+            "name": "fAPGNI",
+            "title": "Information available to determine the polluter",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Provide any information you have that could help the Environment agency determine the polluter",
+        "path": "/provide-any-information-you-have-that-could-help-the-environment-agency-determine-the-polluter",
+        "section": "aZollh",
+        "next": [
+          {
+            "path": "/do-you-have-any-contact-details-for-the-polluter"
+          }
+        ],
+        "components": [
+          {
+            "name": "fyaJVy",
+            "title": "Information that could help the Environment Agency determine the polluter",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the email address for receiving a copy of this report?",
+        "path": "/whats-the-email-address-for-receiving-a-copy-of-this-report",
+        "section": "OEogFO",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "iGfART",
+            "title": "Email address for copy of report",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "pqbfzL",
+        "displayName": "Incident commander is not the main contact",
+        "value": {
+          "name": "Incident commander is not the main contact",
+          "conditions": [
+            {
+              "field": {
+                "name": "yPAyQU",
+                "type": "YesNoField",
+                "display": "Incident commander can provide details of equipment used"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "WtWsWo",
+        "displayName": "EA informed during incident",
+        "value": {
+          "name": "EA informed during incident",
+          "conditions": [
+            {
+              "field": {
+                "name": "vOQxqz",
+                "type": "YesNoField",
+                "display": "Environment Agency contacted during the incident"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "iksIoZ",
+        "displayName": "EA officer attended incident",
+        "value": {
+          "name": "EA officer attended incident",
+          "conditions": [
+            {
+              "field": {
+                "name": "CZOIom",
+                "type": "YesNoField",
+                "display": "Environment Agency officer in attendance   "
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "JDltyk",
+        "displayName": "yes - incident number is known",
+        "value": {
+          "name": "yes - incident number is known",
+          "conditions": [
+            {
+              "field": {
+                "name": "mcTmYC",
+                "type": "YesNoField",
+                "display": "Incident number known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ktTidK",
+        "displayName": "Yes - address is known",
+        "value": {
+          "name": "Yes - address is known",
+          "conditions": [
+            {
+              "field": {
+                "name": "LRuDag",
+                "type": "YesNoField",
+                "display": "Address where incident occurred is known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "zdfugF",
+        "displayName": "Yes - there are extenuating circumstances",
+        "value": {
+          "name": "Yes - there are extenuating circumstances",
+          "conditions": [
+            {
+              "field": {
+                "name": "NNjFLF",
+                "type": "YesNoField",
+                "display": "Extenuating circumstances"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "VZAgOn",
+        "displayName": "Fire and rescue service is other",
+        "value": {
+          "name": "Fire and rescue service is other",
+          "conditions": [
+            {
+              "field": {
+                "name": "PysKZe",
+                "type": "AutocompleteField",
+                "display": "Fire and rescue service name"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Other",
+                "display": "Other"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "pIQnPe",
+        "displayName": "Person or company cause the pollution",
+        "value": {
+          "name": "Person or company cause the pollution",
+          "conditions": [
+            {
+              "field": {
+                "name": "VlRuKe",
+                "type": "RadiosField",
+                "display": "Cause of the incident"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Company",
+                "display": "Company"
+              }
+            },
+            {
+              "coordinator": "or",
+              "field": {
+                "name": "VlRuKe",
+                "type": "RadiosField",
+                "display": "Cause of the incident"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Person",
+                "display": "Person"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "mlqRAM",
+        "displayName": "Yes - can supply contact details",
+        "value": {
+          "name": "Yes - can supply contact details",
+          "conditions": [
+            {
+              "field": {
+                "name": "PKjapp",
+                "type": "YesNoField",
+                "display": "Can provide contact details"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "CRAezO",
+        "displayName": "No - cannot provide contact details",
+        "value": {
+          "name": "No - cannot provide contact details",
+          "conditions": [
+            {
+              "field": {
+                "name": "PKjapp",
+                "type": "YesNoField",
+                "display": "Can provide contact details"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "UdEKKw",
+        "displayName": "Vehicle caused the incident",
+        "value": {
+          "name": "Vehicle caused the incident",
+          "conditions": [
+            {
+              "field": {
+                "name": "VlRuKe",
+                "type": "RadiosField",
+                "display": "Cause of the incident"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Vehicle",
+                "display": "Vehicle"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "WgnomX",
+        "displayName": "Something else is the cause of the incident",
+        "value": {
+          "name": "Something else is the cause of the incident",
+          "conditions": [
+            {
+              "field": {
+                "name": "VlRuKe",
+                "type": "RadiosField",
+                "display": "Cause of the incident"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Something else",
+                "display": "Something else"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "lUtDyI",
+        "displayName": "yes - vehicle registration number is known",
+        "value": {
+          "name": "yes - vehicle registration number is known",
+          "conditions": [
+            {
+              "field": {
+                "name": "PIxNop",
+                "type": "YesNoField",
+                "display": "Owner of the vehicle is known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "uOTvHU",
+        "displayName": "No - do not know the registration number",
+        "value": {
+          "name": "No - do not know the registration number",
+          "conditions": [
+            {
+              "field": {
+                "name": "PIxNop",
+                "type": "YesNoField",
+                "display": "Vehicle registration number is known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "FZGxjB",
+        "displayName": "Yes - has contact details for the vehicle owner",
+        "value": {
+          "name": "Yes - has contact details for the vehicle owner",
+          "conditions": [
+            {
+              "field": {
+                "name": "WthCqC",
+                "type": "YesNoField",
+                "display": "Owner of vehicle is known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "zkvXKz",
+        "displayName": "Owner of the vehicle is not known",
+        "value": {
+          "name": "Owner of the vehicle is not known",
+          "conditions": [
+            {
+              "field": {
+                "name": "WthCqC",
+                "type": "YesNoField",
+                "display": "Owner of vehicle is known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "uXumzl",
+        "displayName": "Yes - knows who the incident commander was",
+        "value": {
+          "name": "Yes - knows who the incident commander was",
+          "conditions": [
+            {
+              "field": {
+                "name": "aYfbpQ",
+                "type": "YesNoField",
+                "display": "Incident commander known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "FoTapV",
+        "displayName": "Yes - knows incident commander contact details",
+        "value": {
+          "name": "Yes - knows incident commander contact details",
+          "conditions": [
+            {
+              "field": {
+                "name": "srSMnJ",
+                "type": "YesNoField",
+                "display": "Incident commander contact details known"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "aSysez",
+        "displayName": "Do not know the cause of the incident",
+        "value": {
+          "name": "Do not know the cause of the incident",
+          "conditions": [
+            {
+              "field": {
+                "name": "VlRuKe",
+                "type": "RadiosField",
+                "display": "Cause of the incident"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "I do not know",
+                "display": "I do not know"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "GRaFIQ",
+        "displayName": "Yes - has details that could determine the polluter",
+        "value": {
+          "name": "Yes - has details that could determine the polluter",
+          "conditions": [
+            {
+              "field": {
+                "name": "fAPGNI",
+                "type": "YesNoField",
+                "display": "Information available to determine the polluter"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "TeQaSJ",
+        "displayName": "yes - send copy of report by email",
+        "value": {
+          "name": "yes - send copy of report by email",
+          "conditions": [
+            {
+              "field": {
+                "name": "nbLBJW",
+                "type": "YesNoField",
+                "display": "Contact details: Copy of report required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Contact details",
+        "hideTitle": true
+      },
+      {
+        "title": "Incident details",
+        "name": "MUhHwC",
+        "hideTitle": true
+      },
+      {
+        "title": "Polluter details",
+        "name": "aZollh",
+        "hideTitle": true
+      },
+      {
+        "title": "Equipment details",
+        "name": "qWnCAP",
+        "hideTitle": true
+      },
+      {
+        "title": "Copy of report",
+        "name": "OEogFO",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Fire service name",
+        "name": "flTrBm",
+        "type": "string",
+        "items": [
+          {
+            "text": "Avon",
+            "value": "Avon"
+          },
+          {
+            "text": "Bedfordshire",
+            "value": "Bedfordshire"
+          },
+          {
+            "text": "Buckinghamshire",
+            "value": "Buckinghamshire"
+          },
+          {
+            "text": "Cambridgeshire",
+            "value": "Cambridgeshire"
+          },
+          {
+            "text": "Cheshire",
+            "value": "Cheshire"
+          },
+          {
+            "text": "Cleveland",
+            "value": "Cleveland"
+          },
+          {
+            "text": "Cornwall",
+            "value": "Cornwall"
+          },
+          {
+            "text": "Cumbria",
+            "value": "Cumbria"
+          },
+          {
+            "text": "Derbyshire",
+            "value": "Derbyshire"
+          },
+          {
+            "text": "Devon and Somerset",
+            "value": "Devon and Somerset"
+          },
+          {
+            "text": "Dorset and Wiltshire",
+            "value": "Dorset and Wiltshire"
+          },
+          {
+            "text": "Durham",
+            "value": "Durham"
+          },
+          {
+            "text": "East Sussex",
+            "value": "East Sussex"
+          },
+          {
+            "text": "Essex",
+            "value": "Essex"
+          },
+          {
+            "text": "Greater Manchester",
+            "value": "Greater Manchester"
+          },
+          {
+            "text": "Gloucestershire",
+            "value": "Gloucestershire"
+          },
+          {
+            "text": "Hampshire and Isle of Wight",
+            "value": "Hampshire and Isle of Wight"
+          },
+          {
+            "text": "Hereford and Worcester",
+            "value": "Hereford and Worcester"
+          },
+          {
+            "text": "Hertfordshire",
+            "value": "Hertfordshire"
+          },
+          {
+            "text": "Humberside",
+            "value": "Humberside"
+          },
+          {
+            "text": "Isle of Man",
+            "value": "Isle of Man"
+          },
+          {
+            "text": "Isles of Scilly",
+            "value": "Isles of Scilly"
+          },
+          {
+            "text": "Kent",
+            "value": "Kent"
+          },
+          {
+            "text": "Lancashire",
+            "value": "Lancashire"
+          },
+          {
+            "text": "Leicestershire",
+            "value": "Leicestershire"
+          },
+          {
+            "text": "Lincolnshire",
+            "value": "Lincolnshire"
+          },
+          {
+            "text": "London Fire Brigade",
+            "value": "London Fire Brigade"
+          },
+          {
+            "text": "Merseyside",
+            "value": "Merseyside"
+          },
+          {
+            "text": "North Yorkshire",
+            "value": "North Yorkshire"
+          },
+          {
+            "text": "Northumberland",
+            "value": "Northumberland"
+          },
+          {
+            "text": "Northamptonshire",
+            "value": "Northamptonshire"
+          },
+          {
+            "text": "Nottinghamshire",
+            "value": "Nottinghamshire"
+          },
+          {
+            "text": "Oxfordshire",
+            "value": "Oxfordshire"
+          },
+          {
+            "text": "Other",
+            "value": "Other"
+          },
+          {
+            "text": "Royal Berkshire",
+            "value": "Royal Berkshire"
+          },
+          {
+            "text": "Shropshire",
+            "value": "Shropshire"
+          },
+          {
+            "text": "South Yorkshire",
+            "value": "South Yorkshire"
+          },
+          {
+            "text": "Staffordshire",
+            "value": "Staffordshire"
+          },
+          {
+            "text": "Suffolk",
+            "value": "Suffolk"
+          },
+          {
+            "text": "Surrey",
+            "value": "Surrey"
+          },
+          {
+            "text": "Tyne and Wear",
+            "value": "Tyne and Wear"
+          },
+          {
+            "text": "Warwickshire",
+            "value": "Warwickshire"
+          },
+          {
+            "text": "West Midlands",
+            "value": "West Midlands"
+          },
+          {
+            "text": "West Sussex",
+            "value": "West Sussex"
+          },
+          {
+            "text": "West Yorkshire",
+            "value": "West Yorkshire"
+          }
+        ]
+      },
+      {
+        "title": "Cause of the incident",
+        "name": "ljJHBG",
+        "type": "string",
+        "items": [
+          {
+            "text": "Company",
+            "value": "Company"
+          },
+          {
+            "text": "Person",
+            "value": "Person"
+          },
+          {
+            "text": "Vehicle",
+            "value": "Vehicle",
+            "description": "We'll ask you to provide details of the vehicle."
+          },
+          {
+            "text": "Something else",
+            "value": "Something else"
+          },
+          {
+            "text": "I do not know",
+            "value": "I do not know"
+          }
+        ]
+      },
+      {
+        "title": "Yes, no or I do not know",
+        "name": "APCLrt",
+        "type": "string",
+        "items": [
+          {
+            "text": "Yes",
+            "value": "Yes"
+          },
+          {
+            "text": "No",
+            "value": "No"
+          },
+          {
+            "text": "I do not know",
+            "value": "I do not know"
+          }
+        ]
+      }
+    ],
+    "startPage": "/what-fire-and-rescue-service-attended-the-incident",
+    "skipSummary": false
+  }
+}

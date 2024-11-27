@@ -69,6 +69,7 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-plugin-transform-import-meta": "^2.3.2",
     "editorconfig-checker": "^6.0.1",
+    "csv-stringify": "^6.5.2",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.5",
     "eslint-config-standard": "^17.1.0",

@@ -1,0 +1,1745 @@
+{
+  "id": "671f860c4909dc24d69c43bd",
+  "metadata": {
+    "id": "671f860c4909dc24d69c43bd",
+    "slug": "water-quality-permits-confirm-your-information",
+    "title": "Water quality permits: confirm your information",
+    "organisation": "Environment Agency",
+    "teamName": "Water Quality Permit Modernisation Project",
+    "teamEmail": "defraforms@defra.gov.uk",
+    "contact": {
+      "phone": "Telephone: 03708 506 506\r\nMonday to Friday, 8am to 6pm",
+      "email": {
+        "address": "waterqualitypermitmodernisation@environment-agency.gov.uk",
+        "responseTime": "We aim to respond within 10 working days."
+      }
+    },
+    "submissionGuidance": "Thank you for taking the time to complete this declaration.\r\n\r\nIf you have any questions regarding this, contact the Environment Agency:\r\n\r\nEmail: waterqualitypermitmodernisation@environment-agency.gov.uk\r\nTelephone: 03708 506 506",
+    "notificationEmail": "waterqualitypermitmodernisation@environment-agency.gov.uk",
+    "draft": {
+      "createdAt": "2024-10-28T12:39:40.086Z",
+      "createdBy": {
+        "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-11-15T16:39:57.844Z",
+      "updatedBy": {
+        "id": "61662b1e-31d3-4714-8be2-44fd1f4887a9",
+        "displayName": "Bethan Ryder"
+      }
+    },
+    "createdBy": {
+      "id": "2cc8c6f5-89b3-4ab3-9eb7-6de798c287b7",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-10-28T12:39:40.086Z",
+    "updatedBy": {
+      "id": "61662b1e-31d3-4714-8be2-44fd1f4887a9",
+      "displayName": "Bethan Ryder"
+    },
+    "updatedAt": "2024-11-15T16:39:57.844Z"
+  },
+  "draft": {
+    "name": "Water quality permits: confirm your information",
+    "pages": [
+      {
+        "title": "Water quality permits: confirm your information",
+        "path": "/start",
+        "controller": "StartPageController",
+        "next": [
+          {
+            "path": "/whats-your-permit-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "JyZEAd",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nYou have received a link to this form because Environment Agency records show you hold a water quality permit.<br><br>\nThe Environment Agency is reviewing these permits to make sure they have the correct details and comply with regulations introduced in 2016. <br><br>\nCompleting this form helps us to check and update their records.\n <br><br>\n</p>\n",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your permit number?",
+        "path": "/whats-your-permit-number",
+        "next": [
+          {
+            "path": "/whats-your-reference-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "PzMeZr",
+            "title": "Permit number",
+            "type": "TextField",
+            "hint": "Enter the permit number shown in the top-right corner of your letter.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your reference number?",
+        "path": "/whats-your-reference-number",
+        "next": [
+          {
+            "path": "/whats-your-name"
+          }
+        ],
+        "components": [
+          {
+            "name": "IVilrn",
+            "title": "Reference number",
+            "type": "TextField",
+            "hint": "Enter the reference number shown in the top-right corner of your letter.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your name?",
+        "path": "/whats-your-name",
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ],
+        "components": [
+          {
+            "name": "SZTpvX",
+            "title": "Name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your email address?",
+        "path": "/whats-your-email-address",
+        "next": [
+          {
+            "path": "/are-you-representing-an-organisation"
+          }
+        ],
+        "components": [
+          {
+            "name": "kCkTUT",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's the name of your organisation?",
+        "path": "/whats-the-name-of-your-organisation",
+        "next": [
+          {
+            "path": "/are-you-the-operator-named-in-the-letter"
+          }
+        ],
+        "components": [
+          {
+            "name": "WejhRR",
+            "title": "Organisation name",
+            "type": "TextField",
+            "hint": "",
+            "options": {
+              "required": true
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Are you the operator named in the letter?",
+        "path": "/are-you-the-operator-named-in-the-letter",
+        "next": [
+          {
+            "path": "/do-you-manage-the-waste-water-discharge-site-named-in-the-letter"
+          }
+        ],
+        "components": [
+          {
+            "name": "lrIuJz",
+            "title": "Are you the named operator?",
+            "type": "YesNoField",
+            "hint": "Choose 'yes' if the letter names you or your organisation as the operator for the permit.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you manage the waste water discharge site named in the letter?",
+        "path": "/do-you-manage-the-waste-water-discharge-site-named-in-the-letter",
+        "next": [
+          {
+            "path": "/is-the-waste-water-discharge-under-this-permit-still-taking-place",
+            "condition": "ReNTyh"
+          },
+          {
+            "path": "/do-you-know-who-manages-the-discharge-site",
+            "condition": "jTjyrF"
+          },
+          {
+            "path": "/do-you-have-any-contact-details-for-the-current-operator",
+            "condition": "hKLlMS"
+          }
+        ],
+        "components": [
+          {
+            "name": "yDTVhN",
+            "title": "Do you manage the discharge site?",
+            "type": "YesNoField",
+            "hint": "Choose 'yes' if you or your organisation manage the discharge site.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Where is the water discharged to?",
+        "path": "/where-is-the-water-discharged-to",
+        "next": [
+          {
+            "path": "/exemptions-for-surface-water-discharges",
+            "condition": "hOnhIx"
+          },
+          {
+            "path": "/exemptions-for-groundwater-discharges",
+            "condition": "YbQVrV"
+          }
+        ],
+        "components": [
+          {
+            "name": "nsLMkr",
+            "title": "Where is the waste water discharged to?",
+            "type": "RadiosField",
+            "hint": "",
+            "list": "bjUOFU",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Surface water discharges: general binding rules",
+        "path": "/surface-water-discharges-general-binding-rules",
+        "next": [
+          {
+            "path": "/the-environment-agency-needs-more-information",
+            "condition": "rmKDoF"
+          },
+          {
+            "path": "/you-need-to-transfer-this-permit-into-your-name",
+            "condition": "ZNpkwZ"
+          },
+          {
+            "path": "/when-did-your-discharge-meet-the-general-binding-rules",
+            "condition": "ETJnZY"
+          }
+        ],
+        "components": [
+          {
+            "name": "FylZCf",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You will not need a permit if you meet the <a href=\"https://www.gov.uk/guidance/general-binding-rules-small-sewage-discharge-to-a-surface-water\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">general binding rules for discharges to surface water (opens in new tab)</a>.</p>\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "vlZGgs",
+            "title": "Do you meet the general binding rules for surface water discharges?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Groundwater discharges: general binding rules",
+        "path": "/groundwater-discharges-general-binding-rules",
+        "next": [
+          {
+            "path": "/the-environment-agency-needs-more-information",
+            "condition": "Ykpnnb"
+          },
+          {
+            "path": "/you-need-to-transfer-this-permit-into-your-name",
+            "condition": "PaegYU"
+          },
+          {
+            "path": "/when-did-your-discharge-meet-the-general-binding-rules",
+            "condition": "sOgpnU"
+          }
+        ],
+        "components": [
+          {
+            "name": "ihNLLJ",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You will not need a permit if you meet the <a href=\"https://www.gov.uk/guidance/general-binding-rules-small-sewage-discharge-to-the-ground\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">general binding rules for discharges to groundwater (opens in new tab)</a>.</p>\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "qqZInB",
+            "title": "Do you meet the general binding rules for groundwater discharges?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Is the waste water discharge under this permit still taking place?",
+        "path": "/is-the-waste-water-discharge-under-this-permit-still-taking-place",
+        "next": [
+          {
+            "path": "/where-is-the-water-discharged-to",
+            "condition": "fFBeWO"
+          },
+          {
+            "path": "/why-has-the-waste-water-discharge-stopped",
+            "condition": "kicwXY"
+          }
+        ],
+        "components": [
+          {
+            "name": "dIiFqJ",
+            "title": "Discharge still taking place?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Surrendering your permit",
+        "path": "/surrendering-your-permit",
+        "next": [
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZVksBs",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Based on the information provided, you no longer need this water quality permit. </p>\n<p class=\"govuk-body\">You should now:</p>\n<ol class=\"govuk-list govuk-list--number\">\n  <li>Continue to the end of the form to submit your answers.</li>\n  <li>Complete a <a href=\"https://www.gov.uk/government/publications/notification-for-an-environmental-permit-part-e1-notification-of-surrender\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">notification of surrender (opens in new tab)</a> to surrender your permit.</li>\n</ol>\n",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Your waste water discharge is exempt",
+        "path": "/your-waste-water-discharge-is-exempt",
+        "next": [
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide"
+          }
+        ],
+        "components": [
+          {
+            "name": "xyrsZE",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Based on the information you have given, your discharge is exempt. This means you do not need a permit.<br><br>\n\nYou will need to continue to the end of the form to submit your answers.<br><br>\nThe Environment Agency will then record this on the database. You will not need to do anything further.<br><br>\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "The Environment Agency needs more information",
+        "path": "/the-environment-agency-needs-more-information",
+        "next": [
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide"
+          }
+        ],
+        "components": [
+          {
+            "name": "DhYbOo",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Based on the information you have provided, you still need this permit. We will contact you to:</p>\n\n<ul class=\"govuk-list govuk-list--bullet\">\n  <li>make sure your permit conditions reflect your discharge activity</li>\n  <li>vary your permit so that it meets current environmental permit regulations</li>\n</ul>\n\n<p class=\"govuk-body\">You will need to continue to the end of the form to submit your answers.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Is there any more information you would like to provide?",
+        "path": "/is-there-any-more-information-you-would-like-to-provide",
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ],
+        "components": [
+          {
+            "name": "hdwQZy",
+            "title": "Additional information",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Check your answers before submitting this form",
+        "path": "/summary",
+        "controller": "SummaryPageController"
+      },
+      {
+        "title": "Do you know who manages the discharge site?",
+        "path": "/do-you-know-who-manages-the-discharge-site",
+        "next": [
+          {
+            "path": "/have-you-already-transferred-the-permit-to-the-new-operator",
+            "condition": "qHdxHg"
+          },
+          {
+            "path": "/what-will-happen-next",
+            "condition": "eulVha"
+          }
+        ],
+        "components": [
+          {
+            "name": "ODKHVF",
+            "title": "Aware who manages the discharge site?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Have you already transferred the permit to the new operator?",
+        "path": "/have-you-already-transferred-the-permit-to-the-new-operator",
+        "next": [
+          {
+            "path": "/do-you-have-proof-of-transfer",
+            "condition": "Ojtoqo"
+          },
+          {
+            "path": "/transferring-your-permit-to-a-new-operator",
+            "condition": "fISTKk"
+          }
+        ],
+        "components": [
+          {
+            "name": "obvLCG",
+            "title": "Have you transferred the permit to the new operator?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Provide the operator's contact details",
+        "path": "/provide-the-operators-contact-details",
+        "next": [
+          {
+            "path": "/what-happens-next",
+            "condition": "jTjyrF"
+          },
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide",
+            "condition": "hKLlMS"
+          }
+        ],
+        "components": [
+          {
+            "name": "FDhBKj",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nEnter as many of the operator's details as you can. Leave questions blank if you cannot provide the information. </p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "SBEfBs",
+            "title": "Operator name",
+            "type": "TextField",
+            "hint": "This could be the name of an individual or organisation.",
+            "options": {
+              "condition": "xaAEow",
+              "required": false,
+              "optionalText": true,
+              "classes": ""
+            },
+            "schema": {}
+          },
+          {
+            "name": "hDLyDi",
+            "title": "Operator phone number",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {
+              "condition": "VSlyHC",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {}
+          },
+          {
+            "name": "kCKkBk",
+            "title": "Operator email address",
+            "type": "EmailAddressField",
+            "hint": "",
+            "options": {
+              "condition": "CRsKzU",
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {}
+          },
+          {
+            "name": "IuIAuF",
+            "title": "Operator address",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {
+              "required": false,
+              "optionalText": true
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What happens next",
+        "path": "/what-happens-next",
+        "next": [
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide"
+          }
+        ],
+        "components": [
+          {
+            "name": "IGyqAJ",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You should continue to the end of the form to submit your answers.<br><br>\nThe Environment Agency will then try to contact the current operator. The operator may request a permit transfer from you if they still need the permit.<br><br>\nIf the operator does not respond, the Environment Agency will get in touch about surrendering your permit.<br><br>\n</p>\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you have any contact details for the current operator?",
+        "path": "/do-you-have-any-contact-details-for-the-current-operator",
+        "next": [
+          {
+            "path": "/provide-the-operators-contact-details",
+            "condition": "BuxaoH"
+          },
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide",
+            "condition": "utYeWf"
+          }
+        ],
+        "components": [
+          {
+            "name": "yKzWGb",
+            "title": "Do you have any contact details for the operator?",
+            "type": "YesNoField",
+            "hint": "Contact details could include the operator's name or organisation name, phone number, email address or postal address.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Are you representing an organisation?",
+        "path": "/are-you-representing-an-organisation",
+        "next": [
+          {
+            "path": "/whats-the-name-of-your-organisation",
+            "condition": "UNUvEe"
+          },
+          {
+            "path": "/are-you-the-operator-named-in-the-letter",
+            "condition": "jIntsE"
+          }
+        ],
+        "components": [
+          {
+            "name": "vFfkBD",
+            "title": "Representing an organisation?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "You need to transfer this permit into your name",
+        "path": "/you-need-to-transfer-this-permit-into-your-name",
+        "next": [
+          {
+            "path": "/proof-of-your-permit-transfer",
+            "condition": "kkFkKP"
+          },
+          {
+            "path": "/transferring-a-permit-into-your-name",
+            "condition": "lwHtbf"
+          }
+        ],
+        "components": [
+          {
+            "name": "fnUDVj",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nBased on your responses, this permit needs to be in your name, or your organisation's name.<br><br>\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "mVOgBN",
+            "title": "Have you already transferred the permit into your name?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Do you have proof of transfer?",
+        "path": "/do-you-have-proof-of-transfer",
+        "next": [
+          {
+            "path": "/proof-of-your-permit-transfer",
+            "condition": "nVBtWS"
+          },
+          {
+            "path": "/do-you-have-any-contact-details-for-the-current-operator",
+            "condition": "KFXrsG"
+          }
+        ],
+        "components": [
+          {
+            "name": "pcrKLV",
+            "title": "Proof of transfer?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Proof of your permit transfer",
+        "path": "/proof-of-your-permit-transfer",
+        "controller": "FileUploadPageController",
+        "next": [
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide"
+          }
+        ],
+        "components": [
+          {
+            "name": "ZGoolt",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\nUpload evidence of the permit transfer, such as a certificate of holder document or transfer notice. This should show the operator of the permit and their contact details. <br><br>\nThe Environment Agency will use this to correct their records.<br><br>\nIf you cannot upload a version now:</p>\n<ol class=\"govuk-list govuk-list--number\">\n  <li>Continue to the end of this form to submit your answers.</li>\n  <li>Send a copy of your proof of transfer by email to <a href=\"mailto:waterqualitypermitmodernisation@environment-agency.gov.uk\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">waterqualitypermitmodernisation@environment-agency.gov.uk (opens in new tab)</a>.\n</li>\n</ol>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "igJcLx",
+            "title": "Upload proof of your permit transfer",
+            "type": "FileUploadField",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "When did your discharge meet the general binding rules?",
+        "path": "/when-did-your-discharge-meet-the-general-binding-rules",
+        "next": [
+          {
+            "path": "/your-waste-water-discharge-is-exempt"
+          }
+        ],
+        "components": [
+          {
+            "name": "EFnBeu",
+            "title": "Date of first exemption",
+            "type": "DatePartsField",
+            "hint": "Enter the date that your discharge first complied with the general binding rules. You can estimate if you're unsure.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Transferring a permit into your name",
+        "path": "/transferring-a-permit-into-your-name",
+        "next": [
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide"
+          }
+        ],
+        "components": [
+          {
+            "name": "zBsrKI",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\n<p class=\"govuk-body\">To transfer the permit into your name, you will need to:</p>\n<ol class=\"govuk-list govuk-list--number\">\n  <li>Continue to the end of this form to submit your answers.\n  <li>Complete the <a href=\"https://www.gov.uk/government/publications/application-for-an-environmental-permit-part-a-about-you\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">Application for an environmental permit: part A, about you (opens in new tab)</a> form.</li>\n  <li>Complete the <a href=\"https://www.gov.uk/government/publications/notification-for-an-environmental-permit-part-d1-notification-of-transfer\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">Notification for an environmental permit: part D1, notification of transfer (opens in new tab)</a> form.</li>\n</ol>\n\n<p class=\"govuk-body\">Both you and the existing permit holder will need to complete part D1.<br><br>\nThe Environment Agency will send you a transfer notification once the permit is in your name.</p>\n \n\n<h2 class=\"govuk-heading-m\">If you cannot contact the permit holder</h2>\n<p class=\"govuk-body\">If you cannot contact the current permit holder, you may still be able to transfer the permit without their declaration. Contact the Integrated Permitting Service (IPS) to discuss this:</p>\n\n<ul class=\"govuk-list\">\n  <li>Email: <a href=\"mailto:psc‐waterquality@environment‐agency.gov.uk\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">psc‐waterquality@environment‐agency.gov.uk (opens in new tab)</a></li>\n  <li>Telephone: 020 8474 8938</li>\n</ul>\n\n<p class=\"govuk-body\">You will need to give evidence that you cannot trace one or all of the permit holders.\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Exemptions for surface water discharges",
+        "path": "/exemptions-for-surface-water-discharges",
+        "next": [
+          {
+            "path": "/surface-water-discharges-general-binding-rules",
+            "condition": "JgeDrl"
+          },
+          {
+            "path": "/your-waste-water-discharge-is-exempt",
+            "condition": "JNvwYT"
+          }
+        ],
+        "components": [
+          {
+            "name": "ecNIfj",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Surface water discharges are exempt if they meet all of the following criteria:</p>\n<ul class=\"govuk-list govuk-list--bullet\">\n  <li>the sewage is domestic only – check the <a href=\"https://www.gov.uk/government/publications/domestic-sewage-discharges-to-surface-water-and-groundwater/domestic-sewage-discharges-to-surface-water-and-groundwater\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">definition of domestic sewage (opens in new tab)</a></li>\n  <li>the discharge started before 6 April 2010 and met standards when it was first made – if your discharge has changed since this date, your discharge will not be exempt</li>\n  <li>you treat the sewage with a sewage treatment plant (also know as a package sewage plant)</li>\n  <li>sewage from the treatment plant discharges to inland freshwater (such as a river, stream, seasonally dry ditch, pond, lake or canal), coastal waters or territorial waters</li>\n  <li>you discharge 5 cubic metres per day or less from the treatment plant – use the  <a href=\"https://www.gov.uk/government/publications/sewage-discharges-calculator-for-domestic-properties\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">discharge calculator (opens in new tab)</a> to check </li>\n  <li>an approved contractor operates, maintains and empties your treatment plant on a regular basis </li>\n  <li>your treatment system is not causing any pollution</li>\n</ul>\n\n<p class=\"govuk-body\">If you are unsure if your discharge meets the exemption criteria, contact your service engineer. Check the <a href=\"https://www.britishwater.co.uk/page/ListofAccreditedServiceTechnicians\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">British Water’s list of accredited service engineers (opens in new tab)</a>  <br><br>\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "QzKwOG",
+            "title": "Does your surface water discharge meet the exemption criteria?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Exemptions for groundwater discharges",
+        "path": "/exemptions-for-groundwater-discharges",
+        "next": [
+          {
+            "path": "/groundwater-discharges-general-binding-rules",
+            "condition": "MCCali"
+          },
+          {
+            "path": "/your-waste-water-discharge-is-exempt",
+            "condition": "iDCqzK"
+          }
+        ],
+        "components": [
+          {
+            "name": "tZXTBz",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Groundwater discharges are exempt if they meet all of the following criteria:</p>\n<ul class=\"govuk-list govuk-list--bullet\">\n  <li>the sewage is domestic only – check the <a href=\"https://www.gov.uk/government/publications/domestic-sewage-discharges-to-surface-water-and-groundwater/domestic-sewage-discharges-to-surface-water-and-groundwater\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">definition of domestic sewage (opens in new tab)</a></li>\n  <li>the discharge started before 6 April 2010 and met standards when it was first made – if your discharge has changed since this date, your discharge will not be exempt</li>\n  <li>you treat the sewage with a septic tank and infiltration system or a sewage treatment plant and infiltration system</li>\n  <li>sewage from the treatment plant or septic tank discharges to ground</li>\n  <li>you discharge 2 cubic metres per day or less from the treatment plant – use the  <a href=\"https://www.gov.uk/government/publications/sewage-discharges-calculator-for-domestic-properties\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">discharge calculator (opens in new tab)</a> to check </li>\n  <li>an approved contractor operates, maintains and empties your treatment plant on a regular basis </li>\n  <li>the discharge is not within groundwater source protection zone – find out more about  <a href=\"https://www.gov.uk/guidance/groundwater-source-protection-zones-spzs\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">groundwater source protection zones  (opens in new tab)</a></li>\n</ul>\n\n<p class=\"govuk-body\">If you are unsure if your discharge meets the exemption criteria, contact your service engineer. Check the <a href=\"https://www.britishwater.co.uk/page/ListofAccreditedServiceTechnicians\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">British Water’s list of accredited service engineers (opens in new tab)</a>  <br><br>\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "EoRmiZ",
+            "title": "Does your groundwater discharge meet the exemption criteria?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Why has the waste water discharge stopped?",
+        "path": "/why-has-the-waste-water-discharge-stopped",
+        "next": [
+          {
+            "path": "/surrendering-your-permit",
+            "condition": "XLwpxE"
+          },
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide",
+            "condition": "MSpwFp"
+          }
+        ],
+        "components": [
+          {
+            "name": "MiCNYs",
+            "title": "Explanation for end of waste water discharge",
+            "type": "MultilineTextField",
+            "hint": "Briefly explain why the waste water discharge has stopped, such as because of connection to the sewer.",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What will happen next",
+        "path": "/what-will-happen-next",
+        "next": [
+          {
+            "path": "/is-there-any-more-information-you-would-like-to-provide"
+          }
+        ],
+        "components": [
+          {
+            "name": "iBJQFc",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">You should continue to the end of the form to submit your answers.<br><br>\nThe Environment Agency will then try to contact the current occupier of the site. The occupier may request a permit transfer from you if they still need the permit.<br><br>\n\nIf the occupier does not respond, the Environment Agency will get in touch about surrendering your permit.<br><br>\n</p>",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "Transferring your permit to a new operator",
+        "path": "/transferring-your-permit-to-a-new-operator",
+        "next": [
+          {
+            "path": "/do-you-have-any-contact-details-for-the-current-operator"
+          }
+        ],
+        "components": [
+          {
+            "name": "uGwkAA",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">\n<p class=\"govuk-body\">To transfer the permit into the new operator's name, you will need to:</p>\n<ol class=\"govuk-list govuk-list--number\">\n  <li>Continue to the end of this form to submit your answers.\n  <li>Complete the <a href=\"https://www.gov.uk/government/publications/notification-for-an-environmental-permit-part-d1-notification-of-transfer\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">Notification for an environmental permit: part D1, notification of transfer (opens in new tab)</a> form.</li>\n</ol>\n\n<p class=\"govuk-body\">Both you and the existing permit holder will need to complete part D1.<br><br>\nThe Environment Agency will send you a transfer notification once the permit is in the new operator's name.</p>\n</p>",
+            "options": {
+              "condition": "fISTKk"
+            },
+            "schema": {}
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "jTjyrF",
+        "displayName": "Named operator but does not manage discharge site",
+        "value": {
+          "name": "Named operator but does not manage discharge site",
+          "conditions": [
+            {
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "yDTVhN",
+                "type": "YesNoField",
+                "display": "Do you manage the discharge site?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ReNTyh",
+        "displayName": "Manages discharge site",
+        "value": {
+          "name": "Manages discharge site",
+          "conditions": [
+            {
+              "field": {
+                "name": "yDTVhN",
+                "type": "YesNoField",
+                "display": "Do you manage the discharge site?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "hKLlMS",
+        "displayName": "Not named operator and does not manage discharge site",
+        "value": {
+          "name": "Not named operator and does not manage discharge site",
+          "conditions": [
+            {
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "yDTVhN",
+                "type": "YesNoField",
+                "display": "Do you manage the discharge site?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "fFBeWO",
+        "displayName": "Discharge is still taking place",
+        "value": {
+          "name": "Discharge is still taking place",
+          "conditions": [
+            {
+              "field": {
+                "name": "dIiFqJ",
+                "type": "YesNoField",
+                "display": "Discharge still taking place?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "XLwpxE",
+        "displayName": "Discharge is no longer taking place and operator is named",
+        "value": {
+          "name": "Discharge is no longer taking place and operator is named",
+          "conditions": [
+            {
+              "field": {
+                "name": "dIiFqJ",
+                "type": "YesNoField",
+                "display": "Discharge still taking place?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "sOgpnU",
+        "displayName": "Groundwater discharge meets GBR",
+        "value": {
+          "name": "Groundwater discharge meets GBR",
+          "conditions": [
+            {
+              "field": {
+                "name": "qqZInB",
+                "type": "YesNoField",
+                "display": "Do you meet the general binding rules for discharges to ground water?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Ykpnnb",
+        "displayName": "Named operators: Ground water discharge does not meet GBR",
+        "value": {
+          "name": "Named operators: Ground water discharge does not meet GBR",
+          "conditions": [
+            {
+              "field": {
+                "name": "qqZInB",
+                "type": "YesNoField",
+                "display": "Do you meet the general binding rules for discharges to ground water?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "rmKDoF",
+        "displayName": "Named operators: Surface water discharge does not meet GBR",
+        "value": {
+          "name": "Named operators: Surface water discharge does not meet GBR",
+          "conditions": [
+            {
+              "field": {
+                "name": "vlZGgs",
+                "type": "YesNoField",
+                "display": "Do you meet the general binding rules for discharges to surface water?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ETJnZY",
+        "displayName": "Surface water discharge meets GBR",
+        "value": {
+          "name": "Surface water discharge meets GBR",
+          "conditions": [
+            {
+              "field": {
+                "name": "vlZGgs",
+                "type": "YesNoField",
+                "display": "Do you meet the general binding rules for discharges to surface water?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "MSpwFp",
+        "displayName": "Discharge is no longer taking place but operator is not named",
+        "value": {
+          "name": "Discharge is no longer taking place but operator is not named",
+          "conditions": [
+            {
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "dIiFqJ",
+                "type": "YesNoField",
+                "display": "Discharge still taking place?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "qHdxHg",
+        "displayName": "Knows who manages the site",
+        "value": {
+          "name": "Knows who manages the site",
+          "conditions": [
+            {
+              "field": {
+                "name": "ODKHVF",
+                "type": "YesNoField",
+                "display": "Aware who manages the discharge site?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "eulVha",
+        "displayName": "Does not know who manages site",
+        "value": {
+          "name": "Does not know who manages site",
+          "conditions": [
+            {
+              "field": {
+                "name": "ODKHVF",
+                "type": "YesNoField",
+                "display": "Aware who manages the discharge site?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "hOnhIx",
+        "displayName": "Surface water",
+        "value": {
+          "name": "Surface water",
+          "conditions": [
+            {
+              "field": {
+                "name": "nsLMkr",
+                "type": "RadiosField",
+                "display": "Where is the water discharged to?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Surface water",
+                "display": "Surface water"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "YbQVrV",
+        "displayName": "Groundwater",
+        "value": {
+          "name": "Groundwater",
+          "conditions": [
+            {
+              "field": {
+                "name": "nsLMkr",
+                "type": "RadiosField",
+                "display": "Where is the waste water discharged to?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Ground",
+                "display": "Ground"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "utYeWf",
+        "displayName": "Does not know the operator's contact details",
+        "value": {
+          "name": "Does not know the operator's contact details",
+          "conditions": [
+            {
+              "field": {
+                "name": "yKzWGb",
+                "type": "YesNoField",
+                "display": "Do you know any of the operator's contact details?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "BuxaoH",
+        "displayName": "Knows the operator's contact details",
+        "value": {
+          "name": "Knows the operator's contact details",
+          "conditions": [
+            {
+              "field": {
+                "name": "yKzWGb",
+                "type": "YesNoField",
+                "display": "Do you know any of the operator's contact details?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "jIntsE",
+        "displayName": "Not representing an organisation",
+        "value": {
+          "name": "Not representing an organisation",
+          "conditions": [
+            {
+              "field": {
+                "name": "vFfkBD",
+                "type": "YesNoField",
+                "display": "Representing an organisation?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "UNUvEe",
+        "displayName": "Representing an organisation",
+        "value": {
+          "name": "Representing an organisation",
+          "conditions": [
+            {
+              "field": {
+                "name": "vFfkBD",
+                "type": "YesNoField",
+                "display": "Representing an organisation?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ZNpkwZ",
+        "displayName": "Non-named operators: Surface water discharge does not meet GBR",
+        "value": {
+          "name": "Non-named operators: Surface water discharge does not meet GBR",
+          "conditions": [
+            {
+              "field": {
+                "name": "vlZGgs",
+                "type": "YesNoField",
+                "display": "Do you meet the general binding rules for discharges to surface water?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "PaegYU",
+        "displayName": "Non-named operators: Ground water discharge does not meet GBR",
+        "value": {
+          "name": "Non-named operators: Ground water discharge does not meet GBR",
+          "conditions": [
+            {
+              "field": {
+                "name": "qqZInB",
+                "type": "YesNoField",
+                "display": "Do you meet the general binding rules for discharges to ground water?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            },
+            {
+              "coordinator": "and",
+              "field": {
+                "name": "lrIuJz",
+                "type": "YesNoField",
+                "display": "Are you the named operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "nVBtWS",
+        "displayName": "Has proof of the transfer",
+        "value": {
+          "name": "Has proof of the transfer",
+          "conditions": [
+            {
+              "field": {
+                "name": "pcrKLV",
+                "type": "YesNoField",
+                "display": "Proof of transfer?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "kkFkKP",
+        "displayName": "Has transferred the permit into own name",
+        "value": {
+          "name": "Has transferred the permit into own name",
+          "conditions": [
+            {
+              "field": {
+                "name": "mVOgBN",
+                "type": "YesNoField",
+                "display": "Have you already transferred the permit?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "lwHtbf",
+        "displayName": "Has not transferred the permit into own name",
+        "value": {
+          "name": "Has not transferred the permit into own name",
+          "conditions": [
+            {
+              "field": {
+                "name": "mVOgBN",
+                "type": "YesNoField",
+                "display": "Have you already transferred the permit?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "MCCali",
+        "displayName": "Groundwater discharge not exempt",
+        "value": {
+          "name": "Groundwater discharge not exempt",
+          "conditions": [
+            {
+              "field": {
+                "name": "EoRmiZ",
+                "type": "YesNoField",
+                "display": "Does your groundwater discharge meet the exemption criteria?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "JgeDrl",
+        "displayName": "Surface water discharge not exempt",
+        "value": {
+          "name": "Surface water discharge not exempt",
+          "conditions": [
+            {
+              "field": {
+                "name": "QzKwOG",
+                "type": "YesNoField",
+                "display": "Does your surface water discharge meet the exemption criteria?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "iDCqzK",
+        "displayName": "Groundwater discharge exempt",
+        "value": {
+          "name": "Groundwater discharge exempt",
+          "conditions": [
+            {
+              "field": {
+                "name": "EoRmiZ",
+                "type": "YesNoField",
+                "display": "Does your groundwater discharge meet the exemption criteria?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "JNvwYT",
+        "displayName": "Surface water discharge exempt",
+        "value": {
+          "name": "Surface water discharge exempt",
+          "conditions": [
+            {
+              "field": {
+                "name": "QzKwOG",
+                "type": "YesNoField",
+                "display": "Does your surface water discharge meet the exemption criteria?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "KFXrsG",
+        "displayName": "Does not have proof of transfer",
+        "value": {
+          "name": "Does not have proof of transfer",
+          "conditions": [
+            {
+              "field": {
+                "name": "pcrKLV",
+                "type": "YesNoField",
+                "display": "Proof of transfer?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Ojtoqo",
+        "displayName": "Has transferred permit to new operator",
+        "value": {
+          "name": "Has transferred permit to new operator",
+          "conditions": [
+            {
+              "field": {
+                "name": "obvLCG",
+                "type": "YesNoField",
+                "display": "Have you transferred the permit to the new operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "fISTKk",
+        "displayName": "Has not transferred the permit to new operator",
+        "value": {
+          "name": "Has not transferred the permit to new operator",
+          "conditions": [
+            {
+              "field": {
+                "name": "obvLCG",
+                "type": "YesNoField",
+                "display": "Have you transferred the permit to the new operator?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "kicwXY",
+        "displayName": "Discharge is no longer taking place",
+        "value": {
+          "name": "Discharge is no longer taking place",
+          "conditions": [
+            {
+              "field": {
+                "name": "dIiFqJ",
+                "type": "YesNoField",
+                "display": "Discharge still taking place?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Type of water discharge",
+        "name": "bjUOFU",
+        "type": "string",
+        "items": [
+          {
+            "text": "Ground",
+            "value": "Ground",
+            "description": "For example, you're spreading waste sheep dip or discharging treated sewage effluent to ground through an infiltration system."
+          },
+          {
+            "text": "Surface water",
+            "value": "Surface water",
+            "description": "For example, you're discharging water to a river, stream, estuary, lake, canal or coastal water."
+          }
+        ]
+      },
+      {
+        "title": "Does anyone else need the permit?",
+        "name": "lFnFkd",
+        "type": "string",
+        "items": [
+          {
+            "text": "Yes",
+            "value": "Yes"
+          },
+          {
+            "text": "No",
+            "value": "No"
+          },
+          {
+            "text": "Not sure",
+            "value": "Not sure"
+          }
+        ]
+      },
+      {
+        "title": "Operator contact details",
+        "name": "nszeid",
+        "type": "string",
+        "items": [
+          {
+            "text": "Name or company name",
+            "value": "Name or company name"
+          },
+          {
+            "text": "Phone number",
+            "value": "Phone number"
+          },
+          {
+            "text": "Email address",
+            "value": "Email address"
+          },
+          {
+            "text": "Postal address",
+            "value": "Postal address"
+          },
+          {
+            "text": "None of the above",
+            "value": "None of the above"
+          }
+        ]
+      },
+      {
+        "title": "Proof of permit transfer",
+        "name": "ZWoFms",
+        "type": "string",
+        "items": [
+          {
+            "text": "Yes, and I can upload a document in this form",
+            "value": "Yes, and I can upload a document in this form"
+          },
+          {
+            "text": "Yes, and I can provide proof by email",
+            "value": "Yes, and I can provide proof by email"
+          },
+          {
+            "text": "No",
+            "value": "No"
+          }
+        ]
+      }
+    ],
+    "declaration": "<p class=\"govuk-body\">I confirm that the details provided in this form are true to the best of my knowledge.</p>\n",
+    "startPage": "/start",
+    "skipSummary": false
+  }
+}
