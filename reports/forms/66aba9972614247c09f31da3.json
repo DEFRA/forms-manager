@@ -1,0 +1,917 @@
+{
+  "id": "66aba9972614247c09f31da3",
+  "metadata": {
+    "id": "66aba9972614247c09f31da3",
+    "slug": "apply-for-group-volunteering-with-natural-england",
+    "title": "Apply for group volunteering with Natural England",
+    "organisation": "Natural England",
+    "teamName": "Natural England volunteer enquiries",
+    "teamEmail": "volunteerenquiries@naturalengland.org.uk",
+    "contact": {
+      "email": {
+        "address": "volunteerenquiries@naturalengland.org.uk",
+        "responseTime": "We aim to respond within 10 working days."
+      }
+    },
+    "submissionGuidance": "Natural England will contact you within 10 working days if there is a suitable opportunity. We will discuss all details with you, including any costs. \r\n\r\nIf you have not heard from us within 10 working days, there are no suitable opportunities available at this time.",
+    "privacyNoticeUrl": "https://www.gov.uk/government/publications/natural-england-privacy-notices/volunteers-privacy-notice",
+    "notificationEmail": "volunteerenquiries@naturalengland.org.uk",
+    "draft": {
+      "createdAt": "2024-08-01T15:28:23.821Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-11-11T15:45:43.279Z",
+      "updatedBy": {
+        "id": "61662b1e-31d3-4714-8be2-44fd1f4887a9",
+        "displayName": "Bethan Ryder"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-08-01T15:28:23.821Z",
+    "updatedBy": {
+      "id": "61662b1e-31d3-4714-8be2-44fd1f4887a9",
+      "displayName": "Bethan Ryder"
+    },
+    "updatedAt": "2024-11-11T15:49:03.688Z"
+  },
+  "draft": {
+    "name": "Apply for group volunteering with Natural England",
+    "pages": [
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "name": "eqiQQu",
+            "title": "Applicant name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-name-of-the-group-youre-representing"
+          }
+        ]
+      },
+      {
+        "title": "What's the name of the group you're representing?",
+        "path": "/whats-the-name-of-the-group-youre-representing",
+        "next": [
+          {
+            "path": "/whats-your-phone-number"
+          }
+        ],
+        "components": [
+          {
+            "name": "nCSGUe",
+            "title": "Group name",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-phone-number",
+        "title": "What's your phone number?",
+        "components": [
+          {
+            "name": "ojRZvH",
+            "title": "Phone number",
+            "type": "TelephoneNumberField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-groups-email-address"
+          }
+        ]
+      },
+      {
+        "title": "What's your group's email address?",
+        "path": "/whats-your-groups-email-address",
+        "next": [
+          {
+            "path": "/whats-your-groups-website"
+          }
+        ],
+        "components": [
+          {
+            "name": "WiqIcF",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "Natural England will use this email address if they need to contact you about this expression of interest.",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What's your group's  website?",
+        "path": "/whats-your-groups-website",
+        "next": [
+          {
+            "path": "/whats-the-address-of-your-group"
+          }
+        ],
+        "components": [
+          {
+            "name": "xrnahl",
+            "title": "Group's website",
+            "type": "TextField",
+            "hint": "Leave this blank if you do not have a website.",
+            "options": {
+              "required": false,
+              "optionalText": false
+            },
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/volunteering-location",
+        "title": "Volunteering location",
+        "components": [
+          {
+            "name": "MAnbbJ",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">For sustainability and fairness, Natural England does not encourage people to travel more than 30 miles to volunteer. <br><br> Check the <a href=\"https://www.gov.uk/government/collections/national-nature-reserves-in-england\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">location of National Nature Reserves (NNRs) in England (opens in new tab)</a>.<br><br>\n</p>\n",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "XIrrVA",
+            "title": "Where would you like to carry out volunteering?",
+            "type": "TextField",
+            "hint": "Enter the NNR you would like to volunteer at. If you're not sure, enter the county where you would like to volunteer.",
+            "options": {
+              "customValidationMessage": "Enter a volunteering location"
+            },
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/dates-for-volunteering"
+          }
+        ]
+      },
+      {
+        "title": "What's the address of your group?",
+        "path": "/whats-the-address-of-your-group",
+        "next": [
+          {
+            "path": "/volunteering-location"
+          }
+        ],
+        "components": [
+          {
+            "name": "elgXTx",
+            "title": "Group's address",
+            "type": "UkAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/dates-for-volunteering",
+        "title": "Dates for volunteering",
+        "components": [
+          {
+            "name": "uEXvnY",
+            "title": "Html",
+            "type": "Html",
+            "content": "<p class=\"govuk-body\">Natural England generally needs up to 8 weeks to prepare for the volunteering.<br><br>\n</p>",
+            "options": {},
+            "schema": {}
+          },
+          {
+            "name": "shrUrZ",
+            "title": "Do you have specific dates in mind for volunteering?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-dates-are-you-available-for-volunteering",
+            "condition": "HTrkKs"
+          },
+          {
+            "path": "/how-many-people-want-to-volunteer",
+            "condition": "pXqrpW"
+          }
+        ]
+      },
+      {
+        "path": "/what-dates-are-you-available-for-volunteering",
+        "title": "What dates are you available for volunteering?",
+        "components": [
+          {
+            "name": "klErpO",
+            "title": "When you can volunteer",
+            "type": "MultilineTextField",
+            "hint": "You can enter multiple dates. This will help Natural England match your request to available NNRs.",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-many-people-want-to-volunteer"
+          }
+        ]
+      },
+      {
+        "path": "/how-many-people-want-to-volunteer",
+        "title": "How many people want to volunteer?",
+        "components": [
+          {
+            "name": "aVxZGa",
+            "title": "Number of volunteers",
+            "type": "RadiosField",
+            "options": {},
+            "schema": {},
+            "list": "jXxtFJ",
+            "hint": "Give an estimate if you are not sure."
+          }
+        ],
+        "next": [
+          {
+            "path": "/how-long-do-you-want-to-volunteer-for"
+          }
+        ]
+      },
+      {
+        "path": "/how-long-do-you-want-to-volunteer-for",
+        "title": "How long do you want to volunteer for?",
+        "components": [
+          {
+            "name": "rUnaiG",
+            "title": "Length of volunteering",
+            "type": "CheckboxesField",
+            "options": {},
+            "schema": {},
+            "list": "zWwMae",
+            "hint": "Select all options you would be interested in."
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-type-of-activities-are-you-interested-in"
+          }
+        ]
+      },
+      {
+        "path": "/what-type-of-activities-are-you-interested-in",
+        "title": "What type of activities are you interested in?",
+        "components": [
+          {
+            "name": "hYeMEa",
+            "title": "Type of activity",
+            "type": "CheckboxesField",
+            "options": {},
+            "schema": {},
+            "list": "oeFnwa",
+            "hint": "Select all that apply. If you choose 'other', we will ask for more information on the following page. "
+          }
+        ],
+        "next": [
+          {
+            "path": "/are-you-interested-in-any-of-these-non-volunteering-activities-as-part-of-your-visit",
+            "condition": "UhzcnX"
+          },
+          {
+            "path": "/what-other-activities-are-you-interested-in",
+            "condition": "xPefsg"
+          }
+        ]
+      },
+      {
+        "path": "/are-you-interested-in-any-of-these-non-volunteering-activities-as-part-of-your-visit",
+        "title": "Are you interested in any of these non-volunteering activities as part of your visit?",
+        "components": [
+          {
+            "name": "vBPjwJ",
+            "title": "Non-volunteering activities",
+            "type": "CheckboxesField",
+            "options": {
+              "required": false
+            },
+            "schema": {},
+            "list": "hPbjqC",
+            "hint": "Select all that apply."
+          }
+        ],
+        "next": [
+          {
+            "path": "/has-your-group-volunteered-for-something-similar-before"
+          }
+        ]
+      },
+      {
+        "title": "Has your group volunteered for something similar before?",
+        "path": "/has-your-group-volunteered-for-something-similar-before",
+        "next": [
+          {
+            "path": "/what-did-your-group-do-before",
+            "condition": "bhInYX"
+          },
+          {
+            "path": "/does-anyone-in-your-group-need-any-reasonable-adjustments",
+            "condition": "ATBHMf"
+          }
+        ],
+        "components": [
+          {
+            "name": "MYwFlo",
+            "title": "Previous experience of volunteering?",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "title": "What did your group do before?",
+        "path": "/what-did-your-group-do-before",
+        "next": [
+          {
+            "path": "/does-anyone-in-your-group-need-any-reasonable-adjustments"
+          }
+        ],
+        "components": [
+          {
+            "name": "MIcEfH",
+            "title": "Description of previous volunteering",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ]
+      },
+      {
+        "path": "/does-anyone-in-your-group-need-any-reasonable-adjustments",
+        "title": "Does anyone in your group need any reasonable adjustments?",
+        "components": [
+          {
+            "name": "TFGdxF",
+            "title": "Reasonable adjustments needed?",
+            "type": "YesNoField",
+            "hint": "For example, disabled access.",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-adjustments-do-you-need",
+            "condition": "eUAndd"
+          },
+          {
+            "path": "/is-there-anything-else-you-need-to-tell-us",
+            "condition": "pjwTAH"
+          }
+        ]
+      },
+      {
+        "path": "/what-adjustments-do-you-need",
+        "title": "What adjustments do you need?",
+        "components": [
+          {
+            "name": "BeYSZa",
+            "title": "Description of adjustments needed",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/is-there-anything-else-you-need-to-tell-us"
+          }
+        ]
+      },
+      {
+        "path": "/is-there-anything-else-you-need-to-tell-us",
+        "title": "Is there anything else you need to tell us?",
+        "components": [
+          {
+            "name": "QaXMCm",
+            "title": "Any other information",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {
+              "required": false
+            },
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "path": "/summary",
+        "title": "Check your answers before submitting the form",
+        "components": [],
+        "next": [],
+        "controller": "./pages/summary.js"
+      },
+      {
+        "path": "/what-other-activities-are-you-interested-in",
+        "title": "What other activities are you interested in?",
+        "components": [
+          {
+            "name": "nIXPtP",
+            "title": "Description of other volunteering activities",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/are-you-interested-in-any-of-these-non-volunteering-activities-as-part-of-your-visit"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "displayName": "Has specific dates in mind",
+        "name": "HTrkKs",
+        "value": {
+          "name": "Has specific dates in mind",
+          "conditions": [
+            {
+              "field": {
+                "name": "shrUrZ",
+                "type": "YesNoField",
+                "display": "Yes or no: dates for volunteering"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Does not have specific dates in mind",
+        "name": "pXqrpW",
+        "value": {
+          "name": "Does not have specific dates in mind",
+          "conditions": [
+            {
+              "field": {
+                "name": "shrUrZ",
+                "type": "YesNoField",
+                "display": "Yes or no: dates for volunteering"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Is interested in non-volunteering activities",
+        "name": "zJQPBP",
+        "value": {
+          "name": "Is interested in non-volunteering activities",
+          "conditions": [
+            {
+              "field": {
+                "name": "pPLSdr",
+                "type": "YesNoField",
+                "display": "Yes or no: interest in non-volunteering activities"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Is not interested in non-volunteering activities",
+        "name": "aqkvMR",
+        "value": {
+          "name": "Is not interested in non-volunteering activities",
+          "conditions": [
+            {
+              "field": {
+                "name": "pPLSdr",
+                "type": "YesNoField",
+                "display": "Yes or no: interest in non-volunteering activities"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Has previous volunteering experience",
+        "name": "bhInYX",
+        "value": {
+          "name": "Has previous volunteering experience",
+          "conditions": [
+            {
+              "field": {
+                "name": "MYwFlo",
+                "type": "YesNoField",
+                "display": "Yes or no: previous volunteering"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Does not have previous volunteering experience",
+        "name": "ATBHMf",
+        "value": {
+          "name": "Does not have previous volunteering experience",
+          "conditions": [
+            {
+              "field": {
+                "name": "MYwFlo",
+                "type": "YesNoField",
+                "display": "Yes or no: previous volunteering"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Does not need adjustments",
+        "name": "pjwTAH",
+        "value": {
+          "name": "Does not need adjustments",
+          "conditions": [
+            {
+              "field": {
+                "name": "TFGdxF",
+                "type": "YesNoField",
+                "display": "Yes or no: special adjustments"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "false"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Needs adjustments",
+        "name": "eUAndd",
+        "value": {
+          "name": "Needs adjustments",
+          "conditions": [
+            {
+              "field": {
+                "name": "TFGdxF",
+                "type": "YesNoField",
+                "display": "Yes or no: special adjustments"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "true"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "xPefsg",
+        "displayName": "Chose 'other'",
+        "value": {
+          "name": "Chose 'other'",
+          "conditions": [
+            {
+              "field": {
+                "name": "hYeMEa",
+                "type": "CheckboxesField",
+                "display": "Type of activity"
+              },
+              "operator": "contains",
+              "value": {
+                "type": "Value",
+                "value": "Other (please specify)",
+                "display": "Other (please specify)"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "UhzcnX",
+        "displayName": "Did not choose 'other'",
+        "value": {
+          "name": "Did not choose 'other'",
+          "conditions": [
+            {
+              "field": {
+                "name": "hYeMEa",
+                "type": "CheckboxesField",
+                "display": "Type of activity"
+              },
+              "operator": "does not contain",
+              "value": {
+                "type": "Value",
+                "value": "Other (please specify)",
+                "display": "Other (please specify)"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "ZdfgYu",
+        "displayName": "Over 18",
+        "value": {
+          "name": "Over 18",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZXeJkN",
+                "type": "YesNoField",
+                "display": "Over 18"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "yVECBA",
+        "displayName": "Under 18",
+        "value": {
+          "name": "Under 18",
+          "conditions": [
+            {
+              "field": {
+                "name": "ZXeJkN",
+                "type": "YesNoField",
+                "display": "Over 18"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "xowIbY",
+        "displayName": "Not a student",
+        "value": {
+          "name": "Not a student",
+          "conditions": [
+            {
+              "field": {
+                "name": "BAuOFc",
+                "type": "YesNoField",
+                "display": "Are you a student?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "QihTFw",
+        "displayName": "Student",
+        "value": {
+          "name": "Student",
+          "conditions": [
+            {
+              "field": {
+                "name": "BAuOFc",
+                "type": "YesNoField",
+                "display": "Are you a student?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "qbebeo",
+        "displayName": "Short-term volunteering",
+        "value": {
+          "name": "Short-term volunteering",
+          "conditions": [
+            {
+              "field": {
+                "name": "jKvArM",
+                "type": "YesNoField",
+                "display": "Long-term volunteering?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "gkMuoZ",
+        "displayName": "Long-term volunteering",
+        "value": {
+          "name": "Long-term volunteering",
+          "conditions": [
+            {
+              "field": {
+                "name": "jKvArM",
+                "type": "YesNoField",
+                "display": "Long-term volunteering?"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Number of volunteers",
+        "name": "jXxtFJ",
+        "type": "string",
+        "items": [
+          {
+            "text": "Less than 10",
+            "value": "Less than 10"
+          },
+          {
+            "text": "10 to 20",
+            "value": "10 to 20"
+          },
+          {
+            "text": "21 or more",
+            "value": "21 or more"
+          }
+        ]
+      },
+      {
+        "title": "Length of volunteering",
+        "name": "zWwMae",
+        "type": "string",
+        "items": [
+          {
+            "text": "Half a day",
+            "value": "Half a day"
+          },
+          {
+            "text": "A full day",
+            "value": "A full day"
+          },
+          {
+            "text": "More than one day",
+            "value": "More than one day"
+          }
+        ]
+      },
+      {
+        "title": "Type of activity",
+        "name": "oeFnwa",
+        "type": "string",
+        "items": [
+          {
+            "text": "Wildlife surveys",
+            "value": "Wildlife surveys"
+          },
+          {
+            "text": "Practical conservation, including habitat management",
+            "description": "For example, cutting back vegetation.",
+            "value": "Practical conservation, including habitat management"
+          },
+          {
+            "text": "Planting",
+            "description": "For example, planting wildflowers.",
+            "value": "Planting"
+          },
+          {
+            "text": "Construction",
+            "description": "For example, laying down steps or boardwalks.",
+            "value": "Construction"
+          },
+          {
+            "text": "Other (please specify)",
+            "value": "Other (please specify)"
+          }
+        ]
+      },
+      {
+        "title": "Non-volunteering activities",
+        "name": "hPbjqC",
+        "type": "string",
+        "items": [
+          {
+            "text": "Guided walk led by Natural England",
+            "value": "Guided walk led by Natural England"
+          },
+          {
+            "text": "Wildlife observation",
+            "description": "For example, bird watching.",
+            "value": "Wildlife observation"
+          },
+          {
+            "text": "Use of a meeting room for a corporate event or business meeting",
+            "value": "Use of a meeting room for a corporate event or business meeting"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "startPage": "/whats-your-name"
+  }
+}

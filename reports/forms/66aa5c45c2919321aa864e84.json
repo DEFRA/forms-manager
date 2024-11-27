@@ -1,0 +1,655 @@
+{
+  "id": "66aa5c45c2919321aa864e84",
+  "metadata": {
+    "id": "66aa5c45c2919321aa864e84",
+    "slug": "request-an-update-to-a-form",
+    "title": "Request an update to a form",
+    "organisation": "Defra",
+    "teamName": "Defra Forms team",
+    "teamEmail": "defraforms@defra.gov.uk",
+    "contact": {
+      "email": {
+        "address": "defraforms@defra.gov.uk",
+        "responseTime": "We aim to respond as soon as possible."
+      }
+    },
+    "submissionGuidance": "The Defra Forms team aim to respond to you within 5 working days.",
+    "privacyNoticeUrl": "https://defra.sharepoint.com/sites/Community4442/SitePages/Privacy-notice--Defra-Forms.aspx",
+    "draft": {
+      "createdAt": "2024-07-31T15:46:13.489Z",
+      "createdBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      },
+      "updatedAt": "2024-08-13T08:12:31.813Z",
+      "updatedBy": {
+        "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+        "displayName": "Steven Thomas"
+      }
+    },
+    "createdBy": {
+      "id": "aHrV2SevsVeAXXwItg1FX_w5RwaTvcwiJm-LtCBjN3s",
+      "displayName": "Steven Thomas"
+    },
+    "createdAt": "2024-07-31T15:46:13.489Z",
+    "updatedBy": {
+      "id": "7242070b-6d85-41fd-ade7-b34500bea1e9",
+      "displayName": "Alex Luckett"
+    },
+    "updatedAt": "2024-09-26T15:24:21.712Z"
+  },
+  "draft": {
+    "name": "Request an update to a form",
+    "pages": [
+      {
+        "path": "/whats-your-name",
+        "title": "What's your name?",
+        "components": [
+          {
+            "type": "TextField",
+            "name": "textField",
+            "title": "Name",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-your-email-address"
+          }
+        ]
+      },
+      {
+        "path": "/whats-your-email-address",
+        "title": "What's your email address?",
+        "components": [
+          {
+            "name": "UktOQe",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-link-for-your-form"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-link-for-your-form",
+        "title": "What's the link for your form?",
+        "components": [
+          {
+            "name": "GfZFuB",
+            "title": "Form link",
+            "type": "TextField",
+            "hint": "For example, https://submit-form-to-defra.service.gov.uk/submit-a-complaint-for-weeds-that-are-causing-damage-or-harm",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-do-you-need-help-with"
+          }
+        ]
+      },
+      {
+        "path": "/what-do-you-need-help-with",
+        "title": "What do you need help with?",
+        "components": [
+          {
+            "name": "UvHVvX",
+            "title": "Update required",
+            "type": "RadiosField",
+            "hint": "",
+            "options": {},
+            "schema": {},
+            "list": "uRiXEY"
+          }
+        ],
+        "next": [
+          {
+            "path": "/what-change-do-you-want-to-make",
+            "condition": "yffyGZ"
+          },
+          {
+            "path": "/whats-the-new-shared-email-address",
+            "condition": "rhGusX"
+          },
+          {
+            "path": "/when-does-the-form-need-to-close",
+            "condition": "MHiQJb"
+          },
+          {
+            "path": "/whos-the-new-owner-of-the-form",
+            "condition": "HHYLFR"
+          },
+          {
+            "path": "/is-it-a-temporary-or-permanent-withdrawal",
+            "condition": "eqvJtg"
+          }
+        ]
+      },
+      {
+        "path": "/what-change-do-you-want-to-make",
+        "title": "What change do you want to make?",
+        "components": [
+          {
+            "name": "OYmgcB",
+            "title": "Required change",
+            "type": "MultilineTextField",
+            "hint": "Provide a brief overview of what you want to change. For complex changes, the Defra Forms team will arrange a call",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/do-you-have-a-deadline-to-make-this-change"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-new-shared-email-address",
+        "title": "What's the new shared email address?",
+        "components": [
+          {
+            "name": "ZASarq",
+            "title": "Email address",
+            "type": "EmailAddressField",
+            "hint": "We cannot send forms to personal email addresses",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/do-you-have-a-deadline-to-make-this-change"
+          }
+        ]
+      },
+      {
+        "path": "/when-does-the-form-need-to-close",
+        "title": "When does the form need to close?",
+        "components": [
+          {
+            "name": "xrVLFA",
+            "title": "Date to close form",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/do-you-have-a-deadline-to-make-this-change"
+          }
+        ]
+      },
+      {
+        "path": "/whos-the-new-owner-of-the-form",
+        "title": "Who's the new owner of the form?",
+        "components": [
+          {
+            "name": "ZnUwMY",
+            "title": "New form owner",
+            "type": "TextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-email-address-of-the-new-form-owner"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-email-address-of-the-new-form-owner",
+        "title": "What's the email address of the new form owner?",
+        "components": [
+          {
+            "name": "AZflEB",
+            "title": "New form owner email address",
+            "type": "EmailAddressField",
+            "hint": "For example, ‘name@example.com’",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/do-you-have-a-deadline-to-make-this-change"
+          }
+        ]
+      },
+      {
+        "path": "/when-does-this-change-need-to-be-made",
+        "title": "When does this change need to be made?",
+        "components": [
+          {
+            "name": "FxKokn",
+            "title": "Date change must be made by",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/whats-the-reason-for-your-deadline"
+          }
+        ]
+      },
+      {
+        "path": "/do-you-have-a-deadline-to-make-this-change",
+        "title": "Do you have a deadline to make this change?",
+        "components": [
+          {
+            "name": "ROcTgv",
+            "title": "Deadline for change",
+            "type": "YesNoField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/when-does-this-change-need-to-be-made",
+            "condition": "EaASDT"
+          },
+          {
+            "path": "/summary",
+            "condition": ""
+          }
+        ]
+      },
+      {
+        "path": "/summary",
+        "title": "Summary",
+        "components": [],
+        "next": [],
+        "controller": "./pages/summary.js"
+      },
+      {
+        "path": "/when-does-the-form-need-to-be-withdrawn",
+        "title": "When does the form need to be withdrawn?",
+        "components": [
+          {
+            "name": "YCbJyB",
+            "title": "Form withdrawal date",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/why-does-the-form-need-to-be-withdrawn"
+          }
+        ]
+      },
+      {
+        "path": "/why-does-the-form-need-to-be-withdrawn",
+        "title": "Why does the form need to be withdrawn?",
+        "components": [
+          {
+            "name": "sVSOVO",
+            "title": "Reason for withdrawal",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      },
+      {
+        "path": "/is-it-a-temporary-or-permanent-withdrawal",
+        "title": "Is it a temporary or permanent withdrawal?",
+        "components": [
+          {
+            "name": "gTNkiM",
+            "title": "Temporary or permanent withdrawal",
+            "type": "RadiosField",
+            "hint": "For temporary form withdrawals, you need to provide a date to withdraw the form and a date to reinstate it. The Defra Forms team will discuss and agree a time ",
+            "options": {},
+            "schema": {},
+            "list": "UlTLrr"
+          }
+        ],
+        "next": [
+          {
+            "path": "/when-does-the-form-need-to-be-withdrawn",
+            "condition": "gbwYtY"
+          },
+          {
+            "path": "/when-does-the-form-need-to-be-withdrawn-fFrOKA"
+          }
+        ]
+      },
+      {
+        "path": "/when-does-the-form-need-to-be-withdrawn-fFrOKA",
+        "title": "When does the form need to be withdrawn?",
+        "components": [
+          {
+            "name": "zSKyum",
+            "title": "Form withdrawal date",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/when-does-the-form-need-to-be-reinstated"
+          }
+        ]
+      },
+      {
+        "path": "/when-does-the-form-need-to-be-reinstated",
+        "title": "When does the form need to be reinstated?",
+        "components": [
+          {
+            "name": "XWteVf",
+            "title": "Form reinstated date",
+            "type": "DatePartsField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/why-does-the-form-need-to-be-withdrawn"
+          }
+        ]
+      },
+      {
+        "path": "/whats-the-reason-for-your-deadline",
+        "title": "What's the reason for your deadline?",
+        "components": [
+          {
+            "name": "ZSgHoh",
+            "title": "Reason for deadline",
+            "type": "MultilineTextField",
+            "hint": "",
+            "options": {},
+            "schema": {}
+          }
+        ],
+        "next": [
+          {
+            "path": "/summary"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "name": "MHiQJb",
+        "displayName": "Change a form closing date",
+        "value": {
+          "name": "Change a form closing date",
+          "conditions": [
+            {
+              "field": {
+                "name": "UvHVvX",
+                "type": "RadiosField",
+                "display": "Update required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Change when a form should no longer be able to submit",
+                "display": "Change a form closing date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "cYcuaR",
+        "displayName": "No deadline",
+        "value": {
+          "name": "No deadline",
+          "conditions": [
+            {
+              "field": {
+                "name": "ROcTgv",
+                "type": "YesNoField",
+                "display": "Deadline for change"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "false",
+                "display": "No"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "HHYLFR",
+        "displayName": "Change owner of a form",
+        "value": {
+          "name": "Change owner of a form",
+          "conditions": [
+            {
+              "field": {
+                "name": "UvHVvX",
+                "type": "RadiosField",
+                "display": "Update required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Change the form owner",
+                "display": "Change the form owner"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "eqvJtg",
+        "displayName": "Withdraw a form",
+        "value": {
+          "name": "Withdraw a form",
+          "conditions": [
+            {
+              "field": {
+                "name": "UvHVvX",
+                "type": "RadiosField",
+                "display": "Update required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Withdraw a form",
+                "display": "Withdraw a form"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "rhGusX",
+        "displayName": "Change form email address",
+        "value": {
+          "name": "Change form email address",
+          "conditions": [
+            {
+              "field": {
+                "name": "UvHVvX",
+                "type": "RadiosField",
+                "display": "Update required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Change the email address where form submissions are sent",
+                "display": "Change the email address where form submissions are sent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "yffyGZ",
+        "displayName": "Change content or something else",
+        "value": {
+          "name": "Change content or something else",
+          "conditions": [
+            {
+              "field": {
+                "name": "UvHVvX",
+                "type": "RadiosField",
+                "display": "Update required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Edit the content",
+                "display": "Edit the content of a form"
+              }
+            },
+            {
+              "coordinator": "or",
+              "field": {
+                "name": "UvHVvX",
+                "type": "RadiosField",
+                "display": "Update required"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Something else",
+                "display": "Something else"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "gbwYtY",
+        "displayName": "Permanent withdrawal",
+        "value": {
+          "name": "Permanent withdrawal",
+          "conditions": [
+            {
+              "field": {
+                "name": "gTNkiM",
+                "type": "RadiosField",
+                "display": "Temporary or permanent withdrawal"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "Permanent",
+                "display": "Permanent"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "EaASDT",
+        "displayName": "Has a deadline",
+        "value": {
+          "name": "Has a deadline",
+          "conditions": [
+            {
+              "field": {
+                "name": "ROcTgv",
+                "type": "YesNoField",
+                "display": "Deadline for change"
+              },
+              "operator": "is",
+              "value": {
+                "type": "Value",
+                "value": "true",
+                "display": "Yes"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sections": [
+      {
+        "name": "section",
+        "title": "Section title",
+        "hideTitle": false
+      }
+    ],
+    "lists": [
+      {
+        "title": "Action to take with form",
+        "name": "uRiXEY",
+        "type": "string",
+        "items": [
+          {
+            "text": "Withdraw a form",
+            "value": "Withdraw a form"
+          },
+          {
+            "text": "Edit the content of a form",
+            "value": "Edit the content",
+            "description": ""
+          },
+          {
+            "text": "Change the email address where form submissions are sent",
+            "value": "Change the email address where form submissions are sent"
+          },
+          {
+            "text": "Change the form owner",
+            "value": "Change the form owner"
+          },
+          {
+            "text": "Change a form closing date",
+            "value": "Change when a form should no longer be able to submit",
+            "description": "Remove, reduce, extend or add a date that a form is publicly available to fill in"
+          },
+          {
+            "text": "Something else",
+            "value": "Something else"
+          }
+        ]
+      },
+      {
+        "title": "Temporary or permanent",
+        "name": "UlTLrr",
+        "type": "string",
+        "items": [
+          {
+            "text": "Temporary",
+            "value": "Temporary"
+          },
+          {
+            "text": "Permanent",
+            "value": "Permanent"
+          }
+        ]
+      }
+    ],
+    "skipSummary": false,
+    "startPage": "/whats-your-name"
+  }
+}
