@@ -6,6 +6,7 @@ import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
@@ -163,12 +164,33 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * Lists the available form metadata
+ * Lists forms and returns query result metadata (e.g., pagination details, total counts)
+ * @param {PaginationOptions} [paginationOptions] - Optional pagination settings (page and perPage)
+ * @returns {Promise<FormMetadata[] | Result<FormMetadata>>} Returns either an array of forms or a paginated result with query metadata
  */
-export async function listForms() {
-  const documents = await formMetadata.list()
+export async function listForms(paginationOptions) {
+  if (!paginationOptions?.page && !paginationOptions?.perPage) {
+    const documents = await formMetadata.listAll()
+    return documents.map(mapForm)
+  }
 
-  return documents.map(mapForm)
+  const page = paginationOptions.page ?? 1
+  const perPage = paginationOptions.perPage ?? MAX_RESULTS
+
+  const { documents, totalItems } = await formMetadata.list({ page, perPage })
+  const forms = documents.map(mapForm)
+
+  return {
+    data: forms,
+    meta: {
+      pagination: {
+        page,
+        perPage,
+        totalItems,
+        totalPages: Math.ceil(totalItems / perPage)
+      }
+    }
+  }
 }
 
 /**
@@ -514,5 +536,5 @@ export async function removeForm(formId, force = false) {
 /**
  * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
- * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
+ * @import { PaginationOptions, PartialFormMetadataDocument, Result} from '~/src/api/types.js'
  */

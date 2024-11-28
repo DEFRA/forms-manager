@@ -20,6 +20,7 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
+  paginationSchema,
   removeFormPayloadSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
@@ -49,11 +50,18 @@ export default [
   {
     method: 'GET',
     path: '/forms',
-    handler() {
-      return listForms()
+    /**
+     * @param {RequestListForms} request
+     */
+    async handler(request) {
+      const { query } = request
+      return listForms(query)
     },
     options: {
-      auth: false
+      auth: false,
+      validate: {
+        query: paginationSchema
+      }
     }
   },
   {
@@ -287,8 +295,8 @@ export default [
 ]
 
 /**
- * @import { FormMetadataAuthor, FormMetadataInput } from '@defra/forms-model'
- * @import { AuthCredentials, RequestAuth, ServerRoute, UserCredentials } from '@hapi/hapi'
+ * @import { FormMetadataAuthor } from '@defra/forms-model'
+ * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
  * @import { OidcStandardClaims } from 'oidc-client-ts'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestRemoveFormById } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestRemoveFormById } from '~/src/api/types.js'
  */
