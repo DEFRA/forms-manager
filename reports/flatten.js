@@ -2,30 +2,19 @@ import fs from 'fs/promises'
 import * as url from 'url'
 
 import {
+  ConditionType,
   hasComponents,
   hasConditionField,
   hasConditionGroup,
   hasConditionName,
+  hasListField,
   hasNext,
   isConditionalType,
   isContentType,
-  isFormType
+  isFormType,
+  isListType
 } from '@defra/forms-model'
 import { stringify } from 'csv-stringify'
-
-function groupBy(arr, key) {
-  return arr.reduce(function (acc, curr) {
-    ;(acc[curr[key]] = acc[curr[key]] || []).push(curr)
-    return acc
-  }, {})
-}
-
-function groupSummary(grouped) {
-  const keys = Object.keys(grouped)
-  return Object.fromEntries(
-    Object.keys(grouped).map((item) => [item, grouped[item].length])
-  )
-}
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 const files = await fs.readdir(`${__dirname}forms`)
@@ -45,216 +34,6 @@ const readFile = async (filename) => {
   const parsed = JSON.parse(json)
 
   return parsed
-}
-
-/**
- * @param {SavedForm[]} saved
- */
-function summariseModels(saved) {
-  const models = saved.map(summariseModel)
-  const summary = {}
-
-  const live = {
-    hasFieldCount: 0,
-    hasGroupCount: 0,
-    hasGroupName: 0,
-    components: {}
-  }
-
-  models.forEach((model) => {
-    if (model.live) {
-      live.hasFieldCount += model.live.conditionsSummary.hasFieldCount
-      live.hasGroupCount += model.live.conditionsSummary.hasGroupCount
-      live.hasGroupName += model.live.conditionsSummary.hasGroupName
-
-      model.live.pages
-        .filter((page) => page.componentsSummary.types)
-        .forEach((page) => {
-          if (page.componentsSummary.types) {
-            const types = page.componentsSummary.types
-            Object.keys(types).forEach((type) => {
-              live.components[type] = live.components[type]
-                ? live.components[type] + types[type]
-                : types[type]
-            })
-          }
-        })
-    }
-  })
-
-  const draft = {
-    hasFieldCount: 0,
-    hasGroupCount: 0,
-    hasGroupName: 0,
-    components: {}
-  }
-
-  models.forEach((model) => {
-    if (model.draft) {
-      draft.hasFieldCount += model.draft.conditionsSummary.hasFieldCount
-      draft.hasGroupCount += model.draft.conditionsSummary.hasGroupCount
-      draft.hasGroupName += model.draft.conditionsSummary.hasGroupName
-
-      model.draft.pages
-        .filter((page) => page.componentsSummary.types)
-        .forEach((page) => {
-          if (page.componentsSummary.types) {
-            const types = page.componentsSummary.types
-            Object.keys(types).forEach((type) => {
-              draft.components[type] = draft.components[type]
-                ? draft.components[type] + types[type]
-                : types[type]
-            })
-          }
-        })
-    }
-  })
-
-  return { models, liveSummary: live, draftSummary: draft }
-}
-
-/**
- * @param {SavedForm} model
- */
-function summariseModel(model) {
-  const { id, slug, draft, live } = model
-
-  return {
-    id,
-    slug,
-    draft: draft && summariseDefinition(draft),
-    live: live && summariseDefinition(live)
-  }
-}
-
-/**
- * @param {FormDefinition} def
- */
-function summariseDefinition(def) {
-  const pageCount = def.pages.length
-  const listCount = def.lists.length
-  const conditionCount = def.conditions.length
-  const pages = def.pages.map(flattenPage)
-  const conditions = def.conditions.map(summariseConditionWrapper)
-
-  const conditionsSummary = {
-    hasFieldCount: conditions
-      .flatMap((item) => item.conditions)
-      .filter((cond) => cond.hasField).length,
-    hasGroupCount: conditions
-      .flatMap((item) => item.conditions)
-      .filter((cond) => cond.hasGroup).length,
-    hasGroupName: conditions
-      .flatMap((item) => item.conditions)
-      .filter((cond) => cond.hasName).length
-  }
-
-  return {
-    pageCount,
-    pages,
-    conditionCount,
-    conditions,
-    conditionsSummary,
-    listCount
-  }
-}
-
-/**
- * @param {Page} page
- */
-function flattenPage(page) {
-  const componentCount = hasComponents(page)
-    ? page.components.length
-    : undefined
-  const nextCount = hasNext(page) ? page.next.length : undefined
-  const components = hasComponents(page)
-    ? page.components.map(summariseComponent)
-    : undefined
-
-  const componentsSummary = {
-    types: components ? groupSummary(groupBy(components, 'type')) : undefined,
-    isForm: components
-      ? components.filter((item) => item.isForm).length
-      : undefined,
-    isContent: components
-      ? components.filter((item) => item.isContent).length
-      : undefined
-  }
-
-  return {
-    componentCount,
-    components,
-    componentsSummary,
-    nextCount,
-    next: hasNext(page) ? page.next.map(summariseNext) : undefined
-  }
-}
-
-/**
- * @param {ComponentDef} component
- */
-function summariseComponent(component) {
-  const type = component.type
-  const isForm = isFormType(type)
-  const isContent = isContentType(type)
-  const isConditional = isConditionalType(type)
-
-  return {
-    type,
-    isForm,
-    isContent,
-    isConditional
-  }
-}
-
-/**
- * @param {Link} next
- */
-function summariseNext(next) {
-  const hasCondition = !!next.condition
-  const hasRedirect = !!next.redirect
-
-  return {
-    hasCondition,
-    hasRedirect
-  }
-}
-
-/**
- * @param {ConditionWrapper} condition
- */
-function summariseConditionWrapper(condition) {
-  const { name } = condition
-  const conditions = condition.value.conditions.map(summariseCondition)
-  const conditionsCount = conditions.length
-  const grouped = groupBy(conditions, 'fieldType')
-  const fieldTypeGroup = groupSummary(grouped)
-
-  return {
-    name,
-    conditionsCount,
-    conditions,
-    fieldTypeGroup
-  }
-}
-
-/**
- * @param {ConditionGroupData | ConditionData | ConditionRefData} condition
- */
-function summariseCondition(condition) {
-  const hasField = hasConditionField(condition)
-  const hasGroup = hasConditionGroup(condition)
-  const hasName = hasConditionName(condition)
-  const field = hasField ? condition.field : undefined
-  const fieldCoordinator = hasField ? condition.coordinator : undefined
-
-  return {
-    hasField,
-    hasGroup,
-    hasName,
-    fieldCoordinator,
-    fieldType: field ? field.type : undefined
-  }
 }
 
 /**
@@ -279,56 +58,320 @@ function createCsv(input) {
 
 const saved = await Promise.all(files.map(readFile))
 
-const headers = [
-  'formId',
-  'formTitle',
-  'state',
-  'id',
-  'path',
-  'title',
-  'componentCount'
-]
-
 /**
- * @type {Row[]}
+ * Create Pages CSV
  */
-const values = []
+async function createPages() {
+  const headers = [
+    'formId',
+    'formTitle',
+    'state',
+    'id',
+    'path',
+    'title',
+    'componentCount'
+  ]
 
-saved.forEach((savedForm) => {
-  if (savedForm.draft) {
-    savedForm.draft.pages.forEach((page) => {
+  /**
+   * @type {Row[]}
+   */
+  const values = []
+
+  saved.forEach((savedForm) => {
+    const { id, metadata } = savedForm
+    const { title: formTitle } = metadata
+
+    /**
+     * @param {Page} page
+     * @param {'draft' | 'live'} state
+     */
+    function addPage(page, state) {
+      const { name, title, type } = page
+
       values.push([
-        savedForm.id,
-        savedForm.metadata.title,
+        id,
+        title,
         'draft',
         page.path,
         page.path,
         page.title,
         hasComponents(page) ? page.components.length.toString() : null
       ])
-    })
-  }
+    }
 
-  if (savedForm.live) {
-    savedForm.live.pages.forEach((page) => {
+    if (savedForm.draft) {
+      savedForm.draft.pages.forEach((page) => {
+        addPage(page, 'draft')
+      })
+    }
+
+    if (savedForm.live) {
+      savedForm.live.pages.forEach((page) => {
+        addPage(page, 'live')
+      })
+    }
+  })
+
+  const csv = await createCsv([headers, ...values])
+
+  await fs.writeFile(`${__dirname}pages.csv`, csv, 'utf8')
+}
+
+await createPages()
+
+/**
+ * Create Components CSV
+ */
+async function createComponents() {
+  const headers = [
+    'formId',
+    'formTitle',
+    'state',
+    'name',
+    'title',
+    'type',
+    'list'
+  ]
+
+  /**
+   * @type {Row[]}
+   */
+  const values = []
+
+  saved.forEach((savedForm) => {
+    const { id, metadata } = savedForm
+    const { title: formTitle } = metadata
+
+    /**
+     * @param {ComponentDef} component
+     * @param {'draft' | 'live'} state
+     */
+    function addComponent(component, state) {
+      const { name, title, type } = component
+
+      if (hasListField(component)) {
+        const list = component.list
+        values.push([id, formTitle, state, name, title, type, list])
+      } else {
+        values.push([id, formTitle, state, name, title, type, ''])
+      }
+    }
+
+    if (savedForm.draft) {
+      savedForm.draft.pages.forEach((page) => {
+        if (hasComponents(page)) {
+          page.components.forEach((component) => {
+            addComponent(component, 'draft')
+          })
+        }
+      })
+    }
+
+    if (savedForm.live) {
+      savedForm.live.pages.forEach((page) => {
+        if (hasComponents(page)) {
+          page.components.forEach((component) => {
+            addComponent(component, 'live')
+          })
+        }
+      })
+    }
+  })
+
+  const csv = await createCsv([headers, ...values])
+
+  await fs.writeFile(`${__dirname}components.csv`, csv, 'utf8')
+}
+
+await createComponents()
+
+/**
+ * Create Lists CSV
+ */
+async function createLists() {
+  const headers = [
+    'formId',
+    'formTitle',
+    'state',
+    'name',
+    'title',
+    'type',
+    'itemCount'
+  ]
+
+  /**
+   * @type {Row[]}
+   */
+  const values = []
+
+  saved.forEach((savedForm) => {
+    const { id, metadata } = savedForm
+    const { title: formTitle } = metadata
+
+    /**
+     * @param {List} list
+     * @param {'draft' | 'live'} state
+     */
+    function addList(list, state) {
+      const { name, title, type, items } = list
+
       values.push([
-        savedForm.id,
-        savedForm.metadata.title,
-        'live',
-        page.path,
-        page.path,
-        page.title,
-        hasComponents(page) ? page.components.length.toString() : null
+        id,
+        formTitle,
+        state,
+        name,
+        title,
+        type,
+        items.length.toString()
       ])
-    })
-  }
-})
+    }
 
-const csv = await createCsv([headers, ...values])
+    if (savedForm.draft) {
+      savedForm.draft.lists.forEach((list) => {
+        addList(list, 'draft')
+      })
+    }
 
-// console.log(summary)
+    if (savedForm.live) {
+      savedForm.live.lists.forEach((list) => {
+        addList(list, 'live')
+      })
+    }
+  })
 
-await fs.writeFile(`${__dirname}pages.csv`, csv, 'utf8')
+  const csv = await createCsv([headers, ...values])
+
+  await fs.writeFile(`${__dirname}lists.csv`, csv, 'utf8')
+}
+
+await createLists()
+
+/**
+ * Create Conditions CSV
+ */
+async function createConditions() {
+  const headers = [
+    'formId',
+    'formTitle',
+    'state',
+    'wrapperName',
+    'wrapperDisplayName',
+    'coordinator',
+    'operator',
+    'conditionType',
+    'conditionValue',
+    'conditionDisplay',
+    'conditionDirection',
+    'conditionUnit',
+    'conditionPeriod',
+    'fieldDisplay',
+    'fieldName',
+    'fieldType',
+    'fieldTypeIsListType'
+  ]
+
+  /**
+   * @type {Row[]}
+   */
+  const values = []
+
+  saved.forEach((savedForm) => {
+    const { id, metadata } = savedForm
+    const { title: formTitle } = metadata
+
+    /**
+     * @param {FormDefinition} definition
+     * @param {ConditionWrapper} wrapper
+     * @param {'draft' | 'live'} state
+     */
+    function addConditionWrapper(definition, wrapper, state) {
+      const {
+        name: wrapperName,
+        displayName: wrapperDisplayName,
+        value
+      } = wrapper
+
+      const components = definition.pages.flatMap((page) =>
+        hasComponents(page) ? page.components : []
+      )
+      const componentsMap = new Map(
+        components.map((component) => [component.name, component])
+      )
+
+      value.conditions.forEach((condition, index) => {
+        if (hasConditionGroup(condition)) {
+          throw new Error('Not implemented')
+        } else if (hasConditionName(condition)) {
+          throw new Error('Not implemented')
+        } else if (hasConditionField(condition)) {
+          const { coordinator, field, operator, value } = condition
+          const {
+            display: fieldDisplay,
+            name: fieldName,
+            type: fieldType
+          } = field
+
+          const conditionType = value.type
+          let conditionValue = ''
+          let conditionDisplay = ''
+          let conditionDirection = ''
+          let conditionUnit = ''
+          let conditionPeriod = ''
+          if (value.type === ConditionType.Value) {
+            conditionValue = value.value
+            conditionDisplay = value.display
+          } else {
+            conditionDirection = value.direction
+            conditionUnit = value.unit
+            conditionPeriod = value.period
+          }
+
+          const fieldTypeIsListType = isListType(fieldType)
+
+          values.push([
+            id,
+            formTitle,
+            state,
+            wrapperName,
+            wrapperDisplayName,
+            coordinator ? coordinator.toString() : '',
+            operator,
+            conditionType,
+            conditionValue,
+            conditionDisplay,
+            conditionDirection,
+            conditionUnit,
+            conditionPeriod,
+            fieldDisplay,
+            fieldName,
+            fieldType,
+            fieldTypeIsListType.toString()
+          ])
+        }
+      })
+    }
+
+    if (savedForm.draft) {
+      const definition = savedForm.draft
+      savedForm.draft.conditions.forEach((wrapper) => {
+        addConditionWrapper(definition, wrapper, 'draft')
+      })
+    }
+
+    if (savedForm.live) {
+      const definition = savedForm.live
+      savedForm.live.conditions.forEach((wrapper) => {
+        addConditionWrapper(definition, wrapper, 'live')
+      })
+    }
+  })
+
+  const csv = await createCsv([headers, ...values])
+
+  await fs.writeFile(`${__dirname}conditions.csv`, csv, 'utf8')
+}
+
+await createConditions()
 
 /**
  * SavedForm
@@ -347,6 +390,6 @@ await fs.writeFile(`${__dirname}pages.csv`, csv, 'utf8')
  */
 
 /**
- * @import { FormMetadata, FormDefinition, Page, ComponentDef, Link, ConditionWrapper, ConditionGroupData, ConditionData, ConditionRefData } from '@defra/forms-model'
+ * @import { FormMetadata, FormDefinition, List, Page, ComponentDef, Link, ConditionWrapper, ConditionsModelData, ConditionGroupData, ConditionData, ConditionRefData } from '@defra/forms-model'
  * @import { Input, Callback } from 'csv-stringify'
  */
