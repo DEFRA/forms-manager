@@ -1,0 +1,200 @@
+formId,formTitle,state,name,title,type,itemCount
+667c137a15854a0b085cd700,Request a form,draft,hqocBW,Organisations,string,7
+667c137a15854a0b085cd700,Request a form,draft,gJIarM,Life of form,string,2
+667c137a15854a0b085cd700,Request a form,draft,UEnuwn,Number of applications,string,5
+667c137a15854a0b085cd700,Request a form,live,hqocBW,Organisations,string,7
+667c137a15854a0b085cd700,Request a form,live,gJIarM,Life of form,string,2
+667c137a15854a0b085cd700,Request a form,live,UEnuwn,Number of applications,string,5
+667d3db83e15d218b60db446,Test form Andrew,draft,kFWAKs,List 1,string,1
+667d3db83e15d218b60db446,Test form Andrew,draft,iWWPSq,list 2,string,1
+667d3db83e15d218b60db446,Test form Andrew,draft,HnFRfs,List 3,string,1
+667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,hsujdZ,Reasons for applying,string,5
+667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,JdDYiW,Wild birds,string,28
+667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,PObXDA,Public health or safety ,string,11
+667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,lwteBn,Conserve,string,2
+667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,gfCRRo,Type of conservation,string,3
+667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,dnSScQ,Class licence,string,3
+667e8b3108138a41f4223a77,Register as a unicorn breeder,draft,IeFOkf,number of unicorns,string,3
+667e8b3108138a41f4223a77,Register as a unicorn breeder,draft,fXiZrL,Type of unicorn,string,4
+667e8b3108138a41f4223a77,Register as a unicorn breeder,live,IeFOkf,number of unicorns,string,3
+667e8b3108138a41f4223a77,Register as a unicorn breeder,live,fXiZrL,Type of unicorn,string,4
+6683dd5408138a41f4223a78,Apply for an annual mooring licence at Rye Harbour,draft,BHXYic,Mooring site,string,6
+6683dd5408138a41f4223a78,Apply for an annual mooring licence at Rye Harbour,draft,BIfePu,Type of boat,string,5
+6683dd5408138a41f4223a78,Apply for an annual mooring licence at Rye Harbour,live,BHXYic,Mooring site,string,6
+6683dd5408138a41f4223a78,Apply for an annual mooring licence at Rye Harbour,live,BIfePu,Type of boat,string,5
+6683dd834682daf93da25879,Register a boat at Rye Harbour,draft,zZCJmu,Type of boat,string,3
+6683dd834682daf93da25879,Register a boat at Rye Harbour,live,zZCJmu,Type of boat,string,3
+6683f2dd4682daf93da2587a,test form 3,draft,kFWAKs,List 1,string,1
+6683f2dd4682daf93da2587a,test form 3,draft,iWWPSq,list 2,string,1
+6683f2dd4682daf93da2587a,test form 3,draft,HnFRfs,List 3,string,1
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,qDDJMD,Owner or occupier,string,4
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,DTVIzB,ORNEC's,string,32
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,wCUaIE,Owner or occupier of the land,string,4
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,OpcAIQ,Environmental Land Management schemes,string,4
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,zNFkBG,What are you applying for consent under?,string,6
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,IfeOoc,More than 1 SSSI,string,2
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,zdFnrY,planned activities are taking place in multiple locations,string,2
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,NmfzIf,Land management agreement or licence,string,6
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,QWKDOo,Advice,string,4
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,TjSoKV,Existing consent,string,3
+66851557a608789f306eb11f,Report fraud and irregularity against the Environment Agency,live,ayiyiJ,Employment connection,string,5
+66851557a608789f306eb11f,Report fraud and irregularity against the Environment Agency,live,mpMsep,Aware of the issue,string,3
+668542e168f6e151c58ccc87,Apply for a research import certificate,draft,pjivwS,Country list,string,4
+668542e168f6e151c58ccc87,Apply for a research import certificate,draft,tKmbUN,Pharmaceutical form,string,6
+668542e168f6e151c58ccc87,Apply for a research import certificate,draft,KGdGEx,Unit type,string,7
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,ihwVmQ,What is the legal status of your business?,string,14
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,gqNQpU,Companies House,string,7
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,CzxRVp,Animal by-products and livestock,string,3
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,ycOtLx,Business type,string,17
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,CoRNqi,Livestock you keep,string,10
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,rieXPV,"business a market, showground or zoo",string,4
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,OxfbRE,National Grid field number for where you'll keep livestock,string,3
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,oNaqxb,Country,string,4
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,IGZhBB,Hobbyist or business,string,2
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,LLfsSM,Top 5 legal statuses for businesses,string,6
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,dfccAs,Less used legal statuses for businesses,string,9
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,kMOALL,Top 5 business types,string,6
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,draft,IOxAAj,Lesser used business types,string,10
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,live,ihwVmQ,What is the legal status of your business?,string,14
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,live,gqNQpU,Companies House,string,7
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,live,CzxRVp,Animal by-products and livestock,string,3
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,live,ycOtLx,Business type,string,17
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,live,CoRNqi,Livestock you keep,string,7
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,live,rieXPV,"business a market, showground or zoo",string,4
+668655e3a608789f306eb121,Apply for a county parish holding (CPH) number,live,OxfbRE,National Grid field number for where you'll keep livestock,string,3
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,draft,EcRvTu,Pump service and parts,string,3
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,draft,GFMJZg,Fire service name,string,45
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,draft,yXexWx,Number of pumps to service,string,3
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,draft,rstpQn,Address is the same,string,1
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,live,EcRvTu,Pump service and parts,string,3
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,live,GFMJZg,Fire service name,string,45
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,live,yXexWx,Number of pumps to service,string,3
+668d486fa608789f306eb122,Request fire service equipment from the Environment Agency,live,rstpQn,Address is the same,string,1
+668e5d4da608789f306eb123,Contact the Animal and Plant Health Agency (APHA),draft,wQMfzs,Country,string,4
+668e5d4da608789f306eb123,Contact the Animal and Plant Health Agency (APHA),draft,xugEks,Issue,string,4
+668e5d4da608789f306eb123,Contact the Animal and Plant Health Agency (APHA),draft,RCKdxR,Trying to do,string,6
+668e5d4da608789f306eb123,Contact the Animal and Plant Health Agency (APHA),draft,fSqPrx,Disease,string,3
+6690ecc868f6e151c58ccc88,Apply for a base mooring on the River Thames,draft,lVflRI,Powered boat,string,2
+6690ecc868f6e151c58ccc88,Apply for a base mooring on the River Thames,draft,sbdzHQ,Mooring length,string,2
+6690ecc868f6e151c58ccc88,Apply for a base mooring on the River Thames,draft,hlBnOA,Mooring choice,string,20
+6690ecc868f6e151c58ccc88,Apply for a base mooring on the River Thames,draft,IuWlWN,Second choice of mooring site,string,21
+6690ecc868f6e151c58ccc88,Apply for a base mooring on the River Thames,draft,IVffBD,Type of boat,string,2
+6690ecc868f6e151c58ccc88,Apply for a base mooring on the River Thames,draft,CtUmIH,Summer moorings,string,8
+6690ecc868f6e151c58ccc88,Apply for a base mooring on the River Thames,draft,zokvkZ,Summer moorings choice 2,string,9
+669154b668f6e151c58ccc89,Tell APHA about your pre-1996 feed silos,draft,zPBoeK,Number of pre-1996 silos,string,4
+669154b668f6e151c58ccc89,Tell APHA about your pre-1996 feed silos,draft,dudjuD,Plans to use silos in future,string,3
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,draft,DJXXvJ,Which injurious weed are you reporting?,string,5
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,draft,yvRBmi,How many plants are there per 10 meters squared (10m2)?,string,3
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,draft,ZcdIpU,How advanced are the weeds?,string,3
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,draft,gqyIHi,Can you send us a Magic map?,string,2
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,draft,rlrQyE,Landowner's details,string,2
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,draft,xIJIhw,List of things the threatened land could be used for,string,4
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,draft,TNwKML,How close are the weeds to this land?,string,3
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,live,DJXXvJ,Which injurious weed are you reporting?,string,5
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,live,yvRBmi,How many plants are there per 10 meters squared (10m2)?,string,3
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,live,ZcdIpU,How advanced are the weeds?,string,3
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,live,gqyIHi,Can you send us a Magic map?,string,2
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,live,rlrQyE,Landowner's details,string,2
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,live,xIJIhw,List of things the threatened land could be used for,string,4
+66a0e3b1a91f987f5ffc7672,Submit a complaint for weeds that are causing damage or harm,live,TNwKML,How close are the weeds to this land?,string,3
+66aa5c45c2919321aa864e84,Request an update to a form,draft,uRiXEY,Action to take with form,string,6
+66aa5c45c2919321aa864e84,Request an update to a form,draft,UlTLrr,Temporary or permanent,string,2
+66aba9972614247c09f31da3,Apply for group volunteering with Natural England,draft,jXxtFJ,Number of volunteers,string,3
+66aba9972614247c09f31da3,Apply for group volunteering with Natural England,draft,zWwMae,Length of volunteering,string,3
+66aba9972614247c09f31da3,Apply for group volunteering with Natural England,draft,oeFnwa,Type of activity,string,5
+66aba9972614247c09f31da3,Apply for group volunteering with Natural England,draft,hPbjqC,Non-volunteering activities,string,3
+66d5cf31656520742de5c791,Tell the Environment Agency about your material facility,draft,xWjdoP,Reporting periods,string,4
+66d5cf31656520742de5c791,Tell the Environment Agency about your material facility,draft,lcBcSg,Notify or withdraw,string,2
+66d5cf31656520742de5c791,Tell the Environment Agency about your material facility,draft,gogrxO,Reason for excluding from public register,string,3
+66d5cf31656520742de5c791,Tell the Environment Agency about your material facility,live,xWjdoP,Reporting periods,string,4
+66d5cf31656520742de5c791,Tell the Environment Agency about your material facility,live,lcBcSg,Notify or withdraw,string,2
+66d5cf31656520742de5c791,Tell the Environment Agency about your material facility,live,gogrxO,Reason for excluding from public register,string,3
+66e7eb0cecfda16e6aa00271,Apply for a certificate of exemption for a dog,draft,hOsBqz,Country,string,4
+66e7eb0cecfda16e6aa00271,Apply for a certificate of exemption for a dog,draft,YFMNfm,Dogs,string,5
+66e7eb0cecfda16e6aa00271,Apply for a certificate of exemption for a dog,draft,iwUAIr,Sex of dog,string,2
+66f577707486f4b920fc946c,e2e form,draft,IeFOkf,number of unicorns,string,3
+66f577707486f4b920fc946c,e2e form,draft,fXiZrL,Type of unicorn,string,4
+66fbcf4141a7a102988a38c8,Register as an authorised person to get a licence to cage-trap badgers,draft,fFNyKq,List of training,string,4
+66fbcf4141a7a102988a38c8,Register as an authorised person to get a licence to cage-trap badgers,draft,RFmLjg,Licence agreement options,string,1
+6703ccc6f47791083f623b3b,Submit a warden patrol report,draft,GmaGAq,Site list,string,3
+6703ccc6f47791083f623b3b,Submit a warden patrol report,draft,MoJtuF,Patrol coverage,string,3
+6703ccc6f47791083f623b3b,Submit a warden patrol report,draft,kpgcXS,Species list,string,56
+6703ccc6f47791083f623b3b,Submit a warden patrol report,draft,ZnfMJI,Organisation,string,43
+670d13c71690ba2ca2dccbe7,Request a manual release for a consignment held at a port or border control post,draft,FvQAZb,Port and border control posts,string,34
+670d2da6f47791083f623b3d,Report the use of environmental protection equipment,draft,flTrBm,Fire service name,string,45
+670d2da6f47791083f623b3d,Report the use of environmental protection equipment,draft,ljJHBG,Cause of the incident,string,5
+670d2da6f47791083f623b3d,Report the use of environmental protection equipment,draft,APCLrt,"Yes, no or I do not know",string,3
+671639b74909dc24d69c43bb,Remove a dog from the dangerous dogs index,draft,rKWFaU,List of countries,string,3
+671639b74909dc24d69c43bb,Remove a dog from the dangerous dogs index,draft,aeNSGx,Declaration,string,1
+671770e14909dc24d69c43bc,Defra Forms user research consent form,draft,OVQATK,recordings,string,5
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,sNVVvR,Purpose of report,string,3
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,kdcDLJ,Species of bat,string,17
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,nrkvVK,Roost types,string,9
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,zNMtZF,Licensed methods,string,11
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,lwkhEl,Unexpected guidance,string,3
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,pJyQLV,Unexpected finds guidance,string,3
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,rHGyDk,Survey and monitoring methods,string,15
+671f6887f306fa15933a5d0d,Report of action for mitigation work on bat roosts,draft,mgfNZY,Bat features surveyed or monitored,string,4
+671f860c4909dc24d69c43bd,Water quality permits: confirm your information,draft,bjUOFU,Type of water discharge,string,2
+671f860c4909dc24d69c43bd,Water quality permits: confirm your information,draft,lFnFkd,Does anyone else need the permit?,string,3
+671f860c4909dc24d69c43bd,Water quality permits: confirm your information,draft,nszeid,Operator contact details,string,5
+671f860c4909dc24d69c43bd,Water quality permits: confirm your information,draft,ZWoFms,Proof of permit transfer,string,3
+6721fe61f306fa15933a5d0e,Declaration of completion of cleansing and disinfection for TB,draft,HqamnJ,Advisal,string,1
+6721fe61f306fa15933a5d0e,Declaration of completion of cleansing and disinfection for TB,draft,YPZGMy,Aeroclean,string,1
+6721fe61f306fa15933a5d0e,Declaration of completion of cleansing and disinfection for TB,draft,FPRioq,Defra approved disinfectant ,string,38
+6721fe61f306fa15933a5d0e,Declaration of completion of cleansing and disinfection for TB,draft,wSpjEX,Defra approved disinfectant and dilution rate,string,1
+6721fe61f306fa15933a5d0e,Declaration of completion of cleansing and disinfection for TB,draft,JHFmxG,Cleansing and disinfection,string,1
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,draft,SLdOfo,Learning new software ,string,5
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,draft,MoQTRc,Helpful when learning ,string,5
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,draft,BUePAW,Getting stuck ,string,5
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,draft,bclfjf,Finding help ,string,4
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,draft,Mgkeff,Form advice ,string,6
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,live,SLdOfo,Learning new software ,string,5
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,live,MoQTRc,Helpful when learning ,string,5
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,live,BUePAW,Getting stuck ,string,5
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,live,bclfjf,Finding help ,string,4
+6728f49ad67b62049afb0d8b,Defra Forms guidance survey,live,Mgkeff,Form advice ,string,6
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,sNVVvR,Purpose of report,string,3
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,kdcDLJ,Species of bat,string,17
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,nrkvVK,Roost types,string,9
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,zNMtZF,Licensed methods,string,11
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,lwkhEl,Unexpected guidance,string,3
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,pJyQLV,Unexpected finds guidance,string,3
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,rHGyDk,Survey and monitoring methods,string,15
+672b8c6fd67b62049afb0d8c,"Report an action, monitoring or compensation for mitigation work on bat roosts",draft,mgfNZY,Bat features surveyed or monitored,string,4
+6737727cf306fa15933a5d10,Apply for a Bovine Tuberculosis (TB) movement licence,draft,SKMYRc, ,string,2
+6737727cf306fa15933a5d10,Apply for a Bovine Tuberculosis (TB) movement licence,draft,SGBzjd,Where are the animals going to?,string,4
+6737727cf306fa15933a5d10,Apply for a Bovine Tuberculosis (TB) movement licence,draft,RZHUEi,Which type of market are the animals going to?,string,2
+6737727cf306fa15933a5d10,Apply for a Bovine Tuberculosis (TB) movement licence,draft,qrSIHj, I confirm these conditions have been met,string,1
+6737727cf306fa15933a5d10,Apply for a Bovine Tuberculosis (TB) movement licence,draft,UDgbhr,origin premises type,string,3
+6737727cf306fa15933a5d10,Apply for a Bovine Tuberculosis (TB) movement licence,draft,pMJiZT,afu destinations,string,2
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,sNVVvR,Purpose of report,string,3
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,kdcDLJ,Species of bat,string,17
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,nrkvVK,Roost types,string,9
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,zNMtZF,Licensed methods,string,11
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,lwkhEl,Unexpected guidance,string,3
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,pJyQLV,Unexpected finds guidance,string,3
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,rHGyDk,Survey and monitoring methods,string,15
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,mgfNZY,Bat features surveyed or monitored,string,4
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,QKAYJP,Applicant options,string,2
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,qMbDBT,Legal status,string,14
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,REftUv,Accreditation level,string,3
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,XiEWOU,Annexes,string,9
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,ogQxVH,Counties,string,57
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,SvnATz,Type of submission,string,3
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,JpWzOj,Licensable actions,string,6
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,jwdKLW,Consent type,string,5
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,jnqfMQ,Consent status,string,5
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,RGmLfx,Purposes,string,2
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,BbPoEr,Types of work,string,21
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,KZuvAT,Protected sites,string,3
+673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,SrEXPS,Disturbance level,string,4
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,sNVVvR,Purpose of report,string,3
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,kdcDLJ,Species of bat,string,17
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,nrkvVK,Roost types,string,9
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,zNMtZF,Licensed methods,string,11
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,lwkhEl,Unexpected guidance,string,3
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,pJyQLV,Unexpected finds guidance,string,3
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,rHGyDk,Survey and monitoring methods,string,15
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,mgfNZY,Bat features surveyed or monitored,string,4
+673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,YBWmcd,Reason for compensation not completed in accordance with the authorised site registration form,string,3
