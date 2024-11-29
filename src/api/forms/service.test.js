@@ -718,7 +718,7 @@ describe('Forms service', () => {
     const defaultAuthor = { displayName: 'Unknown', id: '-1' }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataBaseDocument = {
       ...formMetadataInput,
@@ -727,7 +727,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataLiveDocument = {
       ...formMetadataBaseDocument,
@@ -740,7 +740,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataDraftDocument = {
       ...formMetadataLiveDocument,
@@ -753,7 +753,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataDraftNoLiveDocument = {
       ...formMetadataBaseDocument,
@@ -766,7 +766,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataFullDocument = {
       ...formMetadataDraftDocument,
@@ -880,6 +880,7 @@ describe('Forms service', () => {
         const perPage = 2
         const totalItems = 5
 
+        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
         const documents = [formMetadataFullDocument, formMetadataDraftDocument]
 
         jest
