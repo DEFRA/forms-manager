@@ -718,7 +718,7 @@ describe('Forms service', () => {
     const defaultAuthor = { displayName: 'Unknown', id: '-1' }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataBaseDocument = {
       ...formMetadataInput,
@@ -727,7 +727,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataLiveDocument = {
       ...formMetadataBaseDocument,
@@ -740,7 +740,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataDraftDocument = {
       ...formMetadataLiveDocument,
@@ -753,7 +753,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataDraftNoLiveDocument = {
       ...formMetadataBaseDocument,
@@ -766,7 +766,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @satisfies {WithId<Partial<FormMetadataDocument>>}
+     * @type {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataFullDocument = {
       ...formMetadataDraftDocument,
@@ -778,7 +778,7 @@ describe('Forms service', () => {
 
     it('should handle the full set of states', async () => {
       jest
-        .mocked(formMetadata.list)
+        .mocked(formMetadata.listAll)
         .mockResolvedValue([formMetadataFullDocument])
 
       await expect(listForms()).resolves.toEqual(
@@ -795,7 +795,7 @@ describe('Forms service', () => {
 
     it('should handle states when root state info is missing and live is present', async () => {
       jest
-        .mocked(formMetadata.list)
+        .mocked(formMetadata.listAll)
         .mockResolvedValue([formMetadataDraftDocument])
 
       await expect(listForms()).resolves.toEqual(
@@ -812,7 +812,7 @@ describe('Forms service', () => {
 
     it('should handle states when draft state info is missing', async () => {
       jest
-        .mocked(formMetadata.list)
+        .mocked(formMetadata.listAll)
         .mockResolvedValue([formMetadataLiveDocument])
 
       await expect(listForms()).resolves.toEqual(
@@ -829,7 +829,7 @@ describe('Forms service', () => {
 
     it('should handle states when live state info is missing', async () => {
       jest
-        .mocked(formMetadata.list)
+        .mocked(formMetadata.listAll)
         .mockResolvedValue([formMetadataDraftNoLiveDocument])
 
       await expect(listForms()).resolves.toEqual(
@@ -846,7 +846,7 @@ describe('Forms service', () => {
 
     it('should handle states when all states are missing', async () => {
       jest
-        .mocked(formMetadata.list)
+        .mocked(formMetadata.listAll)
         .mockResolvedValue([formMetadataBaseDocument])
 
       await expect(listForms()).resolves.toEqual(
@@ -862,7 +862,7 @@ describe('Forms service', () => {
     })
 
     it('throws if forms are malformed', async () => {
-      jest.mocked(formMetadata.list).mockResolvedValue([
+      jest.mocked(formMetadata.listAll).mockResolvedValue([
         {
           _id: new ObjectId(id)
           // skip required attributes. This should never happen.
@@ -873,10 +873,128 @@ describe('Forms service', () => {
         'Form is malformed in the database. Expected fields are missing.'
       )
     })
+
+    describe('with pagination', () => {
+      it('should return paginated results with correct pagination metadata', async () => {
+        const page = 1
+        const perPage = 2
+        const totalItems = 5
+
+        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
+        const documents = [formMetadataFullDocument, formMetadataDraftDocument]
+
+        jest
+          .mocked(formMetadata.list)
+          .mockResolvedValue({ documents, totalItems })
+
+        const result = /** @type {Result<FormMetadata>} */ (
+          await listForms({ page, perPage })
+        )
+
+        expect(formMetadata.list).toHaveBeenCalledWith({ page, perPage })
+        expect(result).toEqual({
+          data: expect.any(Array),
+          meta: {
+            pagination: {
+              page,
+              perPage,
+              totalItems,
+              totalPages: Math.ceil(totalItems / perPage)
+            }
+          }
+        })
+        expect(result.data).toHaveLength(documents.length)
+      })
+
+      it('should return empty data when there are no forms', async () => {
+        const page = 1
+        const perPage = 10
+        const totalItems = 0
+
+        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
+        const documents = []
+
+        jest
+          .mocked(formMetadata.list)
+          .mockResolvedValue({ documents, totalItems })
+
+        const result = /** @type {Result<FormMetadata>} */ (
+          await listForms({ page, perPage })
+        )
+
+        expect(formMetadata.list).toHaveBeenCalledWith({ page, perPage })
+        expect(result).toEqual({
+          data: [],
+          meta: {
+            pagination: {
+              page,
+              perPage,
+              totalItems,
+              totalPages: 0
+            }
+          }
+        })
+      })
+
+      it('should return correct totalPages when totalItems is not divisible by perPage', async () => {
+        const page = 1
+        const perPage = 3
+        const totalItems = 10
+
+        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
+        const documents = [
+          formMetadataFullDocument,
+          formMetadataDraftDocument,
+          formMetadataLiveDocument
+        ]
+
+        jest
+          .mocked(formMetadata.list)
+          .mockResolvedValue({ documents, totalItems })
+
+        // Use a type assertion to inform the type checker
+        const result = /** @type {Result<FormMetadata>} */ (
+          await listForms({ page, perPage })
+        )
+
+        expect(result.meta.pagination?.totalPages).toBe(4) // As there are 10 items and we are asking for 3 per page => 4 pages
+      })
+
+      it('should handle page numbers greater than total pages', async () => {
+        const page = 5
+        const perPage = 2
+        const totalItems = 5
+
+        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
+        const documents = []
+
+        jest
+          .mocked(formMetadata.list)
+          .mockResolvedValue({ documents, totalItems })
+
+        const result = /** @type {Result<FormMetadata>} */ (
+          await listForms({ page, perPage })
+        )
+
+        expect(formMetadata.list).toHaveBeenCalledWith({ page, perPage })
+        expect(result).toEqual({
+          data: [],
+          meta: {
+            pagination: {
+              page,
+              perPage,
+              totalItems,
+              totalPages: 3 // As there are 5 items and we are asking for 2 per page => 3 pages
+            }
+          }
+        })
+      })
+    })
   })
 })
 
 /**
  * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { Result } from '~/src/api/types.js'
  * @import { WithId } from 'mongodb'
  */
