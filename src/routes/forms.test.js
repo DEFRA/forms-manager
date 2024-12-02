@@ -104,6 +104,8 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(true)
       expect(response.result).toEqual([])
     })
 
@@ -117,6 +119,8 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(true)
       expect(response.result).toEqual([])
     })
 
@@ -131,6 +135,8 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(true)
       expect(response.result).toEqual([stubFormMetadataOutput])
     })
 
@@ -155,6 +161,8 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(false)
       expect(response.result).toEqual({
         data: [stubFormMetadataOutput],
         meta: {
@@ -189,6 +197,9 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      // Check if response.result is not an array (since it should be an object with 'data' and 'meta')
+      expect(Array.isArray(response.result)).toBe(false)
       expect(response.result).toEqual({
         data: [],
         meta: {

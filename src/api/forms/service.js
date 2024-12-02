@@ -164,15 +164,6 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * @overload
- * @returns {Promise<FormMetadata[]>}
- */
-/**
- * @overload
- * @param {PaginationOptions} options - Optional pagination options
- * @returns {Promise<QueryResult<FormMetadata>>}
- */
-/**
  * Lists forms and returns query result metadata (e.g., pagination details, total counts)
  * @param {PaginationOptions} [options] - Optional pagination options
  * @returns {Promise<FormMetadata[] | QueryResult<FormMetadata>>}

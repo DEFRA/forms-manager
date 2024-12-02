@@ -718,7 +718,7 @@ describe('Forms service', () => {
     const defaultAuthor = { displayName: 'Unknown', id: '-1' }
 
     /**
-     * @type {WithId<Partial<FormMetadataDocument>>}
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataBaseDocument = {
       ...formMetadataInput,
@@ -727,7 +727,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @type {WithId<Partial<FormMetadataDocument>>}
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataLiveDocument = {
       ...formMetadataBaseDocument,
@@ -740,7 +740,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @type {WithId<Partial<FormMetadataDocument>>}
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataDraftDocument = {
       ...formMetadataLiveDocument,
@@ -753,7 +753,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @type {WithId<Partial<FormMetadataDocument>>}
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataDraftNoLiveDocument = {
       ...formMetadataBaseDocument,
@@ -766,7 +766,7 @@ describe('Forms service', () => {
     }
 
     /**
-     * @type {WithId<Partial<FormMetadataDocument>>}
+     * @satisfies {WithId<Partial<FormMetadataDocument>>}
      */
     const formMetadataFullDocument = {
       ...formMetadataDraftDocument,
@@ -880,7 +880,6 @@ describe('Forms service', () => {
         const perPage = 2
         const totalItems = 5
 
-        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
         const documents = [formMetadataFullDocument, formMetadataDraftDocument]
 
         jest
@@ -901,7 +900,9 @@ describe('Forms service', () => {
             }
           }
         })
-        expect(result.data).toHaveLength(documents.length)
+        expect(
+          /** @type {QueryResult<FormMetadata>} */ (result).data
+        ).toHaveLength(documents.length)
       })
 
       it('should return empty data when there are no forms', async () => {
@@ -937,7 +938,6 @@ describe('Forms service', () => {
         const perPage = 3
         const totalItems = 10
 
-        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
         const documents = [
           formMetadataFullDocument,
           formMetadataDraftDocument,
@@ -950,7 +950,10 @@ describe('Forms service', () => {
 
         const result = await listForms({ page, perPage })
 
-        expect(result.meta.pagination?.totalPages).toBe(4) // As there are 10 items and we are asking for 3 per page => 4 pages
+        expect(
+          /** @type {QueryResult<FormMetadata>} */ (result).meta.pagination
+            ?.totalPages
+        ).toBe(4) // As there are 10 items and we are asking for 3 per page => 4 pages
       })
 
       it('should handle page numbers greater than total pages', async () => {
@@ -985,6 +988,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryResult } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */
