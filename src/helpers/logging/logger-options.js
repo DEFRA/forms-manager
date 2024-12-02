@@ -2,22 +2,43 @@ import { ecsFormat } from '@elastic/ecs-pino-format'
 
 import { config } from '~/src/config/index.js'
 
+const logConfig = config.get('log')
+const serviceName = config.get('serviceName')
+const serviceVersion = config.get('serviceVersion')
+
+const formatters = {
+  ecs: /** @type {Omit<LoggerOptions, 'mixin' | 'transport'>} */ ({
+    ...ecsFormat(),
+    base: {
+      service: {
+        name: serviceName,
+        type: 'nodeJs',
+        version: serviceVersion
+      }
+    }
+  }),
+  'pino-pretty': /** @type {{ transport: TransportSingleOptions }} */ ({
+    transport: {
+      target: 'pino-pretty'
+    }
+  })
+}
+
 /**
  * @satisfies {Options}
  */
 export const loggerOptions = {
-  enabled: !config.get('isTest'),
+  enabled: logConfig.enabled,
+  ignorePaths: ['/health'],
   redact: {
-    paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers'],
+    paths: logConfig.redact,
     remove: true
   },
-  level: config.get('logLevel'),
-  ...(config.get('isDevelopment')
-    ? { transport: { target: 'pino-pretty', options: { colorize: true } } }
-    : /** @type {Omit<LoggerOptions, 'mixin' | 'transport'>} */ (ecsFormat()))
+  level: logConfig.level,
+  ...formatters[logConfig.format]
 }
 
 /**
  * @import { Options } from 'hapi-pino'
- * @import { LoggerOptions } from 'pino'
+ * @import { LoggerOptions, TransportSingleOptions } from 'pino'
  */
