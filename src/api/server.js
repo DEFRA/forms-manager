@@ -6,9 +6,9 @@ import { ProxyAgent } from 'proxy-agent'
 
 import { config } from '~/src/config/index.js'
 import { failAction } from '~/src/helpers/fail-action.js'
+import { requestLogger } from '~/src/helpers/logging/request-logger.js'
 import { prepareDb } from '~/src/mongo.js'
 import { auth } from '~/src/plugins/auth/index.js'
-import { logRequests } from '~/src/plugins/log-requests.js'
 import { router } from '~/src/plugins/router.js'
 import { transformErrors } from '~/src/plugins/transform-errors.js'
 import { prepareSecureContext } from '~/src/secure-context.js'
@@ -59,7 +59,7 @@ export async function createServer() {
   })
 
   await server.register(auth)
-  await server.register(logRequests)
+  await server.register(requestLogger)
 
   if (isProduction) {
     prepareSecureContext(server)
