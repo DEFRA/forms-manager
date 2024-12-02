@@ -13,7 +13,7 @@ export const loggerOptions = {
   },
   level: config.get('logLevel'),
   ...(config.get('isDevelopment')
-    ? { transport: { target: 'pino-pretty' } }
+    ? { transport: { target: 'pino-pretty', options: { colorize: true } } }
     : /** @type {Omit<LoggerOptions, 'mixin' | 'transport'>} */ (ecsFormat()))
 }
 
