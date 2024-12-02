@@ -1,6 +1,7 @@
 import {
   formMetadataInputKeys,
-  formMetadataInputSchema
+  formMetadataInputSchema,
+  paginationOptionsSchema
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -20,7 +21,6 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  paginationSchema,
   removeFormPayloadSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
@@ -60,7 +60,7 @@ export default [
     options: {
       auth: false,
       validate: {
-        query: paginationSchema
+        query: paginationOptionsSchema
       }
     }
   },

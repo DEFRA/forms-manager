@@ -887,9 +887,7 @@ describe('Forms service', () => {
           .mocked(formMetadata.list)
           .mockResolvedValue({ documents, totalItems })
 
-        const result = /** @type {Result<FormMetadata>} */ (
-          await listForms({ page, perPage })
-        )
+        const result = await listForms({ page, perPage })
 
         expect(formMetadata.list).toHaveBeenCalledWith({ page, perPage })
         expect(result).toEqual({
@@ -918,9 +916,7 @@ describe('Forms service', () => {
           .mocked(formMetadata.list)
           .mockResolvedValue({ documents, totalItems })
 
-        const result = /** @type {Result<FormMetadata>} */ (
-          await listForms({ page, perPage })
-        )
+        const result = await listForms({ page, perPage })
 
         expect(formMetadata.list).toHaveBeenCalledWith({ page, perPage })
         expect(result).toEqual({
@@ -952,10 +948,7 @@ describe('Forms service', () => {
           .mocked(formMetadata.list)
           .mockResolvedValue({ documents, totalItems })
 
-        // Use a type assertion to inform the type checker
-        const result = /** @type {Result<FormMetadata>} */ (
-          await listForms({ page, perPage })
-        )
+        const result = await listForms({ page, perPage })
 
         expect(result.meta.pagination?.totalPages).toBe(4) // As there are 10 items and we are asking for 3 per page => 4 pages
       })
@@ -972,9 +965,7 @@ describe('Forms service', () => {
           .mocked(formMetadata.list)
           .mockResolvedValue({ documents, totalItems })
 
-        const result = /** @type {Result<FormMetadata>} */ (
-          await listForms({ page, perPage })
-        )
+        const result = await listForms({ page, perPage })
 
         expect(formMetadata.list).toHaveBeenCalledWith({ page, perPage })
         expect(result).toEqual({
@@ -995,6 +986,5 @@ describe('Forms service', () => {
 
 /**
  * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
- * @import { Result } from '~/src/api/types.js'
  * @import { WithId } from 'mongodb'
  */

@@ -14,33 +14,7 @@
  */
 
 /**
- * @import { FormByIdInput, FormBySlugInput, FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadataState } from '@defra/forms-model'
+ * @import { FormByIdInput, FormBySlugInput, FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, PaginationOptions } from '@defra/forms-model'
  * @import { Request } from '@hapi/hapi'
  * @import { Db } from 'mongodb'
- */
-
-/**
- * @template T
- * @typedef {object} Result
- * @property {T[]} data - The array of data items.
- * @property {Meta} meta - The metadata about the result.
- */
-
-/**
- * @typedef {object} Meta
- * @property {PaginationResult} [pagination] - The pagination details.
- */
-
-/**
- * @typedef {object} PaginationResult
- * @property {number} page - The current page number.
- * @property {number} perPage - The number of items per page.
- * @property {number} totalItems - The total number of items available.
- * @property {number} totalPages - The total number of pages available.
- */
-
-/**
- * @typedef {object} PaginationOptions
- * @property {number} [page] - The current page number.
- * @property {number} [perPage] - The number of items per page.
  */

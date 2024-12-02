@@ -38,9 +38,3 @@ export const createFormSchema = Joi.object().keys({
 
 // Update form definition schema
 export const updateFormDefinitionSchema = formDefinitionSchema
-
-// Pagination schema
-export const paginationSchema = Joi.object({
-  page: Joi.number().positive().integer().min(1),
-  perPage: Joi.number().positive().integer().min(1).max(200)
-}).optional()

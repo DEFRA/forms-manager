@@ -164,20 +164,32 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * Lists forms and returns query result metadata (e.g., pagination details, total counts)
- * @param {PaginationOptions} [paginationOptions] - Optional pagination settings (page and perPage)
- * @returns {Promise<FormMetadata[] | Result<FormMetadata>>} Returns either an array of forms or a paginated result with query metadata
+ * @overload
+ * @returns {Promise<FormMetadata[]>}
  */
-export async function listForms(paginationOptions) {
-  if (!paginationOptions?.page && !paginationOptions?.perPage) {
+/**
+ * @overload
+ * @param {PaginationOptions} options - Optional pagination options
+ * @returns {Promise<QueryResult<FormMetadata>>}
+ */
+/**
+ * Lists forms and returns query result metadata (e.g., pagination details, total counts)
+ * @param {PaginationOptions} [options] - Optional pagination options
+ * @returns {Promise<FormMetadata[] | QueryResult<FormMetadata>>}
+ */
+export async function listForms(options) {
+  if (!options?.page && !options?.perPage) {
     const documents = await formMetadata.listAll()
     return documents.map(mapForm)
   }
 
-  const page = paginationOptions.page ?? 1
-  const perPage = paginationOptions.perPage ?? MAX_RESULTS
+  const page = options.page ?? 1
+  const perPage = options.perPage ?? MAX_RESULTS
 
-  const { documents, totalItems } = await formMetadata.list({ page, perPage })
+  const { documents, totalItems } = await formMetadata.list({
+    page,
+    perPage
+  })
   const forms = documents.map(mapForm)
 
   return {
@@ -534,7 +546,7 @@ export async function removeForm(formId, force = false) {
 }
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryResult, PaginationOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
- * @import { PaginationOptions, PartialFormMetadataDocument, Result} from '~/src/api/types.js'
+ * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */

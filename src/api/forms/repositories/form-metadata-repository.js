@@ -29,12 +29,10 @@ export async function listAll() {
 
 /**
  * Retrieves the list of documents from the database with pagination.
- * @param {object} paginationOptions - Pagination options.
- * @param {number} paginationOptions.page - The current page number.
- * @param {number} paginationOptions.perPage - The number of items per page.
+ * @param {PaginationOptions} options
  * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number }>}
  */
-export async function list({ page, perPage }) {
+export async function list({ page = 1, perPage = MAX_RESULTS }) {
   const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
     db.collection(METADATA_COLLECTION_NAME)
   )
@@ -207,7 +205,7 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument } from '@defra/forms-model'
+ * @import { FormMetadataDocument, PaginationOptions } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
- * @import { PartialFormMetadataDocument, RequiredPaginationOptions } from '~/src/api/types.js'
+ * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
