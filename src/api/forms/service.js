@@ -169,18 +169,21 @@ export async function createForm(metadataInput, author) {
  * @returns {Promise<FormMetadata[] | QueryResult<FormMetadata>>}
  */
 export async function listForms(options) {
+  let documents
+
   if (!options?.page && !options?.perPage) {
-    const documents = await formMetadata.listAll()
+    documents = await formMetadata.listAll()
     return documents.map(mapForm)
   }
 
   const page = options.page ?? 1
   const perPage = options.perPage ?? MAX_RESULTS
 
-  const { documents, totalItems } = await formMetadata.list({
+  const { documents: pagedDocuments, totalItems } = await formMetadata.list({
     page,
     perPage
   })
+  documents = pagedDocuments
   const forms = documents.map(mapForm)
 
   return {
