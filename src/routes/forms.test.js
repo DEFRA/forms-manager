@@ -93,7 +93,7 @@ describe('Forms route', () => {
   const slug = stubFormMetadataOutput.slug
 
   describe('Success responses', () => {
-    test('Testing GET /forms route returns empty array', async () => {
+    test('Testing GET /forms route returns empty array when no pagination is used', async () => {
       jest.mocked(listForms).mockResolvedValue([])
 
       const response = await server.inject({
@@ -104,10 +104,12 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(true)
       expect(response.result).toEqual([])
     })
 
-    test('Testing GET /forms route without auth returns empty array', async () => {
+    test('Testing GET /forms route without auth returns empty array when no pagination is used', async () => {
       jest.mocked(listForms).mockResolvedValue([])
 
       const response = await server.inject({
@@ -117,10 +119,12 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(true)
       expect(response.result).toEqual([])
     })
 
-    test('Testing GET /forms route returns a list of forms', async () => {
+    test('Testing GET /forms route returns a list of forms when no pagination is used', async () => {
       jest.mocked(listForms).mockResolvedValue([stubFormMetadataOutput])
 
       const response = await server.inject({
@@ -131,7 +135,81 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(true)
       expect(response.result).toEqual([stubFormMetadataOutput])
+    })
+
+    test('Testing GET /forms route with pagination returns paginated result', async () => {
+      jest.mocked(listForms).mockResolvedValue({
+        data: [stubFormMetadataOutput],
+        meta: {
+          pagination: {
+            page: 1,
+            perPage: 10,
+            totalItems: 1,
+            totalPages: 1
+          }
+        }
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?page=1&perPage=10',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(false)
+      expect(response.result).toEqual({
+        data: [stubFormMetadataOutput],
+        meta: {
+          pagination: {
+            page: 1,
+            perPage: 10,
+            totalItems: 1,
+            totalPages: 1
+          }
+        }
+      })
+    })
+
+    test('Testing GET /forms route with pagination returns empty paginated result', async () => {
+      jest.mocked(listForms).mockResolvedValue({
+        data: [],
+        meta: {
+          pagination: {
+            page: 2,
+            perPage: 10,
+            totalItems: 1,
+            totalPages: 1
+          }
+        }
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?page=2&perPage=10',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(Array.isArray(response.result)).toBe(false)
+      expect(response.result).toEqual({
+        data: [],
+        meta: {
+          pagination: {
+            page: 2,
+            perPage: 10,
+            totalItems: 1,
+            totalPages: 1
+          }
+        }
+      })
     })
 
     test('Testing POST /forms route returns a "created" status', async () => {
@@ -311,6 +389,26 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         error: 'Internal Server Error',
         message: 'An internal server error occurred'
+      })
+    })
+
+    test('Testing GET /forms route with invalid pagination parameters returns validation error', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?page=abc&perPage=-5',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message:
+          '"page" must be a number. "perPage" must be a positive number. "perPage" must be greater than or equal to 1',
+        validation: {
+          keys: ['page', 'perPage', 'perPage'],
+          source: 'query'
+        }
       })
     })
 

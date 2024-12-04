@@ -6,6 +6,7 @@ import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
@@ -163,12 +164,39 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * Lists the available form metadata
+ * Lists forms and returns query result metadata (e.g., pagination details, total counts)
+ * @param {PaginationOptions} [options] - Optional pagination options
+ * @returns {Promise<FormMetadata[] | QueryResult<FormMetadata>>}
  */
-export async function listForms() {
-  const documents = await formMetadata.list()
+export async function listForms(options) {
+  let documents
 
-  return documents.map(mapForm)
+  if (!options?.page && !options?.perPage) {
+    documents = await formMetadata.listAll()
+    return documents.map(mapForm)
+  }
+
+  const page = options.page ?? 1
+  const perPage = options.perPage ?? MAX_RESULTS
+
+  const { documents: pagedDocuments, totalItems } = await formMetadata.list({
+    page,
+    perPage
+  })
+  documents = pagedDocuments
+  const forms = documents.map(mapForm)
+
+  return {
+    data: forms,
+    meta: {
+      pagination: {
+        page,
+        perPage,
+        totalItems,
+        totalPages: Math.ceil(totalItems / perPage)
+      }
+    }
+  }
 }
 
 /**
@@ -512,7 +540,7 @@ export async function removeForm(formId, force = false) {
 }
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryResult, PaginationOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */

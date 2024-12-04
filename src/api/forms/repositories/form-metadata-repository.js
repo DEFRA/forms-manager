@@ -6,26 +6,52 @@ import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
-export const MAX_RESULTS = 500
+export const MAX_RESULTS = 100
 
 const logger = createLogger()
 
 /**
  * Retrieves the list of documents from the database
  */
-export function list() {
-  const coll = /** @satisfies {Collection<Partial<FormMetadataDocument>>} */ (
+export async function listAll() {
+  const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
     db.collection(METADATA_COLLECTION_NAME)
   )
 
   return coll
     .find()
     .sort({
-      updatedAt: -1, // Primary sort: most recently updated documents first (-1 = descending order)
-      'updatedBy.displayName': 1 // Secondary sort: if update times are equal, sort by author name (1 = ascending order)
+      updatedAt: -1
     })
     .limit(MAX_RESULTS)
     .toArray()
+}
+
+/**
+ * Retrieves the list of documents from the database with pagination.
+ * @param {PaginationOptions} options
+ * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number }>}
+ */
+export async function list({ page = 1, perPage = MAX_RESULTS }) {
+  const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
+    db.collection(METADATA_COLLECTION_NAME)
+  )
+
+  const skip = (page - 1) * perPage
+
+  const [documents, totalItems] = await Promise.all([
+    coll
+      .find()
+      .sort({
+        updatedAt: -1
+      })
+      .skip(skip)
+      .limit(perPage)
+      .toArray(),
+    coll.countDocuments()
+  ])
+
+  return { documents, totalItems }
 }
 
 /**
@@ -179,7 +205,7 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument } from '@defra/forms-model'
- * @import { ClientSession, Collection, UpdateFilter } from 'mongodb'
+ * @import { FormMetadataDocument, PaginationOptions } from '@defra/forms-model'
+ * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
