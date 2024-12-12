@@ -28,30 +28,113 @@ export async function listAll() {
 }
 
 /**
- * Retrieves the list of documents from the database with pagination.
- * @param {PaginationOptions} options
+ * Retrieves the list of documents from the database with pagination and sorting.
+ * @param {QueryOptions} options - Pagination and sorting options
  * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number }>}
  */
-export async function list({ page = 1, perPage = MAX_RESULTS }) {
-  const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
-    db.collection(METADATA_COLLECTION_NAME)
-  )
+export async function list(options) {
+  try {
+    const {
+      page = 1,
+      perPage = MAX_RESULTS,
+      sortBy = 'updatedAt',
+      order = 'desc'
+    } = options
 
-  const skip = (page - 1) * perPage
+    const coll =
+      /** @type {Collection<WithId<Partial<FormMetadataDocument>>>} */ (
+        db.collection(METADATA_COLLECTION_NAME)
+      )
 
-  const [documents, totalItems] = await Promise.all([
-    coll
-      .find()
-      .sort({
-        updatedAt: -1
-      })
-      .skip(skip)
-      .limit(perPage)
-      .toArray(),
-    coll.countDocuments()
-  ])
+    const skip = (page - 1) * perPage
 
-  return { documents, totalItems }
+    const pipeline = []
+
+    /** @type {CollationOptions | null} */
+    let collation = null
+
+    switch (sortBy) {
+      case 'updatedAt':
+        pipeline.push(
+          {
+            $addFields: {
+              updatedDateOnly: {
+                $dateToString: {
+                  format: '%Y-%m-%d',
+                  date: '$updatedAt',
+                  timezone: 'UTC'
+                }
+              }
+            }
+          },
+          {
+            $sort: {
+              updatedDateOnly: order === 'asc' ? 1 : -1, // Primary sort
+              'updatedBy.displayName': 1 // Secondary sort
+            }
+          }
+        )
+        break
+
+      case 'title':
+        /**
+         * Case-insensitive, diacritic-insensitive collation
+         * @see https://www.mongodb.com/docs/drivers/node/current/fundamentals/collations/
+         */
+        collation = {
+          locale: 'en',
+          strength: 1
+        }
+        pipeline.push({
+          $sort: {
+            title: order === 'asc' ? 1 : -1
+          }
+        })
+        break
+
+      default:
+        pipeline.push(
+          {
+            $addFields: {
+              updatedDateOnly: {
+                $dateToString: {
+                  format: '%Y-%m-%d',
+                  date: '$updatedAt',
+                  timezone: 'UTC'
+                }
+              }
+            }
+          },
+          {
+            $sort: {
+              updatedDateOnly: -1,
+              'updatedBy.displayName': 1
+            }
+          }
+        )
+        break
+    }
+
+    pipeline.push({ $skip: skip }, { $limit: perPage })
+
+    /** @type {AggregateOptions} */
+    const aggOptions = {}
+    if (collation) {
+      aggOptions.collation = collation
+    }
+
+    const [documents, totalItems] = await Promise.all([
+      /** @type {Promise<WithId<Partial<FormMetadataDocument>>[]>} */ (
+        coll.aggregate(pipeline, aggOptions).toArray()
+      ),
+      coll.countDocuments()
+    ])
+
+    return { documents, totalItems }
+  } catch (error) {
+    logger.error(error, 'Error fetching documents')
+    throw error
+  }
 }
 
 /**
@@ -205,7 +288,7 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, PaginationOptions } from '@defra/forms-model'
- * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
+ * @import { FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { ClientSession, Collection, UpdateFilter, WithId, AggregateOptions, CollationOptions } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

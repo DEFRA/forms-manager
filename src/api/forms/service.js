@@ -164,27 +164,26 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * Lists forms and returns query result metadata (e.g., pagination details, total counts)
- * @param {PaginationOptions} [options] - Optional pagination options
- * @returns {Promise<FormMetadata[] | QueryResult<FormMetadata>>}
+ * Lists forms and returns query result metadata (e.g., pagination and sort details)
+ * @param {QueryOptions} options - Pagination and sorting options
+ * @returns {Promise<QueryResult<FormMetadata>>}
  */
 export async function listForms(options) {
-  let documents
-
-  if (!options?.page && !options?.perPage) {
-    documents = await formMetadata.listAll()
-    return documents.map(mapForm)
-  }
-
-  const page = options.page ?? 1
-  const perPage = options.perPage ?? MAX_RESULTS
+  const {
+    page = 1,
+    perPage = MAX_RESULTS,
+    sortBy = 'updatedAt',
+    order = 'desc'
+  } = options
 
   const { documents: pagedDocuments, totalItems } = await formMetadata.list({
     page,
-    perPage
+    perPage,
+    sortBy,
+    order
   })
-  documents = pagedDocuments
-  const forms = documents.map(mapForm)
+
+  const forms = pagedDocuments.map(mapForm)
 
   return {
     data: forms,
@@ -194,6 +193,10 @@ export async function listForms(options) {
         perPage,
         totalItems,
         totalPages: Math.ceil(totalItems / perPage)
+      },
+      sorting: {
+        sortBy,
+        order
       }
     }
   }
@@ -540,7 +543,7 @@ export async function removeForm(formId, force = false) {
 }
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryResult, PaginationOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, QueryResult, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */
