@@ -47,81 +47,12 @@ export async function list(options) {
       )
 
     const skip = (page - 1) * perPage
-
-    const pipeline = []
-
-    /** @type {CollationOptions | null} */
-    let collation = null
-
-    switch (sortBy) {
-      case 'updatedAt':
-        pipeline.push(
-          {
-            $addFields: {
-              updatedDateOnly: {
-                $dateToString: {
-                  format: '%Y-%m-%d',
-                  date: '$updatedAt',
-                  timezone: 'UTC'
-                }
-              }
-            }
-          },
-          {
-            $sort: {
-              updatedDateOnly: order === 'asc' ? 1 : -1, // Primary sort
-              'updatedBy.displayName': 1 // Secondary sort
-            }
-          }
-        )
-        break
-
-      case 'title':
-        /**
-         * Case-insensitive, diacritic-insensitive collation
-         * @see https://www.mongodb.com/docs/drivers/node/current/fundamentals/collations/
-         */
-        collation = {
-          locale: 'en',
-          strength: 1
-        }
-        pipeline.push({
-          $sort: {
-            title: order === 'asc' ? 1 : -1
-          }
-        })
-        break
-
-      default:
-        pipeline.push(
-          {
-            $addFields: {
-              updatedDateOnly: {
-                $dateToString: {
-                  format: '%Y-%m-%d',
-                  date: '$updatedAt',
-                  timezone: 'UTC'
-                }
-              }
-            }
-          },
-          {
-            $sort: {
-              updatedDateOnly: -1,
-              'updatedBy.displayName': 1
-            }
-          }
-        )
-        break
-    }
+    const { pipeline, collation } = createSortingPipeline(sortBy, order)
 
     pipeline.push({ $skip: skip }, { $limit: perPage })
 
     /** @type {AggregateOptions} */
-    const aggOptions = {}
-    if (collation) {
-      aggOptions.collation = collation
-    }
+    const aggOptions = collation ? { collation } : {}
 
     const [documents, totalItems] = await Promise.all([
       /** @type {Promise<WithId<Partial<FormMetadataDocument>>[]>} */ (
@@ -135,6 +66,67 @@ export async function list(options) {
     logger.error(error, 'Error fetching documents')
     throw error
   }
+}
+
+/**
+ * Creates a MongoDB aggregation pipeline for sorting form metadata documents
+ * @param {string} sortBy - Field to sort by ('updatedAt' or 'title')
+ * @param {string} order - Sort order
+ * @returns {{ pipeline: object[], collation: CollationOptions | null }} Pipeline stages and collation options
+ */
+function createSortingPipeline(sortBy, order) {
+  const pipeline = []
+  let collation = null
+  const sortOrder = order === 'asc' ? 1 : -1
+
+  const dateFieldStage = {
+    $addFields: {
+      updatedDateOnly: {
+        $dateToString: {
+          format: '%Y-%m-%d',
+          date: '$updatedAt',
+          timezone: 'UTC'
+        }
+      }
+    }
+  }
+
+  const updatedAtSortStage = {
+    $sort: {
+      updatedDateOnly: sortOrder,
+      'updatedBy.displayName': 1
+    }
+  }
+
+  const defaultSortStage = {
+    $sort: {
+      updatedDateOnly: -1,
+      'updatedBy.displayName': 1
+    }
+  }
+
+  switch (sortBy) {
+    case 'updatedAt':
+      pipeline.push(dateFieldStage, updatedAtSortStage)
+      break
+
+    case 'title':
+      collation = {
+        locale: 'en',
+        strength: 1
+      }
+      pipeline.push({
+        $sort: {
+          title: sortOrder
+        }
+      })
+      break
+
+    default:
+      pipeline.push(dateFieldStage, defaultSortStage)
+  }
+
+  return { pipeline, collation }
 }
 
 /**
