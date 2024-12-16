@@ -5,6 +5,7 @@ import { pino } from 'pino'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
+import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   createDraftFromLive,
@@ -353,6 +354,21 @@ describe('Forms service', () => {
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
+      )
+    })
+
+    it('should fail to create a live state when there is no draft state', async () => {
+      const formMetadataDocumentNoDraft = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+      delete formMetadataDocumentNoDraft.draft
+
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataDocumentNoDraft)
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
       )
     })
   })
@@ -711,6 +727,8 @@ describe('Forms service', () => {
     const liveDate = new Date('2024-02-26T00:00:00Z')
     const draftDate = new Date('2024-03-26T00:00:00Z')
     const defaultDate = new Date('2024-06-25T23:00:00Z')
+    const defaultPage = 1
+    const defaultPerPage = MAX_RESULTS
 
     const formAuthor = { displayName: 'Joe Bloggs', id: '1' }
     const liveAuthor = { displayName: 'Jane Doe', id: '2' }
@@ -1094,6 +1112,71 @@ describe('Forms service', () => {
           sortBy: 'updatedAt',
           order: 'desc'
         })
+      })
+    })
+
+    it('should handle default pagination parameters', async () => {
+      jest.mocked(formMetadata.list).mockResolvedValue({
+        documents: [formMetadataFullDocument],
+        totalItems: 1
+      })
+
+      const result = await listForms({
+        page: defaultPage,
+        perPage: defaultPerPage
+      })
+
+      expect(formMetadata.list).toHaveBeenCalledWith({
+        page: defaultPage,
+        perPage: defaultPerPage,
+        sortBy: 'updatedAt',
+        order: 'desc'
+      })
+      expect(result.meta.pagination).toEqual({
+        page: defaultPage,
+        perPage: defaultPerPage,
+        totalItems: 1,
+        totalPages: 1
+      })
+    })
+
+    it('should return correct pagination with MAX_RESULTS', async () => {
+      const totalItems = MAX_RESULTS + 1
+
+      jest.mocked(formMetadata.list).mockResolvedValue({
+        documents: [formMetadataFullDocument],
+        totalItems
+      })
+
+      const result = await listForms({
+        page: defaultPage,
+        perPage: defaultPerPage
+      })
+
+      expect(result.meta.pagination).toEqual({
+        page: defaultPage,
+        perPage: defaultPerPage,
+        totalItems,
+        totalPages: 2
+      })
+    })
+
+    it('should handle empty results with MAX_RESULTS', async () => {
+      jest.mocked(formMetadata.list).mockResolvedValue({
+        documents: [],
+        totalItems: 0
+      })
+
+      const result = await listForms({
+        page: defaultPage,
+        perPage: defaultPerPage
+      })
+
+      expect(result.meta.pagination).toEqual({
+        page: defaultPage,
+        perPage: defaultPerPage,
+        totalItems: 0,
+        totalPages: 0
       })
     })
   })
