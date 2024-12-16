@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import { ObjectId } from 'mongodb'
+import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
@@ -11,6 +11,7 @@ import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
+  getFormBySlug,
   getFormDefinition,
   listForms,
   removeForm,
@@ -507,6 +508,22 @@ describe('Forms service', () => {
       await expect(
         updateFormMetadata('123', { title: 'new title' }, author)
       ).rejects.toThrow(error)
+    })
+
+    it('should throw an error when title already exists', async () => {
+      const duplicateError = new MongoServerError({
+        message: 'duplicate key error',
+        code: 11000
+      })
+      jest.mocked(formMetadata.update).mockRejectedValue(duplicateError)
+
+      const input = {
+        title: 'duplicate title'
+      }
+
+      await expect(updateFormMetadata(id, input, author)).rejects.toThrow(
+        Boom.badRequest('Form title duplicate title already exists')
+      )
     })
   })
 
@@ -1178,6 +1195,48 @@ describe('Forms service', () => {
         totalItems: 0,
         totalPages: 0
       })
+    })
+
+    it('should use default values when no options are provided', async () => {
+      jest.mocked(formMetadata.list).mockResolvedValue({
+        documents: [formMetadataFullDocument],
+        totalItems: 1
+      })
+
+      const result = await listForms({ page: 1, perPage: MAX_RESULTS })
+
+      expect(formMetadata.list).toHaveBeenCalledWith({
+        page: defaultPage,
+        perPage: defaultPerPage,
+        sortBy: 'updatedAt',
+        order: 'desc'
+      })
+      expect(result.meta.pagination).toEqual({
+        page: defaultPage,
+        perPage: defaultPerPage,
+        totalItems: 1,
+        totalPages: 1
+      })
+    })
+  })
+
+  describe('getFormBySlug', () => {
+    it('should return form metadata when form exists', async () => {
+      jest
+        .mocked(formMetadata.getBySlug)
+        .mockResolvedValue(formMetadataDocument)
+
+      const result = await getFormBySlug(slug)
+
+      expect(result).toEqual(formMetadataOutput)
+      expect(formMetadata.getBySlug).toHaveBeenCalledWith(slug)
+    })
+
+    it('should throw an error if form does not exist', async () => {
+      const error = Boom.notFound(`Form with slug '${slug}' not found`)
+      jest.mocked(formMetadata.getBySlug).mockRejectedValue(error)
+
+      await expect(getFormBySlug(slug)).rejects.toThrow(error)
     })
   })
 })
