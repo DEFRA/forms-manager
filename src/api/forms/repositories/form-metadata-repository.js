@@ -28,30 +28,105 @@ export async function listAll() {
 }
 
 /**
- * Retrieves the list of documents from the database with pagination.
- * @param {PaginationOptions} options
+ * Retrieves the list of documents from the database with pagination and sorting.
+ * @param {QueryOptions} options - Pagination and sorting options
  * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number }>}
  */
-export async function list({ page = 1, perPage = MAX_RESULTS }) {
-  const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
-    db.collection(METADATA_COLLECTION_NAME)
-  )
+export async function list(options) {
+  try {
+    const {
+      page = 1,
+      perPage = MAX_RESULTS,
+      sortBy = 'updatedAt',
+      order = 'desc'
+    } = options
 
-  const skip = (page - 1) * perPage
+    const coll =
+      /** @type {Collection<WithId<Partial<FormMetadataDocument>>>} */ (
+        db.collection(METADATA_COLLECTION_NAME)
+      )
 
-  const [documents, totalItems] = await Promise.all([
-    coll
-      .find()
-      .sort({
-        updatedAt: -1
+    const skip = (page - 1) * perPage
+    const { pipeline, collation } = createSortingPipeline(sortBy, order)
+
+    pipeline.push({ $skip: skip }, { $limit: perPage })
+
+    /** @type {AggregateOptions} */
+    const aggOptions = collation ? { collation } : {}
+
+    const [documents, totalItems] = await Promise.all([
+      /** @type {Promise<WithId<Partial<FormMetadataDocument>>[]>} */ (
+        coll.aggregate(pipeline, aggOptions).toArray()
+      ),
+      coll.countDocuments()
+    ])
+
+    return { documents, totalItems }
+  } catch (error) {
+    logger.error(error, 'Error fetching documents')
+    throw error
+  }
+}
+
+/**
+ * Creates a MongoDB aggregation pipeline for sorting form metadata documents
+ * @param {string} sortBy - Field to sort by ('updatedAt' or 'title')
+ * @param {string} order - Sort order
+ * @returns {{ pipeline: object[], collation: CollationOptions | null }} Pipeline stages and collation options
+ */
+function createSortingPipeline(sortBy, order) {
+  const pipeline = []
+  let collation = null
+  const sortOrder = order === 'asc' ? 1 : -1
+
+  const dateFieldStage = {
+    $addFields: {
+      updatedDateOnly: {
+        $dateToString: {
+          format: '%Y-%m-%d',
+          date: '$updatedAt',
+          timezone: 'UTC'
+        }
+      }
+    }
+  }
+
+  const updatedAtSortStage = {
+    $sort: {
+      updatedDateOnly: sortOrder,
+      'updatedBy.displayName': 1
+    }
+  }
+
+  const defaultSortStage = {
+    $sort: {
+      updatedDateOnly: -1,
+      'updatedBy.displayName': 1
+    }
+  }
+
+  switch (sortBy) {
+    case 'updatedAt':
+      pipeline.push(dateFieldStage, updatedAtSortStage)
+      break
+
+    case 'title':
+      collation = {
+        locale: 'en',
+        strength: 1
+      }
+      pipeline.push({
+        $sort: {
+          title: sortOrder
+        }
       })
-      .skip(skip)
-      .limit(perPage)
-      .toArray(),
-    coll.countDocuments()
-  ])
+      break
 
-  return { documents, totalItems }
+    default:
+      pipeline.push(dateFieldStage, defaultSortStage)
+  }
+
+  return { pipeline, collation }
 }
 
 /**
@@ -205,7 +280,7 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, PaginationOptions } from '@defra/forms-model'
- * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
+ * @import { FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { ClientSession, Collection, UpdateFilter, WithId, AggregateOptions, CollationOptions } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
