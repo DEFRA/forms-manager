@@ -359,14 +359,15 @@ describe('Forms service', () => {
     })
 
     it('should fail to create a live state when there is no draft state', async () => {
-      const formMetadataDocumentNoDraft = {
-        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      /** @type {WithId<FormMetadataDocument>} */
+      const formMetadataWithoutDraft = {
+        ...formMetadataDocument,
+        draft: undefined
       }
-      delete formMetadataDocumentNoDraft.draft
 
       jest
         .mocked(formMetadata.get)
-        .mockResolvedValueOnce(formMetadataDocumentNoDraft)
+        .mockResolvedValueOnce(formMetadataWithoutDraft)
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
@@ -622,71 +623,6 @@ describe('Forms service', () => {
       await expect(
         updateDraftFormDefinition('123', definition, author)
       ).rejects.toThrow(error)
-    })
-  })
-
-  describe('updateDraftFormDefinition', () => {
-    const formDefinitionCustomisedTitle = actualEmptyForm()
-    formDefinitionCustomisedTitle.name =
-      "A custom form name that shouldn't be allowed"
-
-    it('should update the draft form definition with required attributes upon creation', async () => {
-      const upsertSpy = jest.spyOn(formDefinition, 'upsert')
-      const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
-
-      await updateDraftFormDefinition(
-        '123',
-        formDefinitionCustomisedTitle,
-        author
-      )
-
-      expect(upsertSpy).toHaveBeenCalledWith(
-        '123',
-        { ...formDefinitionCustomisedTitle, name: formMetadataDocument.title },
-        expect.anything()
-      )
-
-      expect(formMetadataGetSpy).toHaveBeenCalledWith('123')
-
-      expect(formDefinitionCustomisedTitle.name).toBe(
-        formMetadataDocument.title
-      )
-    })
-
-    test('should check if form update DB operation is called with correct form data', async () => {
-      const dbSpy = jest.spyOn(formMetadata, 'update')
-
-      await updateDraftFormDefinition(
-        '123',
-        formDefinitionCustomisedTitle,
-        author
-      )
-
-      const dbOperationArgs = dbSpy.mock.calls[0]
-
-      expect(dbSpy).toHaveBeenCalled()
-      expect(dbOperationArgs[0]).toBe('123')
-      expect(dbOperationArgs[1].$set).toEqual({
-        'draft.updatedAt': dateUsedInFakeTime,
-        'draft.updatedBy': author,
-        updatedAt: dateUsedInFakeTime,
-        updatedBy: author
-      })
-    })
-
-    it('should throw an error if the form has no draft state', async () => {
-      jest.mocked(formMetadata.get).mockResolvedValueOnce({
-        ...formMetadataDocument,
-        draft: undefined
-      })
-
-      const formDefinitionCustomised = actualEmptyForm()
-
-      await expect(
-        updateDraftFormDefinition('123', formDefinitionCustomised, author)
-      ).rejects.toThrow(
-        Boom.badRequest(`Form with ID '123' has no draft state`)
-      )
     })
   })
 
@@ -1237,6 +1173,74 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.getBySlug).mockRejectedValue(error)
 
       await expect(getFormBySlug(slug)).rejects.toThrow(error)
+    })
+  })
+
+  describe('updateDraftFormDefinition', () => {
+    const formDefinitionCustomisedTitle = actualEmptyForm()
+    formDefinitionCustomisedTitle.name =
+      "A custom form name that shouldn't be allowed"
+
+    it('should update the draft form definition with required attributes upon creation', async () => {
+      const upsertSpy = jest.spyOn(formDefinition, 'upsert')
+      const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
+
+      await updateDraftFormDefinition(
+        '123',
+        formDefinitionCustomisedTitle,
+        author
+      )
+
+      expect(upsertSpy).toHaveBeenCalledWith(
+        '123',
+        {
+          ...formDefinitionCustomisedTitle,
+          name: formMetadataDocument.title
+        },
+        expect.anything()
+      )
+
+      expect(formMetadataGetSpy).toHaveBeenCalledWith('123')
+
+      expect(formDefinitionCustomisedTitle.name).toBe(
+        formMetadataDocument.title
+      )
+    })
+
+    test('should check if form update DB operation is called with correct form data', async () => {
+      const dbSpy = jest.spyOn(formMetadata, 'update')
+
+      await updateDraftFormDefinition(
+        '123',
+        formDefinitionCustomisedTitle,
+        author
+      )
+
+      const dbOperationArgs = dbSpy.mock.calls[0]
+
+      expect(dbSpy).toHaveBeenCalled()
+      expect(dbOperationArgs[0]).toBe('123')
+      expect(dbOperationArgs[1].$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+    })
+
+    it('should throw an error if the form has no draft state', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValueOnce({
+        ...formMetadataDocument,
+        draft: undefined
+      })
+
+      const formDefinitionCustomised = actualEmptyForm()
+
+      await expect(
+        updateDraftFormDefinition('123', formDefinitionCustomised, author)
+      ).rejects.toThrow(
+        Boom.badRequest(`Form with ID '123' has no draft state`)
+      )
     })
   })
 })
