@@ -21,7 +21,6 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  removeFormPayloadSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
@@ -163,24 +162,21 @@ export default [
     method: 'DELETE',
     path: '/forms/{id}',
     /**
-     * @param {RequestRemoveFormById} request
+     * @param {RequestFormById} request
      */
     async handler(request) {
-      const { params, payload } = request
-      const { id } = params
-      const { force } = payload
+      const { id } = request.params
 
-      await removeForm(id, force)
+      await removeForm(id)
 
       return {
-        id: params.id,
+        id,
         status: 'deleted'
       }
     },
     options: {
       validate: {
-        params: formByIdSchema,
-        payload: removeFormPayloadSchema
+        params: formByIdSchema
       }
     }
   },

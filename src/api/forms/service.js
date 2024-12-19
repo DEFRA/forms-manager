@@ -2,7 +2,10 @@ import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
-import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
+import {
+  makeFormLiveErrorMessages,
+  removeFormErrorMessages
+} from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -477,17 +480,14 @@ export async function createDraftFromLive(formId, author) {
 /**
  * Removes a form (metadata and definition)
  * @param {string} formId
- * @param {boolean} force - deletes the form even if it's live, and ignores failures to delete the form definition.
  */
-export async function removeForm(formId, force = false) {
-  logger.info(`Removing form with ID ${formId} and force=${force}`)
+export async function removeForm(formId) {
+  logger.info(`Removing form with ID ${formId}`)
 
   const form = await getForm(formId)
 
-  if (!force && form.live) {
-    throw Boom.badRequest(
-      `Form with ID '${formId}' is live and cannot be deleted. Set force=true to delete the form anyway.`
-    )
+  if (form.live) {
+    throw Boom.badRequest(removeFormErrorMessages.formIsAlreadyLive)
   }
 
   const session = client.startSession()
@@ -495,16 +495,7 @@ export async function removeForm(formId, force = false) {
   try {
     await session.withTransaction(async () => {
       await formMetadata.remove(formId, session)
-
-      try {
-        await formDefinition.remove(formId, session)
-      } catch (err) {
-        // we might have old forms that don't have form definitions but do have metadata entries.
-        // TODO keep this as a short term only, then remove once cleaned up.
-        if (!force) {
-          throw err
-        }
-      }
+      await formDefinition.remove(formId, session)
     })
   } finally {
     await session.endSession()

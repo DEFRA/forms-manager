@@ -648,30 +648,12 @@ describe('Forms service', () => {
       await expect(removeForm(id)).rejects.toBeDefined()
     })
 
-    it('should fail if the form is live but not being force deleted', async () => {
+    it('should fail if the form is live', async () => {
       jest
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
       await expect(removeForm(id)).rejects.toBeDefined()
-    })
-
-    it('should succeed if the form is live and being force deleted', async () => {
-      jest
-        .mocked(formMetadata.get)
-        .mockResolvedValueOnce(formMetadataWithLiveDocument)
-
-      await expect(removeForm(id, true)).resolves.toBeUndefined()
-    })
-
-    it('should succeed if form definition deletion fails and the form is being force deleted', async () => {
-      jest
-        .mocked(formMetadata.get)
-        .mockResolvedValueOnce(formMetadataWithLiveDocument)
-
-      jest.mocked(formDefinition.remove).mockRejectedValueOnce('unknown error')
-
-      await expect(removeForm(id, true)).resolves.toBeUndefined()
     })
   })
 
