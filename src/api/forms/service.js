@@ -164,8 +164,8 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * Lists forms and returns query result metadata (e.g., pagination and sort details)
- * @param {QueryOptions} options - Pagination and sorting options
+ * Lists forms and returns query result metadata (e.g., pagination, sorting, and filtering details)
+ * @param {QueryOptions} options - Pagination, sorting, and filtering options
  * @returns {Promise<QueryResult<FormMetadata>>}
  */
 export async function listForms(options) {
@@ -173,14 +173,16 @@ export async function listForms(options) {
     page = 1,
     perPage = MAX_RESULTS,
     sortBy = 'updatedAt',
-    order = 'desc'
+    order = 'desc',
+    title = ''
   } = options
 
   const { documents: pagedDocuments, totalItems } = await formMetadata.list({
     page,
     perPage,
     sortBy,
-    order
+    order,
+    title
   })
 
   const forms = pagedDocuments.map(mapForm)
@@ -197,6 +199,9 @@ export async function listForms(options) {
       sorting: {
         sortBy,
         order
+      },
+      search: {
+        title
       }
     }
   }
