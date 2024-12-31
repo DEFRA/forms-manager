@@ -7,11 +7,9 @@ import {
   hasConditionField,
   hasConditionGroup,
   hasConditionName,
+  hasContentField,
+  hasFormField,
   hasListField,
-  hasNext,
-  isConditionalType,
-  isContentType,
-  isFormType,
   isListType
 } from '@defra/forms-model'
 import { stringify } from 'csv-stringify'
@@ -64,12 +62,15 @@ const saved = await Promise.all(files.map(readFile))
 async function createPages() {
   const headers = [
     'formId',
+    'slug',
     'formTitle',
     'state',
     'id',
     'path',
     'title',
-    'componentCount'
+    'componentCount',
+    'formComponentCount',
+    'contentComponentCount'
   ]
 
   /**
@@ -79,23 +80,30 @@ async function createPages() {
 
   saved.forEach((savedForm) => {
     const { id, metadata } = savedForm
-    const { title: formTitle } = metadata
+    const { slug } = metadata
 
     /**
      * @param {Page} page
      * @param {'draft' | 'live'} state
      */
     function addPage(page, state) {
-      const { name, title, type } = page
+      const { title } = page
 
       values.push([
         id,
+        slug,
         title,
-        'draft',
+        state,
         page.path,
         page.path,
         page.title,
-        hasComponents(page) ? page.components.length.toString() : null
+        hasComponents(page) ? page.components.length.toString() : null,
+        hasComponents(page)
+          ? page.components.filter(hasFormField).length.toString()
+          : null,
+        hasComponents(page)
+          ? page.components.filter(hasContentField).length.toString()
+          : null
       ])
     }
 
@@ -291,14 +299,14 @@ async function createConditions() {
         value
       } = wrapper
 
-      const components = definition.pages.flatMap((page) =>
-        hasComponents(page) ? page.components : []
-      )
-      const componentsMap = new Map(
-        components.map((component) => [component.name, component])
-      )
+      // const components = definition.pages.flatMap((page) =>
+      //   hasComponents(page) ? page.components : []
+      // )
+      // const componentsMap = new Map(
+      //   components.map((component) => [component.name, component])
+      // )
 
-      value.conditions.forEach((condition, index) => {
+      value.conditions.forEach((condition) => {
         if (hasConditionGroup(condition)) {
           throw new Error('Not implemented')
         } else if (hasConditionName(condition)) {
@@ -377,7 +385,6 @@ await createConditions()
  * SavedForm
  * @typedef {object} SavedForm
  * @property {string} id - id
- * @property {string} slug - slug
  * @property {FormMetadata} metadata - form metadata
  * @property {FormDefinition} [draft] - draft form definition
  * @property {FormDefinition} [live] - live form definition
