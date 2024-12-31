@@ -39,12 +39,11 @@
     "convict": "^6.2.4",
     "dotenv": "^16.4.7",
     "hapi-pino": "^12.1.0",
-    "https-proxy-agent": "^7.0.6",
     "joi": "^17.13.3",
     "mongodb": "^6.8.0",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
-    "proxy-agent": "^6.4.0"
+    "proxy-agent": "^6.5.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.25.9",
