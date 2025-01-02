@@ -2,9 +2,12 @@ import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
+import {
+  buildAggregationPipeline,
+  buildFilterConditions
+} from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
-import { escapeRegExp } from '~/src/helpers/string-utils.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 export const MAX_RESULTS = 100
@@ -70,174 +73,6 @@ export async function list(options) {
     logger.error(error, 'Error fetching documents')
     throw error
   }
-}
-
-/**
- * Builds the filter conditions for querying forms by title.
- * @param {string} title - The title to filter by.
- * @returns {object} The filter conditions for MongoDB query.
- */
-function buildFilterConditions(title) {
-  const conditions = {}
-
-  if (title) {
-    const regex = new RegExp(escapeRegExp(title), 'i')
-    conditions.title = { $regex: regex }
-  }
-
-  return conditions
-}
-
-/**
- * Builds the aggregation pipeline and aggregation options for the query.
- * @param {string} sortBy - Field to sort by ('updatedAt' or 'title').
- * @param {string} order - Sort order ('asc' or 'desc').
- * @param {string} title - The title to filter by.
- * @returns {{ pipeline: object[], aggOptions: AggregateOptions }} The pipeline stages and aggregation options.
- */
-function buildAggregationPipeline(sortBy, order, title) {
-  const pipeline = []
-  const filterConditions = buildFilterConditions(title)
-
-  // Add $match stage if there are filter conditions
-  if (Object.keys(filterConditions).length > 0) {
-    pipeline.push({ $match: filterConditions })
-  }
-
-  addRankingStage(pipeline, title)
-
-  addDateFieldStage(pipeline)
-
-  const collation = addSortingStage(pipeline, sortBy, order)
-
-  const aggOptions = collation ? { collation } : {}
-
-  return { pipeline, aggOptions }
-}
-
-/**
- * Adds the ranking stage to the pipeline based on the title.
- * @param {object[]} pipeline - The aggregation pipeline stages.
- * @param {string} title - The title to filter by.
- */
-function addRankingStage(pipeline, title) {
-  if (title) {
-    const searchTerm = title.trim()
-
-    // Add 'matchScore' field to rank the documents
-    pipeline.push({
-      $addFields: {
-        matchScore: {
-          $switch: {
-            branches: [
-              // Rank 1: Exact whole title match (case-insensitive)
-              {
-                case: {
-                  $eq: [{ $toLower: '$title' }, searchTerm.toLowerCase()]
-                },
-                then: 1
-              },
-              // Rank 2: Whole word match in the title (case-insensitive)
-              {
-                case: {
-                  $regexMatch: {
-                    input: '$title',
-                    regex: `\\b${escapeRegExp(searchTerm)}\\b`,
-                    options: 'i'
-                  }
-                },
-                then: 2
-              },
-              // Rank 3: Partial substring match in the title (case-insensitive)
-              {
-                case: {
-                  $regexMatch: {
-                    input: '$title',
-                    regex: escapeRegExp(searchTerm),
-                    options: 'i'
-                  }
-                },
-                then: 3
-              }
-            ],
-            default: 4
-          }
-        }
-      }
-    })
-  } else {
-    pipeline.push({
-      $addFields: {
-        matchScore: 0
-      }
-    })
-  }
-}
-
-/**
- * Adds the date field stage to the pipeline to extract date only from 'updatedAt'.
- * @param {object[]} pipeline - The aggregation pipeline stages.
- */
-function addDateFieldStage(pipeline) {
-  const dateFieldStage = {
-    $addFields: {
-      updatedDateOnly: {
-        $dateToString: {
-          format: '%Y-%m-%d',
-          date: '$updatedAt',
-          timezone: 'UTC'
-        }
-      }
-    }
-  }
-  pipeline.push(dateFieldStage)
-}
-
-/**
- * Adds the sorting stage to the pipeline based on the sortBy parameter.
- * @param {object[]} pipeline - The aggregation pipeline stages.
- * @param {string} sortBy - Field to sort by ('updatedAt' or 'title').
- * @param {string} order - Sort order ('asc' or 'desc').
- * @returns {CollationOptions | null} The collation options if necessary.
- */
-function addSortingStage(pipeline, sortBy, order) {
-  const sortOrder = order === 'asc' ? 1 : -1
-  const collation = { locale: 'en', strength: 1 }
-
-  switch (sortBy) {
-    case 'title':
-      pipeline.push({
-        $sort: {
-          // Primary sort is title
-          title: sortOrder,
-          // Then newest first if titles tie
-          updatedDateOnly: -1,
-          // Then alphabetical (case-insensitive) on displayName
-          'updatedBy.displayName': 1
-        }
-      })
-      break
-
-    case 'updatedAt':
-      pipeline.push({
-        $sort: {
-          updatedDateOnly: sortOrder,
-          'updatedBy.displayName': 1
-        }
-      })
-      break
-
-    default:
-      pipeline.push({
-        $sort: {
-          updatedDateOnly: -1,
-          'updatedBy.displayName': 1
-        }
-      })
-      break
-  }
-
-  return collation
 }
 
 /**
