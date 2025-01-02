@@ -1037,6 +1037,26 @@ describe('Forms route', () => {
         }
       })
     })
+
+    test('Testing GET /forms route with title longer than 255 characters returns validation error', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms?title=${'x'.repeat(256)}`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message:
+          '"title" length must be less than or equal to 255 characters long',
+        validation: {
+          keys: ['title'],
+          source: 'query'
+        }
+      })
+    })
   })
 })
 
