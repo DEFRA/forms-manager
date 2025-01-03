@@ -110,19 +110,6 @@ describe('Form metadata aggregation', () => {
       })
     })
 
-    describe('with padded title', () => {
-      it('should trim search term', () => {
-        addRankingStage(pipeline, ' Test Form ')
-
-        const addFields = /** @type {PipelineStage} */ (pipeline[0])
-        const matchScore = /** @type {AddFieldsSwitch} */ (
-          addFields.$addFields?.matchScore
-        )
-        const branches = matchScore.$switch.branches
-        expect(branches[0].case.$eq?.[1]).toBe('test form')
-      })
-    })
-
     describe('with numeric title', () => {
       it('should handle numeric or mixed title gracefully', () => {
         addRankingStage(pipeline, '12345')
@@ -190,5 +177,5 @@ describe('Form metadata aggregation', () => {
 })
 
 /**
- * @import { PipelineStage, AddFieldsSwitch } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
+ * @import { AddFieldsSwitch, PipelineStage } from '~/src/api/forms/repositories/aggregation/types.js'
  */

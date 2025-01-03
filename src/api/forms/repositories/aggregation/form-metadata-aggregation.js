@@ -38,7 +38,7 @@ export function buildAggregationPipeline(sortBy, order, title) {
 
   const collation = addSortingStage(pipeline, sortBy, order)
 
-  const aggOptions = collation ? { collation } : {}
+  const aggOptions = { collation }
 
   return { pipeline, aggOptions }
 }
@@ -50,7 +50,7 @@ export function buildAggregationPipeline(sortBy, order, title) {
  */
 export function addRankingStage(pipeline, title) {
   if (title) {
-    const searchTerm = title.trim()
+    const searchTerm = title
 
     // Add 'matchScore' field to rank the documents
     pipeline.push({
@@ -126,7 +126,7 @@ export function addDateFieldStage(pipeline) {
  * @param {PipelineStage[]} pipeline - The aggregation pipeline stages.
  * @param {string} sortBy - Field to sort by ('updatedAt' or 'title').
  * @param {string} order - Sort order ('asc' or 'desc').
- * @returns {CollationOptions | null} The collation options if necessary.
+ * @returns {CollationOptions} The collation options.
  */
 export function addSortingStage(pipeline, sortBy, order) {
   const sortOrder = order === 'asc' ? 1 : -1
@@ -169,55 +169,7 @@ export function addSortingStage(pipeline, sortBy, order) {
 }
 
 /**
- * @typedef {object} FilterConditions
- * @property {{ $regex: RegExp }} [title] - Optional MongoDB regex query for title matching
- */
-
-/**
- * @typedef {{
- *   case: {
- *     $eq?: [{$toLower: string} | string, string],
- *     $regexMatch?: {
- *       input: string,
- *       regex: string,
- *       options: string
- *     }
- *   },
- *   then: number
- * }} SwitchBranch
- */
-
-/**
- * @typedef {{
- *   branches: Array<SwitchBranch>,
- *   default: number
- * }} SwitchExpression
- */
-
-/**
- * @typedef {{
- *   $switch: SwitchExpression
- * }} AddFieldsSwitch
- */
-
-/**
- * @typedef {{[key: string]: number | {
- *   $dateToString?: {
- *     format: string,
- *     date: string,
- *     timezone: string
- *   },
- *   $switch?: SwitchExpression
- * }}} AddFieldsStage
- */
-
-/**
- * @typedef {object} PipelineStage
- * @property {FilterConditions} [$match] - MongoDB $match stage for filtering documents
- * @property {AddFieldsStage} [$addFields] - MongoDB $addFields stage for adding computed fields to documents
- * @property {{[key: string]: 1 | -1}} [$sort] - MongoDB $sort stage for sorting documents
- * @property {number} [$skip] - MongoDB $skip stage for pagination
- * @property {number} [$limit] - MongoDB $limit stage for limiting results
+ * @import { AddFieldsSwitch, FilterConditions, PipelineStage } from '~/src/api/forms/repositories/aggregation/types.js'
  */
 
 /**
