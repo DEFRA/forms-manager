@@ -2,6 +2,10 @@ import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
+import {
+  buildAggregationPipeline,
+  buildFilterConditions
+} from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
@@ -29,7 +33,8 @@ export async function listAll() {
 
 /**
  * Retrieves the list of documents from the database with pagination and sorting.
- * @param {QueryOptions} options - Pagination and sorting options
+ * Applies ranking to the search results based on match type and sorts them accordingly.
+ * @param {QueryOptions} options - Pagination, sorting, and filtering options.
  * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number }>}
  */
 export async function list(options) {
@@ -38,27 +43,29 @@ export async function list(options) {
       page = 1,
       perPage = MAX_RESULTS,
       sortBy = 'updatedAt',
-      order = 'desc'
+      order = 'desc',
+      title = ''
     } = options
 
-    const coll =
-      /** @type {Collection<WithId<Partial<FormMetadataDocument>>>} */ (
-        db.collection(METADATA_COLLECTION_NAME)
-      )
+    const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
+      db.collection(METADATA_COLLECTION_NAME)
+    )
 
     const skip = (page - 1) * perPage
-    const { pipeline, collation } = createSortingPipeline(sortBy, order)
+
+    const { pipeline, aggOptions } = buildAggregationPipeline(
+      sortBy,
+      order,
+      title
+    )
 
     pipeline.push({ $skip: skip }, { $limit: perPage })
-
-    /** @type {AggregateOptions} */
-    const aggOptions = collation ? { collation } : {}
 
     const [documents, totalItems] = await Promise.all([
       /** @type {Promise<WithId<Partial<FormMetadataDocument>>[]>} */ (
         coll.aggregate(pipeline, aggOptions).toArray()
       ),
-      coll.countDocuments()
+      coll.countDocuments(buildFilterConditions(title))
     ])
 
     return { documents, totalItems }
@@ -66,67 +73,6 @@ export async function list(options) {
     logger.error(error, 'Error fetching documents')
     throw error
   }
-}
-
-/**
- * Creates a MongoDB aggregation pipeline for sorting form metadata documents
- * @param {string} sortBy - Field to sort by ('updatedAt' or 'title')
- * @param {string} order - Sort order
- * @returns {{ pipeline: object[], collation: CollationOptions | null }} Pipeline stages and collation options
- */
-function createSortingPipeline(sortBy, order) {
-  const pipeline = []
-  let collation = null
-  const sortOrder = order === 'asc' ? 1 : -1
-
-  const dateFieldStage = {
-    $addFields: {
-      updatedDateOnly: {
-        $dateToString: {
-          format: '%Y-%m-%d',
-          date: '$updatedAt',
-          timezone: 'UTC'
-        }
-      }
-    }
-  }
-
-  const updatedAtSortStage = {
-    $sort: {
-      updatedDateOnly: sortOrder,
-      'updatedBy.displayName': 1
-    }
-  }
-
-  const defaultSortStage = {
-    $sort: {
-      updatedDateOnly: -1,
-      'updatedBy.displayName': 1
-    }
-  }
-
-  switch (sortBy) {
-    case 'updatedAt':
-      pipeline.push(dateFieldStage, updatedAtSortStage)
-      break
-
-    case 'title':
-      collation = {
-        locale: 'en',
-        strength: 1
-      }
-      pipeline.push({
-        $sort: {
-          title: sortOrder
-        }
-      })
-      break
-
-    default:
-      pipeline.push(dateFieldStage, defaultSortStage)
-  }
-
-  return { pipeline, collation }
 }
 
 /**

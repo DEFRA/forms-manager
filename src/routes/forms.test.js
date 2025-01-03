@@ -93,7 +93,7 @@ describe('Forms route', () => {
   const slug = stubFormMetadataOutput.slug
 
   describe('Success responses', () => {
-    test('GET /forms returns empty data array with default pagination and sorting when no parameters are used', async () => {
+    test('GET /forms returns empty data array with default pagination, sorting, and search when no parameters are used', async () => {
       jest.mocked(listForms).mockResolvedValue({
         data: [],
         meta: {
@@ -106,6 +106,9 @@ describe('Forms route', () => {
           sorting: {
             sortBy: 'updatedAt',
             order: 'desc'
+          },
+          search: {
+            title: ''
           }
         }
       })
@@ -118,7 +121,6 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-
       expect(response.result).toEqual({
         data: [],
         meta: {
@@ -131,6 +133,105 @@ describe('Forms route', () => {
           sorting: {
             sortBy: 'updatedAt',
             order: 'desc'
+          },
+          search: {
+            title: ''
+          }
+        }
+      })
+    })
+
+    test('GET /forms with search parameter returns filtered data and correct meta', async () => {
+      jest.mocked(listForms).mockResolvedValue({
+        data: [stubFormMetadataOutput],
+        meta: {
+          pagination: {
+            page: 1,
+            perPage: 10,
+            totalItems: 1,
+            totalPages: 1
+          },
+          sorting: {
+            sortBy: 'updatedAt',
+            order: 'desc'
+          },
+          search: {
+            title: 'test'
+          }
+        }
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?title=test',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        data: [stubFormMetadataOutput],
+        meta: {
+          pagination: {
+            page: 1,
+            perPage: 10,
+            totalItems: 1,
+            totalPages: 1
+          },
+          sorting: {
+            sortBy: 'updatedAt',
+            order: 'desc'
+          },
+          search: {
+            title: 'test'
+          }
+        }
+      })
+    })
+
+    test('GET /forms with search, pagination and sorting parameters returns filtered, sorted paginated data', async () => {
+      jest.mocked(listForms).mockResolvedValue({
+        data: [stubFormMetadataOutput],
+        meta: {
+          pagination: {
+            page: 1,
+            perPage: 5,
+            totalItems: 1,
+            totalPages: 1
+          },
+          sorting: {
+            sortBy: 'title',
+            order: 'asc'
+          },
+          search: {
+            title: 'test'
+          }
+        }
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?page=1&perPage=5&sortBy=title&order=asc&title=test',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        data: [stubFormMetadataOutput],
+        meta: {
+          pagination: {
+            page: 1,
+            perPage: 5,
+            totalItems: 1,
+            totalPages: 1
+          },
+          sorting: {
+            sortBy: 'title',
+            order: 'asc'
+          },
+          search: {
+            title: 'test'
           }
         }
       })
@@ -278,6 +379,9 @@ describe('Forms route', () => {
           sorting: {
             sortBy: 'updatedAt',
             order: 'desc'
+          },
+          search: {
+            title: ''
           }
         }
       })
@@ -303,6 +407,9 @@ describe('Forms route', () => {
           sorting: {
             sortBy: 'updatedAt',
             order: 'desc'
+          },
+          search: {
+            title: ''
           }
         }
       })
@@ -911,10 +1018,10 @@ describe('Forms route', () => {
       })
     })
 
-    test('Testing GET /forms route with sorting and invalid pagination parameters returns validation error', async () => {
+    test('Testing GET /forms route with invalid parameters and title', async () => {
       const response = await server.inject({
         method: 'GET',
-        url: '/forms?page=-1&perPage=0&sortBy=title&order=asc',
+        url: '/forms?page=-1&perPage=0&sortBy=invalid&title=test',
         auth
       })
 
@@ -923,9 +1030,29 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         error: 'Bad Request',
         message:
-          '"page" must be a positive number. "page" must be greater than or equal to 1. "perPage" must be a positive number. "perPage" must be greater than or equal to 1',
+          '"page" must be a positive number. "page" must be greater than or equal to 1. "perPage" must be a positive number. "perPage" must be greater than or equal to 1. "sortBy" must be one of [updatedAt, title]',
         validation: {
-          keys: ['page', 'page', 'perPage', 'perPage'],
+          keys: ['page', 'page', 'perPage', 'perPage', 'sortBy'],
+          source: 'query'
+        }
+      })
+    })
+
+    test('Testing GET /forms route with title longer than 255 characters returns validation error', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms?title=${'x'.repeat(256)}`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message:
+          '"title" length must be less than or equal to 255 characters long',
+        validation: {
+          keys: ['title'],
           source: 'query'
         }
       })
