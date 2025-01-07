@@ -8,12 +8,12 @@ formId,formTitle,state,name,title,type,itemCount
 667d3db83e15d218b60db446,Test form Andrew,draft,kFWAKs,List 1,string,1
 667d3db83e15d218b60db446,Test form Andrew,draft,iWWPSq,list 2,string,1
 667d3db83e15d218b60db446,Test form Andrew,draft,HnFRfs,List 3,string,1
-667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,hsujdZ,Reasons for applying,string,5
-667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,JdDYiW,Wild birds,string,28
-667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,PObXDA,Public health or safety ,string,11
-667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,lwteBn,Conserve,string,2
-667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,gfCRRo,Type of conservation,string,3
-667e6cca4682daf93da25878,Apply for a licence to control wild birds,draft,dnSScQ,Class licence,string,3
+667e6cca4682daf93da25878,Check if you’re eligible to apply for an A08 or A09 individual licence to control wild birds,draft,hsujdZ,Reasons for applying,string,5
+667e6cca4682daf93da25878,Check if you’re eligible to apply for an A08 or A09 individual licence to control wild birds,draft,JdDYiW,Wild birds,string,28
+667e6cca4682daf93da25878,Check if you’re eligible to apply for an A08 or A09 individual licence to control wild birds,draft,PObXDA,Public health or safety ,string,11
+667e6cca4682daf93da25878,Check if you’re eligible to apply for an A08 or A09 individual licence to control wild birds,draft,lwteBn,Conserve,string,2
+667e6cca4682daf93da25878,Check if you’re eligible to apply for an A08 or A09 individual licence to control wild birds,draft,gfCRRo,Type of conservation,string,3
+667e6cca4682daf93da25878,Check if you’re eligible to apply for an A08 or A09 individual licence to control wild birds,draft,dnSScQ,Class licence,string,3
 667e8b3108138a41f4223a77,Register as a unicorn breeder,live,IeFOkf,number of unicorns,string,3
 667e8b3108138a41f4223a77,Register as a unicorn breeder,live,fXiZrL,Type of unicorn,string,4
 6683dd5408138a41f4223a78,Apply for an annual mooring licence at Rye Harbour,draft,BHXYic,Mooring site,string,6
@@ -26,13 +26,9 @@ formId,formTitle,state,name,title,type,itemCount
 6683f2dd4682daf93da2587a,test form 3,draft,iWWPSq,list 2,string,1
 6683f2dd4682daf93da2587a,test form 3,draft,HnFRfs,List 3,string,1
 6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,qDDJMD,Owner or occupier,string,3
-6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,DTVIzB,ORNEC's,string,32
-6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,wCUaIE,Owner or occupier of the land,string,4
-6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,OpcAIQ,Environmental Land Management schemes,string,4
-6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,zNFkBG,What are you applying for consent under?,string,6
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,zNFkBG,What are you applying for consent under?,string,5
 6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,IfeOoc,More than 1 SSSI,string,2
-6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,zdFnrY,planned activities are taking place in multiple locations,string,2
-6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,NmfzIf,Land management agreement or licence,string,6
+6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,NmfzIf,Land management agreement or licence,string,9
 6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,QWKDOo,Advice,string,4
 6684168c4682daf93da2587b,Apply for consent for a planned activity on a site of special scientific interest (SSSI),draft,TjSoKV,Existing consent,string,3
 66851557a608789f306eb11f,Report fraud and irregularity against the Environment Agency,live,ayiyiJ,Employment connection,string,5
@@ -125,6 +121,9 @@ formId,formTitle,state,name,title,type,itemCount
 6703ccc6f47791083f623b3b,Submit a warden patrol report,draft,kpgcXS,Species list,string,56
 6703ccc6f47791083f623b3b,Submit a warden patrol report,draft,ZnfMJI,Organisation,string,43
 670d13c71690ba2ca2dccbe7,Request a manual release for a consignment held at a port or border control post,draft,FvQAZb,Port and border control posts,string,34
+670d2da6f47791083f623b3d,Report the use of environmental protection equipment,draft,flTrBm,Fire service name,string,45
+670d2da6f47791083f623b3d,Report the use of environmental protection equipment,draft,ljJHBG,Cause of the incident,string,5
+670d2da6f47791083f623b3d,Report the use of environmental protection equipment,draft,APCLrt,"Yes, no or I do not know",string,3
 670d2da6f47791083f623b3d,Report the use of environmental protection equipment,live,flTrBm,Fire service name,string,45
 670d2da6f47791083f623b3d,Report the use of environmental protection equipment,live,ljJHBG,Cause of the incident,string,5
 670d2da6f47791083f623b3d,Report the use of environmental protection equipment,live,APCLrt,"Yes, no or I do not know",string,3
@@ -136,9 +135,10 @@ formId,formTitle,state,name,title,type,itemCount
 671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,nrkvVK,Roost types,string,9
 671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,zNMtZF,Licensed methods,string,12
 671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,lwkhEl,Unexpected guidance,string,3
-671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,pJyQLV,Unexpected finds guidance,string,3
+671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,pJyQLV,Unexpected finds guidance,string,2
 671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,rHGyDk,Survey and monitoring methods,string,15
 671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,mgfNZY,Bat features surveyed or monitored,string,4
+671f6887f306fa15933a5d0d,Report an action for impacts to bat roosts,draft,KwtLUu,Assistants,string,3
 671f860c4909dc24d69c43bd,Water quality permits: confirm your information,draft,bjUOFU,Type of water discharge,string,2
 671f860c4909dc24d69c43bd,Water quality permits: confirm your information,draft,lFnFkd,Does anyone else need the permit?,string,3
 671f860c4909dc24d69c43bd,Water quality permits: confirm your information,draft,nszeid,Operator contact details,string,5
@@ -182,22 +182,27 @@ formId,formTitle,state,name,title,type,itemCount
 673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,pJyQLV,Unexpected finds guidance,string,3
 673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,rHGyDk,Survey and monitoring methods,string,15
 673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,mgfNZY,Bat features surveyed or monitored,string,8
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,QKAYJP,Applicant options,string,2
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,qMbDBT,Legal status,string,14
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,REftUv,Accreditation level,string,3
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,XiEWOU,Annexes,string,9
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,ogQxVH,Counties,string,57
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,SvnATz,Type of submission,string,3
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,JpWzOj,Licensable actions,string,6
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,jwdKLW,Consent type,string,5
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,jnqfMQ,Consent status,string,5
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,RGmLfx,Purposes,string,2
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,BbPoEr,Types of work,string,21
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,KZuvAT,Protected sites,string,3
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,SrEXPS,Disturbance level,string,4
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,QoTHvx,Site accreditation level,string,3
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,EGQwkT,Site annexes,string,8
-673c5a8af306fa15933a5d11,Site registration: Earned Recognition for bat mitigation licensing,draft,wIjRti,Species,string,17
+673b551dd67b62049afb0d8d,Report of monitoring: earned recognition for bat mitigation licensing,draft,sKaKnb,Species of bat with 'bat species could not be identified',string,18
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,QKAYJP,Type of joint licensee,string,2
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,qMbDBT,Legal status,string,14
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,REftUv,Accreditation level,string,3
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,XiEWOU,Annexes,string,9
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,ogQxVH,Counties,string,57
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,SvnATz,Type of submission,string,3
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,JpWzOj,Licensable actions,string,6
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,jwdKLW,Consent type,string,5
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,jnqfMQ,Consent status,string,5
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,RGmLfx,Purposes,string,2
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,BbPoEr,Types of work,string,21
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,KZuvAT,Protected sites,string,3
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,SrEXPS,Disturbance level,string,4
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,QoTHvx,Site accreditation level,string,3
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,EGQwkT,Site annexes,string,8
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,wIjRti,Species,string,17
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,VHtZjS,Grey long-eared bats,string,2
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,yDBghB,Category of work,string,4
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,LMQYZs,Category of work continued,string,4
+673c5a8af306fa15933a5d11,Site registration: earned recognition for bat mitigation licensing,draft,YnOrgH,Survey methods,string,15
 673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,sNVVvR,Purpose of report,string,3
 673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,kdcDLJ,Species of bat,string,17
 673df615d67b62049afb0d8e,Report of compensation: earned recognition for bat mitigation licensing,draft,nrkvVK,Roost types,string,9
@@ -226,3 +231,17 @@ formId,formTitle,state,name,title,type,itemCount
 67583e2504219c270734eeab,Report recreational bluefin tuna catch and release fishing trips,draft,sDjqss,Gear type,string,7
 67583e2504219c270734eeab,Report recreational bluefin tuna catch and release fishing trips,draft,EgJQNf,Condition of the fish,string,4
 67583e2504219c270734eeab,Report recreational bluefin tuna catch and release fishing trips,draft,mVjQbc,Recovery time,string,4
+67616f6f1246a19d074129e5,Apply to register to use deer control licence CL55,draft,flwUJv,Qualification or equivalent experience,string,2
+67616f6f1246a19d074129e5,Apply to register to use deer control licence CL55,draft,DKWFqy,Other equivalent experience,string,3
+67616f6f1246a19d074129e5,Apply to register to use deer control licence CL55,draft,UooBVd,Warning letter or penalty as a result of breaching a wildlife licence,string,4
+676426441246a19d074129e6,Submit a site notification under deer control licence CL55,draft,TBSEiG,Counties in England,string,12
+676426441246a19d074129e6,Submit a site notification under deer control licence CL55,draft,fQQcdK,Reasons for controlling deer at night,string,3
+676426441246a19d074129e6,Submit a site notification under deer control licence CL55,draft,cacMOA,Deer species,string,6
+676426441246a19d074129e6,Submit a site notification under deer control licence CL55,draft,uILTyE,Alternative solutions,string,4
+67658af51246a19d074129e7,DSTest,draft,AIYqPE,Drinks,string,3
+676970d04f7b63940983b05d,Report an action for controlling deer at night,draft,SEEJqx,Purposes for taking deer management,string,3
+676970d04f7b63940983b05d,Report an action for controlling deer at night,draft,DzvfrB,Type of action,string,2
+676970d04f7b63940983b05d,Report an action for controlling deer at night,draft,dwydMW,Did you register the site that you're reporting on?,string,2
+676970d04f7b63940983b05d,Report an action for controlling deer at night,draft,FigLOl,Annex C deer,string,5
+676970d04f7b63940983b05d,Report an action for controlling deer at night,draft,zxlsLC,Multiple shots to kill deer,string,2
+676970d04f7b63940983b05d,Report an action for controlling deer at night,draft,kCphgT,Injured deer,string,2
