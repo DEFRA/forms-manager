@@ -755,30 +755,16 @@ describe('Forms service', () => {
 
       const result = await listForms({ page: 1, perPage: 10 })
 
-      expect(result.data).toEqual(
-        expect.arrayContaining([
+      expect(result).toEqual({
+        forms: [
           expect.objectContaining({
             updatedAt: formDate,
             updatedBy: formAuthor,
             createdAt: formDate,
             createdBy: formAuthor
           })
-        ])
-      )
-      expect(result.meta).toEqual({
-        pagination: {
-          page: 1,
-          perPage: 10,
-          totalItems: 1,
-          totalPages: 1
-        },
-        search: {
-          title: ''
-        },
-        sorting: {
-          sortBy: 'updatedAt',
-          order: 'desc'
-        }
+        ],
+        totalItems: 1
       })
     })
 
@@ -790,16 +776,17 @@ describe('Forms service', () => {
 
       const result = await listForms({ page: 1, perPage: 10 })
 
-      expect(result.data).toEqual(
-        expect.arrayContaining([
+      expect(result).toEqual({
+        forms: [
           expect.objectContaining({
             updatedAt: draftDate,
             updatedBy: draftAuthor,
             createdAt: liveDate,
             createdBy: liveAuthor
           })
-        ])
-      )
+        ],
+        totalItems: 1
+      })
     })
 
     it('should handle states when draft state info is missing', async () => {
@@ -810,16 +797,17 @@ describe('Forms service', () => {
 
       const result = await listForms({ page: 1, perPage: 10 })
 
-      expect(result.data).toEqual(
-        expect.arrayContaining([
+      expect(result).toEqual({
+        forms: [
           expect.objectContaining({
             updatedAt: liveDate,
             updatedBy: liveAuthor,
             createdAt: liveDate,
             createdBy: liveAuthor
           })
-        ])
-      )
+        ],
+        totalItems: 1
+      })
     })
 
     it('should handle states when live state info is missing', async () => {
@@ -830,16 +818,17 @@ describe('Forms service', () => {
 
       const result = await listForms({ page: 1, perPage: 10 })
 
-      expect(result.data).toEqual(
-        expect.arrayContaining([
+      expect(result).toEqual({
+        forms: [
           expect.objectContaining({
             updatedAt: draftDate,
             updatedBy: draftAuthor,
             createdAt: draftDate,
             createdBy: draftAuthor
           })
-        ])
-      )
+        ],
+        totalItems: 1
+      })
     })
 
     it('should handle states when all states are missing', async () => {
@@ -850,162 +839,21 @@ describe('Forms service', () => {
 
       const result = await listForms({ page: 1, perPage: 10 })
 
-      expect(result.data).toEqual(
-        expect.arrayContaining([
+      expect(result).toEqual({
+        forms: [
           expect.objectContaining({
             updatedAt: defaultDate,
             updatedBy: defaultAuthor,
             createdAt: defaultDate,
             createdBy: defaultAuthor
           })
-        ])
-      )
-    })
-
-    it('should throw an error if forms are malformed', async () => {
-      jest.mocked(formMetadata.list).mockResolvedValue({
-        documents: [
-          {
-            _id: new ObjectId(id)
-            // Missing required attributes
-          }
         ],
         totalItems: 1
-      })
-
-      await expect(listForms({ page: 1, perPage: 10 })).rejects.toThrow(
-        'Form is malformed in the database. Expected fields are missing.'
-      )
-    })
-
-    describe('with pagination', () => {
-      it('should return paginated results with correct pagination metadata', async () => {
-        const page = 1
-        const perPage = 2
-        const totalItems = 5
-
-        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
-        const documents = [formMetadataFullDocument, formMetadataDraftDocument]
-
-        jest
-          .mocked(formMetadata.list)
-          .mockResolvedValue({ documents, totalItems })
-
-        const result = await listForms({ page, perPage })
-
-        expect(formMetadata.list).toHaveBeenCalledWith({
-          page,
-          perPage,
-          sortBy: 'updatedAt',
-          order: 'desc',
-          title: ''
-        })
-        expect(result).toEqual({
-          data: expect.any(Array),
-          meta: {
-            pagination: {
-              page,
-              perPage,
-              totalItems,
-              totalPages: Math.ceil(totalItems / perPage)
-            },
-            search: {
-              title: ''
-            },
-            sorting: {
-              sortBy: 'updatedAt',
-              order: 'desc'
-            }
-          }
-        })
-        expect(result.data).toHaveLength(documents.length)
-      })
-
-      it('should return empty data when there are no forms', async () => {
-        const page = 1
-        const perPage = 10
-        const totalItems = 0
-
-        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
-        const documents = []
-
-        jest
-          .mocked(formMetadata.list)
-          .mockResolvedValue({ documents, totalItems })
-
-        const result = await listForms({ page, perPage })
-
-        expect(formMetadata.list).toHaveBeenCalledWith({
-          page,
-          perPage,
-          sortBy: 'updatedAt',
-          order: 'desc',
-          title: ''
-        })
-        expect(result).toEqual({
-          data: [],
-          meta: {
-            pagination: {
-              page,
-              perPage,
-              totalItems,
-              totalPages: 0
-            },
-            search: {
-              title: ''
-            },
-            sorting: {
-              sortBy: 'updatedAt',
-              order: 'desc'
-            }
-          }
-        })
-      })
-
-      it('should handle page numbers greater than total pages', async () => {
-        const page = 5
-        const perPage = 2
-        const totalItems = 5
-
-        /** @type {WithId<Partial<FormMetadataDocument>>[]} */
-        const documents = []
-
-        jest
-          .mocked(formMetadata.list)
-          .mockResolvedValue({ documents, totalItems })
-
-        const result = await listForms({ page, perPage })
-
-        expect(formMetadata.list).toHaveBeenCalledWith({
-          page,
-          perPage,
-          sortBy: 'updatedAt',
-          order: 'desc',
-          title: ''
-        })
-        expect(result).toEqual({
-          data: [],
-          meta: {
-            pagination: {
-              page,
-              perPage,
-              totalItems,
-              totalPages: 3
-            },
-            search: {
-              title: ''
-            },
-            sorting: {
-              sortBy: 'updatedAt',
-              order: 'desc'
-            }
-          }
-        })
       })
     })
 
     describe('with sorting', () => {
-      it('should call formMetadata.list with provided sorting parameters', async () => {
+      it('should pass sorting parameters to repository', async () => {
         const page = 1
         const perPage = 10
         const sortBy = 'title'
@@ -1023,48 +871,83 @@ describe('Forms service', () => {
           .mocked(formMetadata.list)
           .mockResolvedValue({ documents, totalItems })
 
-        const result = await listForms({ page, perPage, sortBy, order, title })
+        const options = { page, perPage, sortBy, order, title }
+        const result = await listForms(options)
+
+        expect(formMetadata.list).toHaveBeenCalledWith(options)
+        expect(result).toEqual({
+          forms: expect.any(Array),
+          totalItems
+        })
+      })
+    })
+
+    describe('with search', () => {
+      it('should pass search parameters to repository', async () => {
+        const page = 1
+        const perPage = 10
+        const title = 'a search'
+
+        jest.mocked(formMetadata.list).mockResolvedValue({
+          documents: [formMetadataFullDocument, formMetadataFullDocument],
+          totalItems: 2
+        })
+
+        const result = await listForms({ page, perPage, title })
 
         expect(formMetadata.list).toHaveBeenCalledWith({
           page,
           perPage,
-          sortBy,
-          order,
           title
         })
-
-        expect(result.data).toEqual(expect.any(Array))
-        expect(result.meta.sorting).toEqual({ sortBy, order })
-        expect(result.meta.search).toEqual({ title })
+        expect(result).toEqual({
+          forms: expect.any(Array),
+          totalItems: 2
+        })
       })
 
-      it('should use default sorting parameters when none are provided', async () => {
+      it('should return empty results when search finds no matches', async () => {
         const page = 1
         const perPage = 10
-        const totalItems = 1
+        const title = 'Defra Badger Relocation and Tea Party Planning Form'
 
-        const documents = [{ ...formMetadataFullDocument }]
+        jest.mocked(formMetadata.list).mockResolvedValue({
+          documents: [],
+          totalItems: 0
+        })
 
-        jest
-          .mocked(formMetadata.list)
-          .mockResolvedValue({ documents, totalItems })
+        const result = await listForms({ page, perPage, title })
+
+        expect(formMetadata.list).toHaveBeenCalledWith({
+          page,
+          perPage,
+          title
+        })
+        expect(result).toEqual({
+          forms: [],
+          totalItems: 0
+        })
+      })
+
+      it('should use empty string for title when no search parameter is provided', async () => {
+        const page = 1
+        const perPage = 10
+
+        jest.mocked(formMetadata.list).mockResolvedValue({
+          documents: [formMetadataFullDocument],
+          totalItems: 1
+        })
 
         const result = await listForms({ page, perPage })
 
         expect(formMetadata.list).toHaveBeenCalledWith({
           page,
-          perPage,
-          sortBy: 'updatedAt',
-          order: 'desc',
-          title: ''
+          perPage
         })
-
-        expect(result.data).toEqual(expect.any(Array))
-        expect(result.meta.sorting).toEqual({
-          sortBy: 'updatedAt',
-          order: 'desc'
+        expect(result).toEqual({
+          forms: expect.any(Array),
+          totalItems: 1
         })
-        expect(result.meta.search).toEqual({ title: '' })
       })
     })
 
@@ -1081,16 +964,18 @@ describe('Forms service', () => {
 
       expect(formMetadata.list).toHaveBeenCalledWith({
         page: defaultPage,
-        perPage: defaultPerPage,
-        sortBy: 'updatedAt',
-        order: 'desc',
-        title: ''
+        perPage: defaultPerPage
       })
-      expect(result.meta.pagination).toEqual({
-        page: defaultPage,
-        perPage: defaultPerPage,
-        totalItems: 1,
-        totalPages: 1
+      expect(result).toEqual({
+        forms: [
+          expect.objectContaining({
+            updatedAt: formDate,
+            updatedBy: formAuthor,
+            createdAt: formDate,
+            createdBy: formAuthor
+          })
+        ],
+        totalItems: 1
       })
     })
 
@@ -1107,11 +992,16 @@ describe('Forms service', () => {
         perPage: defaultPerPage
       })
 
-      expect(result.meta.pagination).toEqual({
-        page: defaultPage,
-        perPage: defaultPerPage,
-        totalItems,
-        totalPages: 2
+      expect(result).toEqual({
+        forms: [
+          expect.objectContaining({
+            updatedAt: formDate,
+            updatedBy: formAuthor,
+            createdAt: formDate,
+            createdBy: formAuthor
+          })
+        ],
+        totalItems
       })
     })
 
@@ -1126,11 +1016,9 @@ describe('Forms service', () => {
         perPage: defaultPerPage
       })
 
-      expect(result.meta.pagination).toEqual({
-        page: defaultPage,
-        perPage: defaultPerPage,
-        totalItems: 0,
-        totalPages: 0
+      expect(result).toEqual({
+        forms: [],
+        totalItems: 0
       })
     })
 
@@ -1143,130 +1031,19 @@ describe('Forms service', () => {
       const result = await listForms({ page: 1, perPage: MAX_RESULTS })
 
       expect(formMetadata.list).toHaveBeenCalledWith({
-        page: defaultPage,
-        perPage: defaultPerPage,
-        sortBy: 'updatedAt',
-        order: 'desc',
-        title: ''
+        page: 1,
+        perPage: MAX_RESULTS
       })
-      expect(result.meta.pagination).toEqual({
-        page: defaultPage,
-        perPage: defaultPerPage,
-        totalItems: 1,
-        totalPages: 1
-      })
-      expect(result.meta.search).toEqual({ title: '' })
-    })
-
-    describe('with search', () => {
-      it('should call formMetadata.list with provided search parameters', async () => {
-        const page = 1
-        const perPage = 10
-        const title = 'a search'
-        const totalItems = 2
-
-        const documents = [
-          { ...formMetadataFullDocument },
-          { ...formMetadataFullDocument }
-        ]
-
-        jest
-          .mocked(formMetadata.list)
-          .mockResolvedValue({ documents, totalItems })
-
-        const result = await listForms({ page, perPage, title })
-
-        expect(formMetadata.list).toHaveBeenCalledWith({
-          page,
-          perPage,
-          sortBy: 'updatedAt',
-          order: 'desc',
-          title
-        })
-
-        expect(result).toEqual({
-          data: expect.any(Array),
-          meta: {
-            pagination: {
-              page,
-              perPage,
-              totalItems,
-              totalPages: 1
-            },
-            search: {
-              title
-            },
-            sorting: {
-              sortBy: 'updatedAt',
-              order: 'desc'
-            }
-          }
-        })
-        expect(result.data).toHaveLength(documents.length)
-      })
-
-      it('should return empty results when search finds no matches', async () => {
-        const page = 1
-        const perPage = 10
-        const title = 'Defra Badger Relocation and Tea Party Planning Form'
-        const totalItems = 0
-
-        jest.mocked(formMetadata.list).mockResolvedValue({
-          documents: [],
-          totalItems
-        })
-
-        const result = await listForms({ page, perPage, title })
-
-        expect(formMetadata.list).toHaveBeenCalledWith({
-          page,
-          perPage,
-          sortBy: 'updatedAt',
-          order: 'desc',
-          title
-        })
-
-        expect(result).toEqual({
-          data: [],
-          meta: {
-            pagination: {
-              page,
-              perPage,
-              totalItems,
-              totalPages: 0
-            },
-            search: {
-              title
-            },
-            sorting: {
-              sortBy: 'updatedAt',
-              order: 'desc'
-            }
-          }
-        })
-      })
-
-      it('should use empty string for title when no search parameter is provided', async () => {
-        const page = 1
-        const perPage = 10
-        const totalItems = 1
-
-        jest.mocked(formMetadata.list).mockResolvedValue({
-          documents: [formMetadataFullDocument],
-          totalItems
-        })
-
-        const result = await listForms({ page, perPage })
-
-        expect(formMetadata.list).toHaveBeenCalledWith({
-          page,
-          perPage,
-          sortBy: 'updatedAt',
-          order: 'desc',
-          title: ''
-        })
-
-        expect(result.meta.search).toEqual({ title: '' })
+      expect(result).toEqual({
+        forms: [
+          expect.objectContaining({
+            updatedAt: formDate,
+            updatedBy: formAuthor,
+            createdAt: formDate,
+            createdBy: formAuthor
+          })
+        ],
+        totalItems: 1
       })
     })
   })

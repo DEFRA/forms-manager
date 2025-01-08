@@ -95,22 +95,8 @@ describe('Forms route', () => {
   describe('Success responses', () => {
     test('GET /forms returns empty data array with default pagination, sorting, and search when no parameters are used', async () => {
       jest.mocked(listForms).mockResolvedValue({
-        data: [],
-        meta: {
-          pagination: {
-            page: 1,
-            perPage: 10,
-            totalItems: 0,
-            totalPages: 1
-          },
-          sorting: {
-            sortBy: 'updatedAt',
-            order: 'desc'
-          },
-          search: {
-            title: ''
-          }
-        }
+        forms: [],
+        totalItems: 0
       })
 
       const response = await server.inject({
@@ -126,9 +112,9 @@ describe('Forms route', () => {
         meta: {
           pagination: {
             page: 1,
-            perPage: 10,
+            perPage: 24,
             totalItems: 0,
-            totalPages: 1
+            totalPages: 0
           },
           sorting: {
             sortBy: 'updatedAt',
@@ -143,22 +129,8 @@ describe('Forms route', () => {
 
     test('GET /forms with search parameter returns filtered data and correct meta', async () => {
       jest.mocked(listForms).mockResolvedValue({
-        data: [stubFormMetadataOutput],
-        meta: {
-          pagination: {
-            page: 1,
-            perPage: 10,
-            totalItems: 1,
-            totalPages: 1
-          },
-          sorting: {
-            sortBy: 'updatedAt',
-            order: 'desc'
-          },
-          search: {
-            title: 'test'
-          }
-        }
+        forms: [stubFormMetadataOutput],
+        totalItems: 1
       })
 
       const response = await server.inject({
@@ -174,7 +146,7 @@ describe('Forms route', () => {
         meta: {
           pagination: {
             page: 1,
-            perPage: 10,
+            perPage: 24,
             totalItems: 1,
             totalPages: 1
           },
@@ -191,22 +163,8 @@ describe('Forms route', () => {
 
     test('GET /forms with search, pagination and sorting parameters returns filtered, sorted paginated data', async () => {
       jest.mocked(listForms).mockResolvedValue({
-        data: [stubFormMetadataOutput],
-        meta: {
-          pagination: {
-            page: 1,
-            perPage: 5,
-            totalItems: 1,
-            totalPages: 1
-          },
-          sorting: {
-            sortBy: 'title',
-            order: 'asc'
-          },
-          search: {
-            title: 'test'
-          }
-        }
+        forms: [stubFormMetadataOutput],
+        totalItems: 1
       })
 
       const response = await server.inject({
@@ -239,19 +197,8 @@ describe('Forms route', () => {
 
     test('GET /forms with sorting parameters returns sorted data and correct meta', async () => {
       jest.mocked(listForms).mockResolvedValue({
-        data: [stubFormMetadataOutput],
-        meta: {
-          pagination: {
-            page: 1,
-            perPage: 10,
-            totalItems: 1,
-            totalPages: 1
-          },
-          sorting: {
-            sortBy: 'title',
-            order: 'asc'
-          }
-        }
+        forms: [stubFormMetadataOutput],
+        totalItems: 1
       })
 
       const response = await server.inject({
@@ -262,19 +209,21 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-
       expect(response.result).toEqual({
         data: [stubFormMetadataOutput],
         meta: {
           pagination: {
             page: 1,
-            perPage: 10,
+            perPage: 24,
             totalItems: 1,
             totalPages: 1
           },
           sorting: {
             sortBy: 'title',
             order: 'asc'
+          },
+          search: {
+            title: ''
           }
         }
       })
@@ -282,19 +231,8 @@ describe('Forms route', () => {
 
     test('GET /forms with pagination and sorting parameters returns sorted paginated data', async () => {
       jest.mocked(listForms).mockResolvedValue({
-        data: [stubFormMetadataOutput],
-        meta: {
-          pagination: {
-            page: 1,
-            perPage: 5,
-            totalItems: 1,
-            totalPages: 1
-          },
-          sorting: {
-            sortBy: 'title',
-            order: 'asc'
-          }
-        }
+        forms: [stubFormMetadataOutput],
+        totalItems: 1
       })
 
       const response = await server.inject({
@@ -305,7 +243,6 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-
       expect(response.result).toEqual({
         data: [stubFormMetadataOutput],
         meta: {
@@ -318,6 +255,9 @@ describe('Forms route', () => {
           sorting: {
             sortBy: 'title',
             order: 'asc'
+          },
+          search: {
+            title: ''
           }
         }
       })
@@ -325,19 +265,8 @@ describe('Forms route', () => {
 
     test('GET /forms with pagination parameters returns paginated data and default sorting', async () => {
       jest.mocked(listForms).mockResolvedValue({
-        data: [stubFormMetadataOutput],
-        meta: {
-          pagination: {
-            page: 1,
-            perPage: 10,
-            totalItems: 1,
-            totalPages: 1
-          },
-          sorting: {
-            sortBy: 'updatedAt',
-            order: 'desc'
-          }
-        }
+        forms: [stubFormMetadataOutput],
+        totalItems: 1
       })
 
       const response = await server.inject({
@@ -348,30 +277,11 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-
       expect(response.result).toEqual({
         data: [stubFormMetadataOutput],
         meta: {
           pagination: {
             page: 1,
-            perPage: 10,
-            totalItems: 1,
-            totalPages: 1
-          },
-          sorting: {
-            sortBy: 'updatedAt',
-            order: 'desc'
-          }
-        }
-      })
-    })
-
-    test('GET /forms with pagination parameters returns empty data array and default sorting when no forms are available', async () => {
-      jest.mocked(listForms).mockResolvedValue({
-        data: [],
-        meta: {
-          pagination: {
-            page: 2,
             perPage: 10,
             totalItems: 1,
             totalPages: 1
@@ -385,6 +295,13 @@ describe('Forms route', () => {
           }
         }
       })
+    })
+
+    test('GET /forms with pagination parameters returns empty data array and default sorting when no forms are available', async () => {
+      jest.mocked(listForms).mockResolvedValue({
+        forms: [],
+        totalItems: 1
+      })
 
       const response = await server.inject({
         method: 'GET',
@@ -394,7 +311,6 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-
       expect(response.result).toEqual({
         data: [],
         meta: {
