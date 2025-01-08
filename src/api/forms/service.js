@@ -6,7 +6,6 @@ import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
@@ -164,47 +163,14 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * Lists forms and returns query result metadata (e.g., pagination, sorting, and filtering details)
+ * Retrieves a paginated list of forms
  * @param {QueryOptions} options - Pagination, sorting, and filtering options
- * @returns {Promise<QueryResult<FormMetadata>>}
+ * @returns {Promise<{ forms: FormMetadata[], totalItems: number }>}
  */
 export async function listForms(options) {
-  const {
-    page = 1,
-    perPage = MAX_RESULTS,
-    sortBy = 'updatedAt',
-    order = 'desc',
-    title = ''
-  } = options
-
-  const { documents: pagedDocuments, totalItems } = await formMetadata.list({
-    page,
-    perPage,
-    sortBy,
-    order,
-    title
-  })
-
-  const forms = pagedDocuments.map(mapForm)
-
-  return {
-    data: forms,
-    meta: {
-      pagination: {
-        page,
-        perPage,
-        totalItems,
-        totalPages: Math.ceil(totalItems / perPage)
-      },
-      sorting: {
-        sortBy,
-        order
-      },
-      search: {
-        title
-      }
-    }
-  }
+  const { documents, totalItems } = await formMetadata.list(options)
+  const forms = documents.map(mapForm)
+  return { forms, totalItems }
 }
 
 /**
