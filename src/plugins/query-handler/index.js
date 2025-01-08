@@ -9,10 +9,11 @@ export const queryHandler = {
         'toolkit',
         'queryResponse',
         /**
-         * @param {Array<*>} data
+         * @template T
+         * @param {Array<T>} data
          * @param {number} totalItems
          * @param {QueryOptions} [options]
-         * @returns {QueryResult<*>}
+         * @returns {QueryResult<T>}
          */
         function (data, totalItems, options) {
           const defaults = {

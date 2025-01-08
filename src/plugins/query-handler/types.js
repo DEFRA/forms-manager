@@ -1,6 +1,12 @@
 /**
- * @typedef {object} QueryHandlerToolkit
- * @property {function(Array<*>, number, QueryOptions): QueryResult<*>} queryResponse - Creates a standardised response with pagination, sorting, and search metadata
+ * @template T The type of items in the array
+ * @typedef {object} QueryHandlerToolkit<T>
+ * @property {function(Array<T>, number, QueryOptions): QueryResult<T>} queryResponse - Creates a standardised response with pagination, sorting, and search metadata
+ */
+
+/**
+ * @template T
+ * @typedef {ResponseToolkit & QueryHandlerToolkit<T>} ExtendedResponseToolkit
  */
 
 /**
@@ -14,10 +20,6 @@
  * @property {PaginationOptions} pagination - Options for configuring pagination behavior
  * @property {SortingOptions} sorting - Options for configuring sorting behavior
  * @property {SearchOptions} search - Options for configuring search behavior
- */
-
-/**
- * @typedef {ResponseToolkit & QueryHandlerToolkit} ExtendedResponseToolkit
  */
 
 /**
