@@ -52,10 +52,13 @@ export default [
     path: '/forms',
     /**
      * @param {RequestListForms} request
+     * @param {ExtendedResponseToolkit<FormMetadata>} h
      */
-    async handler(request) {
+    async handler(request, h) {
       const { query } = request
-      return listForms(query)
+
+      const { forms, totalItems } = await listForms(query)
+      return h.queryResponse(forms, totalItems, query)
     },
     options: {
       auth: false,
@@ -295,8 +298,9 @@ export default [
 ]
 
 /**
- * @import { FormMetadataAuthor } from '@defra/forms-model'
+ * @import { FormMetadataAuthor, FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
  * @import { OidcStandardClaims } from 'oidc-client-ts'
  * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestRemoveFormById } from '~/src/api/types.js'
+ * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
