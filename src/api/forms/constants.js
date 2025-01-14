@@ -12,3 +12,7 @@ export const makeFormLiveErrorMessages = {
   missingPrivacyNotice:
     'You need to add a link to the privacy notice before you can publish this form.'
 }
+
+export const removeFormErrorMessages = {
+  formIsAlreadyLive: 'This form has already gone live and cannot be deleted.'
+}
