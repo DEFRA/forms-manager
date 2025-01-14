@@ -132,6 +132,14 @@ export const config = convict({
     format: String,
     default: '9af646c4-fa14-4606-8ebf-ec187ac03386',
     env: 'ROLE_EDITOR_GROUP_ID'
+  },
+  tracing: {
+    header: {
+      doc: 'Which header to track',
+      format: String,
+      default: 'x-cdp-request-id',
+      env: 'TRACING_HEADER'
+    }
   }
 })
 
