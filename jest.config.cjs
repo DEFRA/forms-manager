@@ -40,7 +40,8 @@ module.exports = {
     `node_modules/(?!${[
       '@defra/forms-model/.*',
       'nanoid', // Supports ESM only
-      'slug' // Supports ESM only
+      'slug', // Supports ESM only
+      '@defra/hapi-tracing' // Supports ESM only
     ].join('|')}/)`
   ]
 }

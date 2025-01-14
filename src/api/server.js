@@ -7,6 +7,7 @@ import { ProxyAgent } from 'proxy-agent'
 import { config } from '~/src/config/index.js'
 import { failAction } from '~/src/helpers/fail-action.js'
 import { requestLogger } from '~/src/helpers/logging/request-logger.js'
+import { requestTracing } from '~/src/helpers/request-tracing.js'
 import { prepareDb } from '~/src/mongo.js'
 import { auth } from '~/src/plugins/auth/index.js'
 import { queryHandler } from '~/src/plugins/query-handler/index.js'
@@ -61,6 +62,7 @@ export async function createServer() {
 
   await server.register(auth)
   await server.register(requestLogger)
+  await server.register(requestTracing)
   await server.register(queryHandler)
 
   if (isProduction) {
