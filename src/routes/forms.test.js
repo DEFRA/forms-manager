@@ -1,4 +1,4 @@
-import { organisations } from '@defra/forms-model' /*  */
+import { organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
@@ -92,11 +92,21 @@ describe('Forms route', () => {
 
   const slug = stubFormMetadataOutput.slug
 
+  /**
+   * @satisfies {FilterOptions}
+   */
+  const mockFilters = {
+    authors: ['Joe Bloggs', 'Jane Doe', 'Enrique Chase'],
+    organisations: ['Defra', 'Natural England'],
+    status: ['live', 'draft']
+  }
+
   describe('Success responses', () => {
     test('GET /forms returns empty data array with default pagination, sorting, and search when no parameters are used', async () => {
       jest.mocked(listForms).mockResolvedValue({
         forms: [],
-        totalItems: 0
+        totalItems: 0,
+        filters: mockFilters
       })
 
       const response = await server.inject({
@@ -121,8 +131,12 @@ describe('Forms route', () => {
             order: 'desc'
           },
           search: {
-            title: ''
-          }
+            title: '',
+            author: '',
+            organisations: [],
+            status: []
+          },
+          filters: mockFilters
         }
       })
     })
@@ -130,7 +144,8 @@ describe('Forms route', () => {
     test('GET /forms with search parameter returns filtered data and correct meta', async () => {
       jest.mocked(listForms).mockResolvedValue({
         forms: [stubFormMetadataOutput],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const response = await server.inject({
@@ -155,8 +170,12 @@ describe('Forms route', () => {
             order: 'desc'
           },
           search: {
-            title: 'test'
-          }
+            title: 'test',
+            author: '',
+            organisations: [],
+            status: []
+          },
+          filters: mockFilters
         }
       })
     })
@@ -164,7 +183,8 @@ describe('Forms route', () => {
     test('GET /forms with search, pagination and sorting parameters returns filtered, sorted paginated data', async () => {
       jest.mocked(listForms).mockResolvedValue({
         forms: [stubFormMetadataOutput],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const response = await server.inject({
@@ -189,8 +209,12 @@ describe('Forms route', () => {
             order: 'asc'
           },
           search: {
-            title: 'test'
-          }
+            title: 'test',
+            author: '',
+            organisations: [],
+            status: []
+          },
+          filters: mockFilters
         }
       })
     })
@@ -198,7 +222,8 @@ describe('Forms route', () => {
     test('GET /forms with sorting parameters returns sorted data and correct meta', async () => {
       jest.mocked(listForms).mockResolvedValue({
         forms: [stubFormMetadataOutput],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const response = await server.inject({
@@ -223,8 +248,12 @@ describe('Forms route', () => {
             order: 'asc'
           },
           search: {
-            title: ''
-          }
+            title: '',
+            author: '',
+            organisations: [],
+            status: []
+          },
+          filters: mockFilters
         }
       })
     })
@@ -232,7 +261,8 @@ describe('Forms route', () => {
     test('GET /forms with pagination and sorting parameters returns sorted paginated data', async () => {
       jest.mocked(listForms).mockResolvedValue({
         forms: [stubFormMetadataOutput],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const response = await server.inject({
@@ -257,8 +287,12 @@ describe('Forms route', () => {
             order: 'asc'
           },
           search: {
-            title: ''
-          }
+            title: '',
+            author: '',
+            organisations: [],
+            status: []
+          },
+          filters: mockFilters
         }
       })
     })
@@ -266,7 +300,8 @@ describe('Forms route', () => {
     test('GET /forms with pagination parameters returns paginated data and default sorting', async () => {
       jest.mocked(listForms).mockResolvedValue({
         forms: [stubFormMetadataOutput],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const response = await server.inject({
@@ -291,8 +326,12 @@ describe('Forms route', () => {
             order: 'desc'
           },
           search: {
-            title: ''
-          }
+            title: '',
+            author: '',
+            organisations: [],
+            status: []
+          },
+          filters: mockFilters
         }
       })
     })
@@ -300,7 +339,8 @@ describe('Forms route', () => {
     test('GET /forms with pagination parameters returns empty data array and default sorting when no forms are available', async () => {
       jest.mocked(listForms).mockResolvedValue({
         forms: [],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const response = await server.inject({
@@ -325,8 +365,12 @@ describe('Forms route', () => {
             order: 'desc'
           },
           search: {
-            title: ''
-          }
+            title: '',
+            author: '',
+            organisations: [],
+            status: []
+          },
+          filters: mockFilters
         }
       })
     })
@@ -973,10 +1017,89 @@ describe('Forms route', () => {
         }
       })
     })
+
+    test('Testing GET /forms route with invalid author returns validation error', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?author=' + 'x'.repeat(101),
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message:
+          '"author" length must be less than or equal to 100 characters long',
+        validation: {
+          keys: ['author'],
+          source: 'query'
+        }
+      })
+    })
+
+    test('Testing GET /forms route with invalid organisations returns validation error', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?organisations=SomeOrg',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message:
+          '"organisations" must be one of [Animal and Plant Health Agency – APHA, Centre for Environment, Fisheries and Aquaculture Science – Cefas, Defra, Environment Agency, Forestry Commission, Marine Management Organisation – MMO, Natural England, Rural Payments Agency – RPA, Veterinary Medicines Directorate – VMD]',
+        validation: {
+          keys: ['organisations'],
+          source: 'query'
+        }
+      })
+    })
+
+    test('Testing GET /forms route with invalid status returns validation error', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?status=non-status',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"status" must be one of [draft, live]',
+        validation: {
+          keys: ['status'],
+          source: 'query'
+        }
+      })
+    })
+
+    test('Testing GET /forms route with multiple invalid search parameters returns validation errors', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms?organisations=SomeOrg&status=non-status',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message:
+          '"organisations" must be one of [Animal and Plant Health Agency – APHA, Centre for Environment, Fisheries and Aquaculture Science – Cefas, Defra, Environment Agency, Forestry Commission, Marine Management Organisation – MMO, Natural England, Rural Payments Agency – RPA, Veterinary Medicines Directorate – VMD]. "status" must be one of [draft, live]',
+        validation: {
+          keys: ['organisations', 'status'],
+          source: 'query'
+        }
+      })
+    })
   })
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput, FilterOptions } from '@defra/forms-model'
  * @import { Server } from '@hapi/hapi'
  */
