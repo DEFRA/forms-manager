@@ -1,7 +1,7 @@
 /**
  * @template T The type of items in the array
  * @typedef {object} QueryHandlerToolkit<T>
- * @property {function(Array<T>, number, QueryOptions): QueryResult<T>} queryResponse - Creates a standardised response with pagination, sorting, and search metadata
+ * @property {function(Array<T>, number, QueryOptions, FilterOptions): QueryResult<T>} queryResponse - Creates a standardised response with pagination, sorting, and search metadata
  */
 
 /**
@@ -23,6 +23,6 @@
  */
 
 /**
- * @import { QueryOptions, QueryResult, PaginationOptions, SortingOptions, SearchOptions } from '@defra/forms-model'
+ * @import { QueryOptions, QueryResult, PaginationOptions, SortingOptions, SearchOptions, FilterOptions } from '@defra/forms-model'
  * @import { ResponseToolkit, Server } from '@hapi/hapi'
  */

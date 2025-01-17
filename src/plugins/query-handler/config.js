@@ -11,7 +11,10 @@ export const defaultConfig = {
     order: 'desc'
   },
   search: {
-    title: ''
+    title: '',
+    author: '',
+    organisations: [],
+    status: []
   }
 }
 

@@ -4,7 +4,9 @@ import { MongoServerError, ObjectId } from 'mongodb'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   buildAggregationPipeline,
-  buildFilterConditions
+  buildFilterConditions,
+  buildFiltersFacet,
+  processAuthorNames
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
@@ -35,7 +37,7 @@ export async function listAll() {
  * Retrieves the list of documents from the database with pagination and sorting.
  * Applies ranking to the search results based on match type and sorts them accordingly.
  * @param {QueryOptions} options - Pagination, sorting, and filtering options.
- * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number }>}
+ * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number, filters: FilterOptions }>}
  */
 export async function list(options) {
   try {
@@ -44,7 +46,10 @@ export async function list(options) {
       perPage = MAX_RESULTS,
       sortBy = 'updatedAt',
       order = 'desc',
-      title = ''
+      title = '',
+      author = '',
+      organisations = [],
+      status = []
     } = options
 
     const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
@@ -53,10 +58,23 @@ export async function list(options) {
 
     const skip = (page - 1) * perPage
 
+    const [filterResults] = /** @type {[FilterAggregationResult]} */ (
+      await coll.aggregate([buildFiltersFacet()]).toArray()
+    )
+
+    const filters = {
+      authors: processAuthorNames(filterResults.authors),
+      organisations: filterResults.organisations.map((org) => org.name),
+      statuses: filterResults.status[0].statuses
+    }
+
     const { pipeline, aggOptions } = buildAggregationPipeline(
       sortBy,
       order,
-      title
+      title,
+      author,
+      organisations,
+      status
     )
 
     pipeline.push({ $skip: skip }, { $limit: perPage })
@@ -65,10 +83,17 @@ export async function list(options) {
       /** @type {Promise<WithId<Partial<FormMetadataDocument>>[]>} */ (
         coll.aggregate(pipeline, aggOptions).toArray()
       ),
-      coll.countDocuments(buildFilterConditions(title))
+      coll.countDocuments(
+        buildFilterConditions({
+          title,
+          author,
+          organisations,
+          status
+        })
+      )
     ])
 
-    return { documents, totalItems }
+    return { documents, totalItems, filters }
   } catch (error) {
     logger.error(error, 'Error fetching documents')
     throw error
@@ -226,7 +251,8 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, QueryOptions } from '@defra/forms-model'
- * @import { ClientSession, Collection, UpdateFilter, WithId, AggregateOptions, CollationOptions } from 'mongodb'
+ * @import { FormMetadataDocument, QueryOptions, FilterOptions } from '@defra/forms-model'
+ * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'
  */

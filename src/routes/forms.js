@@ -3,7 +3,6 @@ import {
   formMetadataInputSchema,
   queryOptionsSchema
 } from '@defra/forms-model'
-import Boom from '@hapi/boom'
 
 import {
   createDraftFromLive,
@@ -17,30 +16,13 @@ import {
   updateDraftFormDefinition,
   updateFormMetadata
 } from '~/src/api/forms/service.js'
+import { getAuthor } from '~/src/helpers/get-author.js'
 import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
-
-/**
- * Get the author from the auth credentials
- * @param {UserCredentials & OidcStandardClaims} [user]
- * @returns {FormMetadataAuthor}
- */
-function getAuthor(user) {
-  if (!user || !user.oid) {
-    throw Boom.unauthorized(
-      'Failed to get the author. User is undefined or has a malformed/missing oid.'
-    )
-  }
-
-  return {
-    id: user.oid,
-    displayName: `${user.given_name} ${user.family_name}`
-  }
-}
 
 /**
  * @type {ServerRoute[]}
@@ -56,8 +38,9 @@ export default [
     async handler(request, h) {
       const { query } = request
 
-      const { forms, totalItems } = await listForms(query)
-      return h.queryResponse(forms, totalItems, query)
+      const { forms, totalItems, filters } = await listForms(query)
+
+      return h.queryResponse(forms, totalItems, query, filters)
     },
     options: {
       auth: false,
