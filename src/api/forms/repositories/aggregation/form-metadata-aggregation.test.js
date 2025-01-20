@@ -3,7 +3,9 @@ import {
   addRankingStage,
   addSortingStage,
   buildAggregationPipeline,
-  buildFilterConditions
+  buildFilterConditions,
+  buildFiltersFacet,
+  processAuthorNames
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 
 describe('Form metadata aggregation', () => {
@@ -15,71 +17,124 @@ describe('Form metadata aggregation', () => {
   })
 
   describe('buildFilterConditions', () => {
-    describe('with empty title', () => {
+    describe('with empty options', () => {
       it('should return empty conditions', () => {
-        const result = buildFilterConditions('')
+        const result = buildFilterConditions({})
         expect(result).toEqual({})
       })
     })
 
-    describe('with simple title', () => {
+    describe('with title filter', () => {
       it('should create case-insensitive regex filter', () => {
-        const result = buildFilterConditions('Test Form')
+        const result = buildFilterConditions({ title: 'Test Form' })
         expect(result).toEqual({
           title: { $regex: /Test Form/i }
         })
       })
     })
 
-    describe('with special characters in title', () => {
-      it('should escape special regex characters', () => {
-        const result = buildFilterConditions('Form (test)')
+    describe('with author filter', () => {
+      it('should create author name filter', () => {
+        const result = buildFilterConditions({ author: 'John Doe' })
         expect(result).toEqual({
-          title: { $regex: /Form \(test\)/i }
+          'createdBy.displayName': { $regex: /John Doe/i }
+        })
+      })
+    })
+
+    describe('with organisations filter', () => {
+      it('should create organisations filter', () => {
+        const result = buildFilterConditions({
+          organisations: ['Natural England', 'Defra']
+        })
+        expect(result).toEqual({
+          organisation: { $in: ['Natural England', 'Defra'] }
+        })
+      })
+    })
+
+    describe('with status filter', () => {
+      it('should create status filter for live forms', () => {
+        const result = buildFilterConditions({ status: ['live'] })
+        expect(result).toEqual({
+          $or: [{ live: { $exists: true } }]
+        })
+      })
+
+      it('should create status filter for draft forms', () => {
+        const result = buildFilterConditions({ status: ['draft'] })
+        expect(result).toEqual({
+          $or: [{ live: { $exists: false } }]
+        })
+      })
+    })
+
+    describe('with multiple status values', () => {
+      it('should create combined status filter', () => {
+        const result = buildFilterConditions({ status: ['live', 'draft'] })
+        expect(result).toEqual({
+          $or: [{ live: { $exists: true } }, { live: { $exists: false } }]
+        })
+      })
+    })
+
+    describe('with combined filters', () => {
+      it('should create filter with all conditions', () => {
+        const result = buildFilterConditions({
+          title: 'Wildlife Permit Application',
+          author: 'Henrique Silva',
+          organisations: ['Natural England', 'Defra'],
+          status: ['live']
+        })
+
+        expect(result).toEqual({
+          title: { $regex: /Wildlife Permit Application/i },
+          'createdBy.displayName': { $regex: /Henrique Silva/i },
+          organisation: { $in: ['Natural England', 'Defra'] },
+          $or: [{ live: { $exists: true } }]
         })
       })
     })
   })
 
   describe('buildAggregationPipeline', () => {
-    describe('without title', () => {
+    describe('without filters', () => {
       it('should build pipeline with default sorting', () => {
         const { pipeline, aggOptions } = buildAggregationPipeline(
           'updatedAt',
           'desc',
-          ''
+          '',
+          '',
+          [],
+          []
         )
 
-        expect(pipeline).toHaveLength(3)
+        expect(pipeline).toHaveLength(3) // ranking, date, and sort stages
         expect(aggOptions).toEqual({
           collation: { locale: 'en', strength: 1 }
         })
       })
     })
 
-    describe('with title', () => {
-      it('should include match stage in pipeline', () => {
-        const { pipeline, aggOptions } = buildAggregationPipeline(
+    describe('with multiple filters', () => {
+      it('should include match stage and all filters', () => {
+        const { pipeline } = buildAggregationPipeline(
           'updatedAt',
           'desc',
-          'Test'
+          'Wildlife Permit Application',
+          'Henrique',
+          ['Defra'],
+          ['live']
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
-        expect(pipeline).toHaveLength(4)
-        expect(aggOptions).toEqual({
-          collation: { locale: 'en', strength: 1 }
+        expect(pipeline[0].$match).toEqual({
+          title: { $regex: /Wildlife Permit Application/i },
+          'createdBy.displayName': { $regex: /Henrique/i },
+          organisation: { $in: ['Defra'] },
+          $or: [{ live: { $exists: true } }]
         })
-      })
-    })
-
-    describe('with title sorting', () => {
-      it('should include collation options', () => {
-        const { aggOptions } = buildAggregationPipeline('title', 'asc', '')
-
-        expect(aggOptions).toEqual({
-          collation: { locale: 'en', strength: 1 }
-        })
+        expect(pipeline).toHaveLength(4) // match, ranking, date, and sort stages
       })
     })
   })
@@ -172,6 +227,70 @@ describe('Form metadata aggregation', () => {
         })
         expect(collation).toEqual({ locale: 'en', strength: 1 })
       })
+    })
+  })
+
+  describe('buildFiltersFacet', () => {
+    it('should build facet pipeline with authors, organisations, and status groups', () => {
+      const result = buildFiltersFacet()
+
+      expect(result).toEqual({
+        $facet: {
+          authors: [
+            {
+              $group: {
+                _id: '$createdBy.displayName'
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                name: '$_id'
+              }
+            },
+            { $sort: { name: 1 } }
+          ],
+          organisations: [
+            { $group: { _id: '$organisation' } },
+            { $project: { name: '$_id', _id: 0 } },
+            { $sort: { name: 1 } }
+          ],
+          status: [
+            {
+              $group: {
+                _id: null,
+                statuses: {
+                  $addToSet: {
+                    $cond: [{ $ifNull: ['$live', false] }, 'live', 'draft']
+                  }
+                }
+              }
+            },
+            { $project: { statuses: 1, _id: 0 } }
+          ]
+        }
+      })
+    })
+  })
+
+  describe('processAuthorNames', () => {
+    it('should filter out invalid author names', () => {
+      const authors = [
+        { name: 'Henrique Chase (Defra)' },
+        { name: 'undefined undefined' },
+        { name: 'Sarah Wilson (Natural England)' }
+      ]
+
+      const result = processAuthorNames(authors)
+
+      expect(result).toEqual([
+        'Henrique Chase (Defra)',
+        'Sarah Wilson (Natural England)'
+      ])
+    })
+
+    it('should handle empty array', () => {
+      expect(processAuthorNames([])).toEqual([])
     })
   })
 })
