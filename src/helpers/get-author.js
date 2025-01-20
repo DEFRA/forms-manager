@@ -6,7 +6,7 @@ import Boom from '@hapi/boom'
  * @returns {FormMetadataAuthor}
  */
 export function getAuthor(user) {
-  if (!user || !user.oid || !user.name) {
+  if (!user?.oid || !user.name) {
     throw Boom.unauthorized(
       'Failed to get the author. User is undefined or has a malformed/missing oid/name.'
     )

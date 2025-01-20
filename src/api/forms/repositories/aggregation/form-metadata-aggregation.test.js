@@ -5,7 +5,8 @@ import {
   buildAggregationPipeline,
   buildFilterConditions,
   buildFiltersFacet,
-  processAuthorNames
+  processAuthorNames,
+  processFilterResults
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 
 describe('Form metadata aggregation', () => {
@@ -293,8 +294,48 @@ describe('Form metadata aggregation', () => {
       expect(processAuthorNames([])).toEqual([])
     })
   })
+
+  describe('processFilterResults', () => {
+    it('should process filter results into FilterOptions structure', () => {
+      /** @type {FilterAggregationResult} */
+      const filterResults = {
+        authors: [
+          { name: 'Enrique Chase (Defra)' },
+          { name: 'undefined undefined' },
+          { name: 'Sarah Wilson (Natural England)' }
+        ],
+        organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
+        status: [{ statuses: ['live', 'draft'] }]
+      }
+
+      const result = processFilterResults(filterResults)
+
+      expect(result).toEqual({
+        authors: ['Enrique Chase (Defra)', 'Sarah Wilson (Natural England)'],
+        organisations: ['Defra', 'Natural England'],
+        statuses: ['live', 'draft']
+      })
+    })
+
+    it('should handle empty filter results', () => {
+      /** @type {FilterAggregationResult} */
+      const filterResults = {
+        authors: [],
+        organisations: [],
+        status: [{ statuses: [] }]
+      }
+
+      const result = processFilterResults(filterResults)
+
+      expect(result).toEqual({
+        authors: [],
+        organisations: [],
+        statuses: []
+      })
+    })
+  })
 })
 
 /**
- * @import { AddFieldsSwitch, PipelineStage } from '~/src/api/forms/repositories/aggregation/types.js'
+ * @import { AddFieldsSwitch, PipelineStage, FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'
  */

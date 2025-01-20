@@ -262,11 +262,23 @@ export function processAuthorNames(authors) {
 }
 
 /**
- * @import { AddFieldsSwitch, FilterConditions, FilterQuery, PipelineStage } from '~/src/api/forms/repositories/aggregation/types.js'
+ * Processes filter results from aggregation into a structured FilterOptions object
+ * @param {FilterAggregationResult} filterResults - Raw filter results from aggregation
+ */
+export function processFilterResults(filterResults) {
+  return {
+    authors: processAuthorNames(filterResults.authors),
+    organisations: filterResults.organisations.map((org) => org.name),
+    statuses: filterResults.status[0].statuses
+  }
+}
+
+/**
+ * @import { AddFieldsSwitch, FilterConditions, FilterQuery, PipelineStage, FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'
  */
 
 /**
- * @import { FormStatus } from '@defra/forms-model'
+ * @import { FormStatus, FilterOptions } from '@defra/forms-model'
  */
 
 /**

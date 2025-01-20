@@ -6,7 +6,7 @@ import {
   buildAggregationPipeline,
   buildFilterConditions,
   buildFiltersFacet,
-  processAuthorNames
+  processFilterResults
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
@@ -62,11 +62,7 @@ export async function list(options) {
       await coll.aggregate([buildFiltersFacet()]).toArray()
     )
 
-    const filters = {
-      authors: processAuthorNames(filterResults.authors),
-      organisations: filterResults.organisations.map((org) => org.name),
-      statuses: filterResults.status[0].statuses
-    }
+    const filters = processFilterResults(filterResults)
 
     const { pipeline, aggOptions } = buildAggregationPipeline(
       sortBy,
