@@ -1,6 +1,20 @@
 /**
  * @typedef {object} FilterConditions
  * @property {{ $regex: RegExp }} [title] - Optional MongoDB regex query for title matching
+ * @property {{ displayName: { $regex: RegExp } }} [createdBy] - Optional MongoDB regex query for author matching
+ * @property {{ $in: string[] }} [organisation] - Optional MongoDB $in query for organisation matching
+ * @property {{ live: { $exists: boolean } }[]} [$or] - Optional MongoDB $or query for status matching
+ */
+
+/**
+ * @typedef {SearchOptions & { title?: string }} FilterQuery
+ */
+
+/**
+ * @typedef {object} FilterAggregationResult
+ * @property {{ name: string }[]} authors - Array of author names
+ * @property {{ name: string }[]} organisations - Array of organisation names
+ * @property {[{ statuses: FormStatus[] }]} status - Array containing status values
  */
 
 /**
@@ -52,9 +66,16 @@
 
 /**
  * @typedef {object} PipelineStage
- * @property {FilterConditions} [$match] - MongoDB $match stage for filtering documents
- * @property {AddFieldsStage} [$addFields] - MongoDB $addFields stage for adding computed fields to documents
- * @property {{ [key: string]: 1 | -1 }} [$sort] - MongoDB $sort stage for sorting documents
- * @property {number} [$skip] - MongoDB $skip stage for pagination
- * @property {number} [$limit] - MongoDB $limit stage for limiting results
+ * @property {FilterConditions} [$match] - MongoDB $match stage
+ * @property {AddFieldsStage} [$addFields] - MongoDB $addFields stage
+ * @property {{ [key: string]: 1 | -1 }} [$sort] - MongoDB $sort stage
+ * @property {number} [$skip] - MongoDB $skip stage
+ * @property {number} [$limit] - MongoDB $limit stage
+ * @property {{ [key: string]: PipelineStage[] }} [$facet] - MongoDB $facet stage
+ * @property {{ _id: string | null | object, [key: string]: any }} [$group] - MongoDB $group stage
+ * @property {{ [key: string]: 0 | 1 | string }} [$project] - MongoDB $project stage
+ */
+
+/**
+ * @import { SearchOptions, FormStatus } from '@defra/forms-model'
  */

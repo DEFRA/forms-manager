@@ -13,18 +13,31 @@ export const queryHandler = {
          * @param {Array<T>} data
          * @param {number} totalItems
          * @param {QueryOptions} [options]
+         * @param {FilterOptions} [filters]
          * @returns {QueryResult<T>}
          */
-        function (data, totalItems, options) {
+        function (data, totalItems, options, filters) {
           const defaults = {
             page: defaultConfig.pagination.page,
             perPage: defaultConfig.pagination.perPage,
             sortBy: defaultConfig.sorting.sortBy,
             order: defaultConfig.sorting.order,
-            title: defaultConfig.search.title
+            title: defaultConfig.search.title,
+            author: defaultConfig.search.author,
+            organisations: defaultConfig.search.organisations,
+            status: defaultConfig.search.status
           }
 
-          const { page, perPage, sortBy, order, title } = {
+          const {
+            page,
+            perPage,
+            sortBy,
+            order,
+            title,
+            author,
+            organisations,
+            status
+          } = {
             ...defaults,
             ...options
           }
@@ -43,8 +56,12 @@ export const queryHandler = {
                 order
               },
               search: {
-                title
-              }
+                title,
+                author,
+                organisations,
+                status
+              },
+              filters
             }
           }
         }
@@ -55,5 +72,5 @@ export const queryHandler = {
 
 /**
  * @import { ServerRegisterPluginObject } from '@hapi/hapi'
- * @import { QueryOptions, QueryResult } from '@defra/forms-model'
+ * @import { QueryOptions, QueryResult, FilterOptions } from '@defra/forms-model'
  */

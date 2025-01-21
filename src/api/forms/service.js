@@ -166,14 +166,15 @@ export async function createForm(metadataInput, author) {
 }
 
 /**
- * Retrieves a paginated list of forms
+ * Retrieves a paginated list of forms with filter options
  * @param {QueryOptions} options - Pagination, sorting, and filtering options
- * @returns {Promise<{ forms: FormMetadata[], totalItems: number }>}
+ * @returns {Promise<{ forms: FormMetadata[], totalItems: number, filters: FilterOptions }>}
  */
 export async function listForms(options) {
-  const { documents, totalItems } = await formMetadata.list(options)
+  const { documents, totalItems, filters } = await formMetadata.list(options)
   const forms = documents.map(mapForm)
-  return { forms, totalItems }
+
+  return { forms, totalItems, filters }
 }
 
 /**
@@ -505,7 +506,7 @@ export async function removeForm(formId) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, QueryResult, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */

@@ -161,6 +161,15 @@ describe('Forms service', () => {
     updatedBy: author
   }
 
+  /**
+   * @satisfies {FilterOptions}
+   */
+  const mockFilters = {
+    authors: ['Joe Bloggs', 'Jane Doe', 'Enrique Chase'],
+    organisations: ['Defra', 'Natural England'],
+    status: ['live', 'draft']
+  }
+
   let definition = actualEmptyForm()
 
   beforeAll(async () => {
@@ -732,7 +741,8 @@ describe('Forms service', () => {
     it('should handle the full set of states', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataFullDocument],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const result = await listForms({ page: 1, perPage: 10 })
@@ -746,14 +756,16 @@ describe('Forms service', () => {
             createdBy: formAuthor
           })
         ],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
     })
 
     it('should handle states when root state info is missing and live is present', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataDraftDocument],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const result = await listForms({ page: 1, perPage: 10 })
@@ -767,14 +779,16 @@ describe('Forms service', () => {
             createdBy: liveAuthor
           })
         ],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
     })
 
     it('should handle states when draft state info is missing', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataLiveDocument],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const result = await listForms({ page: 1, perPage: 10 })
@@ -788,14 +802,16 @@ describe('Forms service', () => {
             createdBy: liveAuthor
           })
         ],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
     })
 
     it('should handle states when live state info is missing', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataDraftNoLiveDocument],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const result = await listForms({ page: 1, perPage: 10 })
@@ -809,14 +825,16 @@ describe('Forms service', () => {
             createdBy: draftAuthor
           })
         ],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
     })
 
     it('should handle states when all states are missing', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataBaseDocument],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const result = await listForms({ page: 1, perPage: 10 })
@@ -830,7 +848,8 @@ describe('Forms service', () => {
             createdBy: defaultAuthor
           })
         ],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
     })
 
@@ -851,7 +870,7 @@ describe('Forms service', () => {
 
         jest
           .mocked(formMetadata.list)
-          .mockResolvedValue({ documents, totalItems })
+          .mockResolvedValue({ documents, totalItems, filters: mockFilters })
 
         const options = { page, perPage, sortBy, order, title }
         const result = await listForms(options)
@@ -859,7 +878,8 @@ describe('Forms service', () => {
         expect(formMetadata.list).toHaveBeenCalledWith(options)
         expect(result).toEqual({
           forms: expect.any(Array),
-          totalItems
+          totalItems,
+          filters: mockFilters
         })
       })
     })
@@ -872,7 +892,8 @@ describe('Forms service', () => {
 
         jest.mocked(formMetadata.list).mockResolvedValue({
           documents: [formMetadataFullDocument, formMetadataFullDocument],
-          totalItems: 2
+          totalItems: 2,
+          filters: mockFilters
         })
 
         const result = await listForms({ page, perPage, title })
@@ -884,7 +905,8 @@ describe('Forms service', () => {
         })
         expect(result).toEqual({
           forms: expect.any(Array),
-          totalItems: 2
+          totalItems: 2,
+          filters: mockFilters
         })
       })
 
@@ -895,7 +917,8 @@ describe('Forms service', () => {
 
         jest.mocked(formMetadata.list).mockResolvedValue({
           documents: [],
-          totalItems: 0
+          totalItems: 0,
+          filters: mockFilters
         })
 
         const result = await listForms({ page, perPage, title })
@@ -907,7 +930,8 @@ describe('Forms service', () => {
         })
         expect(result).toEqual({
           forms: [],
-          totalItems: 0
+          totalItems: 0,
+          filters: mockFilters
         })
       })
 
@@ -917,7 +941,8 @@ describe('Forms service', () => {
 
         jest.mocked(formMetadata.list).mockResolvedValue({
           documents: [formMetadataFullDocument],
-          totalItems: 1
+          totalItems: 1,
+          filters: mockFilters
         })
 
         const result = await listForms({ page, perPage })
@@ -928,7 +953,8 @@ describe('Forms service', () => {
         })
         expect(result).toEqual({
           forms: expect.any(Array),
-          totalItems: 1
+          totalItems: 1,
+          filters: mockFilters
         })
       })
     })
@@ -936,7 +962,8 @@ describe('Forms service', () => {
     it('should handle default pagination parameters', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataFullDocument],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const result = await listForms({
@@ -957,7 +984,8 @@ describe('Forms service', () => {
             createdBy: formAuthor
           })
         ],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
     })
 
@@ -966,7 +994,8 @@ describe('Forms service', () => {
 
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataFullDocument],
-        totalItems
+        totalItems,
+        filters: mockFilters
       })
 
       const result = await listForms({
@@ -983,14 +1012,16 @@ describe('Forms service', () => {
             createdBy: formAuthor
           })
         ],
-        totalItems
+        totalItems,
+        filters: mockFilters
       })
     })
 
     it('should handle empty results with MAX_RESULTS', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [],
-        totalItems: 0
+        totalItems: 0,
+        filters: mockFilters
       })
 
       const result = await listForms({
@@ -1000,14 +1031,16 @@ describe('Forms service', () => {
 
       expect(result).toEqual({
         forms: [],
-        totalItems: 0
+        totalItems: 0,
+        filters: mockFilters
       })
     })
 
     it('should use default values when no options are provided', async () => {
       jest.mocked(formMetadata.list).mockResolvedValue({
         documents: [formMetadataFullDocument],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
       })
 
       const result = await listForms({ page: 1, perPage: MAX_RESULTS })
@@ -1025,7 +1058,84 @@ describe('Forms service', () => {
             createdBy: formAuthor
           })
         ],
-        totalItems: 1
+        totalItems: 1,
+        filters: mockFilters
+      })
+    })
+
+    describe('with filters', () => {
+      it('should return empty filters when no forms exist', async () => {
+        const emptyFilters = {
+          authors: [],
+          organisations: [],
+          status: []
+        }
+
+        jest.mocked(formMetadata.list).mockResolvedValue({
+          documents: [],
+          totalItems: 0,
+          filters: emptyFilters
+        })
+
+        const result = await listForms({ page: 1, perPage: 10 })
+
+        expect(result).toEqual({
+          forms: [],
+          totalItems: 0,
+          filters: emptyFilters
+        })
+      })
+
+      it('should pass filter parameters to repository', async () => {
+        /** @type {QueryOptions} */
+        const options = {
+          page: 1,
+          perPage: 10,
+          author: 'Henrique Chase',
+          organisations: ['Defra'],
+          status: ['live']
+        }
+
+        jest.mocked(formMetadata.list).mockResolvedValue({
+          documents: [formMetadataFullDocument],
+          totalItems: 1,
+          filters: mockFilters
+        })
+
+        const result = await listForms(options)
+
+        expect(formMetadata.list).toHaveBeenCalledWith(options)
+        expect(result).toEqual({
+          forms: expect.any(Array),
+          totalItems: 1,
+          filters: mockFilters
+        })
+      })
+
+      it('should handle multiple filter parameters', async () => {
+        /** @type {QueryOptions} */
+        const options = {
+          page: 1,
+          perPage: 10,
+          author: 'Henrique Chase',
+          organisations: ['Defra', 'Natural England'],
+          status: ['live', 'draft']
+        }
+
+        jest.mocked(formMetadata.list).mockResolvedValue({
+          documents: [formMetadataFullDocument, formMetadataFullDocument],
+          totalItems: 2,
+          filters: mockFilters
+        })
+
+        const result = await listForms(options)
+
+        expect(formMetadata.list).toHaveBeenCalledWith(options)
+        expect(result).toEqual({
+          forms: expect.any(Array),
+          totalItems: 2,
+          filters: mockFilters
+        })
       })
     })
   })
@@ -1120,6 +1230,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryResult } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

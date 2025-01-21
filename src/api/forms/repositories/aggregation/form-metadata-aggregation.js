@@ -1,11 +1,12 @@
 import { escapeRegExp } from '~/src/helpers/string-utils.js'
 
 /**
- * Builds the filter conditions for querying forms by title.
- * @param {string} title - The title to filter by.
+ * Builds the filter conditions for querying forms.
+ * @param {FilterQuery} options - The filter query options
  * @returns {FilterConditions} The filter conditions for MongoDB query.
  */
-export function buildFilterConditions(title) {
+export function buildFilterConditions(options) {
+  const { title, author, organisations, status } = options
   const conditions = {}
 
   if (title) {
@@ -13,7 +14,66 @@ export function buildFilterConditions(title) {
     conditions.title = { $regex: regex }
   }
 
+  if (author) {
+    const regex = new RegExp(escapeRegExp(author), 'i')
+    conditions['createdBy.displayName'] = { $regex: regex }
+  }
+
+  if (organisations && organisations.length > 0) {
+    conditions.organisation = { $in: organisations }
+  }
+
+  if (status && status.length > 0) {
+    conditions.$or = status.map((s) =>
+      s === 'live' ? { live: { $exists: true } } : { live: { $exists: false } }
+    )
+  }
+
   return conditions
+}
+
+/**
+ * Builds the filters facet pipeline stage
+ * @see {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation/facet/}
+ * @returns {{ $facet: { authors: PipelineStage[], organisations: PipelineStage[], status: PipelineStage[] } }} The facet pipeline stage for getting filter options
+ */
+export function buildFiltersFacet() {
+  return {
+    $facet: {
+      authors: [
+        {
+          $group: {
+            _id: '$createdBy.displayName' // Groups documents by author name, removing duplicates
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            name: '$_id' // Renames _id to name for cleaner output
+          }
+        },
+        { $sort: { name: 1 } } // Sorts alphabetically (1 = ascending)
+      ],
+      organisations: [
+        { $group: { _id: '$organisation' } },
+        { $project: { name: '$_id', _id: 0 } },
+        { $sort: { name: 1 } }
+      ],
+      status: [
+        {
+          $group: {
+            _id: null, // Single group for all documents
+            statuses: {
+              $addToSet: {
+                $cond: [{ $ifNull: ['$live', false] }, 'live', 'draft'] // If live field exists, status is 'live', else 'draft'
+              }
+            }
+          }
+        },
+        { $project: { statuses: 1, _id: 0 } }
+      ]
+    }
+  }
 }
 
 /**
@@ -21,11 +81,26 @@ export function buildFilterConditions(title) {
  * @param {string} sortBy - Field to sort by ('updatedAt' or 'title').
  * @param {string} order - Sort order ('asc' or 'desc').
  * @param {string} title - The title to filter by.
- * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }} The pipeline stages and aggregation options.
+ * @param {string} author - The author to filter by.
+ * @param {string[]} organisations - The organisations to filter by.
+ * @param {FormStatus[]} status - The status values to filter by.
+ * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
-export function buildAggregationPipeline(sortBy, order, title) {
+export function buildAggregationPipeline(
+  sortBy,
+  order,
+  title,
+  author,
+  organisations,
+  status
+) {
   const pipeline = []
-  const filterConditions = buildFilterConditions(title)
+  const filterConditions = buildFilterConditions({
+    title,
+    author,
+    organisations,
+    status
+  })
 
   // Add $match stage if there are filter conditions
   if (Object.keys(filterConditions).length > 0) {
@@ -45,6 +120,7 @@ export function buildAggregationPipeline(sortBy, order, title) {
 
 /**
  * Adds the ranking stage to the pipeline based on the title.
+ * @see {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation/rank/}
  * @param {PipelineStage[]} pipeline - The aggregation pipeline stages.
  * @param {string} title - The title to filter by.
  */
@@ -104,6 +180,7 @@ export function addRankingStage(pipeline, title) {
 
 /**
  * Adds the date field stage to the pipeline to extract date only from 'updatedAt'.
+ * @see {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation/dateToString/}
  * @param {PipelineStage[]} pipeline - The aggregation pipeline stages.
  */
 export function addDateFieldStage(pipeline) {
@@ -123,6 +200,7 @@ export function addDateFieldStage(pipeline) {
 
 /**
  * Adds the sorting stage to the pipeline based on the sortBy parameter.
+ * @see {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation/sort/}
  * @param {PipelineStage[]} pipeline - The aggregation pipeline stages.
  * @param {string} sortBy - Field to sort by ('updatedAt' or 'title').
  * @param {string} order - Sort order ('asc' or 'desc').
@@ -169,7 +247,38 @@ export function addSortingStage(pipeline, sortBy, order) {
 }
 
 /**
- * @import { AddFieldsSwitch, FilterConditions, PipelineStage } from '~/src/api/forms/repositories/aggregation/types.js'
+ * Processes author names from aggregation results, filtering out invalid values
+ * @param {{name: string}[]} authors - Array of author objects from aggregation
+ * @returns {string[]} Filtered array of valid author names
+ *
+ * This is a temp workaround for the fact that the author name (given_name and family_name)
+ * is sometimes undefined due to not being register with a Defra account, although we've
+ * changed that now to default to their display name when creating or updating a form
+ */
+export function processAuthorNames(authors) {
+  return authors
+    .map((author) => author.name)
+    .filter((name) => name && name !== 'undefined undefined')
+}
+
+/**
+ * Processes filter results from aggregation into a structured FilterOptions object
+ * @param {FilterAggregationResult} filterResults - Raw filter results from aggregation
+ */
+export function processFilterResults(filterResults) {
+  return {
+    authors: processAuthorNames(filterResults.authors),
+    organisations: filterResults.organisations.map((org) => org.name),
+    statuses: filterResults.status[0].statuses
+  }
+}
+
+/**
+ * @import { AddFieldsSwitch, FilterConditions, FilterQuery, PipelineStage, FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'
+ */
+
+/**
+ * @import { FormStatus, FilterOptions } from '@defra/forms-model'
  */
 
 /**
