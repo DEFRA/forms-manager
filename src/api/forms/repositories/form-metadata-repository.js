@@ -90,7 +90,10 @@ export async function get(formId) {
   )
 
   try {
-    const document = await coll.findOne({ _id: new ObjectId(formId) })
+    const document = await coll.findOne({
+      _id: new ObjectId(formId),
+      ...getDefaultFilterOptions()
+    })
 
     if (!document) {
       throw Boom.notFound(`Form with ID '${formId}' not found`)
@@ -122,7 +125,7 @@ export async function getBySlug(slug) {
   )
 
   try {
-    const document = await coll.findOne({ slug })
+    const document = await coll.findOne({ slug, ...getDefaultFilterOptions() })
 
     if (!document) {
       throw Boom.notFound(`Form with slug '${slug}' not found`)
@@ -212,6 +215,15 @@ export async function update(formId, update, session) {
     }
 
     throw error
+  }
+}
+
+/**
+ * Returns the default search options to pass to Mongo
+ */
+function getDefaultFilterOptions() {
+  return {
+    deleted: { $ne: true }
   }
 }
 
