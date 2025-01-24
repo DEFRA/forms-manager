@@ -16,23 +16,6 @@ export const MAX_RESULTS = 100
 const logger = createLogger()
 
 /**
- * Retrieves the list of documents from the database
- */
-export async function listAll() {
-  const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
-    db.collection(METADATA_COLLECTION_NAME)
-  )
-
-  return coll
-    .find()
-    .sort({
-      updatedAt: -1
-    })
-    .limit(MAX_RESULTS)
-    .toArray()
-}
-
-/**
  * Retrieves the list of documents from the database with pagination and sorting.
  * Applies ranking to the search results based on match type and sorts them accordingly.
  * @param {QueryOptions} options - Pagination, sorting, and filtering options.
