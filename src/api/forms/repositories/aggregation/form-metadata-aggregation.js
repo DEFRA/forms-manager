@@ -3,9 +3,10 @@ import { escapeRegExp } from '~/src/helpers/string-utils.js'
 /**
  * Builds the filter conditions for querying forms.
  * @param {FilterQuery} options - The filter query options
+ * @param {object} defaultOptions - The default filter conditions
  * @returns {FilterConditions} The filter conditions for MongoDB query.
  */
-export function buildFilterConditions(options) {
+export function buildFilterConditions(options, defaultOptions) {
   const { title, author, organisations, status } = options
   const conditions = {}
 
@@ -29,7 +30,10 @@ export function buildFilterConditions(options) {
     )
   }
 
-  return conditions
+  return {
+    ...conditions,
+    ...defaultOptions // these take precedence
+  }
 }
 
 /**
@@ -84,6 +88,7 @@ export function buildFiltersFacet() {
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
  * @param {FormStatus[]} status - The status values to filter by.
+ * @param {object} defaultOptions - The default filter conditions.
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipeline(
@@ -92,15 +97,19 @@ export function buildAggregationPipeline(
   title,
   author,
   organisations,
-  status
+  status,
+  defaultOptions
 ) {
   const pipeline = []
-  const filterConditions = buildFilterConditions({
-    title,
-    author,
-    organisations,
-    status
-  })
+  const filterConditions = buildFilterConditions(
+    {
+      title,
+      author,
+      organisations,
+      status
+    },
+    defaultOptions
+  )
 
   // Add $match stage if there are filter conditions
   if (Object.keys(filterConditions).length > 0) {

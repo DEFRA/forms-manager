@@ -52,7 +52,8 @@ export async function list(options) {
       title,
       author,
       organisations,
-      status
+      status,
+      getDefaultFilterOptions()
     )
 
     pipeline.push({ $skip: skip }, { $limit: perPage })
@@ -62,12 +63,15 @@ export async function list(options) {
         coll.aggregate(pipeline, aggOptions).toArray()
       ),
       coll.countDocuments(
-        buildFilterConditions({
-          title,
-          author,
-          organisations,
-          status
-        })
+        buildFilterConditions(
+          {
+            title,
+            author,
+            organisations,
+            status
+          },
+          getDefaultFilterOptions()
+        )
       )
     ])
 
