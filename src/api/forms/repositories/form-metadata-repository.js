@@ -16,6 +16,13 @@ export const MAX_RESULTS = 100
 const logger = createLogger()
 
 /**
+ * The default search options to pass to Mongo
+ */
+const defaultFilterOptions = {
+  deleted: { $ne: true }
+}
+
+/**
  * Retrieves the list of documents from the database with pagination and sorting.
  * Applies ranking to the search results based on match type and sorts them accordingly.
  * @param {QueryOptions} options - Pagination, sorting, and filtering options.
@@ -53,7 +60,7 @@ export async function list(options) {
       author,
       organisations,
       status,
-      getDefaultFilterOptions()
+      defaultFilterOptions
     )
 
     pipeline.push({ $skip: skip }, { $limit: perPage })
@@ -70,7 +77,7 @@ export async function list(options) {
             organisations,
             status
           },
-          getDefaultFilterOptions()
+          defaultFilterOptions
         )
       )
     ])
@@ -96,7 +103,7 @@ export async function get(formId) {
   try {
     const document = await coll.findOne({
       _id: new ObjectId(formId),
-      ...getDefaultFilterOptions()
+      ...defaultFilterOptions
     })
 
     if (!document) {
@@ -129,7 +136,7 @@ export async function getBySlug(slug) {
   )
 
   try {
-    const document = await coll.findOne({ slug, ...getDefaultFilterOptions() })
+    const document = await coll.findOne({ slug, ...defaultFilterOptions })
 
     if (!document) {
       throw Boom.notFound(`Form with slug '${slug}' not found`)
@@ -219,15 +226,6 @@ export async function update(formId, update, session) {
     }
 
     throw error
-  }
-}
-
-/**
- * Returns the default search options to pass to Mongo
- */
-function getDefaultFilterOptions() {
-  return {
-    deleted: { $ne: true }
   }
 }
 
