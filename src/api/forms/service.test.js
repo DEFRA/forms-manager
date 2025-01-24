@@ -636,23 +636,8 @@ describe('Forms service', () => {
   })
 
   describe('removeForm', () => {
-    it('should succeed if both operations succeed', async () => {
-      jest.mocked(formMetadata.remove).mockResolvedValueOnce()
-      jest.mocked(formDefinition.remove).mockResolvedValueOnce()
-
-      await expect(removeForm(id)).resolves.toBeUndefined()
-    })
-
-    it('should fail if form metadata remove fails', async () => {
-      jest.mocked(formMetadata.remove).mockRejectedValueOnce('unknown error')
-      jest.mocked(formDefinition.remove).mockResolvedValueOnce()
-
-      await expect(removeForm(id)).rejects.toBeDefined()
-    })
-
-    it('should fail if form definition remove fails', async () => {
-      jest.mocked(formMetadata.remove).mockResolvedValueOnce()
-      jest.mocked(formDefinition.remove).mockRejectedValueOnce('unknown error')
+    it('should fail if form metadata update fails', async () => {
+      jest.mocked(formMetadata.update).mockRejectedValueOnce('unknown error')
 
       await expect(removeForm(id)).rejects.toBeDefined()
     })

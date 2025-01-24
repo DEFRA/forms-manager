@@ -9,7 +9,7 @@
  */
 
 /**
- * @typedef {Partial<FormMetadataDocument & { 'draft.updatedAt': Date, 'draft.updatedBy': FormMetadataAuthor }>} PartialFormMetadataDocument
+ * @typedef {Partial<FormMetadataDocument & { 'draft.updatedAt': Date, 'draft.updatedBy': FormMetadataAuthor, 'deleted'?: boolean }>} PartialFormMetadataDocument
  */
 
 /**

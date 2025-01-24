@@ -495,8 +495,15 @@ export async function removeForm(formId) {
 
   try {
     await session.withTransaction(async () => {
-      await formMetadata.remove(formId, session)
-      await formDefinition.remove(formId, session)
+      await formMetadata.update(
+        formId,
+        {
+          $set: {
+            deleted: true
+          }
+        },
+        session
+      )
     })
   } finally {
     await session.endSession()

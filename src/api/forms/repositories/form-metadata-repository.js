@@ -8,7 +8,6 @@ import {
   buildFiltersFacet,
   processFilterResults
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
-import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -231,19 +230,6 @@ export async function update(formId, update, session) {
 
     throw error
   }
-}
-
-/**
- * Removes a form metadata
- * @param {string} formId - ID of the form
- * @param {ClientSession} session
- */
-export async function remove(formId, session) {
-  logger.info(`Removing form metadata with ID ${formId}`)
-
-  await removeById(session, METADATA_COLLECTION_NAME, formId)
-
-  logger.info(`Removed form metadata with ID ${formId}`)
 }
 
 /**
