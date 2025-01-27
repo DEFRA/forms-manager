@@ -269,7 +269,7 @@ export function processFilterResults(filterResults) {
   return {
     authors: processAuthorNames(filterResults.authors),
     organisations: filterResults.organisations.map((org) => org.name),
-    statuses: filterResults.status[0].statuses
+    statuses: filterResults.status.at(0)?.statuses ?? []
   }
 }
 
