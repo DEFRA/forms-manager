@@ -1,8 +1,4 @@
-import {
-  ComponentType,
-  ControllerPath,
-  ControllerType
-} from '@defra/forms-model'
+import { ControllerPath, ControllerType } from '@defra/forms-model'
 
 /**
  * Function to return an empty form
@@ -12,22 +8,6 @@ export function empty() {
     name: '',
     startPage: '/page-one',
     pages: [
-      {
-        path: '/page-one',
-        title: 'Page one',
-        section: 'section',
-        components: [
-          {
-            type: ComponentType.TextField,
-            name: 'textField',
-            title: 'This is your first field',
-            hint: 'Help text',
-            options: {},
-            schema: {}
-          }
-        ],
-        next: [{ path: ControllerPath.Summary }]
-      },
       {
         title: 'Summary',
         path: ControllerPath.Summary,
