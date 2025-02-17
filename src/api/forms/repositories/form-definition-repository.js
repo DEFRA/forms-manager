@@ -1,3 +1,4 @@
+import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -104,7 +105,7 @@ export async function get(formId, state = 'draft') {
       { projection: { [state]: 1 } }
     )
 
-    if (!result || !result[state]) {
+    if (!result?.[state]) {
       throw Boom.notFound(`Form definition with ID '${formId}' not found`)
     }
 
@@ -168,6 +169,57 @@ export async function updateName(formId, name, session, state = 'draft') {
 }
 
 /**
- * @import { FormDefinition } from '@defra/forms-model'
+ * Pushes the summary page to the last page
+ * @param {string} formId - the ID of the form
+ * @param {ClientSession} session
+ * @param {string} [state] - state of the form to update
+ * @returns {Promise<undefined|Page>}
+ */
+export async function pushSummaryToEnd(formId, session, state = 'draft') {
+  if (state === 'live') {
+    throw Boom.badRequest('Cannot add summary page to end of a live form')
+  }
+  logger.info(`Checking position of summary on ${formId}`)
+
+  const definition = await get(formId, state)
+  const pageCount = definition.pages.length
+  const summary = definition.pages.find(
+    (page) => page.controller === ControllerType.Summary
+  )
+
+  const lastPage = definition.pages[pageCount - 1]
+
+  if (summary === undefined || lastPage === summary) {
+    logger.info(`Position of summary on ${formId} correct`)
+    return summary
+  }
+
+  logger.info(`Updating position of summary on ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    {
+      $pull: { 'draft.pages': { controller: 'SummaryPageController' } } // Removes all Summary pages
+    },
+    { session }
+  )
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    {
+      $push: { 'draft.pages': summary } // Adds the summary page back
+    },
+    { session }
+  )
+  logger.info(`Updated position of summary on ${formId}`)
+
+  return summary
+}
+
+/**
+ * @import { FormDefinition, Page } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  */
