@@ -2,6 +2,7 @@ import Boom from '@hapi/boom'
 import Joi from 'joi'
 
 import { pushSummaryToEnd } from '~/src/api/forms/repositories/form-definition-repository.js'
+import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
 const mockCollection = {
@@ -9,13 +10,9 @@ const mockCollection = {
   updateOne: jest.fn()
 }
 
-/**
- * @satisfies {FormMetadataAuthor}
- */
-const author = {
-  id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc',
-  displayName: 'Enrique Chase'
-}
+jest.mock('~/src/helpers/get-author.js')
+
+const author = getAuthor()
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
