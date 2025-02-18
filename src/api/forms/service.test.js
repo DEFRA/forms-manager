@@ -4,7 +4,8 @@ import { pino } from 'pino'
 
 import {
   buildDefinition,
-  buildQuestionPage
+  buildQuestionPage,
+  buildSummaryPage
 } from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
@@ -1237,10 +1238,15 @@ describe('Forms service', () => {
       const formDefinitionPageCustomisedTitle = buildQuestionPage({
         title: 'A new form page'
       })
+      const expectedPage = buildQuestionPage({
+        ...formDefinitionPageCustomisedTitle,
+        id: '2dfd8149-504c-45c6-bd61-c45602d1fc47'
+      })
+      const summaryPage = buildSummaryPage()
 
       const expectedPages /**  @satisfies {Page[]} */ = [
-        formDefinitionPageCustomisedTitle,
-        ...definition.pages
+        expectedPage,
+        summaryPage
       ]
       const newDefinition = buildDefinition({
         ...definition,
@@ -1250,9 +1256,11 @@ describe('Forms service', () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
 
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
-      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPage')
+      const dbDefinitionSpy = jest
+        .spyOn(formDefinition, 'addPage')
+        .mockResolvedValue(expectedPage)
 
-      const pages = await createPageOnDraftDefinition(
+      const page = await createPageOnDraftDefinition(
         '123',
         formDefinitionPageCustomisedTitle,
         author
@@ -1262,8 +1270,7 @@ describe('Forms service', () => {
       expect(dbDefinitionSpy).toHaveBeenCalledWith(
         '123',
         formDefinitionPageCustomisedTitle,
-        expect.anything(),
-        'draft'
+        expect.anything()
       )
       expect(dbOperationArgs[0]).toBe('123')
       expect(dbOperationArgs[1].$set).toEqual({
@@ -1272,7 +1279,7 @@ describe('Forms service', () => {
         updatedAt: dateUsedInFakeTime,
         updatedBy: author
       })
-      expect(pages).toEqual(expectedPages)
+      expect(page).toEqual(expectedPage)
     })
 
     it('should fail if no draft definition exists', async () => {

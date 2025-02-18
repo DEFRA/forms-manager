@@ -525,9 +525,12 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   const session = client.startSession()
 
+  /** @type {Page} */
+  let page
+
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPage(formId, newPage, session, 'draft')
+      page = await formDefinition.addPage(formId, newPage, session)
 
       // Update the form with the new draft state
       await formMetadata.update(
@@ -542,12 +545,11 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   logger.info(`Created new page for form with ID ${formId}`)
 
-  const { pages } = await getFormDefinition(formId, 'draft')
-  return /** @satisfies {Page[]} */ pages
+  return page
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, FormStatus } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */
