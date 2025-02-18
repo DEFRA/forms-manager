@@ -69,8 +69,3 @@ export const buildMockCollection = () => {
     }
   }
 }
-
-/**
- * @import { FormDefinition } from '@defra/forms-model'
- * @import { Collection, BSONSerializeOptions } from 'mongodb'
- */
