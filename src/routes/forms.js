@@ -300,6 +300,6 @@ export default [
  * @import { FormMetadataAuthor, FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
  * @import { OidcStandardClaims } from 'oidc-client-ts'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestRemoveFormById, RequestPage } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
