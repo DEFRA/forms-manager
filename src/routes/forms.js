@@ -213,7 +213,7 @@ export default [
     /**
      * @param {RequestPage} request
      */
-    async handler(request) {
+    handler(request) {
       const { auth, params, payload } = request
       const author = getAuthor(auth.credentials.user)
       return createPageOnDraftDefinition(params.id, payload, author)
