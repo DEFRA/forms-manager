@@ -93,7 +93,7 @@ export async function createDraftFromLive(id, session) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @param {'draft' | 'live'} state - the form state
+ * @param {FormStatus} state - the form state
  */
 export async function get(formId, state = 'draft') {
   logger.info(`Getting form definition (${state}) for form ID ${formId}`)
@@ -150,7 +150,7 @@ export async function remove(formId, session) {
  * @param {string} formId - the ID of the form
  * @param {string} name - new name for the form
  * @param {ClientSession} session
- * @param {string} [state] - state of the form to update
+ * @param {FormStatus} [state] - state of the form to update
  */
 export async function updateName(formId, name, session, state = 'draft') {
   if (state === 'live') {
@@ -176,7 +176,7 @@ export async function updateName(formId, name, session, state = 'draft') {
  * Pushes the summary page to the last page
  * @param {string} formId - the ID of the form
  * @param {ClientSession} session
- * @param {string} [state] - state of the form to update
+ * @param {FormStatus} [state] - state of the form to update
  * @returns {Promise<undefined|Page>}
  */
 export async function pushSummaryToEnd(formId, session, state = 'draft') {
@@ -227,7 +227,7 @@ export async function pushSummaryToEnd(formId, session, state = 'draft') {
  * @param {string} formId
  * @param {Page} page
  * @param {ClientSession} session
- * @param {string} [state]
+ * @param {FormStatus} [state]
  * @returns {Promise<void>}
  */
 export async function addPage(formId, page, session, state = 'draft') {
@@ -269,6 +269,6 @@ export async function addPage(formId, page, session, state = 'draft') {
 }
 
 /**
- * @import { FormDefinition, Page } from '@defra/forms-model'
+ * @import { FormDefinition, Page, FormStatus } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  */

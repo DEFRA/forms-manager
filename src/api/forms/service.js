@@ -519,7 +519,6 @@ export async function removeForm(formId) {
  * @param {string} formId
  * @param {Page} newPage
  * @param {FormMetadataAuthor} author
- * @returns {Promise<Page[]>}
  */
 export async function createPageOnDraftDefinition(formId, newPage, author) {
   logger.info(`Creating new page for form with ID ${formId}`)

@@ -210,10 +210,12 @@ export default [
   {
     method: 'POST',
     path: '/forms/{id}/definition/draft/pages',
+    /**
+     * @param {RequestPage} request
+     */
     async handler(request) {
       const { auth, params, payload } = request
       const author = getAuthor(auth.credentials.user)
-
       return createPageOnDraftDefinition(params.id, payload, author)
     },
     options: {
@@ -298,6 +300,6 @@ export default [
  * @import { FormMetadataAuthor, FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
  * @import { OidcStandardClaims } from 'oidc-client-ts'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestRemoveFormById } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestRemoveFormById, RequestPage } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
