@@ -522,7 +522,7 @@ describe('Forms service', () => {
       ).rejects.toThrow(error)
     })
 
-    it('should throw an error when title already summaryExists', async () => {
+    it('should throw an error when title already exists', async () => {
       const duplicateError = new MongoServerError({
         message: 'duplicate key error',
         code: 11000
@@ -1143,7 +1143,7 @@ describe('Forms service', () => {
   })
 
   describe('getFormBySlug', () => {
-    it('should return form metadata when form summaryExists', async () => {
+    it('should return form metadata when form exists', async () => {
       jest
         .mocked(formMetadata.getBySlug)
         .mockResolvedValue(formMetadataDocument)
