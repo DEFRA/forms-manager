@@ -1,6 +1,7 @@
 import {
   formMetadataInputKeys,
   formMetadataInputSchema,
+  pageSchema,
   queryOptionsSchema
 } from '@defra/forms-model'
 
@@ -8,6 +9,7 @@ import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
+  createPageOnDraftDefinition,
   getForm,
   getFormBySlug,
   getFormDefinition,
@@ -202,6 +204,22 @@ export default [
     options: {
       validate: {
         payload: updateFormDefinitionSchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/pages',
+    async handler(request) {
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
+
+      return createPageOnDraftDefinition(params.id, payload, author)
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        payload: pageSchema
       }
     }
   },
