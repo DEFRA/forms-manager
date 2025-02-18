@@ -6,7 +6,7 @@ import {
 import { summaryHelper } from '~/src/api/forms/repositories/helpers.js'
 
 describe('repository helpers', () => {
-  describe('shouldPushSummaryToEnd', () => {
+  describe('summaryHelper', () => {
     const summary = buildSummaryPage({})
 
     it('should push the summary to the end if it not in the correct place', () => {
@@ -14,8 +14,8 @@ describe('repository helpers', () => {
         pages: [summary, buildPage({})]
       })
       expect(summaryHelper(definition)).toEqual({
-        shouldPush: true,
-        exists: true,
+        shouldPushSummary: true,
+        summaryExists: true,
         summary
       })
     })
@@ -25,19 +25,19 @@ describe('repository helpers', () => {
         pages: [buildPage({}), summary]
       })
       expect(summaryHelper(definition)).toEqual({
-        shouldPush: false,
-        exists: true,
+        shouldPushSummary: false,
+        summaryExists: true,
         summary
       })
     })
 
-    it('should not push summary to the end if no summary exists', () => {
+    it('should not push summary to the end if no summary summaryExists', () => {
       const definition = buildDefinition({
         pages: []
       })
       expect(summaryHelper(definition)).toEqual({
-        shouldPush: false,
-        exists: false,
+        shouldPushSummary: false,
+        summaryExists: false,
         summary: undefined
       })
     })

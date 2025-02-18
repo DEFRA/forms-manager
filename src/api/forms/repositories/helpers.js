@@ -24,7 +24,7 @@ export async function removeById(session, collectionName, id) {
 
 /**
  * @param {FormDefinition} definition
- * @returns {{readonly summary: PageSummary|undefined, readonly shouldPush: boolean, readonly exists: boolean}}
+ * @returns {{readonly summary: PageSummary|undefined, readonly shouldPushSummary: boolean, readonly summaryExists: boolean}}
  */
 export function summaryHelper(definition) {
   const lastIndex = definition.pages.length - 1
@@ -33,10 +33,10 @@ export function summaryHelper(definition) {
   )
 
   return {
-    get shouldPush() {
+    get shouldPushSummary() {
       return summaryIdx !== lastIndex
     },
-    get exists() {
+    get summaryExists() {
       return summaryIdx >= 0
     },
     get summary() {
