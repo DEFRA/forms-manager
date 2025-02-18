@@ -525,7 +525,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   const session = client.startSession()
 
-  /** @type {Page} */
+  /** @type {Page | undefined} */
   let page
 
   try {

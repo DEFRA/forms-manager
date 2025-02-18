@@ -1,10 +1,7 @@
 import { organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import {
-  buildQuestionPage,
-  buildSummaryPage
-} from '~/src/api/forms/__stubs__/definition.js'
+import { buildQuestionPage } from '~/src/api/forms/__stubs__/definition.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   createDraftFromLive,
@@ -560,8 +557,8 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/definition/draft/pages adds a new page to the db', async () => {
-      const expectedPages = [buildQuestionPage({}), buildSummaryPage({})]
-      jest.mocked(createPageOnDraftDefinition).mockResolvedValue(expectedPages)
+      const expectedPage = buildQuestionPage({})
+      jest.mocked(createPageOnDraftDefinition).mockResolvedValue(expectedPage)
 
       const response = await server.inject({
         method: 'POST',
@@ -572,7 +569,7 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(expectedPages)
+      expect(response.result).toEqual(expectedPage)
     })
   })
 
