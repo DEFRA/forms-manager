@@ -31,9 +31,20 @@ describe('repository helpers', () => {
       })
     })
 
-    it('should not push summary to the end if no summary summaryExists', () => {
+    it('should not push summary to the end if no pages', () => {
       const definition = buildDefinition({
         pages: []
+      })
+      expect(summaryHelper(definition)).toEqual({
+        shouldPushSummary: false,
+        summaryExists: false,
+        summary: undefined
+      })
+    })
+
+    it('should not push summary to the end if summary page does not exist', () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage()]
       })
       expect(summaryHelper(definition)).toEqual({
         shouldPushSummary: false,

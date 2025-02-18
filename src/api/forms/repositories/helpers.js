@@ -24,20 +24,19 @@ export async function removeById(session, collectionName, id) {
 
 /**
  * @param {FormDefinition} definition
- * @returns {{readonly summary: PageSummary | undefined, readonly shouldPushSummary: boolean, readonly summaryExists: boolean}}
+ * @returns {{readonly summary: PageSummary | undefined, readonly shouldPushSummary: boolean, summaryExists: boolean}}
  */
 export function summaryHelper(definition) {
   const lastIndex = definition.pages.length - 1
   const summaryIndex = definition.pages.findIndex(
     (page) => page.controller === ControllerType.Summary
   )
+  const summaryExists = summaryIndex >= 0
 
   return {
+    summaryExists,
     get shouldPushSummary() {
-      return summaryIndex !== lastIndex
-    },
-    get summaryExists() {
-      return summaryIndex >= 0
+      return summaryExists && summaryIndex !== lastIndex
     },
     get summary() {
       const summaryPage = /** @type {PageSummary | undefined} */ (
