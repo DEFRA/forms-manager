@@ -207,6 +207,22 @@ export function getFormDefinition(formId, state = 'draft') {
 }
 
 /**
+ * Partially update the [state] fields
+ * @param {Date} date
+ * @param {FormMetadataAuthor} author
+ * @param {string} state
+ * @returns {PartialFormMetadataDocument}
+ */
+const partialAuditFields = (date, author, state = 'draft') => {
+  return {
+    [`${state}.updatedAt`]: date,
+    [`${state}.updatedBy`]: author,
+    updatedAt: date,
+    updatedBy: author
+  }
+}
+
+/**
  * @param {string} formId - ID of the form
  * @param {FormDefinition} definition - full form definition
  * @param {FormMetadataAuthor} author - the author details
@@ -240,12 +256,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
         await formMetadata.update(
           formId,
           {
-            $set: {
-              'draft.updatedAt': now,
-              'draft.updatedBy': author,
-              updatedAt: now,
-              updatedBy: author
-            }
+            $set: partialAuditFields(now, author)
           },
           session
         )
@@ -287,19 +298,23 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
     const now = new Date()
 
+    const { updatedAt, updatedBy, ...draftAuditFields } = partialAuditFields(
+      now,
+      author
+    )
+
     /** @type {PartialFormMetadataDocument} */
     let updatedForm = {
       ...formUpdate,
-      updatedAt: now,
-      updatedBy: author
+      updatedAt,
+      updatedBy
     }
 
     if (formUpdate.title) {
       updatedForm = {
         ...updatedForm,
         slug: slugify(formUpdate.title),
-        'draft.updatedAt': now,
-        'draft.updatedBy': author
+        ...draftAuditFields
       }
     }
 
@@ -384,13 +399,7 @@ export async function createLiveFromDraft(formId, author) {
           updatedAt: now,
           updatedBy: author
         }
-      : {
-          // Partially update the live state
-          'live.updatedAt': now,
-          'live.updatedBy': author,
-          updatedAt: now,
-          updatedBy: author
-        }
+      : partialAuditFields(now, author, 'live') // Partially update the live state fields
 
     const session = client.startSession()
 
@@ -506,7 +515,37 @@ export async function removeForm(formId) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
+ *
+ * @param {string} formId
+ * @param {Page} newPage
+ * @param {FormMetadataAuthor} author
+ * @param {string} [state]
+ */
+export async function createPage(formId, newPage, author, state = 'draft') {
+  logger.info(`Creating new page for form with ID ${formId}`)
+
+  const session = client.startSession()
+  try {
+    await session.withTransaction(async () => {
+      await formDefinition.addPage(formId, newPage, session, state)
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Created new page for form with ID ${formId}`)
+  return /** @satisfies {Page[]} */ []
+}
+
+/**
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */
