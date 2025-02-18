@@ -21,6 +21,10 @@ const mockCollection = {
 jest.mock('~/src/helpers/get-author.js')
 
 const author = getAuthor()
+/**
+ * @type {any}
+ */
+const mockSession = author
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -61,7 +65,9 @@ describe('form-definition-repository', () => {
   })
   describe('pushSummaryToEnd', () => {
     it('should not edit a live summary', async () => {
-      await expect(pushSummaryToEnd('1234', author, 'live')).rejects.toThrow(
+      await expect(
+        pushSummaryToEnd('1234', mockSession, 'live')
+      ).rejects.toThrow(
         Boom.badRequest('Cannot add summary page to end of a live form')
       )
     })
@@ -69,7 +75,7 @@ describe('form-definition-repository', () => {
       mockCollection.findOne.mockResolvedValue(null)
 
       await expect(
-        pushSummaryToEnd('67ade425d6e8ab1116b0aa9a', author)
+        pushSummaryToEnd('67ade425d6e8ab1116b0aa9a', mockSession)
       ).rejects.toThrow(
         Boom.notFound(
           `Form definition with ID '67ade425d6e8ab1116b0aa9a' not found`
@@ -102,7 +108,10 @@ describe('form-definition-repository', () => {
       }
       mockCollection.findOne.mockResolvedValue(docMock)
 
-      const summary = await pushSummaryToEnd('67ade425d6e8ab1116b0aa9a', author)
+      const summary = await pushSummaryToEnd(
+        '67ade425d6e8ab1116b0aa9a',
+        mockSession
+      )
       expect(summary).toEqual({
         id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
         title: 'Summary',
@@ -138,7 +147,10 @@ describe('form-definition-repository', () => {
       }
       mockCollection.findOne.mockResolvedValue(docMock)
 
-      const summary = await pushSummaryToEnd('67ade425d6e8ab1116b0aa9a', author)
+      const summary = await pushSummaryToEnd(
+        '67ade425d6e8ab1116b0aa9a',
+        mockSession
+      )
       expect(mockCollection.updateOne).not.toHaveBeenCalled()
       expect(summary).toEqual({
         id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
@@ -168,7 +180,10 @@ describe('form-definition-repository', () => {
       }
       mockCollection.findOne.mockResolvedValue(docMock)
 
-      const summary = await pushSummaryToEnd('67ade425d6e8ab1116b0aa9a', author)
+      const summary = await pushSummaryToEnd(
+        '67ade425d6e8ab1116b0aa9a',
+        mockSession
+      )
       expect(mockCollection.updateOne).not.toHaveBeenCalled()
       expect(summary).toBeUndefined()
     })
@@ -176,7 +191,7 @@ describe('form-definition-repository', () => {
 
   describe('addPage', () => {
     const pageToAdd = emptyPage()
-    const summaryPage = buildSummaryPage({})
+    const summaryPage = buildPage(buildSummaryPage({}))
 
     it('should add a page if no summary page summaryExists', async () => {
       mockCollection.findOne.mockResolvedValue({
@@ -184,18 +199,16 @@ describe('form-definition-repository', () => {
           pages: []
         })
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, author)
+      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
       expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
-      // expect(pages).toEqual([pageToAdd])
     })
 
     it('should add a page if summary page is last page', async () => {
       mockCollection.findOne.mockResolvedValue({
         draft: buildDefinition({})
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, author)
+      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
       expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
-      // expect(pages).toEqual([pageToAdd, summaryPage])
     })
 
     it('should add a page and push summary to end if summary page summaryExists and is not last page', async () => {
@@ -206,13 +219,8 @@ describe('form-definition-repository', () => {
           pages: [summaryPage, pageOne]
         })
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, author)
+      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
       expect(mockCollection.updateOne).toHaveBeenCalledTimes(3)
-      // expect(pages).toEqual([
-      //   pageOne,
-      //   { ...pageToAdd, id: expect.any(String) },
-      //   summaryPage
-      // ])
     })
   })
 })
