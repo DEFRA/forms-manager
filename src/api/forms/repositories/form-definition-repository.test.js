@@ -1,7 +1,15 @@
 import Boom from '@hapi/boom'
-import Joi from 'joi'
 
-import { pushSummaryToEnd } from '~/src/api/forms/repositories/form-definition-repository.js'
+import {
+  buildDefinition,
+  buildPage,
+  buildSummaryPage
+} from '~/src/api/forms/__stubs__/definition.js'
+import {
+  addPage,
+  pushSummaryToEnd
+} from '~/src/api/forms/repositories/form-definition-repository.js'
+import { emptyPage } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
@@ -68,7 +76,7 @@ describe('form-definition-repository', () => {
         )
       )
     })
-    it('should push the summary to the end if it exists but is not at the end', async () => {
+    it('should push the summary to the end if it summaryExists but is not at the end', async () => {
       const docMock = {
         draft: {
           name: 'Form with Summary at end',
@@ -140,7 +148,7 @@ describe('form-definition-repository', () => {
       })
     })
 
-    it('should not update the document if no summary page exists', async () => {
+    it('should not update the document if no summary page summaryExists', async () => {
       const docMock = {
         draft: {
           name: 'Form with Summary at end',
@@ -164,11 +172,52 @@ describe('form-definition-repository', () => {
       expect(mockCollection.updateOne).not.toHaveBeenCalled()
       expect(summary).toBeUndefined()
     })
+  })
 
-    it('should be ok', () => {
-      Joi.array()
-        .items(Joi.object({ id: Joi.string().hex().length(24).optional() }))
-        .validate([{ id: 'ee717f885e9519dd4bd094c8' }])
+  describe('addPage', () => {
+    const pageToAdd = emptyPage()
+    const summaryPage = buildSummaryPage({})
+
+    it('should add a page if no summary page summaryExists', async () => {
+      mockCollection.findOne.mockResolvedValue({
+        draft: buildDefinition({
+          pages: []
+        })
+      })
+      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, author)
+      expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
+      // expect(pages).toEqual([pageToAdd])
+    })
+
+    it('should add a page if summary page is last page', async () => {
+      mockCollection.findOne.mockResolvedValue({
+        draft: buildDefinition({})
+      })
+      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, author)
+      expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
+      // expect(pages).toEqual([pageToAdd, summaryPage])
+    })
+
+    it('should add a page and push summary to end if summary page summaryExists and is not last page', async () => {
+      const pageOne = buildPage({})
+
+      mockCollection.findOne.mockResolvedValue({
+        draft: buildDefinition({
+          pages: [summaryPage, pageOne]
+        })
+      })
+      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, author)
+      expect(mockCollection.updateOne).toHaveBeenCalledTimes(3)
+      // expect(pages).toEqual([
+      //   pageOne,
+      //   { ...pageToAdd, id: expect.any(String) },
+      //   summaryPage
+      // ])
     })
   })
 })
+
+/**
+ * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
+ */

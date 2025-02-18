@@ -1,8 +1,12 @@
 import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
+import { v4 as uuidv4 } from 'uuid'
 
-import { removeById } from '~/src/api/forms/repositories/helpers.js'
+import {
+  removeById,
+  summaryHelper
+} from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -217,6 +221,51 @@ export async function pushSummaryToEnd(formId, session, state = 'draft') {
   logger.info(`Updated position of summary on ${formId}`)
 
   return summary
+}
+
+/**
+ * @param {string} formId
+ * @param {Page} page
+ * @param {ClientSession} session
+ * @param {string} [state]
+ * @returns {Promise<void>}
+ */
+export async function addPage(formId, page, session, state = 'draft') {
+  logger.info(`Creating new page for form with ID ${formId}`)
+
+  /**
+   * @type {FormDefinition}
+   */
+  const definition = await get(formId, state)
+
+  const { shouldPushSummary, summaryExists } = summaryHelper(definition)
+
+  if (shouldPushSummary) {
+    await pushSummaryToEnd(formId, session, state)
+  }
+
+  const $position = summaryExists ? -1 : definition.pages.length
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const pageToAdd = {
+    id: uuidv4(),
+    ...page
+  }
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    {
+      $push: {
+        'draft.pages': { $each: [pageToAdd], $position }
+      }
+    },
+    { session }
+  )
+
+  logger.info(`Created new page for form with ID ${formId}`)
 }
 
 /**
