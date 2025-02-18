@@ -1,4 +1,3 @@
-import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { v4 as uuidv4 } from 'uuid'
@@ -11,6 +10,7 @@ import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 const logger = createLogger()
+const DRAFT = 'draft'
 
 /**
  * Adds a form to the Form Store
@@ -93,7 +93,7 @@ export async function createDraftFromLive(id, session) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @param {FormStatus} state - the form state
+ * @param {'draft' | 'live'} state - the form state
  */
 export async function get(formId, state = 'draft') {
   logger.info(`Getting form definition (${state}) for form ID ${formId}`)
@@ -150,9 +150,9 @@ export async function remove(formId, session) {
  * @param {string} formId - the ID of the form
  * @param {string} name - new name for the form
  * @param {ClientSession} session
- * @param {FormStatus} [state] - state of the form to update
+ * @param {'draft' | 'live'} [state] - state of the form to update
  */
-export async function updateName(formId, name, session, state = 'draft') {
+export async function updateName(formId, name, session, state = DRAFT) {
   if (state === 'live') {
     throw Boom.badRequest('Cannot update the name of a live form')
   }
@@ -176,24 +176,20 @@ export async function updateName(formId, name, session, state = 'draft') {
  * Pushes the summary page to the last page
  * @param {string} formId - the ID of the form
  * @param {ClientSession} session
- * @param {FormStatus} [state] - state of the form to update
- * @returns {Promise<undefined|Page>}
+ * @param {'draft' | 'live'} [state] - state of the form to update
+ * @returns {Promise<undefined | PageSummary>}
  */
-export async function pushSummaryToEnd(formId, session, state = 'draft') {
+export async function pushSummaryToEnd(formId, session, state = DRAFT) {
   if (state === 'live') {
     throw Boom.badRequest('Cannot add summary page to end of a live form')
   }
   logger.info(`Checking position of summary on ${formId}`)
 
   const definition = await get(formId, state)
-  const pageCount = definition.pages.length
-  const summary = definition.pages.find(
-    (page) => page.controller === ControllerType.Summary
-  )
 
-  const lastPage = definition.pages[pageCount - 1]
+  const { shouldPushSummary, summary } = summaryHelper(definition)
 
-  if (summary === undefined || lastPage === summary) {
+  if (!shouldPushSummary) {
     logger.info(`Position of summary on ${formId} correct`)
     return summary
   }
@@ -227,10 +223,10 @@ export async function pushSummaryToEnd(formId, session, state = 'draft') {
  * @param {string} formId
  * @param {Page} page
  * @param {ClientSession} session
- * @param {FormStatus} [state]
- * @returns {Promise<void>}
+ * @param {'draft' | 'live'} [state]
+ * @returns {Promise<Page>}
  */
-export async function addPage(formId, page, session, state = 'draft') {
+export async function addPage(formId, page, session, state = DRAFT) {
   logger.info(`Creating new page for form with ID ${formId}`)
 
   /**
@@ -250,10 +246,10 @@ export async function addPage(formId, page, session, state = 'draft') {
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
-  const pageToAdd = {
-    id: uuidv4(),
+  const pageToAdd = /** @type {Page} */ ({
+    id: uuidv4().toString(),
     ...page
-  }
+  })
 
   await coll.updateOne(
     { _id: new ObjectId(formId) },
@@ -266,9 +262,11 @@ export async function addPage(formId, page, session, state = 'draft') {
   )
 
   logger.info(`Created new page for form with ID ${formId}`)
+
+  return pageToAdd
 }
 
 /**
- * @import { FormDefinition, Page, FormStatus } from '@defra/forms-model'
+ * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  */

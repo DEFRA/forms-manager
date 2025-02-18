@@ -64,6 +64,13 @@ describe('form-definition-repository', () => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
   })
   describe('pushSummaryToEnd', () => {
+    const summary = {
+      id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
+      title: 'Summary',
+      path: '/summary',
+      controller: 'SummaryPageController'
+    }
+
     it('should not edit a live summary', async () => {
       await expect(
         pushSummaryToEnd('1234', mockSession, 'live')
@@ -88,12 +95,7 @@ describe('form-definition-repository', () => {
           name: 'Form with Summary at end',
           startPage: '/form-with-summary',
           pages: [
-            {
-              id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
-              title: 'Summary',
-              path: '/summary',
-              controller: 'SummaryPageController'
-            },
+            summary,
             {
               title: 'Test page',
               path: '/test-page',
@@ -108,17 +110,28 @@ describe('form-definition-repository', () => {
       }
       mockCollection.findOne.mockResolvedValue(docMock)
 
-      const summary = await pushSummaryToEnd(
+      const summaryResult = await pushSummaryToEnd(
         '67ade425d6e8ab1116b0aa9a',
         mockSession
       )
-      expect(summary).toEqual({
-        id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
-        title: 'Summary',
-        path: '/summary',
-        controller: 'SummaryPageController'
-      })
-      expect(mockCollection.updateOne).toHaveBeenCalled()
+
+      expect(summaryResult).toEqual(summary)
+      expect(mockCollection.updateOne).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        {
+          $pull: { 'draft.pages': { controller: 'SummaryPageController' } }
+        },
+        expect.anything()
+      )
+      expect(mockCollection.updateOne).toHaveBeenNthCalledWith(
+        2,
+        expect.anything(),
+        {
+          $push: { 'draft.pages': summary } // Adds the summary page back
+        },
+        expect.anything()
+      )
     })
 
     it('should not update the document if summary page is at end', async () => {
@@ -133,12 +146,7 @@ describe('form-definition-repository', () => {
               next: [],
               components: []
             },
-            {
-              id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
-              title: 'Summary',
-              path: '/summary',
-              controller: 'SummaryPageController'
-            }
+            summary
           ],
           conditions: [],
           sections: [],
@@ -147,12 +155,12 @@ describe('form-definition-repository', () => {
       }
       mockCollection.findOne.mockResolvedValue(docMock)
 
-      const summary = await pushSummaryToEnd(
+      const summaryResult = await pushSummaryToEnd(
         '67ade425d6e8ab1116b0aa9a',
         mockSession
       )
       expect(mockCollection.updateOne).not.toHaveBeenCalled()
-      expect(summary).toEqual({
+      expect(summaryResult).toEqual({
         id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
         title: 'Summary',
         path: '/summary',
@@ -199,8 +207,16 @@ describe('form-definition-repository', () => {
           pages: []
         })
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
+      const page = await addPage(
+        '1eabd1437567fe1b26708bbb',
+        pageToAdd,
+        mockSession
+      )
       expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
+      expect(page).toMatchObject({
+        ...pageToAdd,
+        id: expect.any(String)
+      })
     })
 
     it('should add a page if summary page is last page', async () => {

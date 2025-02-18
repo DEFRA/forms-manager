@@ -66,6 +66,9 @@ export const buildMockCollection = () => {
     },
     get dbName() {
       return ''
+    },
+    get timeoutMS() {
+      return undefined
     }
   }
 }
