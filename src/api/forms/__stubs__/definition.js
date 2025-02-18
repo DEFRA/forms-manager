@@ -17,9 +17,9 @@ export function buildQuestionPage(partialPage = {}) {
 }
 
 /**
- * @param {Partial<PageSummary>} partialSummaryPage
+ * @param {Partial<PageSummary>} [partialSummaryPage]
  */
-export function buildSummaryPage(partialSummaryPage) {
+export function buildSummaryPage(partialSummaryPage = {}) {
   /** @type {PageSummary} */
   const page = /** @satisfies {PageSummary} */ {
     id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
