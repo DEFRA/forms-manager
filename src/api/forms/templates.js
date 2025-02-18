@@ -6,7 +6,7 @@ import { ControllerPath, ControllerType } from '@defra/forms-model'
 export function empty() {
   return /** @satisfies {FormDefinition} */ ({
     name: '',
-    startPage: '',
+    startPage: '/page-one',
     pages: [
       {
         id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
@@ -27,5 +27,18 @@ export function empty() {
 }
 
 /**
- * @import { FormDefinition } from '@defra/forms-model'
+ *
+ * @returns {Page}
+ */
+export function emptyPage() {
+  return /** @satisfies {Page} */ {
+    title: 'Page One',
+    path: '/page-one',
+    next: [],
+    components: []
+  }
+}
+
+/**
+ * @import { FormDefinition, Page } from '@defra/forms-model'
  */
