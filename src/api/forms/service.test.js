@@ -2,7 +2,10 @@ import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
-import { buildPage } from '~/src/api/forms/__stubs__/definition.js'
+import {
+  buildDefinition,
+  buildPage
+} from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -12,7 +15,7 @@ import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
-  createPage,
+  createPageOnDraftDefinition,
   getFormBySlug,
   getFormDefinition,
   listForms,
@@ -1227,20 +1230,33 @@ describe('Forms service', () => {
     })
   })
 
-  describe('createPage', () => {
+  describe('createPageOnDraftDefinition', () => {
     it('should create a new page', async () => {
-      jest.mocked(formDefinition.get).mockResolvedValueOnce({
-        ...definition
-      })
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
       const formDefinitionPageCustomisedTitle = buildPage({
         title: 'A new form page'
       })
 
+      const expectedPages /**  @satisfies {Page[]} */ = [
+        formDefinitionPageCustomisedTitle,
+        ...definition.pages
+      ]
+      const newDefinition = buildDefinition({
+        ...definition,
+        pages: expectedPages
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
+
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
       const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPage')
 
-      await createPage('123', formDefinitionPageCustomisedTitle, author)
+      const pages = await createPageOnDraftDefinition(
+        '123',
+        formDefinitionPageCustomisedTitle,
+        author
+      )
       const dbOperationArgs = dbMetadataSpy.mock.calls[0]
 
       expect(dbDefinitionSpy).toHaveBeenCalledWith(
@@ -1256,6 +1272,19 @@ describe('Forms service', () => {
         updatedAt: dateUsedInFakeTime,
         updatedBy: author
       })
+      expect(pages).toEqual(expectedPages)
+    })
+
+    it('should fail if no draft definition exists', async () => {
+      jest
+        .mocked(formDefinition.addPage)
+        .mockRejectedValueOnce(Boom.notFound('Error'))
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      await expect(
+        createPageOnDraftDefinition('123', buildPage({}), author)
+      ).rejects.toThrow(Boom.notFound('Error'))
+      expect(dbMetadataSpy).not.toHaveBeenCalled()
     })
   })
 })

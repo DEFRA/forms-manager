@@ -519,15 +519,15 @@ export async function removeForm(formId) {
  * @param {string} formId
  * @param {Page} newPage
  * @param {FormMetadataAuthor} author
- * @param {string} [state]
  */
-export async function createPage(formId, newPage, author, state = 'draft') {
+export async function createPageOnDraftDefinition(formId, newPage, author) {
   logger.info(`Creating new page for form with ID ${formId}`)
 
   const session = client.startSession()
+
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPage(formId, newPage, session, state)
+      await formDefinition.addPage(formId, newPage, session, 'draft')
 
       // Update the form with the new draft state
       await formMetadata.update(
@@ -541,7 +541,9 @@ export async function createPage(formId, newPage, author, state = 'draft') {
   }
 
   logger.info(`Created new page for form with ID ${formId}`)
-  return /** @satisfies {Page[]} */ []
+
+  const { pages } = await getFormDefinition(formId, 'draft')
+  return /** @satisfies {Page[]} */ pages
 }
 
 /**
