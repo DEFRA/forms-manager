@@ -2,7 +2,7 @@ import { organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import {
-  buildPage,
+  buildQuestionPage,
   buildSummaryPage
 } from '~/src/api/forms/__stubs__/definition.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
@@ -65,8 +65,7 @@ describe('Forms route', () => {
     teamEmail: 'defraforms@defra.gov.uk'
   }
 
-  /** @satisfies {TextFieldComponent} */
-  const stubTextFieldComponent = {
+  const stubTextFieldComponent = /** @type {TextFieldComponent} */ {
     title: 'What is your name?',
     type: components.TextField,
     name: 'Ghcbmw',
@@ -74,8 +73,7 @@ describe('Forms route', () => {
     schema: {}
   }
 
-  /** @satisfies {PageStart} */
-  const stubPageObject = {
+  const stubPageObject = /** @type {PageStart} */ {
     title: 'What is your name?',
     path: '/what-is-your-name',
     next: [],
@@ -562,7 +560,7 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/definition/draft/pages adds a new page to the db', async () => {
-      const expectedPages = [buildPage({}), buildSummaryPage({})]
+      const expectedPages = [buildQuestionPage({}), buildSummaryPage({})]
       jest.mocked(createPageOnDraftDefinition).mockResolvedValue(expectedPages)
 
       const response = await server.inject({
@@ -846,7 +844,7 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/definition/draft/pages with invalid payload returns validation errors', async () => {
-      const invalidPageObject /** @type {Page} */ = buildPage({
+      const invalidPageObject /** @type {Page} */ = buildQuestionPage({
         id: 'not-a-valid-id',
         path: '/status'
       })
@@ -1167,6 +1165,6 @@ describe('Forms route', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput, FilterOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput, FilterOptions, PageStart, TextFieldComponent } from '@defra/forms-model'
  * @import { Server } from '@hapi/hapi'
  */

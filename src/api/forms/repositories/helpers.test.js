@@ -1,6 +1,6 @@
 import {
   buildDefinition,
-  buildPage,
+  buildQuestionPage,
   buildSummaryPage
 } from '~/src/api/forms/__stubs__/definition.js'
 import { summaryHelper } from '~/src/api/forms/repositories/helpers.js'
@@ -11,7 +11,7 @@ describe('repository helpers', () => {
 
     it('should push the summary to the end if it not in the correct place', () => {
       const definition = buildDefinition({
-        pages: [summary, buildPage({})]
+        pages: [summary, buildQuestionPage({})]
       })
       expect(summaryHelper(definition)).toEqual({
         shouldPushSummary: true,
@@ -22,7 +22,7 @@ describe('repository helpers', () => {
 
     it('should not push summary to the end if it is in the correct place', () => {
       const definition = buildDefinition({
-        pages: [buildPage({}), summary]
+        pages: [buildQuestionPage({}), summary]
       })
       expect(summaryHelper(definition)).toEqual({
         shouldPushSummary: false,

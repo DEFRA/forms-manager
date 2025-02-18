@@ -4,7 +4,7 @@ import { pino } from 'pino'
 
 import {
   buildDefinition,
-  buildPage
+  buildQuestionPage
 } from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
@@ -1234,7 +1234,7 @@ describe('Forms service', () => {
     it('should create a new page', async () => {
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
-      const formDefinitionPageCustomisedTitle = buildPage({
+      const formDefinitionPageCustomisedTitle = buildQuestionPage({
         title: 'A new form page'
       })
 
@@ -1282,7 +1282,7 @@ describe('Forms service', () => {
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
 
       await expect(
-        createPageOnDraftDefinition('123', buildPage({}), author)
+        createPageOnDraftDefinition('123', buildQuestionPage({}), author)
       ).rejects.toThrow(Boom.notFound('Error'))
       expect(dbMetadataSpy).not.toHaveBeenCalled()
     })

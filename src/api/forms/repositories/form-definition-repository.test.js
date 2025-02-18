@@ -2,21 +2,18 @@ import Boom from '@hapi/boom'
 
 import {
   buildDefinition,
-  buildPage,
+  buildQuestionPage,
   buildSummaryPage
 } from '~/src/api/forms/__stubs__/definition.js'
+import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addPage,
   pushSummaryToEnd
 } from '~/src/api/forms/repositories/form-definition-repository.js'
-import { emptyPage } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
-const mockCollection = {
-  findOne: jest.fn(),
-  updateOne: jest.fn()
-}
+const mockCollection = buildMockCollection()
 
 jest.mock('~/src/helpers/get-author.js')
 
@@ -28,10 +25,13 @@ const mockSession = author
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
-
+  const collection =
+    /** @satisfies {Collection<{draft: FormDefinition}>} */ jest
+      .fn()
+      .mockImplementation(() => mockCollection)
   return {
     db: {
-      collection: jest.fn().mockImplementation(() => mockCollection)
+      collection
     },
     get client() {
       if (!isPrepared) {
@@ -61,7 +61,7 @@ jest.mock('~/src/mongo.js', () => {
 
 describe('form-definition-repository', () => {
   beforeEach(() => {
-    db.collection.mockReturnValue(mockCollection)
+    jest.mocked(db.collection).mockReturnValue(mockCollection)
   })
   describe('pushSummaryToEnd', () => {
     it('should not edit a live summary', async () => {
@@ -190,8 +190,8 @@ describe('form-definition-repository', () => {
   })
 
   describe('addPage', () => {
-    const pageToAdd = emptyPage()
-    const summaryPage = buildPage(buildSummaryPage({}))
+    const pageToAdd = buildQuestionPage()
+    const summaryPage = buildSummaryPage({})
 
     it('should add a page if no summary page summaryExists', async () => {
       mockCollection.findOne.mockResolvedValue({
@@ -212,7 +212,7 @@ describe('form-definition-repository', () => {
     })
 
     it('should add a page and push summary to end if summary page summaryExists and is not last page', async () => {
-      const pageOne = buildPage({})
+      const pageOne = buildQuestionPage({})
 
       mockCollection.findOne.mockResolvedValue({
         draft: buildDefinition({
@@ -227,5 +227,5 @@ describe('form-definition-repository', () => {
 
 /**
  * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
+ * @import { WithId, Collection, Db } from 'mongodb'
  */

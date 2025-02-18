@@ -27,18 +27,5 @@ export function empty() {
 }
 
 /**
- *
- * @returns {Page}
- */
-export function emptyPage() {
-  return /** @satisfies {Page} */ {
-    title: 'Page One',
-    path: '/page-one',
-    next: [],
-    components: []
-  }
-}
-
-/**
- * @import { FormDefinition, Page } from '@defra/forms-model'
+ * @import { FormDefinition } from '@defra/forms-model'
  */

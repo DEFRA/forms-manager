@@ -1,6 +1,5 @@
 /**
  * Get the author from the auth credentials
- * @param {UserCredentials & OidcStandardClaims} [user]
  * @returns {FormMetadataAuthor}
  */
 export function getAuthor() {
