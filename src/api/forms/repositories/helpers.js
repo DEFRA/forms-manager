@@ -1,3 +1,4 @@
+import { ControllerType } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import { db } from '~/src/mongo.js'
@@ -22,5 +23,29 @@ export async function removeById(session, collectionName, id) {
 }
 
 /**
+ * @param {FormDefinition} definition
+ * @returns {{readonly summary: PageSummary|undefined, readonly shouldPush: boolean, readonly exists: boolean}}
+ */
+export function summaryHelper(definition) {
+  const lastIndex = definition.pages.length - 1
+  const summaryIdx = definition.pages.findIndex(
+    (page) => page.controller === ControllerType.Summary
+  )
+
+  return {
+    get shouldPush() {
+      return summaryIdx !== lastIndex
+    },
+    get exists() {
+      return summaryIdx >= 0
+    },
+    get summary() {
+      return definition.pages[summaryIdx]
+    }
+  }
+}
+
+/**
+ * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */
