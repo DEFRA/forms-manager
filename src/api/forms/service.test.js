@@ -1236,7 +1236,8 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
 
       const formDefinitionPageCustomisedTitle = buildQuestionPage({
-        title: 'A new form page'
+        title: 'A new form page',
+        path: '/a-new-form-page'
       })
       const expectedPage = buildQuestionPage({
         ...formDefinitionPageCustomisedTitle,
@@ -1253,6 +1254,7 @@ describe('Forms service', () => {
         pages: expectedPages
       })
 
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
       jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
 
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
@@ -1282,9 +1284,28 @@ describe('Forms service', () => {
       expect(page).toEqual(expectedPage)
     })
 
+    it('should fail if path is duplicate', async () => {
+      const pageOne = buildQuestionPage({
+        path: '/page-one'
+      })
+      const pageOneDuplicate = buildQuestionPage({
+        title: 'Page One Duplicate',
+        path: '/page-one'
+      })
+      const definition1 = buildDefinition({
+        ...definition,
+        pages: [pageOne]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      await expect(
+        createPageOnDraftDefinition('123', pageOneDuplicate, author)
+      ).rejects.toThrow(Boom.conflict('Duplicate page path on Form ID 123'))
+    })
     it('should fail if no draft definition exists', async () => {
       jest
-        .mocked(formDefinition.addPage)
+        .mocked(formDefinition.get)
         .mockRejectedValueOnce(Boom.notFound('Error'))
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
 

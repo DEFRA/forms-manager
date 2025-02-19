@@ -21,7 +21,7 @@ const defaultAuthor = {
 }
 
 const defaultDate = new Date('2024-06-25T23:00:00Z') // date we went live
-
+const DRAFT = 'draft'
 /**
  * Maps a form metadata document from MongoDB to form metadata
  * @param {WithId<Partial<FormMetadataDocument>>} document - form metadata document (with ID)
@@ -202,7 +202,7 @@ export async function getFormBySlug(slug) {
  * @param {string} formId - the ID of the form
  * @param {'draft' | 'live'} state - the form state
  */
-export function getFormDefinition(formId, state = 'draft') {
+export function getFormDefinition(formId, state = DRAFT) {
   return formDefinition.get(formId, state)
 }
 
@@ -213,7 +213,7 @@ export function getFormDefinition(formId, state = 'draft') {
  * @param {string} state
  * @returns {PartialFormMetadataDocument}
  */
-const partialAuditFields = (date, author, state = 'draft') => {
+const partialAuditFields = (date, author, state = DRAFT) => {
   return {
     [`${state}.updatedAt`]: date,
     [`${state}.updatedBy`]: author,
@@ -374,7 +374,7 @@ export async function createLiveFromDraft(formId, author) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
     }
 
-    const draftFormDefinition = await formDefinition.get(formId, 'draft')
+    const draftFormDefinition = await formDefinition.get(formId, DRAFT)
 
     if (!draftFormDefinition.startPage) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
@@ -513,7 +513,7 @@ export async function removeForm(formId) {
 
   logger.info(`Removed form with ID ${formId}`)
 }
-
+// TODO: refactor business logic into service layer
 /**
  *
  * @param {string} formId
@@ -524,6 +524,13 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   logger.info(`Creating new page for form with ID ${formId}`)
 
   const session = client.startSession()
+
+  /** @type {FormDefinition} */
+  const formDraftDefinition = await getFormDefinition(formId, DRAFT)
+
+  if (formDraftDefinition.pages.some((page) => page.path === newPage.path)) {
+    throw Boom.conflict(`Duplicate page path on Form ID ${formId}`)
+  }
 
   /** @type {Page | undefined} */
   let page
