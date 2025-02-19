@@ -10,7 +10,10 @@ import {
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { findPage } from '~/src/api/forms/repositories/helpers.js'
+import {
+  findPage,
+  uniquePathGate
+} from '~/src/api/forms/repositories/helpers.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
@@ -515,6 +518,7 @@ export async function removeForm(formId) {
 
   logger.info(`Removed form with ID ${formId}`)
 }
+
 // TODO: refactor business logic into service layer
 /**
  * Adds a new page to a draft definition
@@ -530,9 +534,11 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   /** @type {FormDefinition} */
   const formDraftDefinition = await getFormDefinition(formId, DRAFT)
 
-  if (formDraftDefinition.pages.some((page) => page.path === newPage.path)) {
-    throw Boom.conflict(`Duplicate page path on Form ID ${formId}`)
-  }
+  uniquePathGate(
+    formDraftDefinition,
+    newPage.path,
+    `Duplicate page path on Form ID ${formId}`
+  )
 
   /** @type {Page | undefined} */
   let page

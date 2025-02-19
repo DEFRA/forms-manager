@@ -1,4 +1,5 @@
 import { ControllerType } from '@defra/forms-model'
+import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import { db } from '~/src/mongo.js'
@@ -52,6 +53,17 @@ export function summaryHelper(definition) {
  */
 export function findPage(definition, pageId) {
   return definition.pages.find((page) => page.id === pageId)
+}
+
+/**
+ * @param {FormDefinition} formDraftDefinition
+ * @param {string} path
+ * @param {string} message
+ */
+export const uniquePathGate = (formDraftDefinition, path, message) => {
+  if (formDraftDefinition.pages.some((page) => page.path === path)) {
+    throw Boom.conflict(message)
+  }
 }
 /**
  * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
