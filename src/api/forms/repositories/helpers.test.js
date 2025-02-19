@@ -3,7 +3,10 @@ import {
   buildQuestionPage,
   buildSummaryPage
 } from '~/src/api/forms/__stubs__/definition.js'
-import { summaryHelper } from '~/src/api/forms/repositories/helpers.js'
+import {
+  findPage,
+  summaryHelper
+} from '~/src/api/forms/repositories/helpers.js'
 
 describe('repository helpers', () => {
   describe('summaryHelper', () => {
@@ -14,7 +17,7 @@ describe('repository helpers', () => {
         pages: [summary, buildQuestionPage({})]
       })
       expect(summaryHelper(definition)).toEqual({
-        shouldPushSummary: true,
+        shouldRepositionSummary: true,
         summaryExists: true,
         summary
       })
@@ -25,7 +28,7 @@ describe('repository helpers', () => {
         pages: [buildQuestionPage({}), summary]
       })
       expect(summaryHelper(definition)).toEqual({
-        shouldPushSummary: false,
+        shouldRepositionSummary: false,
         summaryExists: true,
         summary
       })
@@ -36,7 +39,7 @@ describe('repository helpers', () => {
         pages: []
       })
       expect(summaryHelper(definition)).toEqual({
-        shouldPushSummary: false,
+        shouldRepositionSummary: false,
         summaryExists: false,
         summary: undefined
       })
@@ -47,10 +50,33 @@ describe('repository helpers', () => {
         pages: [buildQuestionPage()]
       })
       expect(summaryHelper(definition)).toEqual({
-        shouldPushSummary: false,
+        shouldRepositionSummary: false,
         summaryExists: false,
         summary: undefined
       })
+    })
+  })
+
+  describe('findPage', () => {
+    it('should find page if page exists in definition', () => {
+      const questionPage = buildQuestionPage({
+        id: '0d174e6c-6131-4588-80bc-684238e13096'
+      })
+      const definition = buildDefinition({
+        pages: [questionPage, buildSummaryPage()]
+      })
+      expect(
+        findPage(definition, '0d174e6c-6131-4588-80bc-684238e13096')
+      ).toEqual(questionPage)
+    })
+
+    it('should return undefined if page is not found', () => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPage()]
+      })
+      expect(
+        findPage(definition, '0d174e6c-6131-4588-80bc-684238e13096')
+      ).toBeUndefined()
     })
   })
 })

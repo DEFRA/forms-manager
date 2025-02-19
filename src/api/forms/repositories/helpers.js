@@ -24,7 +24,7 @@ export async function removeById(session, collectionName, id) {
 
 /**
  * @param {FormDefinition} definition
- * @returns {{readonly summary: PageSummary | undefined, shouldPushSummary: boolean, summaryExists: boolean}}
+ * @returns {{readonly summary: PageSummary | undefined, shouldRepositionSummary: boolean, summaryExists: boolean}}
  */
 export function summaryHelper(definition) {
   const lastIndex = definition.pages.length - 1
@@ -32,11 +32,11 @@ export function summaryHelper(definition) {
     (page) => page.controller === ControllerType.Summary
   )
   const summaryExists = summaryIndex >= 0
-  const shouldPushSummary = summaryExists && summaryIndex !== lastIndex
+  const shouldRepositionSummary = summaryExists && summaryIndex !== lastIndex
 
   return {
     summaryExists,
-    shouldPushSummary,
+    shouldRepositionSummary,
     get summary() {
       const summaryPage = /** @type {PageSummary | undefined} */ (
         definition.pages[summaryIndex]
@@ -46,6 +46,13 @@ export function summaryHelper(definition) {
   }
 }
 
+/**
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ */
+export function findPage(definition, pageId) {
+  return definition.pages.find((page) => page.id === pageId)
+}
 /**
  * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
