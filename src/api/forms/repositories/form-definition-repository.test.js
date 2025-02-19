@@ -1,3 +1,4 @@
+import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -12,6 +13,7 @@ import {
   addComponents,
   addPage,
   pushSummaryToEnd,
+  removeMatchingPages,
   updatePage
 } from '~/src/api/forms/repositories/form-definition-repository.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -68,6 +70,38 @@ jest.mock('~/src/mongo.js', () => {
 describe('form-definition-repository', () => {
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
+  })
+
+  describe('removeMatchingPages', () => {
+    it('should not edit a live summary', async () => {
+      await expect(
+        removeMatchingPages(
+          formId,
+          { controller: ControllerType.Summary },
+          mockSession,
+          'live'
+        )
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot remove page on live form ID 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+
+    it('should remove a page', async () => {
+      await removeMatchingPages(
+        formId,
+        { controller: ControllerType.Summary },
+        mockSession
+      )
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $pull: { 'draft.pages': { controller: 'SummaryPageController' } }
+      })
+    })
   })
   describe('pushSummaryToEnd', () => {
     const summary = {

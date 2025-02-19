@@ -173,6 +173,38 @@ export async function updateName(formId, name, session, state = DRAFT) {
 }
 
 /**
+ * Updates the name of a draft form definition
+ * @param {string} formId - the ID of the form
+ * @param {Partial<Page>} matchCriteria - new name for the form
+ * @param {ClientSession} session
+ * @param {'draft' | 'live'} [state] - state of the form to update
+ */
+export async function removeMatchingPages(
+  formId,
+  matchCriteria,
+  session,
+  state = DRAFT
+) {
+  if (state === 'live') {
+    throw Boom.badRequest(`Cannot remove page on live form ID ${formId}`)
+  }
+  logger.info(`Removing page on ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    {
+      $pull: { 'draft.pages': matchCriteria } // Removes all Summary pages
+    },
+    { session }
+  )
+
+  logger.info(`Removed page on ${formId}`)
+}
+
+/**
  * Pushes the summary page to the last page
  * @param {string} formId - the ID of the form
  * @param {ClientSession} session
