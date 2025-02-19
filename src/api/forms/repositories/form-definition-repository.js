@@ -205,6 +205,41 @@ export async function removeMatchingPages(
 }
 
 /**
+ * @param {string} formId - the ID of the form
+ * @param {Page} page - new name for the form
+ * @param {ClientSession} session
+ * @param {{position?: number; state?: 'live' | 'draft' }} options
+ * @returns {Promise<void>}
+ */
+export async function addPageAtPosition(
+  formId,
+  page,
+  session,
+  { position = Number.MAX_SAFE_INTEGER, state = DRAFT }
+) {
+  if (state === 'live') {
+    throw Boom.badRequest(`Cannot remove add on live form ID ${formId}`)
+  }
+
+  logger.info(`Adding page on Form ID ${formId}`)
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    {
+      $push: {
+        'draft.pages': { $each: [page], $position: position }
+      }
+    },
+    { session }
+  )
+
+  logger.info(`Added page on Form ID ${formId}`)
+}
+
+/**
  * Pushes the summary page to the last page
  * @param {string} formId - the ID of the form
  * @param {ClientSession} session

@@ -12,6 +12,7 @@ import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
   addPage,
+  addPageAtPosition,
   pushSummaryToEnd,
   removeMatchingPages,
   updatePage
@@ -103,6 +104,45 @@ describe('form-definition-repository', () => {
       })
     })
   })
+
+  describe('addPageAtPosition', () => {
+    const page = buildQuestionPage()
+
+    it('should not edit a live summary', async () => {
+      await expect(
+        addPageAtPosition('1234', page, mockSession, { state: 'live' })
+      ).rejects.toThrow(
+        Boom.badRequest('Cannot remove add on live form ID 1234')
+      )
+    })
+
+    it('should add a page at position', async () => {
+      await addPageAtPosition(formId, page, mockSession, { position: -1 })
+
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $push: { 'draft.pages': { $each: [page], $position: -1 } }
+      })
+    })
+
+    it('should add a page to the end', async () => {
+      await addPageAtPosition(formId, page, mockSession, {})
+
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $push: {
+          'draft.pages': { $each: [page], $position: Number.MAX_SAFE_INTEGER }
+        }
+      })
+    })
+  })
+
   describe('pushSummaryToEnd', () => {
     const summary = {
       id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
