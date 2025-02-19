@@ -1,14 +1,17 @@
 import Boom from '@hapi/boom'
+import { ObjectId } from 'mongodb'
 
 import {
   buildDefinition,
   buildQuestionPage,
-  buildSummaryPage
+  buildSummaryPage,
+  buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addPage,
-  pushSummaryToEnd
+  pushSummaryToEnd,
+  updatePage
 } from '~/src/api/forms/repositories/form-definition-repository.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
@@ -22,6 +25,8 @@ const author = getAuthor()
  * @type {any}
  */
 const mockSession = author
+const formId = '1eabd1437567fe1b26708bbb'
+const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -207,11 +212,7 @@ describe('form-definition-repository', () => {
           pages: []
         })
       })
-      const page = await addPage(
-        '1eabd1437567fe1b26708bbb',
-        pageToAdd,
-        mockSession
-      )
+      const page = await addPage(formId, pageToAdd, mockSession)
       expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
       expect(page).toMatchObject({
         ...pageToAdd,
@@ -223,7 +224,7 @@ describe('form-definition-repository', () => {
       mockCollection.findOne.mockResolvedValue({
         draft: buildDefinition({})
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
+      await addPage(formId, pageToAdd, mockSession)
       expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
     })
 
@@ -235,8 +236,41 @@ describe('form-definition-repository', () => {
           pages: [summaryPage, pageOne]
         })
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
+      await addPage(formId, pageToAdd, mockSession)
       expect(mockCollection.updateOne).toHaveBeenCalledTimes(3)
+    })
+  })
+
+  describe('updatePage', () => {
+    const page = buildQuestionPage({
+      id: pageId,
+      title: 'New title',
+      path: 'New path',
+      components: [buildTextFieldComponent({})]
+    })
+
+    it('should fail if form is live', async () => {
+      await expect(
+        updatePage(formId, pageId, page, mockSession, 'live')
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot update page on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+    it('should update a page', async () => {
+      await updatePage(formId, pageId, page, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toMatchObject({
+        $set: {
+          'draft.pages.$': page
+        }
+      })
     })
   })
 })

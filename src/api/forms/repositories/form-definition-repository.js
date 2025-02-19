@@ -267,6 +267,34 @@ export async function addPage(formId, page, session, state = DRAFT) {
 }
 
 /**
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {Page} page
+ * @param {ClientSession} session
+ * @param {'live' | 'draft'} [state]
+ * @returns {Promise<void>}
+ */
+export async function updatePage(formId, pageId, page, session, state = DRAFT) {
+  if (state === 'live') {
+    throw Boom.badRequest(`Cannot update page on a live form - ${formId}`)
+  }
+
+  logger.info(`Updating page ID ${pageId} on form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
+    { $set: { 'draft.pages.$': page } },
+    { session }
+  )
+
+  logger.info(`Updated page ID ${pageId} on form ID ${formId}`)
+}
+
+/**
  * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  */
