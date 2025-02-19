@@ -2,15 +2,21 @@ import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
+import {
+  buildDefinition,
+  buildQuestionPage,
+  buildSummaryPage
+} from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
+  createPageOnDraftDefinition,
   getFormBySlug,
   getFormDefinition,
   listForms,
@@ -19,8 +25,10 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
 
+jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
@@ -53,24 +61,19 @@ jest.mock('~/src/mongo.js', () => {
     }
   }
 })
+
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
-const { empty: actualEmptyForm } = /** @type {typeof formTemplates} */ (
+const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
+
+const author = getAuthor()
 
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
   const dateUsedInFakeTime = new Date('2020-01-01')
-
-  /**
-   * @satisfies {FormMetadataAuthor}
-   */
-  const author = {
-    id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc',
-    displayName: 'Enrique Chase'
-  }
 
   /**
    * @satisfies {FormMetadataInput}
@@ -170,14 +173,14 @@ describe('Forms service', () => {
     status: ['live', 'draft']
   }
 
-  let definition = actualEmptyForm()
+  let definition = emptyFormWithSummary()
 
   beforeAll(async () => {
     await prepareDb(pino())
   })
 
   beforeEach(() => {
-    definition = actualEmptyForm()
+    definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
   })
 
@@ -1161,7 +1164,7 @@ describe('Forms service', () => {
   })
 
   describe('updateDraftFormDefinition', () => {
-    const formDefinitionCustomisedTitle = actualEmptyForm()
+    const formDefinitionCustomisedTitle = emptyFormWithSummary()
     formDefinitionCustomisedTitle.name =
       "A custom form name that shouldn't be allowed"
 
@@ -1218,13 +1221,77 @@ describe('Forms service', () => {
         draft: undefined
       })
 
-      const formDefinitionCustomised = actualEmptyForm()
+      const formDefinitionCustomised = emptyFormWithSummary()
 
       await expect(
         updateDraftFormDefinition('123', formDefinitionCustomised, author)
       ).rejects.toThrow(
         Boom.badRequest(`Form with ID '123' has no draft state`)
       )
+    })
+  })
+
+  describe('createPageOnDraftDefinition', () => {
+    it('should create a new page', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      const formDefinitionPageCustomisedTitle = buildQuestionPage({
+        title: 'A new form page'
+      })
+      const expectedPage = buildQuestionPage({
+        ...formDefinitionPageCustomisedTitle,
+        id: '2dfd8149-504c-45c6-bd61-c45602d1fc47'
+      })
+      const summaryPage = buildSummaryPage()
+
+      const expectedPages /**  @satisfies {Page[]} */ = [
+        expectedPage,
+        summaryPage
+      ]
+      const newDefinition = buildDefinition({
+        ...definition,
+        pages: expectedPages
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
+
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest
+        .spyOn(formDefinition, 'addPage')
+        .mockResolvedValue(expectedPage)
+
+      const page = await createPageOnDraftDefinition(
+        '123',
+        formDefinitionPageCustomisedTitle,
+        author
+      )
+      const dbOperationArgs = dbMetadataSpy.mock.calls[0]
+
+      expect(dbDefinitionSpy).toHaveBeenCalledWith(
+        '123',
+        formDefinitionPageCustomisedTitle,
+        expect.anything()
+      )
+      expect(dbOperationArgs[0]).toBe('123')
+      expect(dbOperationArgs[1].$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+      expect(page).toEqual(expectedPage)
+    })
+
+    it('should fail if no draft definition exists', async () => {
+      jest
+        .mocked(formDefinition.addPage)
+        .mockRejectedValueOnce(Boom.notFound('Error'))
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      await expect(
+        createPageOnDraftDefinition('123', buildQuestionPage({}), author)
+      ).rejects.toThrow(Boom.notFound('Error'))
+      expect(dbMetadataSpy).not.toHaveBeenCalled()
     })
   })
 })

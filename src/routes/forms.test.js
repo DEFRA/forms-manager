@@ -1,11 +1,13 @@
 import { organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
+import { buildQuestionPage } from '~/src/api/forms/__stubs__/definition.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
+  createPageOnDraftDefinition,
   getForm,
   getFormBySlug,
   getFormDefinition,
@@ -41,6 +43,9 @@ describe('Forms route', () => {
   const now = new Date()
   const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
   const authorDisplayName = 'Enrique Chase'
+  const components = {
+    TextField: 'TextField'
+  }
 
   /**
    * @satisfies {FormMetadataAuthor}
@@ -55,6 +60,21 @@ describe('Forms route', () => {
     organisation: 'Defra',
     teamName: 'Defra Forms',
     teamEmail: 'defraforms@defra.gov.uk'
+  }
+
+  const stubTextFieldComponent = /** @type {TextFieldComponent} */ {
+    title: 'What is your name?',
+    type: components.TextField,
+    name: 'Ghcbmw',
+    options: undefined,
+    schema: {}
+  }
+
+  const stubPageObject = /** @type {PageStart} */ {
+    title: 'What is your name?',
+    path: '/what-is-your-name',
+    next: [],
+    components: [stubTextFieldComponent]
   }
 
   /**
@@ -535,6 +555,22 @@ describe('Forms route', () => {
         status: 'created-draft'
       })
     })
+
+    test('Testing POST /forms/{id}/definition/draft/pages adds a new page to the db', async () => {
+      const expectedPage = buildQuestionPage({})
+      jest.mocked(createPageOnDraftDefinition).mockResolvedValue(expectedPage)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages`,
+        payload: stubPageObject,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(expectedPage)
+    })
   })
 
   describe('Error responses', () => {
@@ -801,6 +837,32 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         error: 'FormAlreadyExistsError',
         message: 'Form with slug my-title already exists'
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/pages with invalid payload returns validation errors', async () => {
+      const invalidPageObject /** @type {Page} */ = buildQuestionPage({
+        id: 'not-a-valid-id',
+        path: '/status'
+      })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages`,
+        payload: invalidPageObject,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"id" must be a valid GUID. "path" contains an invalid value',
+        statusCode: 400,
+        validation: {
+          keys: ['id', 'path'],
+          source: 'payload'
+        }
       })
     })
 
@@ -1100,6 +1162,6 @@ describe('Forms route', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput, FilterOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput, FilterOptions, PageStart, TextFieldComponent } from '@defra/forms-model'
  * @import { Server } from '@hapi/hapi'
  */

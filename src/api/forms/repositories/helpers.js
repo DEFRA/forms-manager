@@ -1,3 +1,4 @@
+import { ControllerType } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import { db } from '~/src/mongo.js'
@@ -22,5 +23,37 @@ export async function removeById(session, collectionName, id) {
 }
 
 /**
+ * @param {FormDefinition} definition
+ * @returns {{readonly summary: PageSummary | undefined, shouldRepositionSummary: boolean, summaryExists: boolean}}
+ */
+export function summaryHelper(definition) {
+  const lastIndex = definition.pages.length - 1
+  const summaryIndex = definition.pages.findIndex(
+    (page) => page.controller === ControllerType.Summary
+  )
+  const summaryExists = summaryIndex >= 0
+  const shouldRepositionSummary = summaryExists && summaryIndex !== lastIndex
+
+  return {
+    summaryExists,
+    shouldRepositionSummary,
+    get summary() {
+      const summaryPage = /** @type {PageSummary | undefined} */ (
+        definition.pages[summaryIndex]
+      )
+      return summaryPage
+    }
+  }
+}
+
+/**
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ */
+export function findPage(definition, pageId) {
+  return definition.pages.find((page) => page.id === pageId)
+}
+/**
+ * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */
