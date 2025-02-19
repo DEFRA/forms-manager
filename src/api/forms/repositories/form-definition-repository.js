@@ -295,6 +295,46 @@ export async function updatePage(formId, pageId, page, session, state = DRAFT) {
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {ComponentDef[]} components
+ * @param {ClientSession} session
+ * @param {'live' | 'draft'} [state]
+ * @returns {Promise<void>}
+ */
+export async function addComponents(
+  formId,
+  pageId,
+  components,
+  session,
+  state = DRAFT
+) {
+  if (state === 'live') {
+    throw Boom.badRequest(`Cannot add component to a live form - ${formId}`)
+  }
+
+  logger.info(`Adding a new component to form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
+    {
+      $push: {
+        'draft.pages.$.components': {
+          $each: components
+        }
+      }
+    },
+    { session }
+  )
+
+  logger.info(`Added a new component to form ID ${formId}`)
+}
+
+/**
+ * @import { FormDefinition, Page, PageSummary, ComponentDef } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  */

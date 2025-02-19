@@ -9,6 +9,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
+  addComponents,
   addPage,
   pushSummaryToEnd,
   updatePage
@@ -269,6 +270,37 @@ describe('form-definition-repository', () => {
       expect(update).toMatchObject({
         $set: {
           'draft.pages.$': page
+        }
+      })
+    })
+  })
+
+  describe('addComponents', () => {
+    const component = buildTextFieldComponent()
+
+    it('should fail if form is live', async () => {
+      await expect(
+        addComponents(formId, pageId, [component], mockSession, 'live')
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot add component to a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+
+    it('should add a component to a page', async () => {
+      await addComponents(formId, pageId, [component], mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toMatchObject({
+        $push: {
+          'draft.pages.$.components': {
+            $each: [component]
+          }
         }
       })
     })
