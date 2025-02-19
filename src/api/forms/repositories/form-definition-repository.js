@@ -187,9 +187,9 @@ export async function pushSummaryToEnd(formId, session, state = DRAFT) {
 
   const definition = await get(formId, state)
 
-  const { shouldPushSummary, summary } = summaryHelper(definition)
+  const { shouldRepositionSummary, summary } = summaryHelper(definition)
 
-  if (!shouldPushSummary) {
+  if (!shouldRepositionSummary) {
     logger.info(`Position of summary on ${formId} correct`)
     return summary
   }
@@ -234,9 +234,9 @@ export async function addPage(formId, page, session, state = DRAFT) {
    */
   const definition = await get(formId, state)
 
-  const { shouldPushSummary, summaryExists } = summaryHelper(definition)
+  const { shouldRepositionSummary, summaryExists } = summaryHelper(definition)
 
-  if (shouldPushSummary) {
+  if (shouldRepositionSummary) {
     await pushSummaryToEnd(formId, session, state)
   }
 
@@ -247,7 +247,7 @@ export async function addPage(formId, page, session, state = DRAFT) {
   )
 
   const pageToAdd = /** @type {Page} */ ({
-    id: uuidv4().toString(),
+    id: uuidv4(),
     ...page
   })
 

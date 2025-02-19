@@ -1,4 +1,8 @@
-import { ControllerPath, ControllerType } from '@defra/forms-model'
+import {
+  ComponentType,
+  ControllerPath,
+  ControllerType
+} from '@defra/forms-model'
 
 import { empty } from '~/src/api/forms/templates.js'
 
@@ -54,6 +58,21 @@ export function buildDefinition(partialDefinition) {
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary, PageQuestion } from '@defra/forms-model'
+ * @param {Partial<TextFieldComponent>} partialTextField
+ * @returns {TextFieldComponent}
+ */
+export function buildTextFieldComponent(partialTextField) {
+  return /** @satisfies {TextFieldComponent} */ {
+    name: 'TextField',
+    title: 'Text field',
+    type: ComponentType.TextField,
+    hint: '',
+    options: {},
+    schema: {},
+    ...partialTextField
+  }
+}
+/**
+ * @import { FormDefinition, Page, PageSummary, PageQuestion, TextFieldComponent } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

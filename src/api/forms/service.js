@@ -539,6 +539,9 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
         session
       )
     })
+  } catch (err) {
+    logger.error(err, `Failed to add page on ${formId}`)
+    throw err
   } finally {
     await session.endSession()
   }
