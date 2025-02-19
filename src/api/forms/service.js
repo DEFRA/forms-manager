@@ -1,6 +1,7 @@
 import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
+import { v4 as uuidV4 } from 'uuid'
 
 import {
   makeFormLiveErrorMessages,
@@ -9,6 +10,7 @@ import {
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { findPage } from '~/src/api/forms/repositories/helpers.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
@@ -515,7 +517,7 @@ export async function removeForm(formId) {
 }
 // TODO: refactor business logic into service layer
 /**
- *
+ * Adds a new page to a draft definition
  * @param {string} formId
  * @param {Page} newPage
  * @param {FormMetadataAuthor} author
@@ -559,7 +561,73 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, FormStatus } from '@defra/forms-model'
+ * @param {ComponentDef} component
+ * @returns {ComponentDef}
+ */
+const addIdToComponent = (component) => ({
+  ...component,
+  id: uuidV4()
+})
+
+/**
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {ComponentDef[]} components
+ * @param {FormMetadataAuthor} author
+ */
+export async function createComponentOnDraftDefinition(
+  formId,
+  pageId,
+  components,
+  author
+) {
+  const definition =
+    /** @type {FormDefinition} */ await getFormDefinition(formId)
+  const page = findPage(definition, pageId)
+
+  logger.info(`Adding new component on Page ID ${pageId} on Form ID ${formId}`)
+
+  if (page === undefined) {
+    throw Boom.notFound(`Page ID ${pageId} not found on Form ID ${formId}`)
+  }
+  const session = client.startSession()
+
+  /** @type {ComponentDef[]} */
+  const createdComponents = components.map(addIdToComponent)
+
+  try {
+    await session.withTransaction(async () => {
+      await formDefinition.addComponents(
+        formId,
+        pageId,
+        createdComponents,
+        session,
+        DRAFT
+      )
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to add component on Page ID ${pageId} Form ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Added new component on Page ID ${pageId} on Form ID ${formId}`)
+
+  return createdComponents
+}
+/**
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, FormStatus, ComponentDef } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */

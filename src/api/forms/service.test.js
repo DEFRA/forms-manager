@@ -5,7 +5,8 @@ import { pino } from 'pino'
 import {
   buildDefinition,
   buildQuestionPage,
-  buildSummaryPage
+  buildSummaryPage,
+  buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
@@ -13,6 +14,7 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
+  createComponentOnDraftDefinition,
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
@@ -1307,12 +1309,107 @@ describe('Forms service', () => {
       jest
         .mocked(formDefinition.get)
         .mockRejectedValueOnce(Boom.notFound('Error'))
+
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
 
       await expect(
         createPageOnDraftDefinition('123', buildQuestionPage({}), author)
       ).rejects.toThrow(Boom.notFound('Error'))
       expect(dbMetadataSpy).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors correctly', async () => {
+      jest
+        .mocked(formDefinition.addPage)
+        .mockRejectedValueOnce(Boom.badRequest('Error'))
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+      await expect(
+        createPageOnDraftDefinition('123', buildQuestionPage({}), author)
+      ).rejects.toThrow(Boom.badRequest('Error'))
+    })
+  })
+
+  describe('createComponentOnDraftDefinition', () => {
+    const pageId = 'bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d'
+    const questionPage = buildQuestionPage({
+      id: pageId
+    })
+    const definition1 = buildDefinition({
+      ...definition,
+      pages: [questionPage, ...definition.pages]
+    })
+    const textFieldComponent = buildTextFieldComponent()
+
+    it('should add a component to a DraftDefinition', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      const [createdComponent] = await createComponentOnDraftDefinition(
+        '123',
+        pageId,
+        [textFieldComponent],
+        author
+      )
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addComponents')
+
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
+      const [formId, calledPageId, components, , state] =
+        dbDefinitionSpy.mock.calls[0]
+
+      expect(formId).toBe('123')
+      expect(calledPageId).toBe(pageId)
+      expect(components).toEqual([
+        { ...textFieldComponent, id: expect.any(String) }
+      ])
+      expect(state).toBe('draft')
+
+      expect(metaFormId).toBe('123')
+
+      expect(metaUpdateOperations.$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+      expect(createdComponent).toMatchObject({
+        ...createdComponent,
+        id: expect.any(String)
+      })
+    })
+
+    it('should fail if page does not exist', async () => {
+      const textFieldComponent = buildTextFieldComponent()
+      const definition2 = buildDefinition(definition)
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition2)
+
+      await expect(
+        createComponentOnDraftDefinition(
+          '123',
+          'bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d',
+          [textFieldComponent],
+          author
+        )
+      ).rejects.toThrow(
+        Boom.notFound(
+          'Page ID bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d not found on Form ID 123'
+        )
+      )
+    })
+    it('should surface errors correctly', async () => {
+      jest
+        .mocked(formDefinition.addComponents)
+        .mockRejectedValueOnce(Boom.badRequest('Error'))
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      await expect(
+        createComponentOnDraftDefinition(
+          '123',
+          'bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d',
+          [textFieldComponent],
+          author
+        )
+      ).rejects.toThrow(Boom.badRequest('Error'))
     })
   })
 })
