@@ -11,6 +11,7 @@ import {
   addComponents,
   addPageAtPosition,
   removeMatchingPages,
+  updateComponent,
   updatePage
 } from '~/src/api/forms/repositories/form-definition-repository.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -27,6 +28,7 @@ const author = getAuthor()
 const mockSession = author
 const formId = '1eabd1437567fe1b26708bbb'
 const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
+const componentId = 'e296d931-2364-4b17-9049-1aa1afea29d3'
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -222,6 +224,46 @@ describe('form-definition-repository', () => {
           }
         }
       })
+    })
+  })
+
+  describe('updateComponent', () => {
+    const component = buildTextFieldComponent({
+      id: '11bafb41-5d34-4e2a-b372-1175cb954a25'
+    })
+
+    it('should update the component', async () => {
+      await updateComponent(formId, pageId, componentId, component, mockSession)
+
+      const [filter, update, options] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$[pageId].components.$[component]': component
+        }
+      })
+      expect(options).toMatchObject({
+        arrayFilters: [{ 'pageId.id': pageId }, { 'component.id': componentId }]
+      })
+    })
+    it('should fail if state is live', async () => {
+      await expect(
+        updateComponent(
+          formId,
+          pageId,
+          componentId,
+          component,
+          mockSession,
+          'live'
+        )
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot update component on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
     })
   })
 })

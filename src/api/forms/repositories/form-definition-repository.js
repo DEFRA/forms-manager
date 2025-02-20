@@ -8,10 +8,11 @@ import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 const logger = createLogger()
 
 /**
- * @typedef {'string' | 'live'} State
+ * @typedef {'draft' | 'live'} State
  */
 
-const DRAFT = /** @type {State} */ 'draft'
+const DRAFT = /** @type {State} */ ('draft')
+const LIVE = /** @type {State} */ ('live')
 
 /**
  * Adds a form to the Form Store
@@ -114,7 +115,7 @@ export async function get(formId, state = DRAFT) {
       throw Boom.notFound(`Form definition with ID '${formId}' not found`)
     }
 
-    const definition = result[state]
+    const definition = /** @type {FormDefinition} */ result[state]
 
     logger.info(`Form definition (${state}) for form ID ${formId} found`)
 
@@ -154,7 +155,7 @@ export async function remove(formId, session) {
  * @param {State} [state] - state of the form to update
  */
 export async function updateName(formId, name, session, state = DRAFT) {
-  if (state === 'live') {
+  if (state === LIVE) {
     throw Boom.badRequest('Cannot update the name of a live form')
   }
 
@@ -186,7 +187,7 @@ export async function removeMatchingPages(
   session,
   state = DRAFT
 ) {
-  if (state === 'live') {
+  if (state === LIVE) {
     throw Boom.badRequest(`Cannot remove page on live form ID ${formId}`)
   }
   logger.info(`Removing page on ${formId}`)
@@ -218,7 +219,7 @@ export async function addPageAtPosition(
   session,
   { position, state = DRAFT }
 ) {
-  if (state === 'live') {
+  if (state === LIVE) {
     throw Boom.badRequest(`Cannot remove add on live form ID ${formId}`)
   }
 
@@ -256,7 +257,7 @@ export async function addPageAtPosition(
  * @returns {Promise<void>}
  */
 export async function updatePage(formId, pageId, page, session, state = DRAFT) {
-  if (state === 'live') {
+  if (state === LIVE) {
     throw Boom.badRequest(`Cannot update page on a live form - ${formId}`)
   }
 
@@ -291,7 +292,7 @@ export async function addComponents(
   session,
   { position, state = DRAFT } = {}
 ) {
-  if (state === 'live') {
+  if (state === LIVE) {
     throw Boom.badRequest(`Cannot add component to a live form - ${formId}`)
   }
 
@@ -324,6 +325,55 @@ export async function addComponents(
 }
 
 /**
+ * Updates a component with component id
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ComponentDef} component
+ * @param {ClientSession} session
+ * @param {State} [state]
+ */
+export async function updateComponent(
+  formId,
+  pageId,
+  componentId,
+  component,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot update component on a live form - ${formId}`)
+  }
+
+  logger.info(
+    `Updating component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId)
+    },
+    {
+      $set: {
+        'draft.pages.$[pageId].components.$[component]': component
+      }
+    },
+    {
+      session,
+      arrayFilters: [{ 'pageId.id': pageId }, { 'component.id': componentId }]
+    }
+  )
+
+  logger.info(
+    `Updated component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
+  )
+}
+
+/**
  * @import { FormDefinition, Page, PageSummary, ComponentDef } from '@defra/forms-model'
- * @import { ClientSession, Collection } from 'mongodb'
+ * @import { ClientSession, Collection, Document, InferIdType } from 'mongodb'
  */
