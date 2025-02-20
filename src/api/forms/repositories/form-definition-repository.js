@@ -1,11 +1,7 @@
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
-import { v4 as uuidv4 } from 'uuid'
 
-import {
-  removeById,
-  summaryHelper
-} from '~/src/api/forms/repositories/helpers.js'
+import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -209,7 +205,6 @@ export async function removeMatchingPages(
  * @param {Page} page - new name for the form
  * @param {ClientSession} session
  * @param {{position?: number; state?: 'live' | 'draft' }} options
- * @returns {Promise<void>}
  */
 export async function addPageAtPosition(
   formId,
@@ -237,100 +232,6 @@ export async function addPageAtPosition(
   )
 
   logger.info(`Added page on Form ID ${formId}`)
-}
-
-/**
- * Pushes the summary page to the last page
- * @param {string} formId - the ID of the form
- * @param {ClientSession} session
- * @param {'draft' | 'live'} [state] - state of the form to update
- * @returns {Promise<undefined | PageSummary>}
- */
-export async function pushSummaryToEnd(formId, session, state = DRAFT) {
-  if (state === 'live') {
-    throw Boom.badRequest('Cannot add summary page to end of a live form')
-  }
-  logger.info(`Checking position of summary on ${formId}`)
-
-  const definition = await get(formId, state)
-
-  const { shouldRepositionSummary, summary } = summaryHelper(definition)
-
-  if (!shouldRepositionSummary) {
-    logger.info(`Position of summary on ${formId} correct`)
-    return summary
-  }
-
-  logger.info(`Updating position of summary on ${formId}`)
-
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
-    { _id: new ObjectId(formId) },
-    {
-      $pull: { 'draft.pages': { controller: 'SummaryPageController' } } // Removes all Summary pages
-    },
-    { session }
-  )
-  await coll.updateOne(
-    { _id: new ObjectId(formId) },
-    {
-      $push: { 'draft.pages': summary } // Adds the summary page back
-    },
-    { session }
-  )
-  logger.info(`Updated position of summary on ${formId}`)
-
-  return summary
-}
-
-/**
- * @param {string} formId
- * @param {Page} page
- * @param {ClientSession} session
- * @param {'draft' | 'live'} [state]
- * @returns {Promise<Page>}
- */
-export async function addPage(formId, page, session, state = DRAFT) {
-  logger.info(`Creating new page for form with ID ${formId}`)
-
-  /**
-   * @type {FormDefinition}
-   */
-  const definition = await get(formId, state)
-
-  const { shouldRepositionSummary, summaryExists } = summaryHelper(definition)
-
-  if (shouldRepositionSummary) {
-    await pushSummaryToEnd(formId, session, state)
-  }
-
-  const $position = summaryExists ? -1 : definition.pages.length
-
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  const pageToAdd = /** @type {Page} */ ({
-    id: uuidv4(),
-    ...page
-  })
-
-  await coll.updateOne(
-    { _id: new ObjectId(formId) },
-    {
-      $push: {
-        'draft.pages': { $each: [pageToAdd], $position }
-      }
-    },
-    { session }
-  )
-
-  logger.info(`Created new page for form with ID ${formId}`)
-
-  return pageToAdd
 }
 
 /**

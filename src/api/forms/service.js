@@ -1,4 +1,8 @@
-import { formDefinitionSchema, slugify } from '@defra/forms-model'
+import {
+  ControllerType,
+  formDefinitionSchema,
+  slugify
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 import { v4 as uuidV4 } from 'uuid'
@@ -12,6 +16,7 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   findPage,
+  summaryHelper,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
@@ -519,7 +524,75 @@ export async function removeForm(formId) {
   logger.info(`Removed form with ID ${formId}`)
 }
 
-// TODO: refactor business logic into service layer
+/**
+ * Pipeline
+ * @param {string} formId
+ * @param {FormDefinition} definition
+ * @param {FormMetadataAuthor} author
+ */
+export async function repositionSummaryPipeline(formId, definition, author) {
+  const summaryResult = summaryHelper(definition)
+  const { shouldRepositionSummary } = summaryResult
+
+  logger.info(`Checking position of summary on ${formId}`)
+
+  if (!shouldRepositionSummary) {
+    logger.info(`Position of summary on ${formId} correct`)
+    return summaryResult
+  }
+
+  logger.info(`Updating position of summary on Form ID ${formId}`)
+
+  const session = client.startSession()
+
+  const { summary } = summaryResult
+
+  try {
+    await session.withTransaction(async () => {
+      await formDefinition.removeMatchingPages(
+        formId,
+        { controller: ControllerType.Summary },
+        session
+      )
+
+      await formDefinition.addPageAtPosition(
+        formId,
+        /** @type {PageSummary} */ (summary),
+        session,
+        {}
+      )
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to update position of summary on Form ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Updated position of summary on Form ID ${formId}`)
+
+  return summaryResult
+}
+
+/**
+ * @param {Page} pageWithoutId
+ * @returns {Page}
+ */
+const createPageWithId = (pageWithoutId) => ({
+  ...pageWithoutId,
+  id: uuidV4().toString()
+})
+
 /**
  * Adds a new page to a draft definition
  * @param {string} formId
@@ -540,12 +613,25 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
     `Duplicate page path on Form ID ${formId}`
   )
 
-  /** @type {Page | undefined} */
-  let page
+  const { summaryExists } = await repositionSummaryPipeline(
+    formId,
+    formDraftDefinition,
+    author
+  )
+  /**
+   * @type {{ position?: number; state?: 'live' | 'draft' }}
+   */
+  const options = {}
+
+  if (summaryExists) {
+    options.position = -1
+  }
+
+  const page = createPageWithId(newPage)
 
   try {
     await session.withTransaction(async () => {
-      page = await formDefinition.addPage(formId, newPage, session)
+      await formDefinition.addPageAtPosition(formId, page, session, options)
 
       // Update the form with the new draft state
       await formMetadata.update(
@@ -633,7 +719,7 @@ export async function createComponentOnDraftDefinition(
   return createdComponents
 }
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, FormStatus, ComponentDef } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
  */

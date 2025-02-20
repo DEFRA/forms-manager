@@ -1,3 +1,4 @@
+import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
@@ -23,6 +24,7 @@ import {
   getFormDefinition,
   listForms,
   removeForm,
+  repositionSummaryPipeline,
   updateDraftFormDefinition,
   updateFormMetadata
 } from '~/src/api/forms/service.js'
@@ -71,6 +73,7 @@ const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
 )
 
 const author = getAuthor()
+const DRAFT = 'draft'
 
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
@@ -172,7 +175,7 @@ describe('Forms service', () => {
   const mockFilters = {
     authors: ['Joe Bloggs', 'Jane Doe', 'Enrique Chase'],
     organisations: ['Defra', 'Natural England'],
-    status: ['live', 'draft']
+    status: ['live', DRAFT]
   }
 
   let definition = emptyFormWithSummary()
@@ -1124,7 +1127,7 @@ describe('Forms service', () => {
           perPage: 10,
           author: 'Henrique Chase',
           organisations: ['Defra', 'Natural England'],
-          status: ['live', 'draft']
+          status: ['live', DRAFT]
         }
 
         jest.mocked(formMetadata.list).mockResolvedValue({
@@ -1233,57 +1236,209 @@ describe('Forms service', () => {
     })
   })
 
-  describe('createPageOnDraftDefinition', () => {
-    it('should create a new page', async () => {
-      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+  describe('repositionSummaryPipeline', () => {
+    const summary = buildSummaryPage()
 
+    it('should reposition summary if it exists but is not at the end', async () => {
+      const removeMatchingPagesSpy = jest.spyOn(
+        formDefinition,
+        'removeMatchingPages'
+      )
+      const addPageAtPositionSpy = jest.spyOn(
+        formDefinition,
+        'addPageAtPosition'
+      )
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+
+      const formDefinition1 = buildDefinition({
+        pages: [summary, buildQuestionPage()]
+      })
+
+      const returnedSummary = await repositionSummaryPipeline(
+        id,
+        formDefinition1,
+        author
+      )
+
+      expect(removeMatchingPagesSpy).toHaveBeenCalled()
+      expect(addPageAtPositionSpy).toHaveBeenCalled()
+      expect(formMetadataUpdateSpy).toHaveBeenCalled()
+
+      const [formId1, matchCriteria, , state] =
+        removeMatchingPagesSpy.mock.calls[0]
+      const [formId2, calledSummary, , options] =
+        addPageAtPositionSpy.mock.calls[0]
+      const [formId3, updateFilter] = formMetadataUpdateSpy.mock.calls[0]
+
+      expect(formId1).toBe(id)
+      expect(formId2).toBe(id)
+      expect(formId3).toBe(id)
+      expect(matchCriteria).toEqual({ controller: ControllerType.Summary })
+      expect(calledSummary).toEqual(summary)
+      expect(state).toBeUndefined()
+      expect(options).toEqual({})
+      expect(updateFilter.$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+      expect(returnedSummary.summary).toEqual(summary)
+    })
+
+    it('should not reposition the summary if no pages exist', async () => {
+      const formDefinition1 = buildDefinition({
+        pages: []
+      })
+      const removeMatchingPagesSpy = jest.spyOn(
+        formDefinition,
+        'removeMatchingPages'
+      )
+      const addPageAtPositionSpy = jest.spyOn(
+        formDefinition,
+        'addPageAtPosition'
+      )
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+      await repositionSummaryPipeline(id, formDefinition1, author)
+
+      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
+      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
+      expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
+    })
+
+    it('should not reposition the summary if summary is at the end', async () => {
+      const formDefinition1 = buildDefinition({
+        pages: [buildQuestionPage(), buildSummaryPage()]
+      })
+      const removeMatchingPagesSpy = jest.spyOn(
+        formDefinition,
+        'removeMatchingPages'
+      )
+      const addPageAtPositionSpy = jest.spyOn(
+        formDefinition,
+        'addPageAtPosition'
+      )
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+      await repositionSummaryPipeline(id, formDefinition1, author)
+
+      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
+      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
+      expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
+    })
+
+    it('should not reposition the summary if pages do not contain a summary', async () => {
+      const formDefinition1 = buildDefinition({
+        pages: [buildQuestionPage()]
+      })
+
+      const removeMatchingPagesSpy = jest.spyOn(
+        formDefinition,
+        'removeMatchingPages'
+      )
+      const addPageAtPositionSpy = jest.spyOn(
+        formDefinition,
+        'addPageAtPosition'
+      )
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+      await repositionSummaryPipeline(id, formDefinition1, author)
+
+      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
+      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
+      expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors correctly', async () => {
+      jest
+        .mocked(formDefinition.addPageAtPosition)
+        .mockRejectedValueOnce(Boom.badRequest('Error'))
+
+      const formDefinition1 = buildDefinition({
+        pages: [summary, buildQuestionPage()]
+      })
+      await expect(
+        repositionSummaryPipeline('123', formDefinition1, author)
+      ).rejects.toThrow(Boom.badRequest('Error'))
+    })
+  })
+
+  describe('createPageOnDraftDefinition', () => {
+    it('should create a new page when a summary page exists', async () => {
       const formDefinitionPageCustomisedTitle = buildQuestionPage({
         title: 'A new form page',
         path: '/a-new-form-page'
       })
-      const expectedPage = buildQuestionPage({
-        ...formDefinitionPageCustomisedTitle,
-        id: '2dfd8149-504c-45c6-bd61-c45602d1fc47'
-      })
-      const summaryPage = buildSummaryPage()
-
-      const expectedPages /**  @satisfies {Page[]} */ = [
-        expectedPage,
-        summaryPage
-      ]
-      const newDefinition = buildDefinition({
-        ...definition,
-        pages: expectedPages
-      })
 
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
 
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
-      const dbDefinitionSpy = jest
-        .spyOn(formDefinition, 'addPage')
-        .mockResolvedValue(expectedPage)
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPageAtPosition')
 
       const page = await createPageOnDraftDefinition(
-        '123',
+        id,
         formDefinitionPageCustomisedTitle,
         author
       )
       const dbOperationArgs = dbMetadataSpy.mock.calls[0]
+      const [formId1, page1, , options] = dbDefinitionSpy.mock.calls[0]
 
-      expect(dbDefinitionSpy).toHaveBeenCalledWith(
-        '123',
-        formDefinitionPageCustomisedTitle,
-        expect.anything()
-      )
-      expect(dbOperationArgs[0]).toBe('123')
+      expect(formId1).toBe(id)
+      expect(page1).toMatchObject({
+        ...formDefinitionPageCustomisedTitle,
+        id: expect.any(String)
+      })
+      expect(options).toEqual({ position: -1 })
+      expect(dbOperationArgs[0]).toBe(id)
       expect(dbOperationArgs[1].$set).toEqual({
         'draft.updatedAt': dateUsedInFakeTime,
         'draft.updatedBy': author,
         updatedAt: dateUsedInFakeTime,
         updatedBy: author
       })
-      expect(page).toEqual(expectedPage)
+      expect(page).toMatchObject({
+        ...formDefinitionPageCustomisedTitle,
+        id: expect.any(String)
+      })
+    })
+
+    it('should create a new page when a summary page does not exist', async () => {
+      const formDefinitionPageCustomisedTitle = buildQuestionPage({
+        title: 'A new form page',
+        path: '/a-new-form-page'
+      })
+      const definitionWithoutSummary = buildDefinition({
+        pages: []
+      })
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(definitionWithoutSummary)
+
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPageAtPosition')
+
+      await createPageOnDraftDefinition(
+        id,
+        formDefinitionPageCustomisedTitle,
+        author
+      )
+      const dbOperationArgs = dbMetadataSpy.mock.calls[0]
+
+      expect(dbDefinitionSpy).toHaveBeenCalledWith(
+        id,
+        {
+          ...formDefinitionPageCustomisedTitle,
+          id: expect.any(String)
+        },
+        expect.anything(),
+        {}
+      )
+      expect(dbOperationArgs[0]).toBe(id)
+      expect(dbOperationArgs[1].$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
     })
 
     it('should fail if path is duplicate', async () => {
@@ -1305,6 +1460,7 @@ describe('Forms service', () => {
         createPageOnDraftDefinition('123', pageOneDuplicate, author)
       ).rejects.toThrow(Boom.conflict('Duplicate page path on Form ID 123'))
     })
+
     it('should fail if no draft definition exists', async () => {
       jest
         .mocked(formDefinition.get)
@@ -1320,7 +1476,7 @@ describe('Forms service', () => {
 
     it('should surface errors correctly', async () => {
       jest
-        .mocked(formDefinition.addPage)
+        .mocked(formDefinition.addPageAtPosition)
         .mockRejectedValueOnce(Boom.badRequest('Error'))
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
       await expect(
@@ -1362,7 +1518,7 @@ describe('Forms service', () => {
       expect(components).toEqual([
         { ...textFieldComponent, id: expect.any(String) }
       ])
-      expect(state).toBe('draft')
+      expect(state).toBe(DRAFT)
 
       expect(metaFormId).toBe('123')
 

@@ -3,17 +3,13 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
-  buildDefinition,
   buildQuestionPage,
-  buildSummaryPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
-  addPage,
   addPageAtPosition,
-  pushSummaryToEnd,
   removeMatchingPages,
   updatePage
 } from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -140,179 +136,6 @@ describe('form-definition-repository', () => {
           'draft.pages': { $each: [page], $position: Number.MAX_SAFE_INTEGER }
         }
       })
-    })
-  })
-
-  describe('pushSummaryToEnd', () => {
-    const summary = {
-      id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
-      title: 'Summary',
-      path: '/summary',
-      controller: 'SummaryPageController'
-    }
-
-    it('should not edit a live summary', async () => {
-      await expect(
-        pushSummaryToEnd('1234', mockSession, 'live')
-      ).rejects.toThrow(
-        Boom.badRequest('Cannot add summary page to end of a live form')
-      )
-    })
-    it('should fail if collection does not exist', async () => {
-      mockCollection.findOne.mockResolvedValue(null)
-
-      await expect(
-        pushSummaryToEnd('67ade425d6e8ab1116b0aa9a', mockSession)
-      ).rejects.toThrow(
-        Boom.notFound(
-          `Form definition with ID '67ade425d6e8ab1116b0aa9a' not found`
-        )
-      )
-    })
-    it('should push the summary to the end if it summaryExists but is not at the end', async () => {
-      const docMock = {
-        draft: {
-          name: 'Form with Summary at end',
-          startPage: '/form-with-summary',
-          pages: [
-            summary,
-            {
-              title: 'Test page',
-              path: '/test-page',
-              next: [],
-              components: []
-            }
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
-      }
-      mockCollection.findOne.mockResolvedValue(docMock)
-
-      const summaryResult = await pushSummaryToEnd(
-        '67ade425d6e8ab1116b0aa9a',
-        mockSession
-      )
-
-      expect(summaryResult).toEqual(summary)
-      expect(mockCollection.updateOne).toHaveBeenNthCalledWith(
-        1,
-        expect.anything(),
-        {
-          $pull: { 'draft.pages': { controller: 'SummaryPageController' } }
-        },
-        expect.anything()
-      )
-      expect(mockCollection.updateOne).toHaveBeenNthCalledWith(
-        2,
-        expect.anything(),
-        {
-          $push: { 'draft.pages': summary } // Adds the summary page back
-        },
-        expect.anything()
-      )
-    })
-
-    it('should not update the document if summary page is at end', async () => {
-      const docMock = {
-        draft: {
-          name: 'Form with Summary at end',
-          startPage: '/form-with-summary',
-          pages: [
-            {
-              title: 'Test page',
-              path: '/test-page',
-              next: [],
-              components: []
-            },
-            summary
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
-      }
-      mockCollection.findOne.mockResolvedValue(docMock)
-
-      const summaryResult = await pushSummaryToEnd(
-        '67ade425d6e8ab1116b0aa9a',
-        mockSession
-      )
-      expect(mockCollection.updateOne).not.toHaveBeenCalled()
-      expect(summaryResult).toEqual({
-        id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
-        title: 'Summary',
-        path: '/summary',
-        controller: 'SummaryPageController'
-      })
-    })
-
-    it('should not update the document if no summary page summaryExists', async () => {
-      const docMock = {
-        draft: {
-          name: 'Form with Summary at end',
-          startPage: '/form-with-summary',
-          pages: [
-            {
-              title: 'Test page',
-              path: '/test-page',
-              next: [],
-              components: []
-            }
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
-      }
-      mockCollection.findOne.mockResolvedValue(docMock)
-
-      const summary = await pushSummaryToEnd(
-        '67ade425d6e8ab1116b0aa9a',
-        mockSession
-      )
-      expect(mockCollection.updateOne).not.toHaveBeenCalled()
-      expect(summary).toBeUndefined()
-    })
-  })
-
-  describe('addPage', () => {
-    const pageToAdd = buildQuestionPage()
-    const summaryPage = buildSummaryPage({})
-
-    it('should add a page if no summary page summaryExists', async () => {
-      mockCollection.findOne.mockResolvedValue({
-        draft: buildDefinition({
-          pages: []
-        })
-      })
-      const page = await addPage(formId, pageToAdd, mockSession)
-      expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
-      expect(page).toMatchObject({
-        ...pageToAdd,
-        id: expect.any(String)
-      })
-    })
-
-    it('should add a page if summary page is last page', async () => {
-      mockCollection.findOne.mockResolvedValue({
-        draft: buildDefinition({})
-      })
-      await addPage(formId, pageToAdd, mockSession)
-      expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
-    })
-
-    it('should add a page and push summary to end if summary page summaryExists and is not last page', async () => {
-      const pageOne = buildQuestionPage({})
-
-      mockCollection.findOne.mockResolvedValue({
-        draft: buildDefinition({
-          pages: [summaryPage, pageOne]
-        })
-      })
-      await addPage(formId, pageToAdd, mockSession)
-      expect(mockCollection.updateOne).toHaveBeenCalledTimes(3)
     })
   })
 
