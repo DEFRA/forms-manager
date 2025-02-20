@@ -1240,6 +1240,9 @@ describe('Forms service', () => {
     const summary = buildSummaryPage()
 
     it('should reposition summary if it exists but is not at the end', async () => {
+      const initialSummary = buildSummaryPage()
+      delete initialSummary.id
+
       const removeMatchingPagesSpy = jest.spyOn(
         formDefinition,
         'removeMatchingPages'
@@ -1251,7 +1254,7 @@ describe('Forms service', () => {
       const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
 
       const formDefinition1 = buildDefinition({
-        pages: [summary, buildQuestionPage()]
+        pages: [initialSummary, buildQuestionPage()]
       })
 
       const returnedSummary = await repositionSummaryPipeline(
@@ -1496,7 +1499,7 @@ describe('Forms service', () => {
     })
     const textFieldComponent = buildTextFieldComponent()
 
-    it('should add a component to a DraftDefinition', async () => {
+    it('should add a component to the end of a DraftDefinition page', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
       const [createdComponent] = await createComponentOnDraftDefinition(
         '123',
@@ -1518,7 +1521,7 @@ describe('Forms service', () => {
       expect(components).toEqual([
         { ...textFieldComponent, id: expect.any(String) }
       ])
-      expect(state).toBe(DRAFT)
+      expect(state).toEqual({ state: DRAFT })
 
       expect(metaFormId).toBe('123')
 
@@ -1532,6 +1535,22 @@ describe('Forms service', () => {
         ...createdComponent,
         id: expect.any(String)
       })
+    })
+
+    it('should add a component to the start of a DraftDefinition page if called with prepend=true', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      await createComponentOnDraftDefinition(
+        '123',
+        pageId,
+        [textFieldComponent],
+        author,
+        true
+      )
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addComponents')
+
+      const [, , , , options] = dbDefinitionSpy.mock.calls[0]
+
+      expect(options).toEqual({ state: DRAFT, position: 0 })
     })
 
     it('should fail if page does not exist', async () => {

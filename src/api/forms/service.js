@@ -31,7 +31,11 @@ const defaultAuthor = {
 }
 
 const defaultDate = new Date('2024-06-25T23:00:00Z') // date we went live
-const DRAFT = 'draft'
+/**
+ * @typedef {'draft' | 'live'} State
+ */
+
+const DRAFT = /** @type {State} */ ('draft')
 /**
  * Maps a form metadata document from MongoDB to form metadata
  * @param {WithId<Partial<FormMetadataDocument>>} document - form metadata document (with ID)
@@ -210,7 +214,7 @@ export async function getFormBySlug(slug) {
 /**
  * Retrieves the form definition content for a given form ID
  * @param {string} formId - the ID of the form
- * @param {'draft' | 'live'} state - the form state
+ * @param {State} state - the form state
  */
 export function getFormDefinition(formId, state = DRAFT) {
   return formDefinition.get(formId, state)
@@ -224,7 +228,7 @@ export function getFormDefinition(formId, state = DRAFT) {
  * @returns {PartialFormMetadataDocument}
  */
 const partialAuditFields = (date, author, state = DRAFT) => {
-  return {
+  return /** @type {PartialFormMetadataDocument} */ {
     [`${state}.updatedAt`]: date,
     [`${state}.updatedBy`]: author,
     updatedAt: date,
@@ -524,6 +528,16 @@ export async function removeForm(formId) {
   logger.info(`Removed form with ID ${formId}`)
 }
 
+const SUMMARY_PAGE_ID = '449a45f6-4541-4a46-91bd-8b8931b07b50'
+/**
+ * Adds id to summary page if it's missing
+ * @param {PageSummary} summaryPage
+ */
+export const addIdToSummary = (summaryPage) => ({
+  id: SUMMARY_PAGE_ID,
+  ...summaryPage
+})
+
 /**
  * Repositions the summary page if it's not the last index of pages
  * @param {string} formId
@@ -546,6 +560,8 @@ export async function repositionSummaryPipeline(formId, definition, author) {
   const session = client.startSession()
 
   const { summary } = summaryResult
+  const summaryDefined = /** @type {PageSummary} */ (summary)
+  const summaryWithId = addIdToSummary(summaryDefined)
 
   try {
     await session.withTransaction(async () => {
@@ -557,7 +573,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
 
       await formDefinition.addPageAtPosition(
         formId,
-        /** @type {PageSummary} */ (summary),
+        /** @type {PageSummary} */ (summaryWithId),
         session,
         {}
       )
@@ -581,7 +597,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
 
   logger.info(`Updated position of summary on Form ID ${formId}`)
 
-  return summaryResult
+  return { ...summaryResult, summary: summaryWithId }
 }
 
 /**
@@ -658,10 +674,11 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
  * @param {ComponentDef} component
  * @returns {ComponentDef}
  */
-const addIdToComponent = (component) => ({
-  ...component,
-  id: uuidV4()
-})
+const addIdToComponent = (component) =>
+  /** @type {ComponentDef} */ ({
+    ...component,
+    id: uuidV4()
+  })
 
 /**
  * Adds a component to the end of page components
@@ -669,12 +686,14 @@ const addIdToComponent = (component) => ({
  * @param {string} pageId
  * @param {ComponentDef[]} components
  * @param {FormMetadataAuthor} author
+ * @param {boolean} prepend
  */
 export async function createComponentOnDraftDefinition(
   formId,
   pageId,
   components,
-  author
+  author,
+  prepend = false
 ) {
   const definition =
     /** @type {FormDefinition} */ await getFormDefinition(formId)
@@ -690,6 +709,12 @@ export async function createComponentOnDraftDefinition(
   /** @type {ComponentDef[]} */
   const createdComponents = components.map(addIdToComponent)
 
+  const positionOptions = /** @satisfies {{ position?: number }} */ {}
+
+  if (prepend) {
+    positionOptions.position = 0
+  }
+
   try {
     await session.withTransaction(async () => {
       await formDefinition.addComponents(
@@ -697,7 +722,7 @@ export async function createComponentOnDraftDefinition(
         pageId,
         createdComponents,
         session,
-        DRAFT
+        { state: DRAFT, ...positionOptions }
       )
 
       // Update the form with the new draft state
@@ -723,6 +748,6 @@ export async function createComponentOnDraftDefinition(
 }
 /**
  * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
- * @import { PartialFormMetadataDocument} from '~/src/api/types.js'
+ * @import { WithId, UpdateFilter } from 'mongodb'
+ * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
