@@ -169,7 +169,7 @@ export async function updateName(formId, name, session, state = DRAFT) {
 }
 
 /**
- * Updates the name of a draft form definition
+ * Removes pages that match the matchCriteria
  * @param {string} formId - the ID of the form
  * @param {Partial<Page>} matchCriteria - new name for the form
  * @param {ClientSession} session
@@ -192,7 +192,7 @@ export async function removeMatchingPages(
   await coll.updateOne(
     { _id: new ObjectId(formId) },
     {
-      $pull: { 'draft.pages': matchCriteria } // Removes all Summary pages
+      $pull: { 'draft.pages': matchCriteria }
     },
     { session }
   )
@@ -201,6 +201,7 @@ export async function removeMatchingPages(
 }
 
 /**
+ * Add a page at the position number - defaults to the last page
  * @param {string} formId - the ID of the form
  * @param {Page} page - new name for the form
  * @param {ClientSession} session
@@ -235,6 +236,7 @@ export async function addPageAtPosition(
 }
 
 /**
+ * Updates a page with specific page id on forms
  * @param {string} formId
  * @param {string} pageId
  * @param {Page} page
@@ -263,6 +265,7 @@ export async function updatePage(formId, pageId, page, session, state = DRAFT) {
 }
 
 /**
+ * Adds a new component to the end of a page->components array
  * @param {string} formId
  * @param {string} pageId
  * @param {ComponentDef[]} components

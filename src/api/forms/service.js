@@ -525,7 +525,7 @@ export async function removeForm(formId) {
 }
 
 /**
- * Pipeline
+ * Repositions the summary page if it's not the last index of pages
  * @param {string} formId
  * @param {FormDefinition} definition
  * @param {FormMetadataAuthor} author
@@ -585,6 +585,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
 }
 
 /**
+ * Adds an id to a page
  * @param {Page} pageWithoutId
  * @returns {Page}
  */
@@ -594,7 +595,7 @@ const createPageWithId = (pageWithoutId) => ({
 })
 
 /**
- * Adds a new page to a draft definition
+ * Adds a new page to a draft definition and calls repositionSummaryPipeline is summary exists
  * @param {string} formId
  * @param {Page} newPage
  * @param {FormMetadataAuthor} author
@@ -653,6 +654,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 }
 
 /**
+ * Adds id to a component
  * @param {ComponentDef} component
  * @returns {ComponentDef}
  */
@@ -662,6 +664,7 @@ const addIdToComponent = (component) => ({
 })
 
 /**
+ * Adds a component to the end of page components
  * @param {string} formId
  * @param {string} pageId
  * @param {ComponentDef[]} components
