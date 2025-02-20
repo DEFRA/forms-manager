@@ -4,7 +4,7 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormBySlugInput }>} RequestFormBySlug
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: FormDefinition }>} RequestFormDefinition
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: Page }>} RequestPage
- * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {pageId: string}, Payload: ComponentDef }>} RequestComponent
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {pageId: string}, Payload: ComponentDef; Query: {prepend?: boolean} }>} RequestComponent
  * @typedef {Request<{ Server: { db: Db }, Payload: FormMetadataInput }>} RequestFormMetadataCreate
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: Partial<FormMetadataInput> }>} RequestFormMetadataUpdateById
  * @typedef {Request<{ Server: { db: Db }, Query: QueryOptions }>} RequestListForms

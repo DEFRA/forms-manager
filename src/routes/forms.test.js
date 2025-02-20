@@ -590,13 +590,37 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual(expectedComponent)
-      const [calledFormId, calledPageId, components] =
+      const [calledFormId, calledPageId, components, , prepend] =
         createComponentOnDraftDefinitionMock.mock.calls[0]
-      expect([calledFormId, calledPageId, components]).toEqual([
+      expect([calledFormId, calledPageId, components, prepend]).toEqual([
         id,
         pageId,
-        [stubTextFieldComponent]
+        [stubTextFieldComponent],
+        false
       ])
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components?prepend=true adds a new component to the start of a page', async () => {
+      const expectedComponent = buildTextFieldComponent({
+        ...stubTextFieldComponent,
+        id: '3813a55d-0958-47f9-8522-94b3fc3818d7'
+      })
+      const createComponentOnDraftDefinitionMock = jest
+        .mocked(createComponentOnDraftDefinition)
+        .mockResolvedValue([expectedComponent])
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components?prepend=true`,
+        payload: stubTextFieldComponent,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      const [, , , , prepend] =
+        createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect(prepend).toBe(true)
     })
   })
 

@@ -26,6 +26,7 @@ import {
   formByIdSchema,
   formBySlugSchema,
   pageByIdSchema,
+  prependQuerySchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
@@ -235,14 +236,17 @@ export default [
      * @param {RequestComponent} request
      */
     async handler(request) {
-      const { auth, params, payload } = request
+      const { auth, params, payload, query } = request
       const { id, pageId } = params
+      const { prepend } = query
+
       const author = getAuthor(auth.credentials.user)
       const [component] = await createComponentOnDraftDefinition(
         id,
         pageId,
         [payload],
-        author
+        author,
+        prepend
       )
 
       return component
@@ -250,7 +254,8 @@ export default [
     options: {
       validate: {
         params: pageByIdSchema,
-        payload: componentSchema
+        payload: componentSchema,
+        query: prependQuerySchema
       }
     }
   },
