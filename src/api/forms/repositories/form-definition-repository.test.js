@@ -116,7 +116,7 @@ describe('form-definition-repository', () => {
       await addPageAtPosition(formId, page, mockSession, { position: -1 })
 
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
-      expect(filter).toMatchObject({
+      expect(filter).toEqual({
         _id: new ObjectId(formId)
       })
       expect(update).toMatchObject({
@@ -128,12 +128,12 @@ describe('form-definition-repository', () => {
       await addPageAtPosition(formId, page, mockSession, {})
 
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
-      expect(filter).toMatchObject({
+      expect(filter).toEqual({
         _id: new ObjectId(formId)
       })
-      expect(update).toMatchObject({
+      expect(update).toEqual({
         $push: {
-          'draft.pages': { $each: [page], $position: Number.MAX_SAFE_INTEGER }
+          'draft.pages': { $each: [page] }
         }
       })
     })

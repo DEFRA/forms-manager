@@ -6,7 +6,12 @@ import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 const logger = createLogger()
-const DRAFT = 'draft'
+
+/**
+ * @typedef {'string' | 'live'} State
+ */
+
+const DRAFT = /** @type {State} */ 'draft'
 
 /**
  * Adds a form to the Form Store
@@ -89,9 +94,9 @@ export async function createDraftFromLive(id, session) {
 /**
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
- * @param {'draft' | 'live'} state - the form state
+ * @param {State} state - the form state
  */
-export async function get(formId, state = 'draft') {
+export async function get(formId, state = DRAFT) {
   logger.info(`Getting form definition (${state}) for form ID ${formId}`)
 
   const coll =
@@ -146,7 +151,7 @@ export async function remove(formId, session) {
  * @param {string} formId - the ID of the form
  * @param {string} name - new name for the form
  * @param {ClientSession} session
- * @param {'draft' | 'live'} [state] - state of the form to update
+ * @param {State} [state] - state of the form to update
  */
 export async function updateName(formId, name, session, state = DRAFT) {
   if (state === 'live') {
@@ -173,7 +178,7 @@ export async function updateName(formId, name, session, state = DRAFT) {
  * @param {string} formId - the ID of the form
  * @param {Partial<Page>} matchCriteria - new name for the form
  * @param {ClientSession} session
- * @param {'draft' | 'live'} [state] - state of the form to update
+ * @param {State} [state] - state of the form to update
  */
 export async function removeMatchingPages(
   formId,
@@ -205,13 +210,13 @@ export async function removeMatchingPages(
  * @param {string} formId - the ID of the form
  * @param {Page} page - new name for the form
  * @param {ClientSession} session
- * @param {{position?: number; state?: 'live' | 'draft' }} options
+ * @param {{position?: number; state?: State }} options
  */
 export async function addPageAtPosition(
   formId,
   page,
   session,
-  { position = Number.MAX_SAFE_INTEGER, state = DRAFT }
+  { position, state = DRAFT }
 ) {
   if (state === 'live') {
     throw Boom.badRequest(`Cannot remove add on live form ID ${formId}`)
@@ -222,11 +227,17 @@ export async function addPageAtPosition(
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
+  const positionOptions = /** @satisfies {{ $position?: number }} */ {}
+
+  if (position !== undefined) {
+    positionOptions.$position = position
+  }
+
   await coll.updateOne(
     { _id: new ObjectId(formId) },
     {
       $push: {
-        'draft.pages': { $each: [page], $position: position }
+        'draft.pages': { $each: [page], ...positionOptions }
       }
     },
     { session }
@@ -241,7 +252,7 @@ export async function addPageAtPosition(
  * @param {string} pageId
  * @param {Page} page
  * @param {ClientSession} session
- * @param {'live' | 'draft'} [state]
+ * @param {State} [state]
  * @returns {Promise<void>}
  */
 export async function updatePage(formId, pageId, page, session, state = DRAFT) {
@@ -270,7 +281,7 @@ export async function updatePage(formId, pageId, page, session, state = DRAFT) {
  * @param {string} pageId
  * @param {ComponentDef[]} components
  * @param {ClientSession} session
- * @param {'live' | 'draft'} [state]
+ * @param {State} [state]
  * @returns {Promise<void>}
  */
 export async function addComponents(
