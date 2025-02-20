@@ -281,7 +281,7 @@ export async function updatePage(formId, pageId, page, session, state = DRAFT) {
  * @param {string} pageId
  * @param {ComponentDef[]} components
  * @param {ClientSession} session
- * @param {State} [state]
+ * @param {{ state?: State; position?: number }} [options]
  * @returns {Promise<void>}
  */
 export async function addComponents(
@@ -289,7 +289,7 @@ export async function addComponents(
   pageId,
   components,
   session,
-  state = DRAFT
+  { position, state = DRAFT } = {}
 ) {
   if (state === 'live') {
     throw Boom.badRequest(`Cannot add component to a live form - ${formId}`)
@@ -301,12 +301,19 @@ export async function addComponents(
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
+  const positionOptions = /** @satisfies {{ $position?: number }} */ {}
+
+  if (position !== undefined) {
+    positionOptions.$position = position
+  }
+
   await coll.updateOne(
     { _id: new ObjectId(formId), 'draft.pages.id': pageId },
     {
       $push: {
         'draft.pages.$.components': {
-          $each: components
+          $each: components,
+          ...positionOptions
         }
       }
     },

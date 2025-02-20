@@ -177,7 +177,9 @@ describe('form-definition-repository', () => {
 
     it('should fail if form is live', async () => {
       await expect(
-        addComponents(formId, pageId, [component], mockSession, 'live')
+        addComponents(formId, pageId, [component], mockSession, {
+          state: 'live'
+        })
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot add component to a live form - 1eabd1437567fe1b26708bbb'
@@ -193,10 +195,30 @@ describe('form-definition-repository', () => {
         _id: new ObjectId(formId),
         'draft.pages.id': pageId
       })
-      expect(update).toMatchObject({
+      expect(update).toEqual({
         $push: {
           'draft.pages.$.components': {
             $each: [component]
+          }
+        }
+      })
+    })
+
+    it('should add a component to a page a position x', async () => {
+      await addComponents(formId, pageId, [component], mockSession, {
+        position: 0
+      })
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toEqual({
+        $push: {
+          'draft.pages.$.components': {
+            $each: [component],
+            $position: 0
           }
         }
       })
