@@ -12,7 +12,8 @@ import {
   addPageAtPosition,
   removeMatchingPages,
   updateComponent,
-  updatePage
+  updatePage,
+  updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
@@ -262,6 +263,63 @@ describe('form-definition-repository', () => {
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot update component on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+  })
+
+  describe('updatePageFields', () => {
+    /** @satisfies {{ title?: string; path?: string }} */
+    let pageFields = {}
+
+    beforeEach(() => {
+      pageFields = {
+        title: 'Updated page title',
+        path: '/updated-page-title'
+      }
+    })
+
+    it('should update a single page field', async () => {
+      pageFields = {
+        title: 'Updated page title'
+      }
+
+      await updatePageFields(formId, pageId, pageFields, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$.title': 'Updated page title'
+        }
+      })
+    })
+
+    it('should update multiple page fields', async () => {
+      await updatePageFields(formId, pageId, pageFields, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$.title': 'Updated page title',
+          'draft.pages.$.path': '/updated-page-title'
+        }
+      })
+    })
+
+    it('should fail if form is live', async () => {
+      await expect(
+        updatePageFields(formId, pageId, pageFields, mockSession, 'live')
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
         )
       )
     })

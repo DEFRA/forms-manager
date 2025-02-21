@@ -375,6 +375,66 @@ export async function updateComponent(
 }
 
 /**
+ * Repository method to patch fields on a page - such as title
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {{ title?: string; path?: string }} pageFields
+ * @param {ClientSession} session
+ * @param {State} state
+ */
+export async function updatePageFields(
+  formId,
+  pageId,
+  pageFields,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot update pageFields on a live form - ${formId}`)
+  }
+
+  const pageFieldKeys = Object.keys(pageFields)
+
+  logger.info(
+    `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  /**
+   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string }}
+   */
+  const fieldsToSet = {}
+
+  const { title, path } = pageFields
+
+  if (title) {
+    fieldsToSet['draft.pages.$.title'] = title
+  }
+  if (path) {
+    fieldsToSet['draft.pages.$.path'] = path
+  }
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      'draft.pages.id': pageId
+    },
+    {
+      $set: fieldsToSet
+    }
+  )
+
+  logger.info(
+    `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
+  )
+
+  return `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
+}
+
+/**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType } from 'mongodb'
  */
