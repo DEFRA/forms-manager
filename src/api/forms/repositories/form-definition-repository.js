@@ -378,7 +378,7 @@ export async function updateComponent(
  * Repository method to patch fields on a page - such as title
  * @param {string} formId
  * @param {string} pageId
- * @param {{ title?: string; path?: string }} pageFields
+ * @param {PatchPageFields} pageFields
  * @param {ClientSession} session
  * @param {State} state
  */
@@ -430,11 +430,9 @@ export async function updatePageFields(
   logger.info(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
   )
-
-  return `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType } from '@defra/forms-model'
+ * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType } from 'mongodb'
  */

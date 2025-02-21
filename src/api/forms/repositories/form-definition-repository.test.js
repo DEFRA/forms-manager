@@ -269,7 +269,7 @@ describe('form-definition-repository', () => {
   })
 
   describe('updatePageFields', () => {
-    /** @satisfies {{ title?: string; path?: string }} */
+    /** @satisfies {PatchPageFields} */
     let pageFields = {}
 
     beforeEach(() => {
@@ -327,6 +327,6 @@ describe('form-definition-repository', () => {
 })
 
 /**
- * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
+ * @import { FormDefinition, Page, PageSummary, PatchPageFields } from '@defra/forms-model'
  * @import { WithId, Collection, Db } from 'mongodb'
  */
