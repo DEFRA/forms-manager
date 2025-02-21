@@ -22,7 +22,9 @@ import {
   createPageOnDraftDefinition,
   getFormBySlug,
   getFormDefinition,
+  getFormDefinitionPage,
   listForms,
+  patchFieldsOnDraftDefinitionPage,
   removeForm,
   repositionSummaryPipeline,
   updateDraftFormDefinition,
@@ -74,11 +76,13 @@ const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
 
 const author = getAuthor()
 const DRAFT = 'draft'
+const summaryPage = buildSummaryPage()
 
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
   const dateUsedInFakeTime = new Date('2020-01-01')
+  const pageId = 'ffefd409-f3f4-49fe-882e-6e89f44631b1'
 
   /**
    * @satisfies {FormMetadataInput}
@@ -1311,7 +1315,7 @@ describe('Forms service', () => {
 
     it('should not reposition the summary if summary is at the end', async () => {
       const formDefinition1 = buildDefinition({
-        pages: [buildQuestionPage(), buildSummaryPage()]
+        pages: [buildQuestionPage(), summaryPage]
       })
       const removeMatchingPagesSpy = jest.spyOn(
         formDefinition,
@@ -1361,6 +1365,39 @@ describe('Forms service', () => {
       await expect(
         repositionSummaryPipeline('123', formDefinition1, author)
       ).rejects.toThrow(Boom.badRequest('Error'))
+    })
+  })
+
+  describe('getFormDefinitionPage', () => {
+    it('should get a page if it exists', async () => {
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage = buildQuestionPage({
+        id: questionPageId
+      })
+
+      const definition2 = buildDefinition({
+        pages: [questionPage, summaryPage]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition2)
+
+      const foundPage = await getFormDefinitionPage('123', questionPageId)
+
+      expect(foundPage).toEqual(questionPage)
+    })
+
+    it('should fail is page does not exist', async () => {
+      const definition2 = buildDefinition(definition)
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition2)
+
+      await expect(
+        getFormDefinitionPage('123', 'bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d')
+      ).rejects.toThrow(
+        Boom.notFound(
+          'Page ID bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d not found on Form ID 123'
+        )
+      )
     })
   })
 
@@ -1587,9 +1624,79 @@ describe('Forms service', () => {
       ).rejects.toThrow(Boom.badRequest('Error'))
     })
   })
+
+  describe('patchFieldsOnDraftDefinitionPage', () => {
+    const initialPage = buildQuestionPage()
+    const pageFields = /** @satisfies {PatchPageFields} */ {
+      title: 'Updated Title',
+      path: '/updated-title'
+    }
+    const initialDefinition = buildDefinition({
+      pages: [initialPage, summaryPage]
+    })
+
+    it('should update page fields', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(initialDefinition)
+      const expectedPage = buildQuestionPage({
+        ...pageFields
+      })
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        buildDefinition({
+          pages: [expectedPage, summaryPage]
+        })
+      )
+      const page = await patchFieldsOnDraftDefinitionPage(
+        '123',
+        pageId,
+        pageFields,
+        author
+      )
+
+      expect(page).toEqual(expectedPage)
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updatePageFields')
+
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
+      expect(metaFormId).toBe('123')
+
+      expect(metaUpdateOperations.$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      const [formId, calledPageId, pageFieldsToUpdate, , state] =
+        dbDefinitionSpy.mock.calls[0]
+
+      expect(formId).toBe('123')
+      expect(calledPageId).toBe(pageId)
+      expect(pageFieldsToUpdate).toEqual(pageFields)
+      expect(state).toBe(DRAFT)
+    })
+
+    it('should fail if the fields were unsuccessfully updated', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(initialDefinition)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        buildDefinition({
+          pages: [buildQuestionPage({}), summaryPage]
+        })
+      )
+
+      await expect(
+        patchFieldsOnDraftDefinitionPage('123', pageId, pageFields, author)
+      ).rejects.toThrow(
+        Boom.internal(
+          'Failed to patch fields title,path on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 Form ID 123'
+        )
+      )
+    })
+  })
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions, PatchPageFields } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

@@ -12,6 +12,7 @@ import { empty } from '~/src/api/forms/templates.js'
  */
 export function buildQuestionPage(partialPage = {}) {
   return {
+    id: 'ffefd409-f3f4-49fe-882e-6e89f44631b1',
     title: 'Page One',
     path: '/page-one',
     next: [],
