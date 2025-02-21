@@ -16,6 +16,7 @@ import {
   getFormBySlug,
   getFormDefinition,
   listForms,
+  patchFieldsOnDraftDefinitionPage,
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service.js'
@@ -68,6 +69,11 @@ describe('Forms route', () => {
     title: 'What is your name?',
     name: 'Ghcbmw'
   })
+
+  /** @satisfies {PatchPageFields} */
+  const stubPatchPageFields = {
+    title: 'Updated title for page'
+  }
 
   const stubPageObject = /** @type {PageStart} */ {
     title: 'What is your name?',
@@ -569,6 +575,33 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual(expectedPage)
+    })
+
+    test('Testing PATCH /forms/{id}/definition/draft/pages/{pageId} updates fields on a page', async () => {
+      const questionPage = buildQuestionPage({
+        title: 'Updated title for page'
+      })
+      const patchFieldsOnDraftPageMock = jest
+        .mocked(patchFieldsOnDraftDefinitionPage)
+        .mockResolvedValue(questionPage)
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: `/forms/${id}/definition/draft/pages/${pageId}`,
+        payload: stubPatchPageFields,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(questionPage)
+      const [calledFormId, calledPageId, patchedFields] =
+        patchFieldsOnDraftPageMock.mock.calls[0]
+      expect([calledFormId, calledPageId, patchedFields]).toEqual([
+        id,
+        pageId,
+        stubPatchPageFields
+      ])
     })
 
     test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components adds a new component to a page', async () => {
@@ -1259,6 +1292,6 @@ describe('Forms route', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput, FilterOptions, PageStart, TextFieldComponent } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataInput, FilterOptions, PageStart, TextFieldComponent, PatchPageFields } from '@defra/forms-model'
  * @import { Server } from '@hapi/hapi'
  */

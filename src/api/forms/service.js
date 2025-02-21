@@ -788,38 +788,41 @@ export async function patchFieldsOnDraftDefinitionPage(
   )
 
   try {
-    await session.withTransaction(async () => {
-      await formDefinition.updatePageFields(
-        formId,
-        pageId,
-        pageFieldsToUpdate,
-        session,
-        DRAFT
-      )
-
-      page = await getFormDefinitionPage(formId, pageId, session)
-
-      // Check whether field changes have persisted and abort transaction if not
-      const failedFields = /** @type {(keyof PatchPageFields)[]} */ ([])
-
-      fields.forEach((field) => {
-        if (page[field] !== pageFieldsToUpdate[field]) {
-          failedFields.push(field)
-        }
-      })
-      if (failedFields.length) {
-        throw Boom.internal(
-          `Failed to patch fields ${failedFields.toString()} on Page ID ${pageId} Form ID ${formId}`
+    await session.withTransaction(
+      async () => {
+        await formDefinition.updatePageFields(
+          formId,
+          pageId,
+          pageFieldsToUpdate,
+          session,
+          DRAFT
         )
-      }
 
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
-    })
+        page = await getFormDefinitionPage(formId, pageId, session)
+
+        // Check whether field changes have persisted and abort transaction if not
+        const failedFields = /** @type {(keyof PatchPageFields)[]} */ ([])
+
+        fields.forEach((field) => {
+          if (page[field] !== pageFieldsToUpdate[field]) {
+            failedFields.push(field)
+          }
+        })
+        if (failedFields.length) {
+          throw Boom.internal(
+            `Failed to patch fields ${failedFields.toString()} on Page ID ${pageId} Form ID ${formId}`
+          )
+        }
+
+        // Update the form with the new draft state
+        await formMetadata.update(
+          formId,
+          { $set: partialAuditFields(new Date(), author) },
+          session
+        )
+      },
+      { readPreference: 'primary' }
+    )
   } catch (err) {
     logger.error(
       err,

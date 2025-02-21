@@ -16,6 +16,7 @@ import {
   getFormBySlug,
   getFormDefinition,
   listForms,
+  patchFieldsOnDraftDefinitionPage,
   removeForm,
   updateDraftFormDefinition,
   updateFormMetadata
@@ -26,6 +27,7 @@ import {
   formByIdSchema,
   formBySlugSchema,
   pageByIdSchema,
+  patchPageSchema,
   prependQuerySchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
@@ -230,6 +232,29 @@ export default [
     }
   },
   {
+    method: 'PATCH',
+    path: '/forms/{id}/definition/draft/pages/{pageId}',
+    /**
+     * @param {PatchPageRequest} request
+     */
+    handler(request) {
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
+      return patchFieldsOnDraftDefinitionPage(
+        params.id,
+        params.pageId,
+        payload,
+        author
+      )
+    },
+    options: {
+      validate: {
+        params: pageByIdSchema,
+        payload: patchPageSchema
+      }
+    }
+  },
+  {
     method: 'POST',
     path: '/forms/{id}/definition/draft/pages/{pageId}/components',
     /**
@@ -334,6 +359,6 @@ export default [
  * @import { FormMetadataAuthor, FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
  * @import { OidcStandardClaims } from 'oidc-client-ts'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
