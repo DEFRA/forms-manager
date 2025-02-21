@@ -61,7 +61,7 @@ export function buildDefinition(partialDefinition) {
  * @param {Partial<TextFieldComponent>} partialTextField
  * @returns {TextFieldComponent}
  */
-export function buildTextFieldComponent(partialTextField) {
+export function buildTextFieldComponent(partialTextField = {}) {
   return /** @satisfies {TextFieldComponent} */ {
     name: 'TextField',
     title: 'Text field',

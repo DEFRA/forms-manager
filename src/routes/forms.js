@@ -1,4 +1,5 @@
 import {
+  componentSchema,
   formMetadataInputKeys,
   formMetadataInputSchema,
   pageSchema,
@@ -6,6 +7,7 @@ import {
 } from '@defra/forms-model'
 
 import {
+  createComponentOnDraftDefinition,
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
@@ -23,6 +25,8 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
+  pageByIdSchema,
+  prependQuerySchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
@@ -226,6 +230,36 @@ export default [
     }
   },
   {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/pages/{pageId}/components',
+    /**
+     * @param {RequestComponent} request
+     */
+    async handler(request) {
+      const { auth, params, payload, query } = request
+      const { id, pageId } = params
+      const { prepend } = query
+
+      const author = getAuthor(auth.credentials.user)
+      const [component] = await createComponentOnDraftDefinition(
+        id,
+        pageId,
+        [payload],
+        author,
+        prepend
+      )
+
+      return component
+    },
+    options: {
+      validate: {
+        params: pageByIdSchema,
+        payload: componentSchema,
+        query: prependQuerySchema
+      }
+    }
+  },
+  {
     method: 'GET',
     path: '/forms/{id}/definition',
     /**
@@ -300,6 +334,6 @@ export default [
  * @import { FormMetadataAuthor, FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
  * @import { OidcStandardClaims } from 'oidc-client-ts'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

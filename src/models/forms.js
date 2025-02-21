@@ -13,6 +13,17 @@ export const formByIdSchema = Joi.object()
   })
   .required()
 
+export const pageByIdSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    pageId: Joi.string().uuid().required()
+  })
+  .required()
+
+export const prependQuerySchema = Joi.object().keys({
+  prepend: Joi.boolean().default(false)
+})
+
 // Retrieve form by slug schema
 export const formBySlugSchema = Joi.object()
   .keys({

@@ -1,9 +1,13 @@
 import { organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { buildQuestionPage } from '~/src/api/forms/__stubs__/definition.js'
+import {
+  buildQuestionPage,
+  buildTextFieldComponent
+} from '~/src/api/forms/__stubs__/definition.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
+  createComponentOnDraftDefinition,
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
@@ -40,12 +44,10 @@ describe('Forms route', () => {
   const internalErrorStatusCode = 500
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
+  const pageId = 'c7b9f0fa-3223-46b8-b7d3-b2bf00f37155'
   const now = new Date()
   const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
   const authorDisplayName = 'Enrique Chase'
-  const components = {
-    TextField: 'TextField'
-  }
 
   /**
    * @satisfies {FormMetadataAuthor}
@@ -62,13 +64,10 @@ describe('Forms route', () => {
     teamEmail: 'defraforms@defra.gov.uk'
   }
 
-  const stubTextFieldComponent = /** @type {TextFieldComponent} */ {
+  const stubTextFieldComponent = buildTextFieldComponent({
     title: 'What is your name?',
-    type: components.TextField,
-    name: 'Ghcbmw',
-    options: undefined,
-    schema: {}
-  }
+    name: 'Ghcbmw'
+  })
 
   const stubPageObject = /** @type {PageStart} */ {
     title: 'What is your name?',
@@ -571,6 +570,58 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual(expectedPage)
     })
+
+    test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components adds a new component to a page', async () => {
+      const expectedComponent = buildTextFieldComponent({
+        ...stubTextFieldComponent,
+        id: '3813a55d-0958-47f9-8522-94b3fc3818d7'
+      })
+      const createComponentOnDraftDefinitionMock = jest
+        .mocked(createComponentOnDraftDefinition)
+        .mockResolvedValue([expectedComponent])
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components`,
+        payload: stubTextFieldComponent,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(expectedComponent)
+      const [calledFormId, calledPageId, components, , prepend] =
+        createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect([calledFormId, calledPageId, components, prepend]).toEqual([
+        id,
+        pageId,
+        [stubTextFieldComponent],
+        false
+      ])
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components?prepend=true adds a new component to the start of a page', async () => {
+      const expectedComponent = buildTextFieldComponent({
+        ...stubTextFieldComponent,
+        id: '3813a55d-0958-47f9-8522-94b3fc3818d7'
+      })
+      const createComponentOnDraftDefinitionMock = jest
+        .mocked(createComponentOnDraftDefinition)
+        .mockResolvedValue([expectedComponent])
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components?prepend=true`,
+        payload: stubTextFieldComponent,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      const [, , , , prepend] =
+        createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect(prepend).toBe(true)
+    })
   })
 
   describe('Error responses', () => {
@@ -865,6 +916,52 @@ describe('Forms route', () => {
         }
       })
     })
+
+    const invalidComponent = buildTextFieldComponent({
+      id: 'not-a-valid-id'
+    })
+
+    test.each([
+      {
+        url: `/forms/${id}/definition/draft/pages/not-a-valid-guid/components`,
+        errors: {
+          message: '"pageId" must be a valid GUID',
+          validation: {
+            keys: ['pageId'],
+            source: 'params'
+          }
+        }
+      },
+      {
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components`,
+        errors: {
+          message: '"id" must be a valid GUID',
+          validation: {
+            keys: ['id'],
+            source: 'payload'
+          }
+        }
+      }
+    ])(
+      'Testing POST /forms/{id}/definition/draft/pages/{pageId}/components with invalid payload returns validation errors',
+      async ({ url, errors }) => {
+        const response = await server.inject({
+          method: 'POST',
+          url,
+          payload: invalidComponent,
+          auth
+        })
+
+        expect(response.statusCode).toEqual(badRequestStatusCode)
+        expect(response.headers['content-type']).toContain(jsonContentType)
+        expect(response.result).toMatchObject({
+          error: 'Bad Request',
+          message: errors.message,
+          statusCode: 400,
+          validation: errors.validation
+        })
+      }
+    )
 
     test.each([
       {

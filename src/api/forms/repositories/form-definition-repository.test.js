@@ -1,14 +1,18 @@
+import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
+import { ObjectId } from 'mongodb'
 
 import {
-  buildDefinition,
   buildQuestionPage,
-  buildSummaryPage
+  buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
-  addPage,
-  pushSummaryToEnd
+  addComponents,
+  addPageAtPosition,
+  removeMatchingPages,
+  updateComponent,
+  updatePage
 } from '~/src/api/forms/repositories/form-definition-repository.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
@@ -22,6 +26,9 @@ const author = getAuthor()
  * @type {any}
  */
 const mockSession = author
+const formId = '1eabd1437567fe1b26708bbb'
+const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
+const componentId = 'e296d931-2364-4b17-9049-1aa1afea29d3'
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -63,180 +70,200 @@ describe('form-definition-repository', () => {
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
   })
-  describe('pushSummaryToEnd', () => {
-    const summary = {
-      id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
-      title: 'Summary',
-      path: '/summary',
-      controller: 'SummaryPageController'
-    }
 
+  describe('removeMatchingPages', () => {
     it('should not edit a live summary', async () => {
       await expect(
-        pushSummaryToEnd('1234', mockSession, 'live')
+        removeMatchingPages(
+          formId,
+          { controller: ControllerType.Summary },
+          mockSession,
+          'live'
+        )
       ).rejects.toThrow(
-        Boom.badRequest('Cannot add summary page to end of a live form')
-      )
-    })
-    it('should fail if collection does not exist', async () => {
-      mockCollection.findOne.mockResolvedValue(null)
-
-      await expect(
-        pushSummaryToEnd('67ade425d6e8ab1116b0aa9a', mockSession)
-      ).rejects.toThrow(
-        Boom.notFound(
-          `Form definition with ID '67ade425d6e8ab1116b0aa9a' not found`
+        Boom.badRequest(
+          'Cannot remove page on live form ID 1eabd1437567fe1b26708bbb'
         )
       )
     })
-    it('should push the summary to the end if it summaryExists but is not at the end', async () => {
-      const docMock = {
-        draft: {
-          name: 'Form with Summary at end',
-          startPage: '/form-with-summary',
-          pages: [
-            summary,
-            {
-              title: 'Test page',
-              path: '/test-page',
-              next: [],
-              components: []
-            }
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
-      }
-      mockCollection.findOne.mockResolvedValue(docMock)
 
-      const summaryResult = await pushSummaryToEnd(
-        '67ade425d6e8ab1116b0aa9a',
+    it('should remove a page', async () => {
+      await removeMatchingPages(
+        formId,
+        { controller: ControllerType.Summary },
         mockSession
       )
-
-      expect(summaryResult).toEqual(summary)
-      expect(mockCollection.updateOne).toHaveBeenNthCalledWith(
-        1,
-        expect.anything(),
-        {
-          $pull: { 'draft.pages': { controller: 'SummaryPageController' } }
-        },
-        expect.anything()
-      )
-      expect(mockCollection.updateOne).toHaveBeenNthCalledWith(
-        2,
-        expect.anything(),
-        {
-          $push: { 'draft.pages': summary } // Adds the summary page back
-        },
-        expect.anything()
-      )
-    })
-
-    it('should not update the document if summary page is at end', async () => {
-      const docMock = {
-        draft: {
-          name: 'Form with Summary at end',
-          startPage: '/form-with-summary',
-          pages: [
-            {
-              title: 'Test page',
-              path: '/test-page',
-              next: [],
-              components: []
-            },
-            summary
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
-      }
-      mockCollection.findOne.mockResolvedValue(docMock)
-
-      const summaryResult = await pushSummaryToEnd(
-        '67ade425d6e8ab1116b0aa9a',
-        mockSession
-      )
-      expect(mockCollection.updateOne).not.toHaveBeenCalled()
-      expect(summaryResult).toEqual({
-        id: '1e322ebc-18ea-4b5d-846a-76bc08fc9943',
-        title: 'Summary',
-        path: '/summary',
-        controller: 'SummaryPageController'
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
       })
-    })
-
-    it('should not update the document if no summary page summaryExists', async () => {
-      const docMock = {
-        draft: {
-          name: 'Form with Summary at end',
-          startPage: '/form-with-summary',
-          pages: [
-            {
-              title: 'Test page',
-              path: '/test-page',
-              next: [],
-              components: []
-            }
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
-      }
-      mockCollection.findOne.mockResolvedValue(docMock)
-
-      const summary = await pushSummaryToEnd(
-        '67ade425d6e8ab1116b0aa9a',
-        mockSession
-      )
-      expect(mockCollection.updateOne).not.toHaveBeenCalled()
-      expect(summary).toBeUndefined()
+      expect(update).toMatchObject({
+        $pull: { 'draft.pages': { controller: 'SummaryPageController' } }
+      })
     })
   })
 
-  describe('addPage', () => {
-    const pageToAdd = buildQuestionPage()
-    const summaryPage = buildSummaryPage({})
+  describe('addPageAtPosition', () => {
+    const page = buildQuestionPage()
 
-    it('should add a page if no summary page summaryExists', async () => {
-      mockCollection.findOne.mockResolvedValue({
-        draft: buildDefinition({
-          pages: []
-        })
-      })
-      const page = await addPage(
-        '1eabd1437567fe1b26708bbb',
-        pageToAdd,
-        mockSession
+    it('should not edit a live summary', async () => {
+      await expect(
+        addPageAtPosition('1234', page, mockSession, { state: 'live' })
+      ).rejects.toThrow(
+        Boom.badRequest('Cannot remove add on live form ID 1234')
       )
-      expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
-      expect(page).toMatchObject({
-        ...pageToAdd,
-        id: expect.any(String)
+    })
+
+    it('should add a page at position', async () => {
+      await addPageAtPosition(formId, page, mockSession, { position: -1 })
+
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      expect(filter).toEqual({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $push: { 'draft.pages': { $each: [page], $position: -1 } }
       })
     })
 
-    it('should add a page if summary page is last page', async () => {
-      mockCollection.findOne.mockResolvedValue({
-        draft: buildDefinition({})
+    it('should add a page to the end', async () => {
+      await addPageAtPosition(formId, page, mockSession, {})
+
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      expect(filter).toEqual({
+        _id: new ObjectId(formId)
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
-      expect(mockCollection.updateOne).toHaveBeenCalledTimes(1)
+      expect(update).toEqual({
+        $push: {
+          'draft.pages': { $each: [page] }
+        }
+      })
+    })
+  })
+
+  describe('updatePage', () => {
+    const page = buildQuestionPage({
+      id: pageId,
+      title: 'New title',
+      path: 'New path',
+      components: [buildTextFieldComponent({})]
     })
 
-    it('should add a page and push summary to end if summary page summaryExists and is not last page', async () => {
-      const pageOne = buildQuestionPage({})
+    it('should fail if form is live', async () => {
+      await expect(
+        updatePage(formId, pageId, page, mockSession, 'live')
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot update page on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+    it('should update a page', async () => {
+      await updatePage(formId, pageId, page, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
 
-      mockCollection.findOne.mockResolvedValue({
-        draft: buildDefinition({
-          pages: [summaryPage, pageOne]
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toMatchObject({
+        $set: {
+          'draft.pages.$': page
+        }
+      })
+    })
+  })
+
+  describe('addComponents', () => {
+    const component = buildTextFieldComponent()
+
+    it('should fail if form is live', async () => {
+      await expect(
+        addComponents(formId, pageId, [component], mockSession, {
+          state: 'live'
         })
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot add component to a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+
+    it('should add a component to a page', async () => {
+      await addComponents(formId, pageId, [component], mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
       })
-      await addPage('1eabd1437567fe1b26708bbb', pageToAdd, mockSession)
-      expect(mockCollection.updateOne).toHaveBeenCalledTimes(3)
+      expect(update).toEqual({
+        $push: {
+          'draft.pages.$.components': {
+            $each: [component]
+          }
+        }
+      })
+    })
+
+    it('should add a component to a page a position x', async () => {
+      await addComponents(formId, pageId, [component], mockSession, {
+        position: 0
+      })
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toEqual({
+        $push: {
+          'draft.pages.$.components': {
+            $each: [component],
+            $position: 0
+          }
+        }
+      })
+    })
+  })
+
+  describe('updateComponent', () => {
+    const component = buildTextFieldComponent({
+      id: '11bafb41-5d34-4e2a-b372-1175cb954a25'
+    })
+
+    it('should update the component', async () => {
+      await updateComponent(formId, pageId, componentId, component, mockSession)
+
+      const [filter, update, options] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$[pageId].components.$[component]': component
+        }
+      })
+      expect(options).toMatchObject({
+        arrayFilters: [{ 'pageId.id': pageId }, { 'component.id': componentId }]
+      })
+    })
+    it('should fail if state is live', async () => {
+      await expect(
+        updateComponent(
+          formId,
+          pageId,
+          componentId,
+          component,
+          mockSession,
+          'live'
+        )
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot update component on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
     })
   })
 })
