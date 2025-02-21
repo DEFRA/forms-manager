@@ -3,6 +3,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
+  buildDefinition,
   buildQuestionPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
@@ -10,6 +11,7 @@ import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
   addPageAtPosition,
+  get,
   removeMatchingPages,
   updateComponent,
   updatePage,
@@ -30,6 +32,11 @@ const mockSession = author
 const formId = '1eabd1437567fe1b26708bbb'
 const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
 const componentId = 'e296d931-2364-4b17-9049-1aa1afea29d3'
+
+/**
+ * @typedef {'draft' | 'live'} State
+ */
+const DRAFT = /** @type {State} */ ('draft')
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -70,6 +77,35 @@ jest.mock('~/src/mongo.js', () => {
 describe('form-definition-repository', () => {
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
+  })
+
+  describe('get', () => {
+    const mockDefinition = buildDefinition({})
+
+    beforeEach(() => {
+      mockCollection.findOne.mockResolvedValue({
+        draft: mockDefinition
+      })
+    })
+
+    it('should handle a call outside of a session', async () => {
+      const definition = await get(formId)
+      const [filter, options] = mockCollection.findOne.mock.calls[0]
+
+      expect(filter).toEqual({ _id: new ObjectId(formId) })
+      expect(options).toEqual({ projection: { draft: 1 } })
+      expect(definition).toEqual(mockDefinition)
+    })
+
+    it('should handle a call inside a session', async () => {
+      await get(formId, DRAFT, mockSession)
+      const [, options] = mockCollection.findOne.mock.calls[0]
+
+      expect(options).toEqual({
+        projection: { draft: 1 },
+        session: mockSession
+      })
+    })
   })
 
   describe('removeMatchingPages', () => {
