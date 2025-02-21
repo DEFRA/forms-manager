@@ -178,7 +178,7 @@ export async function updateName(formId, name, session, state = DRAFT) {
 /**
  * Removes pages that match the matchCriteria
  * @param {string} formId - the ID of the form
- * @param {Partial<Page>} matchCriteria - new name for the form
+ * @param {{ controller: ControllerType.Summary }} matchCriteria - new name for the form
  * @param {ClientSession} session
  * @param {State} [state] - state of the form to update
  */
@@ -375,6 +375,6 @@ export async function updateComponent(
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary, ComponentDef } from '@defra/forms-model'
+ * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType } from 'mongodb'
  */
