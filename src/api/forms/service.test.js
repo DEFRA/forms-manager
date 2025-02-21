@@ -1655,6 +1655,7 @@ describe('Forms service', () => {
       expect(page).toEqual(expectedPage)
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
       const dbDefinitionSpy = jest.spyOn(formDefinition, 'updatePageFields')
+      const dbDefinitionGetSpy = jest.spyOn(formDefinition, 'get')
 
       expect(dbMetadataSpy).toHaveBeenCalled()
       const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
@@ -1675,9 +1676,13 @@ describe('Forms service', () => {
       expect(calledPageId).toBe(pageId)
       expect(pageFieldsToUpdate).toEqual(pageFields)
       expect(state).toBe(DRAFT)
+
+      expect(dbDefinitionGetSpy.mock.calls[1][2]).toMatchObject({
+        withTransaction: expect.anything()
+      })
     })
 
-    it('should fail if the fields were unsuccessfully updated', async () => {
+    it('should fail if the field updates are not persisted in the transaction', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(initialDefinition)
       jest.mocked(formDefinition.get).mockResolvedValueOnce(
         buildDefinition({

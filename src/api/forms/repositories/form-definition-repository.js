@@ -96,7 +96,7 @@ export async function createDraftFromLive(id, session) {
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
  * @param {State} state - the form state
- * @param {ClientSession} [session]
+ * @param {ClientSession | undefined} [session]
  * @returns {Promise<FormDefinition>}
  */
 export async function get(formId, state = DRAFT, session) {

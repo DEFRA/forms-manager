@@ -215,9 +215,10 @@ export async function getFormBySlug(slug) {
  * Retrieves the form definition content for a given form ID
  * @param {string} formId - the ID of the form
  * @param {State} state - the form state
+ * @param {ClientSession | undefined} [session]
  */
-export function getFormDefinition(formId, state = DRAFT) {
-  return formDefinition.get(formId, state)
+export function getFormDefinition(formId, state = DRAFT, session = undefined) {
+  return formDefinition.get(formId, state, session)
 }
 
 /**
@@ -684,12 +685,16 @@ const addIdToComponent = (component) =>
  * Gets a page from a form definition and fails if the page is not found
  * @param {string} formId
  * @param {string} pageId
+ * @param {ClientSession} [session]
  */
-export async function getFormDefinitionPage(formId, pageId) {
+export async function getFormDefinitionPage(formId, pageId, session) {
   logger.info(`Getting Page ID ${pageId} on Form ID ${formId}`)
 
-  const definition =
-    /** @type {FormDefinition} */ await getFormDefinition(formId)
+  const definition = /** @type {FormDefinition} */ await getFormDefinition(
+    formId,
+    DRAFT,
+    session
+  )
   logger.info(`Got Page ID ${pageId} on Form ID ${formId}`)
 
   const page = findPage(definition, pageId)
@@ -792,15 +797,9 @@ export async function patchFieldsOnDraftDefinitionPage(
         DRAFT
       )
 
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
+      page = await getFormDefinitionPage(formId, pageId, session)
 
-      page = await getFormDefinitionPage(formId, pageId)
-
+      // Check whether field changes have persisted and abort transaction if not
       const failedFields = /** @type {(keyof PatchPageFields)[]} */ ([])
 
       fields.forEach((field) => {
@@ -813,6 +812,13 @@ export async function patchFieldsOnDraftDefinitionPage(
           `Failed to patch fields ${failedFields.toString()} on Page ID ${pageId} Form ID ${formId}`
         )
       }
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
     })
   } catch (err) {
     logger.error(
@@ -828,6 +834,6 @@ export async function patchFieldsOnDraftDefinitionPage(
 }
 /**
  * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef, PatchPageFields } from '@defra/forms-model'
- * @import { WithId, UpdateFilter } from 'mongodb'
+ * @import { WithId, UpdateFilter, ClientSession } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
