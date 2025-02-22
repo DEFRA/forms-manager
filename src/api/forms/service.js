@@ -15,6 +15,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
+  findComponent,
   findPage,
   summaryHelper,
   uniquePathGate
@@ -215,9 +216,10 @@ export async function getFormBySlug(slug) {
  * Retrieves the form definition content for a given form ID
  * @param {string} formId - the ID of the form
  * @param {State} state - the form state
+ * @param {ClientSession | undefined} [session]
  */
-export function getFormDefinition(formId, state = DRAFT) {
-  return formDefinition.get(formId, state)
+export function getFormDefinition(formId, state = DRAFT, session = undefined) {
+  return formDefinition.get(formId, state, session)
 }
 
 /**
@@ -681,6 +683,68 @@ const addIdToComponent = (component) =>
   })
 
 /**
+ * Gets a page from a form definition and fails if the page is not found
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {ClientSession} [session]
+ */
+export async function getFormDefinitionPage(formId, pageId, session) {
+  logger.info(`Getting Page ID ${pageId} on Form ID ${formId}`)
+
+  const definition = /** @type {FormDefinition} */ await getFormDefinition(
+    formId,
+    DRAFT,
+    session
+  )
+
+  const page = findPage(definition, pageId)
+
+  if (page === undefined) {
+    throw Boom.notFound(`Page ID ${pageId} not found on Form ID ${formId}`)
+  }
+
+  logger.info(`Got Page ID ${pageId} on Form ID ${formId}`)
+
+  return page
+}
+
+/**
+ * Gets a component from a formDefintion page if it exists, throws a Boom.notFound if not
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ClientSession} [session]
+ */
+export async function getFormDefinitionPageComponent(
+  formId,
+  pageId,
+  componentId,
+  session
+) {
+  logger.info(
+    `Getting Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  const definition = /** @type {FormDefinition} */ await getFormDefinition(
+    formId,
+    DRAFT,
+    session
+  )
+
+  const component = findComponent(definition, pageId, componentId)
+
+  if (component === undefined) {
+    throw Boom.notFound(
+      `Component ID ${componentId} not found on Page ID ${pageId} & Form ID ${formId}`
+    )
+  }
+  logger.info(
+    `Got Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  return component
+}
+/**
  * Adds a component to the end of page components
  * @param {string} formId
  * @param {string} pageId
@@ -695,19 +759,14 @@ export async function createComponentOnDraftDefinition(
   author,
   prepend = false
 ) {
-  const definition =
-    /** @type {FormDefinition} */ await getFormDefinition(formId)
-  const page = findPage(definition, pageId)
+  await getFormDefinitionPage(formId, pageId)
 
   logger.info(`Adding new component on Page ID ${pageId} on Form ID ${formId}`)
 
-  if (page === undefined) {
-    throw Boom.notFound(`Page ID ${pageId} not found on Form ID ${formId}`)
-  }
   const session = client.startSession()
 
-  /** @type {ComponentDef[]} */
-  const createdComponents = components.map(addIdToComponent)
+  const createdComponents =
+    /** @type {ComponentDef[]} */ components.map(addIdToComponent)
 
   const positionOptions = /** @satisfies {{ position?: number }} */ {}
 
@@ -746,8 +805,155 @@ export async function createComponentOnDraftDefinition(
 
   return createdComponents
 }
+
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef } from '@defra/forms-model'
- * @import { WithId, UpdateFilter } from 'mongodb'
+ * Updates a component and throws a Boom.notFound if page or component is not found
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ComponentDef} component
+ * @param {FormMetadataAuthor} author
+ */
+export async function updateComponentOnDraftDefinition(
+  formId,
+  pageId,
+  componentId,
+  component,
+  author
+) {
+  logger.info(
+    `Updating Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  let componentReturn = await getFormDefinitionPageComponent(
+    formId,
+    pageId,
+    componentId
+  )
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(
+      async () => {
+        await formDefinition.updateComponent(
+          formId,
+          pageId,
+          componentId,
+          component,
+          session,
+          DRAFT
+        )
+
+        componentReturn = await getFormDefinitionPageComponent(
+          formId,
+          pageId,
+          componentId,
+          session
+        )
+
+        // Check that component has been updated
+        if (JSON.stringify(componentReturn) !== JSON.stringify(component)) {
+          throw Boom.internal(
+            `Component ${componentId} not updated on Page ID ${pageId} and Form ID ${formId}`
+          )
+        }
+
+        // Update the form with the new draft state
+        await formMetadata.update(
+          formId,
+          { $set: partialAuditFields(new Date(), author) },
+          session
+        )
+      },
+      { readPreference: 'primary' }
+    )
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to update Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(
+    `Updated Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  return componentReturn
+}
+/**
+ * Updates specific fields on a page, allowing concurrent changes should components be updated
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {PatchPageFields} pageFieldsToUpdate
+ * @param {FormMetadataAuthor} author
+ */
+export async function patchFieldsOnDraftDefinitionPage(
+  formId,
+  pageId,
+  pageFieldsToUpdate,
+  author
+) {
+  let page = await getFormDefinitionPage(formId, pageId)
+
+  const session = client.startSession()
+  const fields = /** @type {(keyof PatchPageFields)[]} */ (
+    Object.keys(pageFieldsToUpdate)
+  )
+
+  try {
+    await session.withTransaction(
+      async () => {
+        await formDefinition.updatePageFields(
+          formId,
+          pageId,
+          pageFieldsToUpdate,
+          session,
+          DRAFT
+        )
+
+        page = await getFormDefinitionPage(formId, pageId, session)
+
+        // Check whether field changes have persisted and abort transaction if not
+        const failedFields = /** @type {(keyof PatchPageFields)[]} */ ([])
+
+        fields.forEach((field) => {
+          if (page[field] !== pageFieldsToUpdate[field]) {
+            failedFields.push(field)
+          }
+        })
+        if (failedFields.length) {
+          throw Boom.internal(
+            `Failed to patch fields ${failedFields.toString()} on Page ID ${pageId} Form ID ${formId}`
+          )
+        }
+
+        // Update the form with the new draft state
+        await formMetadata.update(
+          formId,
+          { $set: partialAuditFields(new Date(), author) },
+          session
+        )
+      },
+      { readPreference: 'primary' }
+    )
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to patch fields ${fields.toString()} on Page ID ${pageId} Form ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  return page
+}
+/**
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef, PatchPageFields } from '@defra/forms-model'
+ * @import { WithId, UpdateFilter, ClientSession } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

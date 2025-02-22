@@ -12,6 +12,7 @@ import { empty } from '~/src/api/forms/templates.js'
  */
 export function buildQuestionPage(partialPage = {}) {
   return {
+    id: 'ffefd409-f3f4-49fe-882e-6e89f44631b1',
     title: 'Page One',
     path: '/page-one',
     next: [],
@@ -33,6 +34,18 @@ export function buildSummaryPage(partialSummaryPage = {}) {
     ...partialSummaryPage
   }
   return page
+}
+
+/**
+ * @param {Partial<PageStatus>} partialStatusPage
+ */
+export function buildStatusPage(partialStatusPage) {
+  return /** @type {PageStatus} */ ({
+    title: 'Status',
+    path: ControllerPath.Status,
+    controller: ControllerType.Status,
+    ...partialStatusPage
+  })
 }
 
 /**
@@ -73,6 +86,6 @@ export function buildTextFieldComponent(partialTextField = {}) {
   }
 }
 /**
- * @import { FormDefinition, Page, PageSummary, PageQuestion, TextFieldComponent } from '@defra/forms-model'
+ * @import { FormDefinition, Page, PageSummary, PageQuestion, PageStatus, TextFieldComponent } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

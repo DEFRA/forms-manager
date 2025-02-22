@@ -96,21 +96,24 @@ export async function createDraftFromLive(id, session) {
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
  * @param {State} state - the form state
+ * @param {ClientSession | undefined} [session]
  * @returns {Promise<FormDefinition>}
  */
-export async function get(formId, state = DRAFT) {
+export async function get(formId, state = DRAFT, session) {
   logger.info(`Getting form definition (${state}) for form ID ${formId}`)
 
   const coll =
     /** @satisfies {Collection<{draft?: FormDefinition, live?: FormDefinition}>} */ (
       db.collection(DEFINITION_COLLECTION_NAME)
     )
+  const sessionOptions = /** @type {FindOptions} */ session && { session }
+  const options = /** @type {FindOptions} */ ({
+    projection: { [state]: 1 },
+    ...sessionOptions
+  })
 
   try {
-    const result = await coll.findOne(
-      { _id: new ObjectId(formId) },
-      { projection: { [state]: 1 } }
-    )
+    const result = await coll.findOne({ _id: new ObjectId(formId) }, options)
 
     if (!result?.[state]) {
       throw Boom.notFound(`Form definition with ID '${formId}' not found`)
@@ -375,6 +378,64 @@ export async function updateComponent(
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType } from '@defra/forms-model'
- * @import { ClientSession, Collection, Document, InferIdType } from 'mongodb'
+ * Repository method to patch fields on a page - such as title
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {PatchPageFields} pageFields
+ * @param {ClientSession} session
+ * @param {State} state
+ */
+export async function updatePageFields(
+  formId,
+  pageId,
+  pageFields,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot update pageFields on a live form - ${formId}`)
+  }
+
+  const pageFieldKeys = Object.keys(pageFields)
+
+  logger.info(
+    `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  /**
+   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string }}
+   */
+  const fieldsToSet = {}
+
+  const { title, path } = pageFields
+
+  if (title) {
+    fieldsToSet['draft.pages.$.title'] = title
+  }
+  if (path) {
+    fieldsToSet['draft.pages.$.path'] = path
+  }
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      'draft.pages.id': pageId
+    },
+    {
+      $set: fieldsToSet
+    }
+  )
+
+  logger.info(
+    `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
+  )
+}
+
+/**
+ * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields } from '@defra/forms-model'
+ * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
  */
