@@ -23,6 +23,7 @@ import {
   getFormBySlug,
   getFormDefinition,
   getFormDefinitionPage,
+  getFormDefinitionPageComponent,
   listForms,
   patchFieldsOnDraftDefinitionPage,
   removeForm,
@@ -83,6 +84,7 @@ describe('Forms service', () => {
   const slug = 'test-form'
   const dateUsedInFakeTime = new Date('2020-01-01')
   const pageId = 'ffefd409-f3f4-49fe-882e-6e89f44631b1'
+  const componentId = 'b008e366-7136-4159-b2c6-db3ee8e75ab7'
 
   /**
    * @satisfies {FormMetadataInput}
@@ -1396,6 +1398,55 @@ describe('Forms service', () => {
       ).rejects.toThrow(
         Boom.notFound(
           'Page ID bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d not found on Form ID 123'
+        )
+      )
+    })
+  })
+
+  describe('getFormDefinitionPageComponent', () => {
+    it('should get component if one exists', async () => {
+      const textFieldComponent = buildTextFieldComponent({
+        id: componentId
+      })
+      const page = buildQuestionPage({
+        id: pageId,
+        components: [textFieldComponent]
+      })
+      const definition1 = buildDefinition({
+        pages: [page]
+      })
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      const component = await getFormDefinitionPageComponent(
+        id,
+        pageId,
+        componentId
+      )
+      expect(component).toEqual(textFieldComponent)
+    })
+
+    it('should fail is component does not exist', async () => {
+      const textFieldComponent = buildTextFieldComponent({})
+      const page = buildQuestionPage({
+        id: pageId,
+        components: [textFieldComponent]
+      })
+      const definition1 = buildDefinition({
+        pages: [page]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      await expect(
+        getFormDefinitionPageComponent(
+          '123',
+          pageId,
+          'invalid-component-id',
+          undefined
+        )
+      ).rejects.toThrow(
+        Boom.notFound(
+          'Component ID invalid-component-id not found on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 & Form ID 123'
         )
       )
     })

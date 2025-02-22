@@ -15,6 +15,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
+  findComponent,
   findPage,
   summaryHelper,
   uniquePathGate
@@ -695,7 +696,6 @@ export async function getFormDefinitionPage(formId, pageId, session) {
     DRAFT,
     session
   )
-  logger.info(`Got Page ID ${pageId} on Form ID ${formId}`)
 
   const page = findPage(definition, pageId)
 
@@ -703,7 +703,46 @@ export async function getFormDefinitionPage(formId, pageId, session) {
     throw Boom.notFound(`Page ID ${pageId} not found on Form ID ${formId}`)
   }
 
+  logger.info(`Got Page ID ${pageId} on Form ID ${formId}`)
+
   return page
+}
+
+/**
+ * Gets a component from a formDefintion page if it exists, throws a Boom.notFound if not
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ClientSession} [session]
+ */
+export async function getFormDefinitionPageComponent(
+  formId,
+  pageId,
+  componentId,
+  session
+) {
+  logger.info(
+    `Getting Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  const definition = /** @type {FormDefinition} */ await getFormDefinition(
+    formId,
+    DRAFT,
+    session
+  )
+
+  const component = findComponent(definition, pageId, componentId)
+
+  if (component === undefined) {
+    throw Boom.notFound(
+      `Component ID ${componentId} not found on Page ID ${pageId} & Form ID ${formId}`
+    )
+  }
+  logger.info(
+    `Got Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  return component
 }
 /**
  * Adds a component to the end of page components
