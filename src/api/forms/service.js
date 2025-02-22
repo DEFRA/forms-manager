@@ -834,37 +834,40 @@ export async function updateComponentOnDraftDefinition(
   const session = client.startSession()
 
   try {
-    await session.withTransaction(async () => {
-      await formDefinition.updateComponent(
-        formId,
-        pageId,
-        componentId,
-        component,
-        session,
-        DRAFT
-      )
-
-      componentReturn = await getFormDefinitionPageComponent(
-        formId,
-        pageId,
-        componentId,
-        session
-      )
-
-      // Check that component has been updated
-      if (componentReturn !== component) {
-        throw Boom.internal(
-          `Component ${componentId} not updated on Page ID ${pageId} and Form ID ${formId}`
+    await session.withTransaction(
+      async () => {
+        await formDefinition.updateComponent(
+          formId,
+          pageId,
+          componentId,
+          component,
+          session,
+          DRAFT
         )
-      }
 
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
-    })
+        componentReturn = await getFormDefinitionPageComponent(
+          formId,
+          pageId,
+          componentId,
+          session
+        )
+
+        // Check that component has been updated
+        if (JSON.stringify(componentReturn) !== JSON.stringify(component)) {
+          throw Boom.internal(
+            `Component ${componentId} not updated on Page ID ${pageId} and Form ID ${formId}`
+          )
+        }
+
+        // Update the form with the new draft state
+        await formMetadata.update(
+          formId,
+          { $set: partialAuditFields(new Date(), author) },
+          session
+        )
+      },
+      { readPreference: 'primary' }
+    )
   } catch (err) {
     logger.error(
       err,

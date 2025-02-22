@@ -18,6 +18,7 @@ import {
   listForms,
   patchFieldsOnDraftDefinitionPage,
   removeForm,
+  updateComponentOnDraftDefinition,
   updateFormMetadata
 } from '~/src/api/forms/service.js'
 import { createServer } from '~/src/api/server.js'
@@ -46,6 +47,7 @@ describe('Forms route', () => {
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
   const pageId = 'c7b9f0fa-3223-46b8-b7d3-b2bf00f37155'
+  const componentId = '64d9c012-2238-4ab2-ab11-6290d3c0cf15'
   const now = new Date()
   const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
   const authorDisplayName = 'Enrique Chase'
@@ -604,6 +606,36 @@ describe('Forms route', () => {
       ])
     })
 
+    test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/components/{componentId} updates a component on a page', async () => {
+      const updatedComponent = buildTextFieldComponent({
+        id: componentId,
+        title: 'New component title'
+      })
+      const updateComponentOnDraftPageMock = jest
+        .mocked(updateComponentOnDraftDefinition)
+        .mockResolvedValue(updatedComponent)
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components/${componentId}`,
+        payload: updatedComponent,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(updatedComponent)
+      expect(updateComponentOnDraftPageMock).toHaveBeenCalled()
+      const [calledFormId, calledPageId, calledComponentId, component] =
+        updateComponentOnDraftPageMock.mock.calls[0]
+      expect([
+        calledFormId,
+        calledPageId,
+        calledComponentId,
+        component
+      ]).toEqual([id, pageId, componentId, updatedComponent])
+    })
+
     test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components adds a new component to a page', async () => {
       const expectedComponent = buildTextFieldComponent({
         ...stubTextFieldComponent,
@@ -950,6 +982,29 @@ describe('Forms route', () => {
       })
     })
 
+    test('Testing POST /forms/{id}/definition/draft/pages/{pageId} with invalid payload returns validation errors', async () => {
+      const invalidPatchPayload = {
+        id: 1234
+      }
+      const response = await server.inject({
+        method: 'PATCH',
+        url: `/forms/${id}/definition/draft/pages/${pageId}`,
+        payload: invalidPatchPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"id" is not allowed',
+        statusCode: 400,
+        validation: {
+          keys: ['id']
+        }
+      })
+    })
+
     const invalidComponent = buildTextFieldComponent({
       id: 'not-a-valid-id'
     })
@@ -995,6 +1050,29 @@ describe('Forms route', () => {
         })
       }
     )
+
+    test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/component/{componentId} with invalid payload returns validation errors', async () => {
+      const invalidPatchPayload = {
+        id: 1234
+      }
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components/${componentId}`,
+        payload: invalidPatchPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"id" must be a string. "type" is required',
+        statusCode: 400,
+        validation: {
+          keys: ['id', 'type']
+        }
+      })
+    })
 
     test.each([
       {

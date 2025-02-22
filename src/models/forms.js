@@ -21,6 +21,14 @@ export const pageByIdSchema = Joi.object()
   })
   .required()
 
+export const componentByIdSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    pageId: Joi.string().uuid().required(),
+    componentId: Joi.string().uuid().required()
+  })
+  .required()
+
 export const prependQuerySchema = Joi.object().keys({
   prepend: Joi.boolean().default(false)
 })
