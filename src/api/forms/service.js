@@ -765,8 +765,8 @@ export async function createComponentOnDraftDefinition(
 
   const session = client.startSession()
 
-  /** @type {ComponentDef[]} */
-  const createdComponents = components.map(addIdToComponent)
+  const createdComponents =
+    /** @type {ComponentDef[]} */ components.map(addIdToComponent)
 
   const positionOptions = /** @satisfies {{ position?: number }} */ {}
 
@@ -806,6 +806,81 @@ export async function createComponentOnDraftDefinition(
   return createdComponents
 }
 
+/**
+ * Updates a component and throws a Boom.notFound if page or component is not found
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ComponentDef} component
+ * @param {FormMetadataAuthor} author
+ */
+export async function updateComponentOnDraftDefinition(
+  formId,
+  pageId,
+  componentId,
+  component,
+  author
+) {
+  logger.info(
+    `Updating Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  let componentReturn = await getFormDefinitionPageComponent(
+    formId,
+    pageId,
+    componentId
+  )
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await formDefinition.updateComponent(
+        formId,
+        pageId,
+        componentId,
+        component,
+        session,
+        DRAFT
+      )
+
+      componentReturn = await getFormDefinitionPageComponent(
+        formId,
+        pageId,
+        componentId,
+        session
+      )
+
+      // Check that component has been updated
+      if (componentReturn !== component) {
+        throw Boom.internal(
+          `Component ${componentId} not updated on Page ID ${pageId} and Form ID ${formId}`
+        )
+      }
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to update Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(
+    `Updated Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  return componentReturn
+}
 /**
  * Updates specific fields on a page, allowing concurrent changes should components be updated
  * @param {string} formId

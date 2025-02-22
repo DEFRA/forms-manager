@@ -60,6 +60,7 @@ export function findPage(definition, pageId) {
  * @param {FormDefinition} definition
  * @param {string} pageId
  * @param {string} componentId
+ * @returns {ComponentDef | undefined}
  */
 export function findComponent(definition, pageId, componentId) {
   const page = /** @satisfies {Page | undefined} */ (
@@ -74,7 +75,9 @@ export function findComponent(definition, pageId, componentId) {
     return undefined
   }
 
-  return page.components.find((component) => component.id === componentId)
+  return /** @type {ComponentDef | undefined} */ (
+    page.components.find((component) => component.id === componentId)
+  )
 }
 /**
  * @param {FormDefinition} formDraftDefinition

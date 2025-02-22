@@ -28,6 +28,7 @@ import {
   patchFieldsOnDraftDefinitionPage,
   removeForm,
   repositionSummaryPipeline,
+  updateComponentOnDraftDefinition,
   updateDraftFormDefinition,
   updateFormMetadata
 } from '~/src/api/forms/service.js'
@@ -1673,6 +1674,95 @@ describe('Forms service', () => {
           author
         )
       ).rejects.toThrow(Boom.badRequest('Error'))
+    })
+  })
+
+  describe('updateComponentOnDraftDefinition', () => {
+    const textFieldComponent = buildTextFieldComponent({
+      id: componentId,
+      title: 'Old title'
+    })
+    const newTextFieldComponent = buildTextFieldComponent({
+      id: componentId,
+      title: 'New title'
+    })
+    const page = buildQuestionPage({
+      id: pageId,
+      components: [textFieldComponent]
+    })
+    const definition1 = buildDefinition({
+      pages: [page]
+    })
+
+    it('should update the component', async () => {
+      const newDefinition = buildDefinition({
+        pages: [
+          buildQuestionPage({
+            id: pageId,
+            components: [newTextFieldComponent]
+          })
+        ]
+      })
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
+
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateComponent')
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      const component = await updateComponentOnDraftDefinition(
+        id,
+        pageId,
+        componentId,
+        newTextFieldComponent,
+        author
+      )
+
+      expect(component).toEqual(newTextFieldComponent)
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      const [
+        calledFormId,
+        calledPageId,
+        calledComponentId,
+        calledComponent,
+        ,
+        calledState
+      ] = dbDefinitionSpy.mock.calls[0]
+
+      expect([
+        calledFormId,
+        calledPageId,
+        calledComponentId,
+        calledState
+      ]).toEqual([id, pageId, componentId, DRAFT])
+      expect(calledComponent).toEqual(newTextFieldComponent)
+      const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
+      expect(metaFormId).toBe(id)
+
+      expect(metaUpdateOperations.$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+    })
+
+    it('should fail if component is not updated', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      await expect(
+        updateComponentOnDraftDefinition(
+          id,
+          pageId,
+          componentId,
+          newTextFieldComponent,
+          author
+        )
+      ).rejects.toThrow(
+        Boom.internal(
+          'Component b008e366-7136-4159-b2c6-db3ee8e75ab7 not updated on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 and Form ID 661e4ca5039739ef2902b214'
+        )
+      )
     })
   })
 
