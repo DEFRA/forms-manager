@@ -56,6 +56,34 @@ export function findPage(definition, pageId) {
 }
 
 /**
+ * Finds a component in a form definition by formId, pageId & componentId
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {string} componentId
+ */
+export function findComponent(definition, pageId, componentId) {
+  const page = /** @satisfies {Page | undefined} */ (
+    findPage(definition, pageId)
+  )
+
+  if (
+    page === undefined ||
+    page.controller === ControllerType.Summary ||
+    page.controller === ControllerType.Status
+  ) {
+    return undefined
+  }
+
+  const pageWithComponents =
+    /** @type {PageStart | PageQuestion | PageTerminal | PageRepeat | PageFileUpload} */ (
+      page
+    )
+
+  return pageWithComponents.components.find(
+    (component) => component.id === componentId
+  )
+}
+/**
  * @param {FormDefinition} formDraftDefinition
  * @param {string} path
  * @param {string} message
@@ -66,6 +94,6 @@ export const uniquePathGate = (formDraftDefinition, path, message) => {
   }
 }
 /**
- * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
+ * @import { FormDefinition, Page, PageSummary, ComponentDef, PageStart, PageQuestion, PageTerminal, PageRepeat, PageFileUpload} from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */

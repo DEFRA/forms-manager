@@ -37,6 +37,18 @@ export function buildSummaryPage(partialSummaryPage = {}) {
 }
 
 /**
+ * @param {Partial<PageStatus>} partialStatusPage
+ */
+export function buildStatusPage(partialStatusPage) {
+  return /** @type {PageStatus} */ ({
+    title: 'Status',
+    path: ControllerPath.Status,
+    controller: ControllerType.Status,
+    ...partialStatusPage
+  })
+}
+
+/**
  * Creates a page array with a summary at the end
  * @param {Page[]} pages
  * @returns {Page[]}
@@ -74,6 +86,6 @@ export function buildTextFieldComponent(partialTextField = {}) {
   }
 }
 /**
- * @import { FormDefinition, Page, PageSummary, PageQuestion, TextFieldComponent } from '@defra/forms-model'
+ * @import { FormDefinition, Page, PageSummary, PageQuestion, PageStatus, TextFieldComponent } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */
