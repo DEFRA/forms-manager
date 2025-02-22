@@ -74,14 +74,7 @@ export function findComponent(definition, pageId, componentId) {
     return undefined
   }
 
-  const pageWithComponents =
-    /** @type {PageStart | PageQuestion | PageTerminal | PageRepeat | PageFileUpload} */ (
-      page
-    )
-
-  return pageWithComponents.components.find(
-    (component) => component.id === componentId
-  )
+  return page.components.find((component) => component.id === componentId)
 }
 /**
  * @param {FormDefinition} formDraftDefinition
