@@ -99,7 +99,7 @@ export async function createDraftFromLive(id, session) {
  * @param {ClientSession | undefined} [session]
  * @returns {Promise<FormDefinition>}
  */
-export async function get(formId, state = DRAFT, session) {
+export async function get(formId, state = DRAFT, session = undefined) {
   logger.info(`Getting form definition (${state}) for form ID ${formId}`)
 
   const coll =
@@ -427,6 +427,9 @@ export async function updatePageFields(
     },
     {
       $set: fieldsToSet
+    },
+    {
+      session
     }
   )
 

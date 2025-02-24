@@ -8,24 +8,30 @@ import {
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   createComponentOnDraftDefinition,
+  updateComponentOnDraftDefinition
+} from '~/src/api/forms/service/component.js'
+import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
-  createPageOnDraftDefinition,
   getForm,
   getFormBySlug,
   getFormDefinition,
   listForms,
-  patchFieldsOnDraftDefinitionPage,
   removeForm,
-  updateComponentOnDraftDefinition,
   updateFormMetadata
-} from '~/src/api/forms/service.js'
+} from '~/src/api/forms/service/definition.js'
+import {
+  createPageOnDraftDefinition,
+  patchFieldsOnDraftDefinitionPage
+} from '~/src/api/forms/service/page.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
 
 jest.mock('~/src/mongo.js')
-jest.mock('~/src/api/forms/service.js')
+jest.mock('~/src/api/forms/service/definition.js')
+jest.mock('~/src/api/forms/service/page.js')
+jest.mock('~/src/api/forms/service/component.js')
 
 describe('Forms route', () => {
   /** @type {Server} */

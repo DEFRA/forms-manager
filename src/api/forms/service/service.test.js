@@ -16,22 +16,26 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   createComponentOnDraftDefinition,
+  getFormDefinitionPageComponent,
+  updateComponentOnDraftDefinition
+} from '~/src/api/forms/service/component.js'
+import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
-  createPageOnDraftDefinition,
   getFormBySlug,
   getFormDefinition,
-  getFormDefinitionPage,
-  getFormDefinitionPageComponent,
   listForms,
-  patchFieldsOnDraftDefinitionPage,
   removeForm,
-  repositionSummaryPipeline,
-  updateComponentOnDraftDefinition,
   updateDraftFormDefinition,
   updateFormMetadata
-} from '~/src/api/forms/service.js'
+} from '~/src/api/forms/service/definition.js'
+import {
+  createPageOnDraftDefinition,
+  getFormDefinitionPage,
+  patchFieldsOnDraftDefinitionPage,
+  repositionSummaryPipeline
+} from '~/src/api/forms/service/page.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'

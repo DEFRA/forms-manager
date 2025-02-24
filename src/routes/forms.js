@@ -8,20 +8,24 @@ import {
 
 import {
   createComponentOnDraftDefinition,
+  updateComponentOnDraftDefinition
+} from '~/src/api/forms/service/component.js'
+import {
   createDraftFromLive,
   createForm,
   createLiveFromDraft,
-  createPageOnDraftDefinition,
   getForm,
   getFormBySlug,
   getFormDefinition,
   listForms,
-  patchFieldsOnDraftDefinitionPage,
   removeForm,
-  updateComponentOnDraftDefinition,
   updateDraftFormDefinition,
   updateFormMetadata
-} from '~/src/api/forms/service.js'
+} from '~/src/api/forms/service/definition.js'
+import {
+  createPageOnDraftDefinition,
+  patchFieldsOnDraftDefinitionPage
+} from '~/src/api/forms/service/page.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import {
   componentByIdSchema,
