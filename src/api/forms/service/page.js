@@ -254,7 +254,6 @@ export async function patchFieldsOnDraftDefinitionPage(
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef, PatchPageFields } from '@defra/forms-model'
- * @import { WithId, UpdateFilter, ClientSession } from 'mongodb'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { FormDefinition, FormMetadataAuthor, Page, PageSummary, PatchPageFields } from '@defra/forms-model'
+ * @import { ClientSession } from 'mongodb'
  */

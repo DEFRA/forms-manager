@@ -497,7 +497,8 @@ export async function removeForm(formId) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef, PatchPageFields } from '@defra/forms-model'
- * @import { WithId, UpdateFilter, ClientSession } from 'mongodb'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
+ * @import { WithId, ClientSession } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { State } from '~/src/api/forms/service/shared.js'
  */
