@@ -11,6 +11,7 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   DRAFT,
+  MongoError,
   defaultAuthor,
   defaultDate,
   logger,
@@ -315,7 +316,10 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
     return updatedForm.slug ?? form.slug
   } catch (err) {
-    if (err instanceof MongoServerError && err.code === 11000) {
+    if (
+      err instanceof MongoServerError &&
+      err.code === MongoError.DuplicateKey
+    ) {
       logger.error(err, `Form title ${formUpdate.title} already exists`)
       throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
     }

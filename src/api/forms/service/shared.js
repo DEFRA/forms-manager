@@ -28,6 +28,10 @@ export const partialAuditFields = (date, author, state = DRAFT) => {
 }
 export const SUMMARY_PAGE_ID = '449a45f6-4541-4a46-91bd-8b8931b07b50'
 
+export const MongoError = {
+  DuplicateKey: 11000
+}
+
 /**
  * @import { FormMetadataAuthor } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
