@@ -11,6 +11,7 @@ import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
   addPageAtPosition,
+  deleteComponent,
   get,
   removeMatchingPages,
   updateComponent,
@@ -358,6 +359,32 @@ describe('form-definition-repository', () => {
           'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
         )
       )
+    })
+  })
+
+  describe('deleteComponent', () => {
+    it('should fail if form is live', async () => {
+      await expect(
+        deleteComponent(formId, pageId, componentId, mockSession, 'live')
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot delete component on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+    it('should delte a component', async () => {
+      await deleteComponent(formId, pageId, componentId, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toMatchObject({
+        $pull: {
+          'draft.pages.$.components': { id: componentId }
+        }
+      })
     })
   })
 })
