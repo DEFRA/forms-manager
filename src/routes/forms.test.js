@@ -8,6 +8,7 @@ import {
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   createComponentOnDraftDefinition,
+  deleteComponentOnDraftDefinition,
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
 import {
@@ -1371,6 +1372,32 @@ describe('Forms route', () => {
           source: 'query'
         }
       })
+    })
+
+    test('Testing DELETE /forms/{id}/pages/{pageId}/components/{componentId} route returns a "deleted" status', async () => {
+      const deleteComponentOnDraftDefinitionMock = jest
+        .mocked(deleteComponentOnDraftDefinition)
+        .mockResolvedValue()
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components/${componentId}`,
+        auth,
+        payload: {}
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        componentId,
+        status: 'deleted'
+      })
+      expect(deleteComponentOnDraftDefinitionMock).toHaveBeenCalledWith(
+        id,
+        pageId,
+        componentId,
+        expect.anything()
+      )
     })
   })
 })

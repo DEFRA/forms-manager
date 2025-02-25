@@ -8,6 +8,7 @@ import {
 
 import {
   createComponentOnDraftDefinition,
+  deleteComponentOnDraftDefinition,
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
 import {
@@ -313,6 +314,30 @@ export default [
       validate: {
         params: componentByIdSchema,
         payload: componentSchema
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}',
+    /**
+     * @param {RequestUpdateComponent} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, pageId, componentId } = params
+
+      const author = getAuthor(auth.credentials.user)
+      await deleteComponentOnDraftDefinition(id, pageId, componentId, author)
+
+      return {
+        componentId,
+        status: 'deleted'
+      }
+    },
+    options: {
+      validate: {
+        params: componentByIdSchema
       }
     }
   },

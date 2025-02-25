@@ -203,6 +203,71 @@ export async function updateComponentOnDraftDefinition(
 }
 
 /**
+ * Updates a component and throws a Boom.notFound if page or component is not found
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {FormMetadataAuthor} author
+ */
+export async function deleteComponentOnDraftDefinition(
+  formId,
+  pageId,
+  componentId,
+  author
+) {
+  logger.info(
+    `Deleting Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(
+      async () => {
+        await formDefinition.deleteComponent(
+          formId,
+          pageId,
+          componentId,
+          session,
+          DRAFT
+        )
+
+        const pageReturn = await getFormDefinitionPage(formId, pageId, session)
+
+        // Check that component has been deleted
+        const components =
+          'components' in pageReturn ? pageReturn.components : []
+        if (components.find((x) => x.id === componentId)) {
+          throw Boom.internal(
+            `Component ${componentId} not deleted on Page ID ${pageId} and Form ID ${formId}`
+          )
+        }
+
+        // Update the form with the new draft state
+        await formMetadata.update(
+          formId,
+          { $set: partialAuditFields(new Date(), author) },
+          session
+        )
+      },
+      { readPreference: 'primary' }
+    )
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to delete Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(
+    `Deleted Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+  )
+}
+
+/**
  * @import { FormDefinition, FormMetadataAuthor, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef, PatchPageFields } from '@defra/forms-model'
  * @import { WithId, UpdateFilter, ClientSession } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'

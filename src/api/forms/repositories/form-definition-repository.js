@@ -383,6 +383,50 @@ export async function updateComponent(
 }
 
 /**
+ * Updates a component with component id
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ClientSession} session
+ * @param {State} [state]
+ */
+export async function deleteComponent(
+  formId,
+  pageId,
+  componentId,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot delete component on a live form - ${formId}`)
+  }
+
+  logger.info(
+    `Deleting component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
+    {
+      $pull: {
+        'draft.pages.$.components': {
+          id: componentId
+        }
+      }
+    },
+    { session }
+  )
+
+  logger.info(
+    `Deleted component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
+  )
+}
+
+/**
  * Repository method to patch fields on a page - such as title
  * @param {string} formId
  * @param {string} pageId

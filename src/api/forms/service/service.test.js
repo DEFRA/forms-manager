@@ -16,6 +16,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   createComponentOnDraftDefinition,
+  deleteComponentOnDraftDefinition,
   getFormDefinitionPageComponent,
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
@@ -1840,6 +1841,84 @@ describe('Forms service', () => {
       ).rejects.toThrow(
         Boom.internal(
           'Failed to patch fields title,path on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 Form ID 123'
+        )
+      )
+    })
+  })
+
+  describe('deleteComponentOnDraftDefinition', () => {
+    const componentId1 = '6dba3b08-3262-45ab-a666-babafa8b919b'
+    const componentId2 = '756de148-7612-4787-b522-17d3c39e31dc'
+    const componentId3 = '4b827d8a-e216-409a-86f1-2a04626ee7b2'
+    const textFieldComponents = [
+      buildTextFieldComponent({
+        id: componentId1,
+        title: 'Component 1'
+      }),
+      buildTextFieldComponent({
+        id: componentId2,
+        title: 'Component 2'
+      }),
+      buildTextFieldComponent({
+        id: componentId3,
+        title: 'Component 3'
+      })
+    ]
+
+    const page = buildQuestionPage({
+      id: pageId,
+      components: textFieldComponents
+    })
+    const definition1 = buildDefinition({
+      pages: [page]
+    })
+
+    it('should delete the component', async () => {
+      const newDefinition = buildDefinition({
+        pages: [
+          buildQuestionPage({
+            id: pageId,
+            components: textFieldComponents.filter((x) => x.id !== componentId2)
+          })
+        ]
+      })
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
+
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'deleteComponent')
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      await deleteComponentOnDraftDefinition(id, pageId, componentId2, author)
+
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      const [calledFormId, calledPageId, calledComponentId, , calledState] =
+        dbDefinitionSpy.mock.calls[0]
+
+      expect([
+        calledFormId,
+        calledPageId,
+        calledComponentId,
+        calledState
+      ]).toEqual([id, pageId, componentId2, DRAFT])
+      const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
+      expect(metaFormId).toBe(id)
+
+      expect(metaUpdateOperations.$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+    })
+
+    it('should fail if component is not deleted', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      await expect(
+        deleteComponentOnDraftDefinition(id, pageId, componentId2, author)
+      ).rejects.toThrow(
+        Boom.internal(
+          `Component ${componentId2} not deleted on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 and Form ID 661e4ca5039739ef2902b214`
         )
       )
     })
