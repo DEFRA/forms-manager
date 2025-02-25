@@ -92,18 +92,15 @@ export const uniquePathGate = (formDraftDefinition, path, message) => {
 }
 
 /**
- * @param {Page} page
+ * @param {Page} pageWithoutComponentIds
  */
-export function populateComponentIds(page) {
-  const pageWithoutComponentIds = { ...page }
-  const components =
-    'components' in pageWithoutComponentIds
-      ? pageWithoutComponentIds.components
-      : []
+export function populateComponentIds(pageWithoutComponentIds) {
+  const page = { ...pageWithoutComponentIds }
+  const components = 'components' in page ? page.components : []
   for (const component of components) {
     component.id = component.id ?? uuidV4()
   }
-  return pageWithoutComponentIds
+  return page
 }
 
 /**
