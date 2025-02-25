@@ -135,6 +135,12 @@ describe('repository helpers', () => {
       expect(page).toEqual(testPage)
     })
 
+    it('should return unchanged if page is not one with components', () => {
+      const testPage = buildStatusPage({})
+      const page = populateComponentIds(testPage)
+      expect(page).toEqual(testPage)
+    })
+
     it('should return unchanged if page has a component but component already has id', () => {
       const testPage = buildQuestionPage({
         components: [
