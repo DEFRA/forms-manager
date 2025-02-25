@@ -200,9 +200,8 @@ export async function patchFieldsOnDraftDefinitionPage(
   let page = await getFormDefinitionPage(formId, pageId)
 
   const session = client.startSession()
-  const fields = /** @type {(keyof PatchPageFields)[]} */ (
-    Object.keys(pageFieldsToUpdate)
-  )
+
+  const fields = Object.entries(pageFieldsToUpdate)
 
   try {
     await session.withTransaction(
@@ -217,15 +216,23 @@ export async function patchFieldsOnDraftDefinitionPage(
 
         page = await getFormDefinitionPage(formId, pageId, session)
 
-        // Check whether field changes have persisted and abort transaction if not
-        const failedFields = /** @type {(keyof PatchPageFields)[]} */ ([])
+        let shouldAbort = /** @type {boolean} */ (false)
 
-        fields.forEach((field) => {
-          if (page[field] !== pageFieldsToUpdate[field]) {
-            failedFields.push(field)
+        // Check whether field changes have persisted and abort transaction if not
+        const failedFields = fields.reduce((failedFieldList, [key, value]) => {
+          const typeSafePage =
+            /** @type {Record<keyof PatchPageFields, unknown>} */ (page)
+          const typeSafeKey = /** @type {keyof PatchPageFields} */ (key)
+
+          if (value !== typeSafePage[typeSafeKey]) {
+            shouldAbort = true
+            return [key, ...failedFieldList]
           }
-        })
-        if (failedFields.length) {
+
+          return failedFieldList
+        }, /** @type {string[]} */ ([]))
+
+        if (shouldAbort) {
           throw Boom.internal(
             `Failed to patch fields ${failedFields.toString()} on Page ID ${pageId} Form ID ${formId}`
           )
@@ -243,7 +250,7 @@ export async function patchFieldsOnDraftDefinitionPage(
   } catch (err) {
     logger.error(
       err,
-      `Failed to patch fields ${fields.toString()} on Page ID ${pageId} Form ID ${formId}`
+      `Failed to patch fields ${fields.map(([key]) => key).toString()} on Page ID ${pageId} Form ID ${formId}`
     )
     throw err
   } finally {
