@@ -1,7 +1,10 @@
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
-import { removeById } from '~/src/api/forms/repositories/helpers.js'
+import {
+  populateComponentIds,
+  removeById
+} from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -238,11 +241,13 @@ export async function addPageAtPosition(
     positionOptions.$position = position
   }
 
+  const newPage = populateComponentIds(page)
+
   await coll.updateOne(
     { _id: new ObjectId(formId) },
     {
       $push: {
-        'draft.pages': { $each: [page], ...positionOptions }
+        'draft.pages': { $each: [newPage], ...positionOptions }
       }
     },
     { session }

@@ -1,6 +1,7 @@
 import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
+import { v4 as uuidV4 } from 'uuid'
 
 import { db } from '~/src/mongo.js'
 
@@ -89,6 +90,18 @@ export const uniquePathGate = (formDraftDefinition, path, message) => {
     throw Boom.conflict(message)
   }
 }
+
+/**
+ * @param {Page} page
+ */
+export function populateComponentIds(page) {
+  const components = 'components' in page ? page.components : []
+  for (const component of components) {
+    component.id = component.id ?? uuidV4()
+  }
+  return page
+}
+
 /**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, PageStart, PageQuestion, PageTerminal, PageRepeat, PageFileUpload} from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'

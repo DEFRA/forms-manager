@@ -8,6 +8,7 @@ import {
 import {
   findComponent,
   findPage,
+  populateComponentIds,
   summaryHelper
 } from '~/src/api/forms/repositories/helpers.js'
 
@@ -126,4 +127,37 @@ describe('repository helpers', () => {
       expect(findComponent(definition, pageId, componentId)).toEqual(component)
     })
   })
+
+  describe('populateComponentIds', () => {
+    it('should return unchanged if no components in page', () => {
+      const testPage = buildQuestionPage()
+      const page = populateComponentIds(testPage)
+      expect(page).toEqual(testPage)
+    })
+
+    it('should return unchanged if page has a component but component already has id', () => {
+      const testPage = buildQuestionPage({
+        components: [
+          buildTextFieldComponent({
+            id: 'f0449907-e3fe-4c9e-a954-dc4f8ae778f8'
+          })
+        ]
+      })
+      const page = populateComponentIds(testPage)
+      expect(page).toEqual(testPage)
+    })
+
+    it('should return populated if page has a component where component has no id', () => {
+      const testPage = buildQuestionPage({
+        components: [buildTextFieldComponent()]
+      })
+      expect(testPage.components[0].id).toBeUndefined()
+      const page = /** @type {PageQuestion} */ (populateComponentIds(testPage))
+      expect(page.components[0].id).toBeDefined()
+    })
+  })
 })
+
+/**
+ * @import { PageQuestion } from '@defra/forms-model'
+ */
