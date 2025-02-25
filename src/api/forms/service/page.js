@@ -100,7 +100,7 @@ const createPageWithId = (pageWithoutId) => ({
 })
 
 /**
- * Adds a new page to a draft definition and calls repositionSummaryPipeline is summary exists
+ * Adds a new page to a draft definition and calls repositionSummaryPipeline if the summary exists
  * @param {string} formId
  * @param {Page} newPage
  * @param {FormMetadataAuthor} author
@@ -226,7 +226,7 @@ export async function patchFieldsOnDraftDefinitionPage(
 
           if (value !== typeSafePage[typeSafeKey]) {
             shouldAbort = true
-            return [key, ...failedFieldList]
+            return [...failedFieldList, key]
           }
 
           return failedFieldList

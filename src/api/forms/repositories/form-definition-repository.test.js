@@ -335,6 +335,25 @@ describe('form-definition-repository', () => {
       })
     })
 
+    it('should update a single page field 2', async () => {
+      pageFields = {
+        path: '/updated-page-title'
+      }
+
+      await updatePageFields(formId, pageId, pageFields, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$.path': '/updated-page-title'
+        }
+      })
+    })
+
     it('should update multiple page fields', async () => {
       await updatePageFields(formId, pageId, pageFields, mockSession)
       const [filter, update] = mockCollection.updateOne.mock.calls[0]

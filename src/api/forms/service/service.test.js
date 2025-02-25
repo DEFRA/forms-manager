@@ -6,6 +6,7 @@ import { pino } from 'pino'
 import {
   buildDefinition,
   buildQuestionPage,
+  buildStatusPage,
   buildSummaryPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
@@ -1908,6 +1909,25 @@ describe('Forms service', () => {
         updatedAt: dateUsedInFakeTime,
         updatedBy: author
       })
+    })
+
+    it('should not fail if no component exists', async () => {
+      const newDefinition = buildDefinition({
+        pages: [
+          buildStatusPage({
+            id: pageId
+          })
+        ]
+      })
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
+
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'deleteComponent')
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      await deleteComponentOnDraftDefinition(id, pageId, componentId2, author)
+
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      expect(dbMetadataSpy).toHaveBeenCalled()
     })
 
     it('should fail if component is not deleted', async () => {
