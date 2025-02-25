@@ -76,9 +76,7 @@ export function findComponent(definition, pageId, componentId) {
     return undefined
   }
 
-  return /** @type {ComponentDef | undefined} */ (
-    page.components.find((component) => component.id === componentId)
-  )
+  return page.components.find((component) => component.id === componentId)
 }
 /**
  * @param {FormDefinition} formDraftDefinition
