@@ -13,15 +13,17 @@ import {
 } from '~/src/api/forms/service/component.js'
 import {
   createDraftFromLive,
-  createForm,
   createLiveFromDraft,
+  getFormDefinition,
+  listForms
+} from '~/src/api/forms/service/definition.js'
+import {
+  createForm,
   getForm,
   getFormBySlug,
-  getFormDefinition,
-  listForms,
   removeForm,
   updateFormMetadata
-} from '~/src/api/forms/service/definition.js'
+} from '~/src/api/forms/service/index.js'
 import {
   createPageOnDraftDefinition,
   patchFieldsOnDraftDefinitionPage
@@ -30,6 +32,7 @@ import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
 
 jest.mock('~/src/mongo.js')
+jest.mock('~/src/api/forms/service/index.js')
 jest.mock('~/src/api/forms/service/definition.js')
 jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')

@@ -1,167 +1,16 @@
-import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
-import { MongoServerError } from 'mongodb'
 
-import {
-  makeFormLiveErrorMessages,
-  removeFormErrorMessages
-} from '~/src/api/forms/constants.js'
-import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { getForm } from '~/src/api/forms/service/index.js'
 import {
   DRAFT,
-  MongoError,
-  defaultAuthor,
-  defaultDate,
   logger,
+  mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
-import * as formTemplates from '~/src/api/forms/templates.js'
 import { client } from '~/src/mongo.js'
-
-/**
- * Maps a form metadata document from MongoDB to form metadata
- * @param {WithId<Partial<FormMetadataDocument>>} document - form metadata document (with ID)
- * @returns {FormMetadata}
- */
-function mapForm(document) {
-  if (
-    !document.slug ||
-    !document.title ||
-    !document.organisation ||
-    !document.teamName ||
-    !document.teamEmail
-  ) {
-    throw Error(
-      'Form is malformed in the database. Expected fields are missing.'
-    )
-  }
-
-  const lastUpdated = getLastUpdated(document)
-  const created = getCreated(document)
-
-  return {
-    id: document._id.toString(),
-    slug: document.slug,
-    title: document.title,
-    organisation: document.organisation,
-    teamName: document.teamName,
-    teamEmail: document.teamEmail,
-    contact: document.contact,
-    submissionGuidance: document.submissionGuidance,
-    privacyNoticeUrl: document.privacyNoticeUrl,
-    notificationEmail: document.notificationEmail,
-    draft: document.draft,
-    live: document.live,
-    createdBy: created.createdBy,
-    createdAt: created.createdAt,
-    updatedBy: lastUpdated.updatedBy,
-    updatedAt: lastUpdated.updatedAt
-  }
-}
-
-/**
- * @param {Partial<FormMetadataDocument>} document - form metadata document
- * @returns {{ updatedAt: Date, updatedBy: FormMetadataAuthor }}
- */
-function getLastUpdated(document) {
-  if (document.updatedAt && document.updatedBy) {
-    return { updatedAt: document.updatedAt, updatedBy: document.updatedBy }
-  } else if (document.draft) {
-    // draft is newer than live, handle it first
-    return document.draft
-  } else if (document.live) {
-    return document.live
-  } else {
-    return { updatedAt: defaultDate, updatedBy: defaultAuthor }
-  }
-}
-
-/**
- * @param {Partial<FormMetadataDocument>} document - form metadata document
- * @returns {{ createdAt: Date, createdBy: FormMetadataAuthor }}
- */
-function getCreated(document) {
-  if (document.createdAt && document.createdBy) {
-    return { createdAt: document.createdAt, createdBy: document.createdBy }
-  } else if (document.live) {
-    // live is older than draft, handle it first
-    return document.live
-  } else if (document.draft) {
-    return document.draft
-  } else {
-    return { createdAt: defaultDate, createdBy: defaultAuthor }
-  }
-}
-
-/**
- * Creates a new empty form
- * @param {FormMetadataInput} metadataInput - the form metadata to save
- * @param {FormMetadataAuthor} author - the author details
- */
-export async function createForm(metadataInput, author) {
-  const { title } = metadataInput
-
-  // Create a blank form definition with the title set
-  const definition = { ...formTemplates.empty(), name: title }
-
-  // Validate the form definition
-  const { error } = formDefinitionSchema.validate(definition)
-  if (error) {
-    logger.warn(`Form failed validation: '${metadataInput.title}'`)
-    throw new InvalidFormDefinitionError(metadataInput.title, {
-      cause: error
-    })
-  }
-
-  // Create the slug
-  const slug = slugify(title)
-  const now = new Date()
-
-  /**
-   * Create the metadata document
-   * @satisfies {FormMetadataDocument}
-   */
-  const document = {
-    ...metadataInput,
-    slug,
-    draft: {
-      createdAt: now,
-      createdBy: author,
-      updatedAt: now,
-      updatedBy: author
-    },
-    createdAt: now,
-    createdBy: author,
-    updatedAt: now,
-    updatedBy: author
-  }
-
-  const session = client.startSession()
-
-  /** @type {FormMetadata | undefined} */
-  let metadata
-
-  try {
-    await session.withTransaction(async () => {
-      // Create the metadata document
-      const { insertedId: _id } = await formMetadata.create(document, session)
-      metadata = mapForm({ ...document, _id })
-
-      // Create the draft form definition
-      await formDefinition.upsert(metadata.id, definition, session)
-    })
-  } finally {
-    await session.endSession()
-  }
-
-  if (!metadata) {
-    throw Boom.badRequest('No metadata created in the transaction')
-  }
-
-  return metadata
-}
 
 /**
  * Retrieves a paginated list of forms with filter options
@@ -173,26 +22,6 @@ export async function listForms(options) {
   const forms = documents.map(mapForm)
 
   return { forms, totalItems, filters }
-}
-
-/**
- * Retrieves form metadata by ID
- * @param {string} formId - ID of the form
- */
-export async function getForm(formId) {
-  const document = await formMetadata.get(formId)
-
-  return mapForm(document)
-}
-
-/**
- * Retrieves form metadata by slug
- * @param {string} slug - The slug of the form
- */
-export async function getFormBySlug(slug) {
-  const document = await formMetadata.getBySlug(slug)
-
-  return mapForm(document)
 }
 
 /**
@@ -255,75 +84,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       `Updating form definition (draft) for form ID ${formId} failed`
     )
 
-    throw err
-  }
-}
-
-/**
- * Updates the form metadata.
- * Note: If the 'title' is updated, this method also updates the form definition's 'name' to keep them in sync.
- * @param {string} formId - ID of the form
- * @param {Partial<FormMetadataInput>} formUpdate - full form definition
- * @param {FormMetadataAuthor} author - the author details
- */
-export async function updateFormMetadata(formId, formUpdate, author) {
-  logger.info(`Updating form metadata for form ID ${formId}`)
-
-  try {
-    // Get the form metadata from the db
-    const form = await getForm(formId)
-
-    if (form.live && 'title' in formUpdate) {
-      throw Boom.badRequest(
-        `Form with ID '${formId}' is live so 'title' cannot be updated`
-      )
-    }
-
-    const now = new Date()
-
-    const { updatedAt, updatedBy, ...draftAuditFields } = partialAuditFields(
-      now,
-      author
-    )
-
-    /** @type {PartialFormMetadataDocument} */
-    let updatedForm = {
-      ...formUpdate,
-      updatedAt,
-      updatedBy
-    }
-
-    if (formUpdate.title) {
-      updatedForm = {
-        ...updatedForm,
-        slug: slugify(formUpdate.title),
-        ...draftAuditFields
-      }
-    }
-
-    const session = client.startSession()
-
-    await session.withTransaction(async () => {
-      await formMetadata.update(formId, { $set: updatedForm }, session)
-
-      if (formUpdate.title) {
-        // Also update the form definition's name to keep them in sync
-        await formDefinition.updateName(formId, formUpdate.title, session)
-      }
-    })
-
-    logger.info(`Updated form metadata for form ID ${formId}`)
-
-    return updatedForm.slug ?? form.slug
-  } catch (err) {
-    if (
-      err instanceof MongoServerError &&
-      err.code === MongoError.DuplicateKey
-    ) {
-      logger.error(err, `Form title ${formUpdate.title} already exists`)
-      throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
-    }
-    logger.error(err, `Updating form metadata for form ID ${formId} failed`)
     throw err
   }
 }
@@ -471,33 +231,6 @@ export async function createDraftFromLive(formId, author) {
 
     throw err
   }
-}
-
-/**
- * Removes a form (metadata and definition)
- * @param {string} formId
- */
-export async function removeForm(formId) {
-  logger.info(`Removing form with ID ${formId}`)
-
-  const form = await getForm(formId)
-
-  if (form.live) {
-    throw Boom.badRequest(removeFormErrorMessages.formIsAlreadyLive)
-  }
-
-  const session = client.startSession()
-
-  try {
-    await session.withTransaction(async () => {
-      await formMetadata.remove(formId, session)
-      await formDefinition.remove(formId, session)
-    })
-  } finally {
-    await session.endSession()
-  }
-
-  logger.info(`Removed form with ID ${formId}`)
 }
 
 /**

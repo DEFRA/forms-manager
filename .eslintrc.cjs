@@ -167,7 +167,11 @@ module.exports = {
         'jest/globals': true
       },
       extends: ['plugin:jest/recommended', 'plugin:jest/style'],
-      files: ['**/*.test.{cjs,js,mjs}'],
+      files: [
+        '**/*.test.{cjs,js,mjs}',
+        '**/__stubs__/*.{cjs,js,mjs}',
+        '**/__mocks__/*.{cjs,js,mjs}'
+      ],
       plugins: ['jest'],
       rules: {
         // Turn off warnings for jest.Expect 'any' types

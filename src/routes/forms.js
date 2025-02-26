@@ -13,16 +13,18 @@ import {
 } from '~/src/api/forms/service/component.js'
 import {
   createDraftFromLive,
-  createForm,
   createLiveFromDraft,
-  getForm,
-  getFormBySlug,
   getFormDefinition,
   listForms,
-  removeForm,
-  updateDraftFormDefinition,
-  updateFormMetadata
+  updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
+import {
+  createForm,
+  getForm,
+  getFormBySlug,
+  removeForm,
+  updateFormMetadata
+} from '~/src/api/forms/service/index.js'
 import {
   createPageOnDraftDefinition,
   patchFieldsOnDraftDefinitionPage

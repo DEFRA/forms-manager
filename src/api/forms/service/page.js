@@ -1,5 +1,6 @@
 import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
+import Hoek from '@hapi/hoek'
 import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -224,7 +225,7 @@ export async function patchFieldsOnDraftDefinitionPage(
             /** @type {Record<keyof PatchPageFields, unknown>} */ (page)
           const typeSafeKey = /** @type {keyof PatchPageFields} */ (key)
 
-          if (value !== typeSafePage[typeSafeKey]) {
+          if (!Hoek.deepEqual(value, typeSafePage[typeSafeKey])) {
             shouldAbort = true
             return [...failedFieldList, key]
           }

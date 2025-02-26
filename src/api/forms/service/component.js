@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import Hoek from '@hapi/hoek'
 import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -128,21 +129,21 @@ export async function createComponentOnDraftDefinition(
  * @param {string} formId
  * @param {string} pageId
  * @param {string} componentId
- * @param {ComponentDef} component
+ * @param {ComponentDef} componentPayload
  * @param {FormMetadataAuthor} author
  */
 export async function updateComponentOnDraftDefinition(
   formId,
   pageId,
   componentId,
-  component,
+  componentPayload,
   author
 ) {
   logger.info(
     `Updating Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
   )
 
-  let componentReturn = await getFormDefinitionPageComponent(
+  let updatedFormDefinitionPageComponent = await getFormDefinitionPageComponent(
     formId,
     pageId,
     componentId
@@ -157,20 +158,23 @@ export async function updateComponentOnDraftDefinition(
           formId,
           pageId,
           componentId,
-          component,
+          componentPayload,
           session,
           DRAFT
         )
 
-        componentReturn = await getFormDefinitionPageComponent(
-          formId,
-          pageId,
-          componentId,
-          session
-        )
+        updatedFormDefinitionPageComponent =
+          await getFormDefinitionPageComponent(
+            formId,
+            pageId,
+            componentId,
+            session
+          )
 
         // Check that component has been updated
-        if (JSON.stringify(componentReturn) !== JSON.stringify(component)) {
+        if (
+          !Hoek.deepEqual(updatedFormDefinitionPageComponent, componentPayload)
+        ) {
           throw Boom.internal(
             `Component ${componentId} not updated on Page ID ${pageId} and Form ID ${formId}`
           )
@@ -199,7 +203,7 @@ export async function updateComponentOnDraftDefinition(
     `Updated Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
   )
 
-  return componentReturn
+  return updatedFormDefinitionPageComponent
 }
 
 /**
