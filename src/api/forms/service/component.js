@@ -47,9 +47,8 @@ export async function getFormDefinitionPageComponent(
     DRAFT,
     session
   )
-  logger.info('before component')
   const component = findComponent(definition, pageId, componentId)
-  logger.info(component)
+
   if (component === undefined) {
     throw Boom.notFound(
       `Component ID ${componentId} not found on Page ID ${pageId} & Form ID ${formId}`
