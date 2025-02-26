@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import Hoek from '@hapi/hoek'
+import { deepEqual } from '@hapi/hoek'
 import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -47,9 +47,9 @@ export async function getFormDefinitionPageComponent(
     DRAFT,
     session
   )
-
+  logger.info('before component')
   const component = findComponent(definition, pageId, componentId)
-
+  logger.info(component)
   if (component === undefined) {
     throw Boom.notFound(
       `Component ID ${componentId} not found on Page ID ${pageId} & Form ID ${formId}`
@@ -172,9 +172,7 @@ export async function updateComponentOnDraftDefinition(
           )
 
         // Check that component has been updated
-        if (
-          !Hoek.deepEqual(updatedFormDefinitionPageComponent, componentPayload)
-        ) {
+        if (!deepEqual(updatedFormDefinitionPageComponent, componentPayload)) {
           throw Boom.internal(
             `Component ${componentId} not updated on Page ID ${pageId} and Form ID ${formId}`
           )

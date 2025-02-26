@@ -1,4 +1,4 @@
-import { ControllerType, hasComponents } from '@defra/forms-model'
+import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { v4 as uuidV4 } from 'uuid'
@@ -68,7 +68,11 @@ export function findComponent(definition, pageId, componentId) {
     findPage(definition, pageId)
   )
 
-  if (!hasComponents(page)) {
+  if (
+    page === undefined ||
+    page.controller === ControllerType.Summary ||
+    page.controller === ControllerType.Status
+  ) {
     return undefined
   }
 
@@ -89,7 +93,7 @@ export const uniquePathGate = (formDraftDefinition, path, message) => {
  * @param {Page} pageWithoutComponentIds
  */
 export function populateComponentIds(pageWithoutComponentIds) {
-  if (!hasComponents(pageWithoutComponentIds)) {
+  if (!('components' in pageWithoutComponentIds)) {
     return pageWithoutComponentIds
   }
 
