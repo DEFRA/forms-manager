@@ -1076,10 +1076,34 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Bad Request',
-        message: '"id" must be a string. "type" is required',
+        message: '"type" is required. "id" must be a string',
         statusCode: 400,
         validation: {
-          keys: ['id', 'type']
+          keys: ['type', 'id']
+        }
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/component/{componentId} without an id returns validation errors', async () => {
+      const componentWithoutAnId = buildTextFieldComponent({
+        title: 'New component title'
+      })
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components/${componentId}`,
+        payload: componentWithoutAnId,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"id" is required',
+        statusCode: 400,
+        validation: {
+          keys: ['id']
         }
       })
     })

@@ -32,6 +32,7 @@ import {
 import { getAuthor } from '~/src/helpers/get-author.js'
 import {
   componentByIdSchema,
+  componentPayloadWithRequiredIdSchema,
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
@@ -315,7 +316,7 @@ export default [
     options: {
       validate: {
         params: componentByIdSchema,
-        payload: componentSchema
+        payload: componentPayloadWithRequiredIdSchema
       }
     }
   },

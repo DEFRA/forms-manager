@@ -1,4 +1,5 @@
 import {
+  componentSchema,
   formDefinitionSchema,
   formMetadataInputSchema,
   idSchema,
@@ -29,6 +30,9 @@ export const componentByIdSchema = Joi.object()
   })
   .required()
 
+export const componentPayloadWithRequiredIdSchema = componentSchema.keys({
+  id: Joi.string().uuid().required()
+})
 export const prependQuerySchema = Joi.object().keys({
   prepend: Joi.boolean().default(false)
 })
