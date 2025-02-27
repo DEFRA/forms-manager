@@ -422,7 +422,7 @@ describe('form-definition-repository', () => {
       await expect(
         setEngineVersion(
           formId,
-          /** @type{Engine} */ ('V9'),
+          /** @type {Engine} */ ('V9'),
           mockDefinition,
           mockSession
         )
