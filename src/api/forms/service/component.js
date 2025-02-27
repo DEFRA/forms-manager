@@ -146,11 +146,8 @@ export async function updateComponentOnDraftDefinition(
   try {
     const updatedFormDefinitionPageComponent = await session.withTransaction(
       async () => {
-        let formDefinitionPageComponent = await getFormDefinitionPageComponent(
-          formId,
-          pageId,
-          componentId
-        )
+        // Check that component exists
+        await getFormDefinitionPageComponent(formId, pageId, componentId)
 
         await formDefinition.updateComponent(
           formId,
@@ -161,12 +158,13 @@ export async function updateComponentOnDraftDefinition(
           DRAFT
         )
 
-        formDefinitionPageComponent = await getFormDefinitionPageComponent(
-          formId,
-          pageId,
-          componentId,
-          session
-        )
+        const formDefinitionPageComponent =
+          await getFormDefinitionPageComponent(
+            formId,
+            pageId,
+            componentId,
+            session
+          )
 
         // Update the form with the new draft state
         await formMetadata.update(
