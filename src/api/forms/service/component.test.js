@@ -297,25 +297,6 @@ describe('Forms service', () => {
         updatedBy: author
       })
     })
-
-    it('should fail if component is not updated', async () => {
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
-
-      await expect(
-        updateComponentOnDraftDefinition(
-          id,
-          pageId,
-          componentId,
-          newTextFieldComponent,
-          author
-        )
-      ).rejects.toThrow(
-        Boom.internal(
-          'Component b008e366-7136-4159-b2c6-db3ee8e75ab7 not updated on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 and Form ID 661e4ca5039739ef2902b214'
-        )
-      )
-    })
   })
 
   describe('deleteComponentOnDraftDefinition', () => {

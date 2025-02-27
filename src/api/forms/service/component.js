@@ -1,5 +1,4 @@
 import Boom from '@hapi/boom'
-import { deepEqual } from '@hapi/hoek'
 import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -142,17 +141,17 @@ export async function updateComponentOnDraftDefinition(
     `Updating Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
   )
 
-  let updatedFormDefinitionPageComponent = await getFormDefinitionPageComponent(
-    formId,
-    pageId,
-    componentId
-  )
-
   const session = client.startSession()
 
   try {
-    await session.withTransaction(
+    const updatedFormDefinitionPageComponent = await session.withTransaction(
       async () => {
+        let formDefinitionPageComponent = await getFormDefinitionPageComponent(
+          formId,
+          pageId,
+          componentId
+        )
+
         await formDefinition.updateComponent(
           formId,
           pageId,
@@ -162,20 +161,12 @@ export async function updateComponentOnDraftDefinition(
           DRAFT
         )
 
-        updatedFormDefinitionPageComponent =
-          await getFormDefinitionPageComponent(
-            formId,
-            pageId,
-            componentId,
-            session
-          )
-
-        // Check that component has been updated
-        if (!deepEqual(updatedFormDefinitionPageComponent, componentPayload)) {
-          throw Boom.internal(
-            `Component ${componentId} not updated on Page ID ${pageId} and Form ID ${formId}`
-          )
-        }
+        formDefinitionPageComponent = await getFormDefinitionPageComponent(
+          formId,
+          pageId,
+          componentId,
+          session
+        )
 
         // Update the form with the new draft state
         await formMetadata.update(
@@ -183,9 +174,16 @@ export async function updateComponentOnDraftDefinition(
           { $set: partialAuditFields(new Date(), author) },
           session
         )
+
+        return formDefinitionPageComponent
       },
       { readPreference: 'primary' }
     )
+    logger.info(
+      `Updated Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+    )
+
+    return updatedFormDefinitionPageComponent
   } catch (err) {
     logger.error(
       err,
@@ -195,12 +193,6 @@ export async function updateComponentOnDraftDefinition(
   } finally {
     await session.endSession()
   }
-
-  logger.info(
-    `Updated Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
-  )
-
-  return updatedFormDefinitionPageComponent
 }
 
 /**
