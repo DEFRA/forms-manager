@@ -390,19 +390,19 @@ describe('Forms service', () => {
       })
     })
 
-    it('should fail if the field updates are not persisted in the transaction', async () => {
+    it('should fail if the page does not exist', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(initialDefinition)
       jest.mocked(formDefinition.get).mockResolvedValueOnce(
         buildDefinition({
-          pages: [buildQuestionPage({}), summaryPage]
+          pages: []
         })
       )
 
       await expect(
         patchFieldsOnDraftDefinitionPage('123', pageId, pageFields, author)
       ).rejects.toThrow(
-        Boom.internal(
-          'Failed to patch fields title,path on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 Form ID 123'
+        Boom.notFound(
+          'Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 not found on Form ID 123'
         )
       )
     })

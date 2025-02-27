@@ -318,14 +318,6 @@ describe('Forms service', () => {
       })
     ]
 
-    const page = buildQuestionPage({
-      id: pageId,
-      components: textFieldComponents
-    })
-    const definition1 = buildDefinition({
-      pages: [page]
-    })
-
     it('should delete the component', async () => {
       const newDefinition = buildDefinition({
         pages: [
@@ -381,23 +373,5 @@ describe('Forms service', () => {
       expect(dbDefinitionSpy).toHaveBeenCalled()
       expect(dbMetadataSpy).toHaveBeenCalled()
     })
-
-    it('should fail if component is not deleted', async () => {
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
-
-      await expect(
-        deleteComponentOnDraftDefinition(id, pageId, componentId2, author)
-      ).rejects.toThrow(
-        Boom.internal(
-          `Component ${componentId2} not deleted on Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 and Form ID 661e4ca5039739ef2902b214`
-        )
-      )
-    })
   })
 })
-
-/**
- * @import { FormMetadata, FormMetadataDocument, FormMetadataInput } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
- */

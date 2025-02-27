@@ -1,4 +1,4 @@
-import { ControllerType } from '@defra/forms-model'
+import { ControllerType, Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -14,6 +14,7 @@ import {
   deleteComponent,
   get,
   removeMatchingPages,
+  setEngineVersion,
   updateComponent,
   updatePage,
   updatePageFields
@@ -406,9 +407,55 @@ describe('form-definition-repository', () => {
       })
     })
   })
+
+  describe('setEngineVersion', () => {
+    it('should fail if form is live', async () => {
+      const mockDefinition = buildDefinition({})
+      await expect(
+        setEngineVersion(formId, Engine.V2, mockDefinition, mockSession, 'live')
+      ).rejects.toThrow(
+        Boom.badRequest('Cannot update the engine version of a live form')
+      )
+    })
+    it('should fail if invalid version', async () => {
+      const mockDefinition = buildDefinition({})
+      await expect(
+        setEngineVersion(
+          formId,
+          /** @type{Engine} */ ('V9'),
+          mockDefinition,
+          mockSession
+        )
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Invalid engine version for form ID 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+    it('should update the version if not already at V2', async () => {
+      const mockDefinition = buildDefinition({})
+      await setEngineVersion(formId, Engine.V2, mockDefinition, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $set: {
+          'draft.engine': 'V2'
+        }
+      })
+    })
+
+    it('should leave the version as is if already at V2', async () => {
+      const mockDefinition = buildDefinition({})
+      mockDefinition.engine = Engine.V2
+      await setEngineVersion(formId, Engine.V2, mockDefinition, mockSession)
+      expect(mockCollection.updateOne).not.toHaveBeenCalled()
+    })
+  })
 })
 
 /**
- * @import { FormDefinition, Page, PageSummary, PatchPageFields } from '@defra/forms-model'
- * @import { WithId, Collection, Db } from 'mongodb'
+ * @import { PatchPageFields } from '@defra/forms-model'
  */

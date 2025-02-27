@@ -1,3 +1,4 @@
+import { Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -152,6 +153,52 @@ export async function remove(formId, session) {
   await removeById(session, DEFINITION_COLLECTION_NAME, formId)
 
   logger.info(`Removed form definition with ID ${formId}`)
+}
+
+/**
+ * Updates the engine version if applicable
+ * @param {string} formId - the ID of the form
+ * @param {Engine} engineVersion - the engine version e.g. 'V1' or 'V2'
+ * @param {FormDefinition} definition - the form definition
+ * @param {ClientSession} session
+ * @param {State} [state] - state of the form to update
+ */
+export async function setEngineVersion(
+  formId,
+  engineVersion,
+  definition,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest('Cannot update the engine version of a live form')
+  }
+
+  if (![Engine.V1, Engine.V2].includes(engineVersion)) {
+    throw Boom.badRequest(`Invalid engine version for form ID ${formId}`)
+  }
+
+  if (definition.engine === engineVersion) {
+    return
+  }
+
+  logger.info(
+    `Updating engine version to ${engineVersion} for form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    { $set: { [`${state}.engine`]: engineVersion } },
+    { session }
+  )
+
+  logger.info(
+    `Updated engine version to ${engineVersion} for form ID ${formId}`
+  )
 }
 
 /**

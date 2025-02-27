@@ -147,7 +147,12 @@ export async function updateComponentOnDraftDefinition(
     const updatedFormDefinitionPageComponent = await session.withTransaction(
       async () => {
         // Check that component exists
-        await getFormDefinitionPageComponent(formId, pageId, componentId)
+        await getFormDefinitionPageComponent(
+          formId,
+          pageId,
+          componentId,
+          session
+        )
 
         await formDefinition.updateComponent(
           formId,
@@ -223,17 +228,6 @@ export async function deleteComponentOnDraftDefinition(
           DRAFT
         )
 
-        const pageReturn = await getFormDefinitionPage(formId, pageId, session)
-
-        // Check that component has been deleted
-        const components =
-          'components' in pageReturn ? pageReturn.components : []
-        if (components.find((x) => x.id === componentId)) {
-          throw Boom.internal(
-            `Component ${componentId} not deleted on Page ID ${pageId} and Form ID ${formId}`
-          )
-        }
-
         // Update the form with the new draft state
         await formMetadata.update(
           formId,
@@ -259,7 +253,6 @@ export async function deleteComponentOnDraftDefinition(
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadata, FilterOptions, QueryOptions, Page, PageSummary, FormStatus, ComponentDef, PatchPageFields } from '@defra/forms-model'
- * @import { WithId, UpdateFilter, ClientSession } from 'mongodb'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { FormMetadataAuthor, ComponentDef } from '@defra/forms-model'
+ * @import { ClientSession } from 'mongodb'
  */

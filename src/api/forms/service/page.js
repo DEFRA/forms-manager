@@ -1,6 +1,5 @@
-import { ControllerType } from '@defra/forms-model'
+import { ControllerType, Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
-import { deepEqual } from '@hapi/hoek'
 import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -140,6 +139,14 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
     await session.withTransaction(async () => {
       await formDefinition.addPageAtPosition(formId, page, session, options)
 
+      // Set to V2 if not already
+      await formDefinition.setEngineVersion(
+        formId,
+        Engine.V2,
+        formDraftDefinition,
+        session
+      )
+
       // Update the form with the new draft state
       await formMetadata.update(
         formId,
@@ -198,13 +205,15 @@ export async function patchFieldsOnDraftDefinitionPage(
   pageFieldsToUpdate,
   author
 ) {
-  let page = await getFormDefinitionPage(formId, pageId)
-
   const session = client.startSession()
 
   const fields = Object.entries(pageFieldsToUpdate)
 
+  let page
   try {
+    // Check that page exists
+    await getFormDefinitionPage(formId, pageId, session)
+
     await session.withTransaction(
       async () => {
         await formDefinition.updatePageFields(
@@ -216,28 +225,6 @@ export async function patchFieldsOnDraftDefinitionPage(
         )
 
         page = await getFormDefinitionPage(formId, pageId, session)
-
-        let shouldAbort = /** @type {boolean} */ (false)
-
-        // Check whether field changes have persisted and abort transaction if not
-        const failedFields = fields.reduce((failedFieldList, [key, value]) => {
-          const typeSafePage =
-            /** @type {Record<keyof PatchPageFields, unknown>} */ (page)
-          const typeSafeKey = /** @type {keyof PatchPageFields} */ (key)
-
-          if (!deepEqual(value, typeSafePage[typeSafeKey])) {
-            shouldAbort = true
-            return [...failedFieldList, key]
-          }
-
-          return failedFieldList
-        }, /** @type {string[]} */ ([]))
-
-        if (shouldAbort) {
-          throw Boom.internal(
-            `Failed to patch fields ${failedFields.toString()} on Page ID ${pageId} Form ID ${formId}`
-          )
-        }
 
         // Update the form with the new draft state
         await formMetadata.update(
@@ -258,7 +245,7 @@ export async function patchFieldsOnDraftDefinitionPage(
     await session.endSession()
   }
 
-  return page
+  return /** @type {Page | undefined } */ (page)
 }
 
 /**
