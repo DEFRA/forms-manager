@@ -1,7 +1,11 @@
+import { Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
-import { removeById } from '~/src/api/forms/repositories/helpers.js'
+import {
+  populateComponentIds,
+  removeById
+} from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -96,21 +100,24 @@ export async function createDraftFromLive(id, session) {
  * Retrieves the form definition for a given form ID
  * @param {string} formId - the ID of the form
  * @param {State} state - the form state
+ * @param {ClientSession | undefined} [session]
  * @returns {Promise<FormDefinition>}
  */
-export async function get(formId, state = DRAFT) {
+export async function get(formId, state = DRAFT, session = undefined) {
   logger.info(`Getting form definition (${state}) for form ID ${formId}`)
 
   const coll =
     /** @satisfies {Collection<{draft?: FormDefinition, live?: FormDefinition}>} */ (
       db.collection(DEFINITION_COLLECTION_NAME)
     )
+  const sessionOptions = /** @type {FindOptions} */ session && { session }
+  const options = /** @type {FindOptions} */ ({
+    projection: { [state]: 1 },
+    ...sessionOptions
+  })
 
   try {
-    const result = await coll.findOne(
-      { _id: new ObjectId(formId) },
-      { projection: { [state]: 1 } }
-    )
+    const result = await coll.findOne({ _id: new ObjectId(formId) }, options)
 
     if (!result?.[state]) {
       throw Boom.notFound(`Form definition with ID '${formId}' not found`)
@@ -146,6 +153,52 @@ export async function remove(formId, session) {
   await removeById(session, DEFINITION_COLLECTION_NAME, formId)
 
   logger.info(`Removed form definition with ID ${formId}`)
+}
+
+/**
+ * Updates the engine version if applicable
+ * @param {string} formId - the ID of the form
+ * @param {Engine} engineVersion - the engine version e.g. 'V1' or 'V2'
+ * @param {FormDefinition} definition - the form definition
+ * @param {ClientSession} session
+ * @param {State} [state] - state of the form to update
+ */
+export async function setEngineVersion(
+  formId,
+  engineVersion,
+  definition,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest('Cannot update the engine version of a live form')
+  }
+
+  if (![Engine.V1, Engine.V2].includes(engineVersion)) {
+    throw Boom.badRequest(`Invalid engine version for form ID ${formId}`)
+  }
+
+  if (definition.engine === engineVersion) {
+    return
+  }
+
+  logger.info(
+    `Updating engine version to ${engineVersion} for form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId) },
+    { $set: { [`${state}.engine`]: engineVersion } },
+    { session }
+  )
+
+  logger.info(
+    `Updated engine version to ${engineVersion} for form ID ${formId}`
+  )
 }
 
 /**
@@ -235,11 +288,13 @@ export async function addPageAtPosition(
     positionOptions.$position = position
   }
 
+  const newPage = populateComponentIds(page)
+
   await coll.updateOne(
     { _id: new ObjectId(formId) },
     {
       $push: {
-        'draft.pages': { $each: [page], ...positionOptions }
+        'draft.pages': { $each: [newPage], ...positionOptions }
       }
     },
     { session }
@@ -375,6 +430,111 @@ export async function updateComponent(
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType } from '@defra/forms-model'
- * @import { ClientSession, Collection, Document, InferIdType } from 'mongodb'
+ * Updates a component with component id
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ClientSession} session
+ * @param {State} [state]
+ */
+export async function deleteComponent(
+  formId,
+  pageId,
+  componentId,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot delete component on a live form - ${formId}`)
+  }
+
+  logger.info(
+    `Deleting component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
+    {
+      $pull: {
+        'draft.pages.$.components': {
+          id: componentId
+        }
+      }
+    },
+    { session }
+  )
+
+  logger.info(
+    `Deleted component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
+  )
+}
+
+/**
+ * Repository method to patch fields on a page - such as title
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {PatchPageFields} pageFields
+ * @param {ClientSession} session
+ * @param {State} state
+ */
+export async function updatePageFields(
+  formId,
+  pageId,
+  pageFields,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot update pageFields on a live form - ${formId}`)
+  }
+
+  const pageFieldKeys = Object.keys(pageFields)
+
+  logger.info(
+    `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  /**
+   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string }}
+   */
+  const fieldsToSet = {}
+
+  const { title, path } = pageFields
+
+  if (title) {
+    fieldsToSet['draft.pages.$.title'] = title
+  }
+  if (path) {
+    fieldsToSet['draft.pages.$.path'] = path
+  }
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      'draft.pages.id': pageId
+    },
+    {
+      $set: fieldsToSet
+    },
+    {
+      session
+    }
+  )
+
+  logger.info(
+    `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
+  )
+}
+
+/**
+ * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields } from '@defra/forms-model'
+ * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
  */

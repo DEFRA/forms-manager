@@ -8,24 +8,36 @@ import {
 
 import {
   createComponentOnDraftDefinition,
+  deleteComponentOnDraftDefinition,
+  updateComponentOnDraftDefinition
+} from '~/src/api/forms/service/component.js'
+import {
   createDraftFromLive,
-  createForm,
   createLiveFromDraft,
-  createPageOnDraftDefinition,
-  getForm,
-  getFormBySlug,
   getFormDefinition,
   listForms,
+  updateDraftFormDefinition
+} from '~/src/api/forms/service/definition.js'
+import {
+  createForm,
+  getForm,
+  getFormBySlug,
   removeForm,
-  updateDraftFormDefinition,
   updateFormMetadata
-} from '~/src/api/forms/service.js'
+} from '~/src/api/forms/service/index.js'
+import {
+  createPageOnDraftDefinition,
+  patchFieldsOnDraftDefinitionPage
+} from '~/src/api/forms/service/page.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import {
+  componentByIdSchema,
+  componentPayloadWithRequiredIdSchema,
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
   pageByIdSchema,
+  patchPageSchema,
   prependQuerySchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
@@ -230,6 +242,29 @@ export default [
     }
   },
   {
+    method: 'PATCH',
+    path: '/forms/{id}/definition/draft/pages/{pageId}',
+    /**
+     * @param {PatchPageRequest} request
+     */
+    handler(request) {
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
+      return patchFieldsOnDraftDefinitionPage(
+        params.id,
+        params.pageId,
+        payload,
+        author
+      )
+    },
+    options: {
+      validate: {
+        params: pageByIdSchema,
+        payload: patchPageSchema
+      }
+    }
+  },
+  {
     method: 'POST',
     path: '/forms/{id}/definition/draft/pages/{pageId}/components',
     /**
@@ -256,6 +291,56 @@ export default [
         params: pageByIdSchema,
         payload: componentSchema,
         query: prependQuerySchema
+      }
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}',
+    /**
+     * @param {RequestUpdateComponent} request
+     */
+    handler(request) {
+      const { auth, params, payload } = request
+      const { id, pageId, componentId } = params
+
+      const author = getAuthor(auth.credentials.user)
+      return updateComponentOnDraftDefinition(
+        id,
+        pageId,
+        componentId,
+        payload,
+        author
+      )
+    },
+    options: {
+      validate: {
+        params: componentByIdSchema,
+        payload: componentPayloadWithRequiredIdSchema
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}',
+    /**
+     * @param {RequestUpdateComponent} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, pageId, componentId } = params
+
+      const author = getAuthor(auth.credentials.user)
+      await deleteComponentOnDraftDefinition(id, pageId, componentId, author)
+
+      return {
+        componentId,
+        status: 'deleted'
+      }
+    },
+    options: {
+      validate: {
+        params: componentByIdSchema
       }
     }
   },
@@ -334,6 +419,6 @@ export default [
  * @import { FormMetadataAuthor, FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
  * @import { OidcStandardClaims } from 'oidc-client-ts'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

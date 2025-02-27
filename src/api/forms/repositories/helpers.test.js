@@ -1,20 +1,45 @@
 import {
   buildDefinition,
   buildQuestionPage,
-  buildSummaryPage
+  buildStatusPage,
+  buildSummaryPage,
+  buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import {
+  findComponent,
   findPage,
+  populateComponentIds,
   summaryHelper
 } from '~/src/api/forms/repositories/helpers.js'
 
 describe('repository helpers', () => {
-  describe('summaryHelper', () => {
-    const summary = buildSummaryPage({})
+  const pageId = '0d174e6c-6131-4588-80bc-684238e13096'
+  const summaryPageId = '449a45f6-4541-4a46-91bd-8b8931b07b50'
+  const statusPageId = '38a2946b-78d9-4b94-9a31-4aa979ce2a89'
+  const componentId = '62559680-e45e-4178-acdc-68f6b65d42bb'
 
+  const component = buildTextFieldComponent({
+    id: componentId
+  })
+  const questionPage = buildQuestionPage()
+  const summary = buildSummaryPage()
+
+  const questionPageWithComponent = buildQuestionPage({
+    id: pageId,
+    components: [component]
+  })
+  const questionPageWithoutComponent = buildQuestionPage({
+    id: pageId
+  })
+  const summaryPageWithoutComponents = buildSummaryPage({
+    id: summaryPageId
+  })
+  const statusPage = buildStatusPage({})
+
+  describe('summaryHelper', () => {
     it('should push the summary to the end if it not in the correct place', () => {
       const definition = buildDefinition({
-        pages: [summary, buildQuestionPage({})]
+        pages: [summary, questionPage]
       })
       expect(summaryHelper(definition)).toEqual({
         shouldRepositionSummary: true,
@@ -25,7 +50,7 @@ describe('repository helpers', () => {
 
     it('should not push summary to the end if it is in the correct place', () => {
       const definition = buildDefinition({
-        pages: [buildQuestionPage({}), summary]
+        pages: [questionPage, summary]
       })
       expect(summaryHelper(definition)).toEqual({
         shouldRepositionSummary: false,
@@ -47,7 +72,7 @@ describe('repository helpers', () => {
 
     it('should not push summary to the end if summary page does not exist', () => {
       const definition = buildDefinition({
-        pages: [buildQuestionPage()]
+        pages: [questionPage]
       })
       expect(summaryHelper(definition)).toEqual({
         shouldRepositionSummary: false,
@@ -59,24 +84,86 @@ describe('repository helpers', () => {
 
   describe('findPage', () => {
     it('should find page if page exists in definition', () => {
-      const questionPage = buildQuestionPage({
-        id: '0d174e6c-6131-4588-80bc-684238e13096'
-      })
       const definition = buildDefinition({
-        pages: [questionPage, buildSummaryPage()]
+        pages: [questionPageWithoutComponent, summary]
       })
-      expect(
-        findPage(definition, '0d174e6c-6131-4588-80bc-684238e13096')
-      ).toEqual(questionPage)
+      expect(findPage(definition, pageId)).toEqual(questionPageWithoutComponent)
     })
 
     it('should return undefined if page is not found', () => {
       const definition = buildDefinition({
-        pages: [buildSummaryPage()]
+        pages: [summaryPageWithoutComponents]
       })
-      expect(
-        findPage(definition, '0d174e6c-6131-4588-80bc-684238e13096')
-      ).toBeUndefined()
+      expect(findPage(definition, 'incorrect-id')).toBeUndefined()
+    })
+  })
+
+  describe('findComponent', () => {
+    it('should return undefined if page is not found', () => {
+      const definition = buildDefinition({
+        pages: [summary]
+      })
+      expect(findComponent(definition, 'abc', 'def')).toBeUndefined()
+    })
+
+    it('should return undefined if page is a summary page', () => {
+      const definition = buildDefinition({
+        pages: [summaryPageWithoutComponents]
+      })
+      expect(findComponent(definition, summaryPageId, 'abc')).toBeUndefined()
+    })
+
+    it('should return undefined if page is a status page', () => {
+      const definition = buildDefinition({
+        pages: [statusPage]
+      })
+      expect(findComponent(definition, statusPageId, 'abc')).toBeUndefined()
+    })
+
+    it('should return component if component is found', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+      expect(findComponent(definition, pageId, componentId)).toEqual(component)
+    })
+  })
+
+  describe('populateComponentIds', () => {
+    it('should return unchanged if no components in page', () => {
+      const testPage = buildQuestionPage()
+      const page = populateComponentIds(testPage)
+      expect(page).toEqual(testPage)
+    })
+
+    it('should return unchanged if page is not one with components', () => {
+      const testPage = buildStatusPage({})
+      const page = populateComponentIds(testPage)
+      expect(page).toEqual(testPage)
+    })
+
+    it('should return unchanged if page has a component but component already has id', () => {
+      const testPage = buildQuestionPage({
+        components: [
+          buildTextFieldComponent({
+            id: 'f0449907-e3fe-4c9e-a954-dc4f8ae778f8'
+          })
+        ]
+      })
+      const page = populateComponentIds(testPage)
+      expect(page).toEqual(testPage)
+    })
+
+    it('should return populated if page has a component where component has no id', () => {
+      const testPage = buildQuestionPage({
+        components: [buildTextFieldComponent()]
+      })
+      expect(testPage.components[0].id).toBeUndefined()
+      const page = /** @type {PageQuestion} */ (populateComponentIds(testPage))
+      expect(page.components[0].id).toBeDefined()
     })
   })
 })
+
+/**
+ * @import { PageQuestion } from '@defra/forms-model'
+ */

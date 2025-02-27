@@ -1,6 +1,7 @@
-import { ControllerType } from '@defra/forms-model'
+import { ControllerType, hasComponents } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
+import { v4 as uuidV4 } from 'uuid'
 
 import { db } from '~/src/mongo.js'
 
@@ -56,6 +57,24 @@ export function findPage(definition, pageId) {
 }
 
 /**
+ * Finds a component in a form definition by formId, pageId & componentId
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {string} componentId
+ * @returns {ComponentDef | undefined}
+ */
+export function findComponent(definition, pageId, componentId) {
+  const page = /** @satisfies {Page | undefined} */ (
+    findPage(definition, pageId)
+  )
+
+  if (!hasComponents(page)) {
+    return undefined
+  }
+
+  return page.components.find((component) => component.id === componentId)
+}
+/**
  * @param {FormDefinition} formDraftDefinition
  * @param {string} path
  * @param {string} message
@@ -65,7 +84,30 @@ export const uniquePathGate = (formDraftDefinition, path, message) => {
     throw Boom.conflict(message)
   }
 }
+
 /**
- * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
+ * @param {Page} pageWithoutComponentIds
+ */
+export function populateComponentIds(pageWithoutComponentIds) {
+  if (!hasComponents(pageWithoutComponentIds)) {
+    return pageWithoutComponentIds
+  }
+
+  return {
+    ...pageWithoutComponentIds,
+    components: pageWithoutComponentIds.components.map((component) => {
+      if (Object.hasOwn(component, 'id')) {
+        return component
+      }
+      return {
+        ...component,
+        id: uuidV4()
+      }
+    })
+  }
+}
+
+/**
+ * @import { FormDefinition, Page, PageSummary, ComponentDef, PageStart, PageQuestion, PageTerminal, PageRepeat, PageFileUpload} from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */
