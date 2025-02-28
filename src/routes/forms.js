@@ -2,7 +2,7 @@ import {
   componentSchema,
   formMetadataInputKeys,
   formMetadataInputSchema,
-  pageSchema,
+  pageSchemaV2,
   queryOptionsSchema
 } from '@defra/forms-model'
 
@@ -237,7 +237,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: pageSchema
+        payload: pageSchemaV2
       }
     }
   },
@@ -416,9 +416,8 @@ export default [
 ]
 
 /**
- * @import { FormMetadataAuthor, FormMetadata } from '@defra/forms-model'
- * @import { ServerRoute, UserCredentials } from '@hapi/hapi'
- * @import { OidcStandardClaims } from 'oidc-client-ts'
+ * @import { FormMetadata } from '@defra/forms-model'
+ * @import { ServerRoute } from '@hapi/hapi'
  * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

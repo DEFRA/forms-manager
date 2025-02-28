@@ -509,7 +509,7 @@ export async function updatePageFields(
 
   const { title, path } = pageFields
 
-  if (title) {
+  if (title || title === '') {
     fieldsToSet['draft.pages.$.title'] = title
   }
   if (path) {
