@@ -230,35 +230,15 @@ describe('Forms service', () => {
   })
 
   describe('updateComponentOnDraftDefinition', () => {
-    const textFieldComponent = buildTextFieldComponent({
-      id: componentId,
-      title: 'Old title'
-    })
     const newTextFieldComponent = buildTextFieldComponent({
       id: componentId,
       title: 'New title'
     })
-    const page = buildQuestionPage({
-      id: pageId,
-      components: [textFieldComponent]
-    })
-    const definition1 = buildDefinition({
-      pages: [page]
-    })
 
     it('should update the component', async () => {
-      const newDefinition = buildDefinition({
-        pages: [
-          buildQuestionPage({
-            id: pageId,
-            components: [newTextFieldComponent]
-          })
-        ]
-      })
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(newDefinition)
-
-      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateComponent')
+      const dbDefinitionSpy = jest
+        .spyOn(formDefinition, 'updateComponent')
+        .mockResolvedValueOnce(newTextFieldComponent)
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
 
       const component = await updateComponentOnDraftDefinition(
@@ -296,6 +276,22 @@ describe('Forms service', () => {
         updatedAt: dateUsedInFakeTime,
         updatedBy: author
       })
+    })
+
+    it('should correctly surface the error is the component is not found', async () => {
+      jest
+        .spyOn(formDefinition, 'updateComponent')
+        .mockRejectedValueOnce(Boom.notFound('Not found'))
+
+      await expect(
+        updateComponentOnDraftDefinition(
+          id,
+          pageId,
+          componentId,
+          newTextFieldComponent,
+          author
+        )
+      ).rejects.toThrow(Boom.notFound('Not found'))
     })
   })
 
