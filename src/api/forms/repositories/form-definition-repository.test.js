@@ -519,7 +519,7 @@ describe('form-definition-repository', () => {
 
     it('should fail if form definition is live', async () => {
       await expect(
-        addPageFieldByPath(formId, '/path', { id: pageId }, mockSession, 'live')
+        addPageFieldByPath(formId, '/path', {}, mockSession, 'live')
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
