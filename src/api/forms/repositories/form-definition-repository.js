@@ -585,6 +585,11 @@ export async function addPageFieldByPath(
     fieldsToSet['draft.pages.$[pageId].id'] = id
   }
 
+  if (!pageFieldKeys.length) {
+    logger.info(`No page fields populated on form ID ${formId}`)
+    return
+  }
+
   /**
    * @type {{ "pageId.id"?: { $exists: false }, "pageId.path": string }[]}
    */

@@ -517,6 +517,12 @@ describe('form-definition-repository', () => {
       })
     })
 
+    it('should handle missing fields', async () => {
+      await addPageFieldByPath(formId, 'path', {}, mockSession)
+
+      expect(mockCollection.updateOne).not.toHaveBeenCalled()
+    })
+
     it('should fail if form definition is live', async () => {
       await expect(
         addPageFieldByPath(formId, '/path', {}, mockSession, 'live')
