@@ -3,7 +3,7 @@ import {
   formDefinitionSchema,
   formMetadataInputSchema,
   idSchema,
-  pageSchema,
+  pageSchemaV2,
   slugSchema
 } from '@defra/forms-model'
 import Joi from 'joi'
@@ -39,8 +39,8 @@ export const prependQuerySchema = Joi.object().keys({
 
 export const patchPageSchema = Joi.object()
   .keys({
-    title: pageSchema.extract('title').optional(),
-    path: pageSchema.extract('path').optional()
+    title: pageSchemaV2.extract('title').optional(),
+    path: pageSchemaV2.extract('path').optional()
   })
   .required()
   .min(1)
