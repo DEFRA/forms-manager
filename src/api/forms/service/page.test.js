@@ -14,6 +14,7 @@ import {
   formMetadataDocument
 } from '~/src/api/forms/service/__stubs__/service.js'
 import {
+  addPageIdsPipeline,
   createPageOnDraftDefinition,
   getFormDefinitionPage,
   patchFieldsOnDraftDefinitionPage,
@@ -173,6 +174,61 @@ describe('Forms service', () => {
       await expect(
         repositionSummaryPipeline('123', formDefinition1, author)
       ).rejects.toThrow(Boom.badRequest('Error'))
+    })
+  })
+
+  describe('addPageIdsPipeline', () => {
+    it('should add ids to each of the pages where they are missing', async () => {
+      const pageOneWithoutId = buildQuestionPage({
+        path: '/page-one'
+      })
+      delete pageOneWithoutId.id
+      const pageTwoWithId = buildQuestionPage({
+        path: '/path-two'
+      })
+      const summaryPageWithoutId = buildSummaryPage({
+        path: '/summary'
+      })
+      delete summaryPageWithoutId.id
+
+      const definition = buildDefinition({
+        pages: [pageOneWithoutId, pageTwoWithId, summaryPageWithoutId]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValue(definition)
+
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPageFieldByPath')
+
+      await addPageIdsPipeline(id, author)
+
+      expect(dbDefinitionSpy).toHaveBeenCalledTimes(2)
+      expect(dbMetadataSpy).toHaveBeenCalledTimes(1)
+
+      const [formId1, path1, fieldsToUpdate1] = dbDefinitionSpy.mock.calls[0]
+      const [formId2, path2, fieldsToUpdate2] = dbDefinitionSpy.mock.calls[1]
+      const [formId3, updateFilter] = dbMetadataSpy.mock.calls[0]
+
+      expect([formId1, formId2, formId3]).toEqual([id, id, id])
+      expect([path1, path2]).toEqual(['/page-one', '/summary'])
+      expect(fieldsToUpdate1).toMatchObject({ id: expect.any(String) })
+      expect(fieldsToUpdate2).toMatchObject({ id: expect.any(String) })
+
+      expect(updateFilter.$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+    })
+
+    it('should surface any errors', async () => {
+      jest
+        .spyOn(formDefinition, 'get')
+        .mockRejectedValueOnce(Boom.internal('any'))
+      await expect(addPageIdsPipeline(id, author)).rejects.toThrow(
+        Boom.internal('any')
+      )
     })
   })
 

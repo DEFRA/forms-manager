@@ -90,6 +90,53 @@ export async function repositionSummaryPipeline(formId, definition, author) {
 }
 
 /**
+ * Will cycle through a definition and add pageIds to all the pages where they are missing
+ * @param {string} formId
+ * @param {FormMetadataAuthor} author
+ */
+export async function addPageIdsPipeline(formId, author) {
+  logger.info(`Adding missing page ids for form with ID ${formId}`)
+  const session = client.startSession()
+  let updated = 0
+
+  try {
+    await session.withTransaction(
+      async () => {
+        const form = await formDefinition.get(formId, DRAFT, session)
+        const pagesWithoutIds = form.pages.filter((page) => !page.id)
+
+        for (const page of pagesWithoutIds) {
+          await formDefinition.addPageFieldByPath(
+            formId,
+            page.path,
+            { id: uuidV4() },
+            session
+          )
+          updated++
+        }
+
+        // Update the form with the new draft state
+        await formMetadata.update(
+          formId,
+          { $set: partialAuditFields(new Date(), author) },
+          session
+        )
+      },
+      { readPreference: 'primary' }
+    )
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to add missing page ids for form with ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+  logger.info(`Added ${updated} missing page ids for form with ID ${formId}`)
+}
+
+/**
  * Adds an id to a page
  * @param {Page} pageWithoutId
  * @returns {Page}
@@ -124,6 +171,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
     formDraftDefinition,
     author
   )
+
   /**
    * @type {{ position?: number; state?: 'live' | 'draft' }}
    */
