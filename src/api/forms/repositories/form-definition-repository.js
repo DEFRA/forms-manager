@@ -3,6 +3,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
+  findComponent,
   populateComponentIds,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
@@ -409,9 +410,11 @@ export async function updateComponent(
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
-  await coll.updateOne(
+  const updatedDefinition = await coll.findOneAndUpdate(
     {
-      _id: new ObjectId(formId)
+      _id: new ObjectId(formId),
+      'draft.pages.id': pageId,
+      'draft.pages.components.id': componentId
     },
     {
       $set: {
@@ -420,13 +423,22 @@ export async function updateComponent(
     },
     {
       session,
+      returnDocument: 'after',
       arrayFilters: [{ 'pageId.id': pageId }, { 'component.id': componentId }]
     }
   )
 
+  if (updatedDefinition === null) {
+    throw Boom.notFound(
+      `Component ID ${componentId} not found on Page ID ${pageId} & Form ID ${formId}`
+    )
+  }
+
   logger.info(
     `Updated component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
+
+  return findComponent(updatedDefinition.draft, pageId, componentId)
 }
 
 /**

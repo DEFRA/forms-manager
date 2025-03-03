@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb'
 import {
   buildDefinition,
   buildQuestionPage,
+  buildSummaryPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
@@ -268,16 +269,41 @@ describe('form-definition-repository', () => {
 
   describe('updateComponent', () => {
     const component = buildTextFieldComponent({
-      id: '11bafb41-5d34-4e2a-b372-1175cb954a25'
+      id: componentId
     })
 
     it('should update the component', async () => {
-      await updateComponent(formId, pageId, componentId, component, mockSession)
+      const expectedComponent = buildTextFieldComponent({
+        ...component,
+        title: 'New Component Title'
+      })
+      mockCollection.findOneAndUpdate.mockResolvedValue({
+        draft: buildDefinition({
+          pages: [
+            buildQuestionPage({
+              id: pageId,
+              components: [expectedComponent]
+            }),
+            buildSummaryPage()
+          ]
+        })
+      })
 
-      const [filter, update, options] = mockCollection.updateOne.mock.calls[0]
+      const savedComponent = await updateComponent(
+        formId,
+        pageId,
+        componentId,
+        component,
+        mockSession
+      )
+
+      const [filter, update, options] =
+        mockCollection.findOneAndUpdate.mock.calls[0]
 
       expect(filter).toEqual({
-        _id: new ObjectId(formId)
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId,
+        'draft.pages.components.id': componentId
       })
       expect(update).toEqual({
         $set: {
@@ -287,7 +313,21 @@ describe('form-definition-repository', () => {
       expect(options).toMatchObject({
         arrayFilters: [{ 'pageId.id': pageId }, { 'component.id': componentId }]
       })
+      expect(savedComponent).toEqual(expectedComponent)
     })
+
+    it('should fail if the component is not found', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue(null)
+
+      await expect(
+        updateComponent(formId, pageId, componentId, component, mockSession)
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Component ID e296d931-2364-4b17-9049-1aa1afea29d3 not found on Page ID 87ffdbd3-9e43-41e2-8db3-98ade26ca0b7 & Form ID 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+
     it('should fail if state is live', async () => {
       await expect(
         updateComponent(
