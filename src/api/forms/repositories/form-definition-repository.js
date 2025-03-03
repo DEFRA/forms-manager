@@ -549,20 +549,22 @@ export async function updatePageFields(
 /**
  * Adds id for every page this is missing an id
  * @param {string} formId
- * @param {{ id?: () => string }} fieldsToUpdate
+ * @param {string} path
+ * @param {{ id?: string }} pageFields
  * @param {ClientSession} session
  * @param {State} state
  */
-export async function createPageFieldsByFilter(
+export async function addPageFieldByPath(
   formId,
-  fieldsToUpdate,
+  path,
+  pageFields,
   session,
   state = DRAFT
 ) {
   if (state === LIVE) {
     throw Boom.badRequest(`Cannot update pageFields on a live form - ${formId}`)
   }
-  const pageFieldKeys = Object.keys(fieldsToUpdate)
+  const pageFieldKeys = Object.keys(pageFields)
 
   logger.info(
     `Populating page fields ${pageFieldKeys.toString()} on form ID ${formId}`
@@ -572,36 +574,34 @@ export async function createPageFieldsByFilter(
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
-  const pageFields = Object.entries(fieldsToUpdate).reduce(
-    (pageFieldsAcc, [key, value]) => {
-      if (key === 'id') {
-        return {
-          ...pageFieldsAcc,
-          'draft.pages.$[pageId].id': {
-            $function: { body: value, args: [], lang: 'js' }
-          }
-        }
-      }
-      return pageFieldsAcc
-    },
-    /** @type {{"draft.pages.$[pageId].id?": {$function: {args: *[], body: (function(): string), lang: string}}}} */ ({})
-  )
   /**
-   * @type {{ "pageId.id"?: { $exists: false }}[]}
+   * @type {{ 'draft.pages.$[pageId].id'?: string; }}
+   */
+  const fieldsToSet = {}
+
+  const { id } = pageFields
+
+  if (id) {
+    fieldsToSet['draft.pages.$[pageId].id'] = id
+  }
+
+  /**
+   * @type {{ "pageId.id"?: { $exists: false }, "pageId.path": string }[]}
    */
   const arrayFilters = pageFieldKeys.map((key) => ({
-    [`pageId.${key}`]: { $exists: false }
+    [`pageId.${key}`]: { $exists: false },
+    'pageId.path': path
   }))
 
-  const updatedDefinition = await coll.findOneAndUpdate(
+  await coll.updateOne(
     {
-      _id: new ObjectId(formId)
+      _id: new ObjectId(formId),
+      'draft.pages.path': path
     },
     {
-      $set: pageFields
+      $set: fieldsToSet
     },
     {
-      returnDocument: 'after',
       arrayFilters,
       session
     }
@@ -610,8 +610,6 @@ export async function createPageFieldsByFilter(
   logger.info(
     `Populated page fields ${pageFieldKeys.toString()} on form ID ${formId}`
   )
-
-  return updatedDefinition
 }
 
 /**

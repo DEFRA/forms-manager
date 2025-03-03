@@ -12,7 +12,7 @@ import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
   addPageAtPosition,
-  createPageFieldsByFilter,
+  addPageFieldByPath,
   deleteComponent,
   get,
   removeMatchingPages,
@@ -497,47 +497,29 @@ describe('form-definition-repository', () => {
   })
 
   describe('createPageFieldsByFilter', () => {
-    const createIdMock = jest.fn()
-
     it('should update the page fields', async () => {
-      const definition = buildDefinition({
-        pages: [buildQuestionPage()]
-      })
-      mockCollection.findOneAndUpdate.mockResolvedValue(definition)
+      const path = '/question-page-path'
 
-      const newDefinition = await createPageFieldsByFilter(
-        formId,
-        { id: createIdMock },
-        mockSession
-      )
+      await addPageFieldByPath(formId, path, { id: pageId }, mockSession)
 
-      expect(newDefinition).toEqual(definition)
-      const [filter, update, options] =
-        mockCollection.findOneAndUpdate.mock.calls[0]
+      const [filter, update, options] = mockCollection.updateOne.mock.calls[0]
       expect(filter).toEqual({
-        _id: new ObjectId(formId)
+        _id: new ObjectId(formId),
+        'draft.pages.path': path
       })
       expect(update).toEqual({
         $set: {
-          'draft.pages.$[pageId].id': {
-            $function: { body: createIdMock, args: [], lang: 'js' }
-          }
+          'draft.pages.$[pageId].id': pageId
         }
       })
       expect(options).toMatchObject({
-        returnDocument: 'after',
-        arrayFilters: [{ 'pageId.id': { $exists: false } }]
+        arrayFilters: [{ 'pageId.id': { $exists: false }, 'pageId.path': path }]
       })
     })
 
     it('should fail if form definition is live', async () => {
       await expect(
-        createPageFieldsByFilter(
-          formId,
-          { id: createIdMock },
-          mockSession,
-          'live'
-        )
+        addPageFieldByPath(formId, '/path', { id: pageId }, mockSession, 'live')
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
