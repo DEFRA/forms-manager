@@ -547,6 +547,74 @@ export async function updatePageFields(
 }
 
 /**
+ * Adds id for every page this is missing an id
+ * @param {string} formId
+ * @param {{ id?: () => string }} fieldsToUpdate
+ * @param {ClientSession} session
+ * @param {State} state
+ */
+export async function createPageFieldsByFilter(
+  formId,
+  fieldsToUpdate,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot update pageFields on a live form - ${formId}`)
+  }
+  const pageFieldKeys = Object.keys(fieldsToUpdate)
+
+  logger.info(
+    `Populating page fields ${pageFieldKeys.toString()} on form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const pageFields = Object.entries(fieldsToUpdate).reduce(
+    (pageFieldsAcc, [key, value]) => {
+      if (key === 'id') {
+        return {
+          ...pageFieldsAcc,
+          'draft.pages.$[pageId].id': {
+            $function: { body: value, args: [], lang: 'js' }
+          }
+        }
+      }
+      return pageFieldsAcc
+    },
+    /** @type {{"draft.pages.$[pageId].id?": {$function: {args: *[], body: (function(): string), lang: string}}}} */ ({})
+  )
+  /**
+   * @type {{ "pageId.id"?: { $exists: false }}[]}
+   */
+  const arrayFilters = pageFieldKeys.map((key) => ({
+    [`pageId.${key}`]: { $exists: false }
+  }))
+
+  const updatedDefinition = await coll.findOneAndUpdate(
+    {
+      _id: new ObjectId(formId)
+    },
+    {
+      $set: pageFields
+    },
+    {
+      returnDocument: 'after',
+      arrayFilters,
+      session
+    }
+  )
+
+  logger.info(
+    `Populated page fields ${pageFieldKeys.toString()} on form ID ${formId}`
+  )
+
+  return updatedDefinition
+}
+
+/**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
  */

@@ -12,6 +12,7 @@ import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
   addPageAtPosition,
+  createPageFieldsByFilter,
   deleteComponent,
   get,
   removeMatchingPages,
@@ -492,6 +493,56 @@ describe('form-definition-repository', () => {
       mockDefinition.engine = Engine.V2
       await setEngineVersion(formId, Engine.V2, mockDefinition, mockSession)
       expect(mockCollection.updateOne).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('createPageFieldsByFilter', () => {
+    const createIdMock = jest.fn()
+
+    it('should update the page fields', async () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage()]
+      })
+      mockCollection.findOneAndUpdate.mockResolvedValue(definition)
+
+      const newDefinition = await createPageFieldsByFilter(
+        formId,
+        { id: createIdMock },
+        mockSession
+      )
+
+      expect(newDefinition).toEqual(definition)
+      const [filter, update, options] =
+        mockCollection.findOneAndUpdate.mock.calls[0]
+      expect(filter).toEqual({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$[pageId].id': {
+            $function: { body: createIdMock, args: [], lang: 'js' }
+          }
+        }
+      })
+      expect(options).toMatchObject({
+        returnDocument: 'after',
+        arrayFilters: [{ 'pageId.id': { $exists: false } }]
+      })
+    })
+
+    it('should fail if form definition is live', async () => {
+      await expect(
+        createPageFieldsByFilter(
+          formId,
+          { id: createIdMock },
+          mockSession,
+          'live'
+        )
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
     })
   })
 })
