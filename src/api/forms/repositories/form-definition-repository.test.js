@@ -10,6 +10,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
+  addComponentFieldByName,
   addComponents,
   addPageAtPosition,
   addPageFieldByPath,
@@ -529,6 +530,59 @@ describe('form-definition-repository', () => {
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+  })
+
+  describe('addComponentFieldByName', () => {
+    it('should update the component', async () => {
+      await addComponentFieldByName(
+        formId,
+        pageId,
+        'AbcOrS',
+        { id: 'abcd-1234' },
+        mockSession
+      )
+
+      const [filter, update, options] = mockCollection.updateOne.mock.calls[0]
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId,
+        'draft.pages.components.name': 'AbcOrS'
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$[pageId].components.$[component].id': 'abcd-1234'
+        }
+      })
+      expect(options).toMatchObject({
+        arrayFilters: [
+          { 'pageId.id': pageId },
+          { 'component.id': { $exists: false }, 'component.name': 'AbcOrS' }
+        ]
+      })
+    })
+
+    it('should handle missing fields', async () => {
+      await addComponentFieldByName(formId, pageId, 'AbcOrS', {}, mockSession)
+
+      expect(mockCollection.updateOne).not.toHaveBeenCalled()
+    })
+
+    it('should fail if form definition is live', async () => {
+      await expect(
+        addComponentFieldByName(
+          formId,
+          pageId,
+          'AbcOrS',
+          { id: 'abcd-1234' },
+          mockSession,
+          'live'
+        )
+      ).rejects.toThrow(
+        Boom.badRequest(
+          'Cannot update component fields on a live form - 1eabd1437567fe1b26708bbb'
         )
       )
     })
