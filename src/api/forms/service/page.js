@@ -1,7 +1,6 @@
-import { randomUUID } from 'crypto'
-
-import { ControllerType, Engine } from '@defra/forms-model'
+import { Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
+import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -35,7 +34,7 @@ export const addIdToSummary = (summaryPage) => ({
  */
 const createPageWithId = (pageWithoutId) => ({
   ...pageWithoutId,
-  id: randomUUID()
+  id: uuidV4().toString()
 })
 
 /**
