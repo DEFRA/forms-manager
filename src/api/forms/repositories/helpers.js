@@ -1,4 +1,8 @@
-import { ControllerType, hasComponents } from '@defra/forms-model'
+import {
+  ControllerType,
+  hasComponents,
+  hasComponentsEvenIfNoNext
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { v4 as uuidV4 } from 'uuid'
@@ -68,7 +72,7 @@ export function findComponent(definition, pageId, componentId) {
     findPage(definition, pageId)
   )
 
-  if (!hasComponents(page)) {
+  if (!hasComponentsEvenIfNoNext(page)) {
     return undefined
   }
 
