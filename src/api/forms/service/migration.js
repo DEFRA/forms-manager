@@ -1,4 +1,4 @@
-import { ControllerType } from '@defra/forms-model'
+import { ControllerType, Engine } from '@defra/forms-model'
 import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -88,8 +88,8 @@ export async function addPageIdsPipeline(formId, author) {
     await session.withTransaction(
       async () => {
         const form = await formDefinition.get(formId, DRAFT, session)
-        const pagesWithoutIds = form.pages.filter((page) => !page.id)
 
+        const pagesWithoutIds = form.pages.filter((page) => !page.id)
         for (const page of pagesWithoutIds) {
           await formDefinition.addPageFieldByPath(
             formId,
@@ -119,7 +119,90 @@ export async function addPageIdsPipeline(formId, author) {
     await session.endSession()
   }
   logger.info(`Added ${updated} missing page ids for form with ID ${formId}`)
+
+  return formDefinition.get(formId, DRAFT)
 }
+
+/**
+ * Should set the engine version to v2 - last step in migration pipeline
+ * @param {string} formId
+ * @param {FormDefinition} formDraftDefinition
+ * @param {FormMetadataAuthor} author
+ */
+export async function setEngineVersionToV2(
+  formId,
+  formDraftDefinition,
+  author
+) {
+  if (formDraftDefinition.engine === Engine.V2) {
+    return
+  }
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(
+      async () => {
+        await formDefinition.setEngineVersion(
+          formId,
+          Engine.V2,
+          formDraftDefinition,
+          session
+        )
+
+        // Update the form with the new draft state
+        await formMetadata.update(
+          formId,
+          { $set: partialAuditFields(new Date(), author) },
+          session
+        )
+      },
+      { readPreference: 'primary' }
+    )
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to update form with ID ${formId} to engine version 2`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
+ * Migrates a v1 definition to v2
+ * @param {string} formId
+ * @param {FormDefinition} formDraftDefinition
+ * @param {FormMetadataAuthor} author
+ */
+export async function migrateDefinitionToV2(
+  formId,
+  formDraftDefinition,
+  author
+) {
+  if (formDraftDefinition.engine === Engine.V2) {
+    return
+  }
+  logger.info(`Migrating form with ID ${formId} to engine version 2`)
+
+  try {
+    await repositionSummaryPipeline(formId, formDraftDefinition, author)
+    const updatedDraftDefinition = await addPageIdsPipeline(formId, author)
+    await setEngineVersionToV2(formId, updatedDraftDefinition, author)
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to migrate form with ID ${formId} to engine version 2`
+    )
+    throw err
+  }
+
+  logger.info(`Migrated form with ID ${formId} to engine version 2`)
+
+  return formDefinition.get(formId)
+}
+
+// TODO: add migrate to V1
 
 /**
  * @import { FormDefinition, FormMetadataAuthor, Page, PageSummary } from '@defra/forms-model'

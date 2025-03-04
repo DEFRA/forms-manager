@@ -1,4 +1,4 @@
-import { ControllerType } from '@defra/forms-model'
+import { ControllerType, Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
@@ -11,7 +11,9 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   addPageIdsPipeline,
-  repositionSummaryPipeline
+  migrateDefinitionToV2,
+  repositionSummaryPipeline,
+  setEngineVersionToV2
 } from '~/src/api/forms/service/migration.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -24,24 +26,43 @@ jest.mock('~/src/mongo.js')
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const author = getAuthor()
-const summaryPage = buildSummaryPage()
 
 describe('migration', () => {
   const id = '661e4ca5039739ef2902b214'
+  const v4Id = '083f2f65-7c1d-48e0-a195-3f6b0836ad08'
   // const pageId = 'ffefd409-f3f4-49fe-882e-6e89f44631b1'
   const dateUsedInFakeTime = new Date('2020-01-01')
+  const defaultAudit = {
+    'draft.updatedAt': dateUsedInFakeTime,
+    'draft.updatedBy': author,
+    updatedAt: dateUsedInFakeTime,
+    updatedBy: author
+  }
+
+  const summaryWithoutId = buildSummaryPage()
+  delete summaryWithoutId.id
+  const summaryWithId = buildSummaryPage({
+    id: v4Id
+  })
+  const questionPageWithId = buildQuestionPage()
+  const questionPageWithoutId = buildQuestionPage()
+  delete questionPageWithoutId.id
+
+  const versionOne = buildDefinition({
+    pages: [summaryWithoutId, questionPageWithoutId],
+    engine: Engine.V1
+  })
+  const versionTwo = buildDefinition({
+    pages: [questionPageWithId, summaryWithId],
+    engine: Engine.V2
+  })
 
   beforeAll(async () => {
     await prepareDb(pino())
   })
 
   describe('repositionSummaryPipeline', () => {
-    const summary = buildSummaryPage()
-
     it('should reposition summary if it exists but is not at the end', async () => {
-      const initialSummary = buildSummaryPage()
-      delete initialSummary.id
-
       const removeMatchingPagesSpy = jest.spyOn(
         formDefinition,
         'removeMatchingPages'
@@ -51,14 +72,9 @@ describe('migration', () => {
         'addPageAtPosition'
       )
       const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
-
-      const formDefinition1 = buildDefinition({
-        pages: [initialSummary, buildQuestionPage()]
-      })
-
       const returnedSummary = await repositionSummaryPipeline(
         id,
-        formDefinition1,
+        versionOne,
         author
       )
 
@@ -76,16 +92,17 @@ describe('migration', () => {
       expect(formId2).toBe(id)
       expect(formId3).toBe(id)
       expect(matchCriteria).toEqual({ controller: ControllerType.Summary })
-      expect(calledSummary).toEqual(summary)
+      expect(calledSummary).toEqual({
+        ...summaryWithId,
+        id: expect.any(String)
+      })
       expect(state).toBeUndefined()
       expect(options).toEqual({})
-      expect(updateFilter.$set).toEqual({
-        'draft.updatedAt': dateUsedInFakeTime,
-        'draft.updatedBy': author,
-        updatedAt: dateUsedInFakeTime,
-        updatedBy: author
+      expect(updateFilter.$set).toEqual(defaultAudit)
+      expect(returnedSummary.summary).toEqual({
+        ...summaryWithId,
+        id: expect.any(String)
       })
-      expect(returnedSummary.summary).toEqual(summary)
     })
 
     it('should not reposition the summary if no pages exist', async () => {
@@ -110,7 +127,7 @@ describe('migration', () => {
 
     it('should not reposition the summary if summary is at the end', async () => {
       const formDefinition1 = buildDefinition({
-        pages: [buildQuestionPage(), summaryPage]
+        pages: [buildQuestionPage(), summaryWithId]
       })
       const removeMatchingPagesSpy = jest.spyOn(
         formDefinition,
@@ -154,11 +171,8 @@ describe('migration', () => {
         .mocked(formDefinition.addPageAtPosition)
         .mockRejectedValueOnce(Boom.badRequest('Error'))
 
-      const formDefinition1 = buildDefinition({
-        pages: [summary, buildQuestionPage()]
-      })
       await expect(
-        repositionSummaryPipeline('123', formDefinition1, author)
+        repositionSummaryPipeline('123', versionOne, author)
       ).rejects.toThrow(Boom.badRequest('Error'))
     })
   })
@@ -181,7 +195,7 @@ describe('migration', () => {
         pages: [pageOneWithoutId, pageTwoWithId, summaryPageWithoutId]
       })
 
-      jest.mocked(formDefinition.get).mockResolvedValue(definition)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
 
       const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
       const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPageFieldByPath')
@@ -200,12 +214,7 @@ describe('migration', () => {
       expect(fieldsToUpdate1).toMatchObject({ id: expect.any(String) })
       expect(fieldsToUpdate2).toMatchObject({ id: expect.any(String) })
 
-      expect(updateFilter.$set).toEqual({
-        'draft.updatedAt': dateUsedInFakeTime,
-        'draft.updatedBy': author,
-        updatedAt: dateUsedInFakeTime,
-        updatedBy: author
-      })
+      expect(updateFilter.$set).toEqual(defaultAudit)
     })
 
     it('should surface any errors', async () => {
@@ -215,6 +224,101 @@ describe('migration', () => {
       await expect(addPageIdsPipeline(id, author)).rejects.toThrow(
         Boom.internal('any')
       )
+    })
+  })
+
+  describe('setEngineVersion', () => {
+    it('should set the engine version', async () => {
+      const engineMock = jest.mocked(formDefinition.setEngineVersion)
+      await setEngineVersionToV2(id, versionOne, author)
+
+      const [finalExpectedId, finalExpectedEngine, finalExpectedDefinition] =
+        engineMock.mock.calls[0]
+
+      expect([
+        finalExpectedId,
+        finalExpectedEngine,
+        finalExpectedDefinition
+      ]).toEqual([id, Engine.V2, versionOne])
+      expect(formMetadata.update).toHaveBeenCalledWith(
+        id,
+        {
+          $set: defaultAudit
+        },
+        expect.anything()
+      )
+    })
+
+    it('should do nothing if definition is v2 already', async () => {
+      const engineMock = jest.mocked(formDefinition.setEngineVersion)
+      await setEngineVersionToV2(id, versionTwo, author)
+      expect(engineMock).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors', async () => {
+      jest
+        .mocked(formDefinition.setEngineVersion)
+        .mockRejectedValueOnce(Boom.internal('an error'))
+      await expect(
+        setEngineVersionToV2(id, versionOne, author)
+      ).rejects.toThrow(Boom.internal('an error'))
+    })
+  })
+
+  describe('migrateDefinitionToV2', () => {
+    it('should migrate a v1 definition to v2', async () => {
+      const getMock = jest.mocked(formDefinition.get)
+      const setEngineMock = jest.mocked(formDefinition.setEngineVersion)
+      const versionOneB = buildDefinition({
+        ...versionOne,
+        pages: [questionPageWithoutId, summaryWithId]
+      })
+      const versionOneC = buildDefinition({
+        ...versionOne,
+        pages: [questionPageWithId, summaryWithId]
+      })
+      getMock.mockResolvedValueOnce(versionOneB)
+      getMock.mockResolvedValueOnce(versionOneC)
+      getMock.mockResolvedValueOnce(versionTwo)
+
+      const updatedDefinition = await migrateDefinitionToV2(
+        id,
+        versionOne,
+        author
+      )
+
+      expect(updatedDefinition).toEqual(versionTwo)
+      const [finalExpectedId, finalExpectedEngine, finalExpectedDefinition] =
+        setEngineMock.mock.calls[0]
+      const [metaId, metaUpdate] = jest.mocked(formMetadata.update).mock
+        .calls[0]
+
+      expect(formDefinition.removeMatchingPages).toHaveBeenCalled()
+      expect(formDefinition.addPageFieldByPath).toHaveBeenCalledTimes(1)
+      expect([
+        finalExpectedId,
+        finalExpectedEngine,
+        finalExpectedDefinition
+      ]).toEqual([id, Engine.V2, versionOneC])
+      expect([metaId, metaUpdate]).toEqual([id, { $set: defaultAudit }])
+    })
+
+    it('should do nothing if definition is v2 already', async () => {
+      await migrateDefinitionToV2(id, versionTwo, author)
+      expect(formDefinition.get).not.toHaveBeenCalled()
+      expect(formDefinition.addPageFieldByPath).not.toHaveBeenCalled()
+      expect(formDefinition.removeMatchingPages).not.toHaveBeenCalled()
+      expect(formDefinition.addPageAtPosition).not.toHaveBeenCalled()
+      expect(formDefinition.addPageFieldByPath).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors correctly', async () => {
+      jest
+        .mocked(formDefinition.removeMatchingPages)
+        .mockRejectedValueOnce(Boom.internal('err'))
+      await expect(
+        migrateDefinitionToV2(id, versionOne, author)
+      ).rejects.toThrow(Boom.internal('err'))
     })
   })
 })
