@@ -62,3 +62,10 @@ export const createFormSchema = Joi.object().keys({
 
 // Update form definition schema
 export const updateFormDefinitionSchema = formDefinitionSchema
+
+export const migrateDefinitionParamSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    version: Joi.string().allow('v1', 'v2').required()
+  })
+  .required()
