@@ -139,8 +139,8 @@ export function findPageComponentsWithoutIds(page, pageId) {
   return page.components.reduce((componentsWithoutIds, component) => {
     if (!component.id) {
       return [
-        { pageId, componentName: component.name },
-        ...componentsWithoutIds
+        ...componentsWithoutIds,
+        { pageId, componentName: component.name }
       ]
     }
 
@@ -151,6 +151,7 @@ export function findPageComponentsWithoutIds(page, pageId) {
 /**
  * Returns a list of components found without an id in a form definition
  * @param {FormDefinition} formDefinition
+ * @returns {{ pageId: string, componentName: string }[]}
  */
 export function findComponentsWithoutIds(formDefinition) {
   return formDefinition.pages.flatMap((page) =>

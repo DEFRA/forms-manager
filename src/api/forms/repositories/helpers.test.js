@@ -188,9 +188,9 @@ describe('repository helpers', () => {
     ]
     const componentListWithoutAnId2 = [
       componentWithAnId,
-      componentWithoutAnId2,
+      componentWithoutAnId,
       componentWithAnId3,
-      componentWithoutAnId
+      componentWithoutAnId2
     ]
     const componentListWithIds = [
       componentWithAnId,
