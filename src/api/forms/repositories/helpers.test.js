@@ -6,8 +6,12 @@ import {
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import {
+  definitionHasComponentWithoutId,
   findComponent,
+  findComponentsWithoutIds,
   findPage,
+  findPageComponentsWithoutIds,
+  pageHasComponentWithoutId,
   populateComponentIds,
   summaryHelper
 } from '~/src/api/forms/repositories/helpers.js'
@@ -35,6 +39,11 @@ describe('repository helpers', () => {
     id: summaryPageId
   })
   const statusPage = buildStatusPage({})
+
+  const componentWithoutAnId = buildTextFieldComponent({
+    name: 'CwAid'
+  })
+  delete componentWithoutAnId.id
 
   describe('summaryHelper', () => {
     it('should push the summary to the end if it not in the correct place', () => {
@@ -155,11 +164,149 @@ describe('repository helpers', () => {
 
     it('should return populated if page has a component where component has no id', () => {
       const testPage = buildQuestionPage({
-        components: [buildTextFieldComponent()]
+        components: [componentWithoutAnId]
       })
       expect(testPage.components[0].id).toBeUndefined()
       const page = /** @type {PageQuestion} */ (populateComponentIds(testPage))
       expect(page.components[0].id).toBeDefined()
+    })
+  })
+
+  describe('component checks', () => {
+    const componentWithoutAnId2 = buildTextFieldComponent({
+      id: undefined,
+      name: 'CwAid2'
+    })
+    const componentWithAnId = buildTextFieldComponent()
+    const componentWithAnId2 = buildTextFieldComponent({ id: '123' })
+    const componentWithAnId3 = buildTextFieldComponent({ id: '123' })
+    const componentListWithoutAnId = [
+      componentWithAnId,
+      componentWithAnId2,
+      componentWithAnId3,
+      componentWithoutAnId
+    ]
+    const componentListWithoutAnId2 = [
+      componentWithAnId,
+      componentWithoutAnId2,
+      componentWithAnId3,
+      componentWithoutAnId
+    ]
+    const componentListWithIds = [
+      componentWithAnId,
+      componentWithAnId2,
+      componentWithAnId3
+    ]
+    const pageWithComponentIds = buildQuestionPage({
+      components: componentListWithIds
+    })
+    const pageWithoutAComponentId = buildQuestionPage({
+      id: 'pageIds1',
+      components: componentListWithoutAnId2
+    })
+    const pageWithoutAComponentId2 = buildQuestionPage({
+      id: 'pageIds2',
+      components: [componentWithoutAnId]
+    })
+    const pagesWithoutAComponentId = [
+      pageWithComponentIds,
+      pageWithComponentIds,
+      pageWithComponentIds,
+      pageWithoutAComponentId
+    ]
+    const pagesWithComponentIds = [
+      pageWithComponentIds,
+      pageWithComponentIds,
+      pageWithComponentIds,
+      summaryPageWithoutComponents
+    ]
+
+    describe('pageHasComponentWithoutId', () => {
+      it('should return true if a component is found without an id', () => {
+        expect(
+          pageHasComponentWithoutId(
+            buildQuestionPage({ components: componentListWithoutAnId })
+          )
+        ).toBe(true)
+      })
+      it('should return false if no component is found without an id', () => {
+        expect(
+          pageHasComponentWithoutId(buildQuestionPage({ components: [] }))
+        ).toBe(false)
+        expect(pageHasComponentWithoutId(buildSummaryPage())).toBe(false)
+        expect(pageHasComponentWithoutId(pageWithComponentIds)).toBe(false)
+      })
+    })
+
+    describe('definitionHasComponentWithoutId', () => {
+      it('should return true if component is found without an id', () => {
+        expect(
+          definitionHasComponentWithoutId(
+            buildDefinition({ pages: pagesWithoutAComponentId })
+          )
+        ).toBe(true)
+      })
+      it('should return false if component is not found without an id', () => {
+        expect(
+          definitionHasComponentWithoutId(
+            buildDefinition({ pages: pagesWithComponentIds })
+          )
+        ).toBe(false)
+      })
+    })
+
+    describe('findPageComponentsWithoutIds', () => {
+      it('should return a list of components if they are found', () => {
+        expect(
+          findPageComponentsWithoutIds(pageWithoutAComponentId, 'abc-123')
+        ).toEqual([
+          { pageId: 'abc-123', componentName: 'CwAid' },
+          { pageId: 'abc-123', componentName: 'CwAid2' }
+        ])
+      })
+
+      it('should return an empty list if none are found', () => {
+        expect(
+          findPageComponentsWithoutIds(summaryPageWithoutComponents, 'abc-123')
+        ).toEqual([])
+        expect(
+          findPageComponentsWithoutIds(pageWithComponentIds, 'abc-123')
+        ).toEqual([])
+      })
+    })
+
+    describe('recursivelyFindComponentsWithoutIds', () => {
+      it('should return list of components without an id', () => {
+        const definitionWithoutComponentIds = buildDefinition({
+          pages: [
+            ...pagesWithComponentIds,
+            ...pagesWithoutAComponentId,
+            pageWithoutAComponentId2
+          ]
+        })
+        expect(findComponentsWithoutIds(definitionWithoutComponentIds)).toEqual(
+          [
+            { pageId: 'pageIds1', componentName: 'CwAid' },
+            { pageId: 'pageIds1', componentName: 'CwAid2' },
+            { pageId: 'pageIds2', componentName: 'CwAid' }
+          ]
+        )
+      })
+      it('should return empty array if all components have ids', () => {
+        const pageWithMissingId = buildQuestionPage()
+        delete pageWithMissingId.id
+
+        const pageWithUndefinedId = buildQuestionPage({ id: undefined })
+
+        const definitionWithComponentIds = buildDefinition({
+          pages: [
+            ...pagesWithComponentIds,
+            pageWithMissingId,
+            pageWithUndefinedId
+          ]
+        })
+        expect(findComponentsWithoutIds(definitionWithComponentIds)).toEqual([])
+      })
     })
   })
 })

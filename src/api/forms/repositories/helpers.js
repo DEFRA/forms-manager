@@ -108,6 +108,57 @@ export function populateComponentIds(pageWithoutComponentIds) {
 }
 
 /**
+ * Finds if a component is found without an id
+ * @param {Page} page
+ */
+export function pageHasComponentWithoutId(page) {
+  if (!hasComponents(page)) {
+    return false
+  }
+  return page.components.some((component) => !component.id)
+}
+
+/**
+ * Recursively Traverses pages and component and returns true if a component exists without an id
+ * @param {FormDefinition} definition
+ */
+export function definitionHasComponentWithoutId(definition) {
+  return definition.pages.some((page) => pageHasComponentWithoutId(page))
+}
+
+/**
+ * Recursively traverse components in page and return list of components without an id
+ * @param {Page} page
+ * @param {string} pageId
+ * @returns {{ pageId: string, componentName: string }[]}
+ */
+export function findPageComponentsWithoutIds(page, pageId) {
+  if (!hasComponents(page)) {
+    return []
+  }
+  return page.components.reduce((componentsWithoutIds, component) => {
+    if (!component.id) {
+      return [
+        { pageId, componentName: component.name },
+        ...componentsWithoutIds
+      ]
+    }
+
+    return componentsWithoutIds
+  }, /** @type {{ pageId: string, componentName: string }[]} */ ([]))
+}
+
+/**
+ * Returns a list of components found without an id in a form definition
+ * @param {FormDefinition} formDefinition
+ */
+export function findComponentsWithoutIds(formDefinition) {
+  return formDefinition.pages.flatMap((page) =>
+    'id' in page && !!page.id ? findPageComponentsWithoutIds(page, page.id) : []
+  )
+}
+
+/**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, PageStart, PageQuestion, PageTerminal, PageRepeat, PageFileUpload} from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */
