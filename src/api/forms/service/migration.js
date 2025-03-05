@@ -1,9 +1,14 @@
+import { randomUUID } from 'crypto'
+
 import { ControllerType, Engine } from '@defra/forms-model'
 import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { summaryHelper } from '~/src/api/forms/repositories/helpers.js'
+import {
+  findComponentsWithoutIds,
+  summaryHelper
+} from '~/src/api/forms/repositories/helpers.js'
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
 import {
   DRAFT,
@@ -90,6 +95,7 @@ export async function addPageIdsPipeline(formId, author) {
         const form = await formDefinition.get(formId, DRAFT, session)
 
         const pagesWithoutIds = form.pages.filter((page) => !page.id)
+
         for (const page of pagesWithoutIds) {
           await formDefinition.addPageFieldByPath(
             formId,
@@ -119,6 +125,65 @@ export async function addPageIdsPipeline(formId, author) {
     await session.endSession()
   }
   logger.info(`Added ${updated} missing page ids for form with ID ${formId}`)
+
+  return formDefinition.get(formId, DRAFT)
+}
+
+/**
+ * Adds ids to all components that miss them
+ * @param {string} formId
+ * @param {FormDefinition} draftFormDefinition
+ * @param {FormMetadataAuthor} author
+ */
+export async function addComponentIdsPipeline(
+  formId,
+  draftFormDefinition,
+  author
+) {
+  logger.info(`Adding missing component ids for form with ID ${formId}`)
+
+  const componentsWithMissingIds = findComponentsWithoutIds(draftFormDefinition)
+
+  if (!componentsWithMissingIds.length) {
+    logger.info(`No missing component ids for form with ID ${formId}`)
+    return draftFormDefinition
+  }
+
+  let updated = 0
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      for (const { pageId, componentName } of componentsWithMissingIds) {
+        await formDefinition.addComponentFieldByName(
+          formId,
+          pageId,
+          componentName,
+          { id: randomUUID() },
+          session
+        )
+        updated++
+      }
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to add missing page ids for form with ID ${formId}`
+    )
+    throw err
+  } finally {
+    await session.endSession()
+  }
+  logger.info(
+    `Added ${updated} missing component ids for form with ID ${formId}`
+  )
 
   return formDefinition.get(formId, DRAFT)
 }
@@ -181,13 +246,20 @@ export async function migrateDefinitionToV2(
   author
 ) {
   if (formDraftDefinition.engine === Engine.V2) {
-    return
+    return formDraftDefinition
   }
   logger.info(`Migrating form with ID ${formId} to engine version 2`)
 
+  let updatedDraftDefinition = formDraftDefinition
+
   try {
     await repositionSummaryPipeline(formId, formDraftDefinition, author)
-    const updatedDraftDefinition = await addPageIdsPipeline(formId, author)
+    updatedDraftDefinition = await addPageIdsPipeline(formId, author)
+    updatedDraftDefinition = await addComponentIdsPipeline(
+      formId,
+      updatedDraftDefinition,
+      author
+    )
     await setEngineVersionToV2(formId, updatedDraftDefinition, author)
   } catch (err) {
     logger.error(
