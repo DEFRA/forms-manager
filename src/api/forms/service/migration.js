@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto'
 
 import { ControllerType, Engine } from '@defra/forms-model'
-import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -100,7 +99,7 @@ export async function addPageIdsPipeline(formId, author) {
           await formDefinition.addPageFieldByPath(
             formId,
             page.path,
-            { id: uuidV4() },
+            { id: randomUUID() },
             session
           )
           updated++
