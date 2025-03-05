@@ -237,14 +237,11 @@ export async function setEngineVersionToV2(
 /**
  * Migrates a v1 definition to v2
  * @param {string} formId
- * @param {FormDefinition} formDraftDefinition
  * @param {FormMetadataAuthor} author
  */
-export async function migrateDefinitionToV2(
-  formId,
-  formDraftDefinition,
-  author
-) {
+export async function migrateDefinitionToV2(formId, author) {
+  const formDraftDefinition = await formDefinition.get(formId, DRAFT)
+
   if (formDraftDefinition.engine === Engine.V2) {
     return formDraftDefinition
   }

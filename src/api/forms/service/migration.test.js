@@ -371,7 +371,9 @@ describe('migration', () => {
   })
 
   describe('migrateDefinitionToV2', () => {
-    const getMock = jest.mocked(formDefinition.get)
+    const getMock = jest
+      .mocked(formDefinition.get)
+      .mockResolvedValue(versionOne)
 
     it('should migrate a v1 definition to v2', async () => {
       const setEngineMock = jest.mocked(formDefinition.setEngineVersion)
@@ -387,16 +389,13 @@ describe('migration', () => {
         ...versionOneC,
         pages: [questionPageWithIdAndComponentIds, summaryWithId]
       })
+      getMock.mockResolvedValueOnce(versionOne)
       getMock.mockResolvedValueOnce(versionOneB)
       getMock.mockResolvedValueOnce(versionOneC)
       getMock.mockResolvedValueOnce(versionOneD)
       getMock.mockResolvedValueOnce(versionTwo)
 
-      const updatedDefinition = await migrateDefinitionToV2(
-        id,
-        versionOne,
-        author
-      )
+      const updatedDefinition = await migrateDefinitionToV2(id, author)
 
       expect(updatedDefinition).toEqual(versionTwo)
       const [finalExpectedId, finalExpectedEngine, finalExpectedDefinition] =
@@ -414,9 +413,10 @@ describe('migration', () => {
     })
 
     it('should do nothing if definition is v2 already', async () => {
-      const definition = await migrateDefinitionToV2(id, versionTwo, author)
+      jest.mocked(formDefinition.get).mockResolvedValue(versionTwo)
+      const definition = await migrateDefinitionToV2(id, author)
       expect(definition).toEqual(versionTwo)
-      expect(formDefinition.get).not.toHaveBeenCalled()
+      expect(formDefinition.get).toHaveBeenCalledTimes(1)
       expect(formDefinition.addPageFieldByPath).not.toHaveBeenCalled()
       expect(formDefinition.removeMatchingPages).not.toHaveBeenCalled()
       expect(formDefinition.addPageAtPosition).not.toHaveBeenCalled()
@@ -425,12 +425,13 @@ describe('migration', () => {
     })
 
     it('should surface errors correctly', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValue(versionOne)
       jest
         .mocked(formDefinition.removeMatchingPages)
         .mockRejectedValueOnce(Boom.internal('err'))
-      await expect(
-        migrateDefinitionToV2(id, versionOne, author)
-      ).rejects.toThrow(Boom.internal('err'))
+      await expect(migrateDefinitionToV2(id, author)).rejects.toThrow(
+        Boom.internal('err')
+      )
     })
   })
 })
