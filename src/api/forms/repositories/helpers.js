@@ -124,7 +124,7 @@ export function pageHasComponentWithoutId(page) {
 }
 
 /**
- * Recursively Traverses pages and component and returns true if a component exists without an id
+ * Traverses pages and component and returns true if a component exists without an id
  * @param {FormDefinition} definition
  */
 export function definitionHasComponentWithoutId(definition) {
@@ -132,7 +132,7 @@ export function definitionHasComponentWithoutId(definition) {
 }
 
 /**
- * Recursively traverse components in page and return list of components without an id
+ * Traverse components in page and return list of components without an id
  * @param {Page} page
  * @param {string} pageId
  * @returns {{ pageId: string, componentName: string }[]}

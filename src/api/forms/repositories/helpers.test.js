@@ -275,7 +275,7 @@ describe('repository helpers', () => {
       })
     })
 
-    describe('recursivelyFindComponentsWithoutIds', () => {
+    describe('findComponentsWithoutIds', () => {
       it('should return list of components without an id', () => {
         const definitionWithoutComponentIds = buildDefinition({
           pages: [
