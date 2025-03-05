@@ -76,6 +76,7 @@ export function buildDefinition(partialDefinition) {
  */
 export function buildTextFieldComponent(partialTextField = {}) {
   return /** @satisfies {TextFieldComponent} */ {
+    id: '407dd0d7-cce9-4f43-8e1f-7d89cb698875',
     name: 'TextField',
     title: 'Text field',
     type: ComponentType.TextField,

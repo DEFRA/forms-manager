@@ -24,6 +24,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
   patchFieldsOnDraftDefinitionPage
@@ -36,6 +37,7 @@ jest.mock('~/src/api/forms/service/index.js')
 jest.mock('~/src/api/forms/service/definition.js')
 jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')
+jest.mock('~/src/api/forms/service/migration.js')
 
 describe('Forms route', () => {
   /** @type {Server} */
@@ -532,6 +534,20 @@ describe('Forms route', () => {
       const response = await server.inject({
         method: 'GET',
         url: `/forms/${id}/definition/draft`
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
+    })
+
+    test('Testing GET /forms/{id}/definition/draft/migrate/v2 route migrates a form to v2 and returns a form definition', async () => {
+      jest.mocked(migrateDefinitionToV2).mockResolvedValue(stubFormDefinition)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/migrate/v2`,
+        auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
@@ -1088,6 +1104,7 @@ describe('Forms route', () => {
       const componentWithoutAnId = buildTextFieldComponent({
         title: 'New component title'
       })
+      delete componentWithoutAnId.id
 
       const response = await server.inject({
         method: 'PUT',

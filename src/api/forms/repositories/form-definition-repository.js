@@ -547,6 +547,156 @@ export async function updatePageFields(
 }
 
 /**
+ * Adds id for every page this is missing an id
+ * @param {string} formId
+ * @param {string} path
+ * @param {{ id?: string }} pageFields
+ * @param {ClientSession} session
+ * @param {State} state
+ */
+export async function addPageFieldByPath(
+  formId,
+  path,
+  pageFields,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(`Cannot update pageFields on a live form - ${formId}`)
+  }
+  const pageFieldKeys = Object.keys(pageFields)
+
+  logger.info(
+    `Populating page fields ${pageFieldKeys.toString()} on form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  /**
+   * @type {{ 'draft.pages.$[pageId].id'?: string; }}
+   */
+  const fieldsToSet = {}
+
+  const { id } = pageFields
+
+  if (id) {
+    fieldsToSet['draft.pages.$[pageId].id'] = id
+  }
+
+  if (!pageFieldKeys.length) {
+    logger.info(`No page fields populated on form ID ${formId}`)
+    return
+  }
+
+  /**
+   * @type {{ "pageId.id"?: { $exists: false }, "pageId.path": string }[]}
+   */
+  const arrayFilters = pageFieldKeys.map((key) => ({
+    [`pageId.${key}`]: { $exists: false },
+    'pageId.path': path
+  }))
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      'draft.pages.path': path
+    },
+    {
+      $set: fieldsToSet
+    },
+    {
+      arrayFilters,
+      session
+    }
+  )
+
+  logger.info(
+    `Populated page fields ${pageFieldKeys.toString()} on form ID ${formId}`
+  )
+}
+
+/**
+ * Adds field to component in a page where the field is missing
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string} componentName
+ * @param {{id?: string}} componentFields
+ * @param {ClientSession} session
+ * @param {State} [state]
+ */
+export async function addComponentFieldByName(
+  formId,
+  pageId,
+  componentName,
+  componentFields,
+  session,
+  state = DRAFT
+) {
+  if (state === LIVE) {
+    throw Boom.badRequest(
+      `Cannot update component fields on a live form - ${formId}`
+    )
+  }
+
+  const componentFieldKeys = Object.keys(componentFields)
+
+  logger.info(
+    `Populating component fields ${componentFieldKeys.toString()} on form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  /**
+   * @type {{ 'draft.pages.$[pageId].components.$[component].id'?: string; }}
+   */
+  const fieldsToSet = {}
+
+  const { id } = componentFields
+
+  if (id) {
+    fieldsToSet['draft.pages.$[pageId].components.$[component].id'] = id
+  }
+
+  if (!componentFieldKeys.length) {
+    logger.info(`No page fields populated on form ID ${formId}`)
+    return
+  }
+
+  /**
+   * @type {{ "pageId.id"?: string, "component.id"?: { $exists: false }, "component.name"?: string }[]}
+   */
+  const arrayFilters = [
+    { 'pageId.id': pageId },
+    ...componentFieldKeys.map((key) => ({
+      [`component.${key}`]: { $exists: false },
+      'component.name': componentName
+    }))
+  ]
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      'draft.pages.id': pageId,
+      'draft.pages.components.name': componentName
+    },
+    {
+      $set: fieldsToSet
+    },
+    {
+      arrayFilters,
+      session
+    }
+  )
+
+  logger.info(
+    `Populated component fields ${componentFieldKeys.toString()} on form ID ${formId}`
+  )
+}
+/**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
  */

@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import {
   ControllerType,
   hasComponents,
@@ -5,7 +7,6 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
-import { v4 as uuidV4 } from 'uuid'
 
 import { db } from '~/src/mongo.js'
 
@@ -105,10 +106,62 @@ export function populateComponentIds(pageWithoutComponentIds) {
       }
       return {
         ...component,
-        id: uuidV4()
+        id: randomUUID()
       }
     })
   }
+}
+
+/**
+ * Finds if a component is found without an id
+ * @param {Page} page
+ */
+export function pageHasComponentWithoutId(page) {
+  if (!hasComponents(page)) {
+    return false
+  }
+  return page.components.some((component) => !component.id)
+}
+
+/**
+ * Traverses pages and component and returns true if a component exists without an id
+ * @param {FormDefinition} definition
+ */
+export function definitionHasComponentWithoutId(definition) {
+  return definition.pages.some((page) => pageHasComponentWithoutId(page))
+}
+
+/**
+ * Traverse components in page and return list of components without an id
+ * @param {Page} page
+ * @param {string} pageId
+ * @returns {{ pageId: string, componentName: string }[]}
+ */
+export function findPageComponentsWithoutIds(page, pageId) {
+  if (!hasComponents(page)) {
+    return []
+  }
+  return page.components.reduce((componentsWithoutIds, component) => {
+    if (!component.id) {
+      return [
+        ...componentsWithoutIds,
+        { pageId, componentName: component.name }
+      ]
+    }
+
+    return componentsWithoutIds
+  }, /** @type {{ pageId: string, componentName: string }[]} */ ([]))
+}
+
+/**
+ * Returns a list of components found without an id in a form definition
+ * @param {FormDefinition} formDefinition
+ * @returns {{ pageId: string, componentName: string }[]}
+ */
+export function findComponentsWithoutIds(formDefinition) {
+  return formDefinition.pages.flatMap((page) =>
+    'id' in page && !!page.id ? findPageComponentsWithoutIds(page, page.id) : []
+  )
 }
 
 /**
