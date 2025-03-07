@@ -1,6 +1,7 @@
+import { randomUUID } from 'crypto'
+
 import { ControllerType, Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
-import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -96,7 +97,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
  */
 const createPageWithId = (pageWithoutId) => ({
   ...pageWithoutId,
-  id: uuidV4().toString()
+  id: randomUUID()
 })
 
 /**

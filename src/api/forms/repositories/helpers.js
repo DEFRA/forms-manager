@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import {
   ControllerType,
   hasComponents,
@@ -5,7 +7,6 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
-import { v4 as uuidV4 } from 'uuid'
 
 import { db } from '~/src/mongo.js'
 
@@ -105,7 +106,7 @@ export function populateComponentIds(pageWithoutComponentIds) {
       }
       return {
         ...component,
-        id: uuidV4()
+        id: randomUUID()
       }
     })
   }
