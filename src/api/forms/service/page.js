@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 
-import { Engine } from '@defra/forms-model'
+import { ControllerType, Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
