@@ -97,7 +97,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
  */
 const createPageWithId = (pageWithoutId) => ({
   ...pageWithoutId,
-  id: randomUUID().toString()
+  id: randomUUID()
 })
 
 /**
