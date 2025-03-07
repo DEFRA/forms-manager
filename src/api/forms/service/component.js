@@ -1,5 +1,6 @@
+import { randomUUID } from 'crypto'
+
 import Boom from '@hapi/boom'
-import { v4 as uuidV4 } from 'uuid'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -21,7 +22,7 @@ import { client } from '~/src/mongo.js'
 const addIdToComponent = (component) =>
   /** @type {ComponentDef} */ ({
     ...component,
-    id: uuidV4()
+    id: randomUUID()
   })
 
 /**
