@@ -35,7 +35,7 @@ export const addIdToSummary = (summaryPage) => ({
  */
 const createPageWithId = (pageWithoutId) => ({
   ...pageWithoutId,
-  id: randomUUID().toString()
+  id: randomUUID()
 })
 
 /**
