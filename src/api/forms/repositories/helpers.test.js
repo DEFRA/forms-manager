@@ -1,3 +1,5 @@
+import { Engine } from '@defra/forms-model'
+
 import {
   buildDefinition,
   buildQuestionPage,
@@ -13,6 +15,7 @@ import {
   findPageComponentsWithoutIds,
   pageHasComponentWithoutId,
   populateComponentIds,
+  populateDefinitionIds,
   summaryHelper
 } from '~/src/api/forms/repositories/helpers.js'
 
@@ -172,6 +175,106 @@ describe('repository helpers', () => {
     })
   })
 
+  describe('populateDefinitionIds', () => {
+    const componentOne = buildTextFieldComponent({
+      id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
+      name: 'CwAid1'
+    })
+    const componentTwo = buildTextFieldComponent({
+      id: '52e34be1-a528-4e10-a5eb-06aed317fb7f',
+      name: 'CwAid2'
+    })
+    const componentOneNoId = buildTextFieldComponent({
+      ...componentOne,
+      id: undefined
+    })
+    const componentTwoNoId = buildTextFieldComponent({
+      ...componentTwo
+    })
+    delete componentTwoNoId.id
+
+    const pageOne = buildQuestionPage({
+      id: '73cf34ee-f53a-4159-9eef-b0286fd81934',
+      components: [
+        buildTextFieldComponent({
+          id: '1c61fa1f-a8dc-463c-ade0-13aa7cbf4960'
+        })
+      ]
+    })
+
+    const pageTwo = buildQuestionPage({
+      id: 'c7766963-fd9d-4ad9-90a7-88b0ef856b76',
+      title: 'Page two',
+      path: '/path-two',
+      components: [componentOne, componentTwo]
+    })
+
+    const pageOneUndefinedId = buildQuestionPage({
+      ...pageOne,
+      id: undefined
+    })
+    const pageTwoNoIds = buildQuestionPage({
+      ...pageTwo,
+      components: [componentOneNoId, componentTwoNoId]
+    })
+    delete pageTwoNoIds.id
+    const expectedDefintion = buildDefinition({
+      engine: Engine.V1,
+      pages: [pageOne, pageTwo, summaryPageWithoutComponents],
+      sections: [{ hideTitle: false, name: 'section', title: 'Section title' }]
+    })
+
+    it('should add page and component ids if they are missing', () => {
+      const definition = buildDefinition({
+        pages: [pageOneUndefinedId, pageTwoNoIds, summaryPageWithoutComponents],
+        sections: [
+          { hideTitle: false, name: 'section', title: 'Section title' }
+        ]
+      })
+
+      const pages = /** @type {[PageQuestion, PageQuestion, Page]} */ (
+        expectedDefintion.pages
+      )
+
+      const components = /** @type {[ComponentDef, ComponentDef]} */ (
+        pages[1].components
+      )
+
+      expect(populateDefinitionIds(definition)).toMatchObject({
+        ...expectedDefintion,
+        pages: [
+          {
+            ...pages[0],
+            id: expect.any(String)
+          },
+          {
+            ...pages[1],
+            id: expect.any(String),
+            components: [
+              {
+                ...components[0],
+                id: expect.any(String)
+              },
+              {
+                ...components[1],
+                id: expect.any(String)
+              }
+            ]
+          },
+          {
+            ...pages[2],
+            id: expect.any(String)
+          }
+        ]
+      })
+    })
+    it('should not perform any changes if component and page ids exist', () => {
+      expect(populateDefinitionIds(expectedDefintion)).toMatchObject(
+        expectedDefintion
+      )
+    })
+  })
+
   describe('component checks', () => {
     const componentWithoutAnId2 = buildTextFieldComponent({
       id: undefined,
@@ -312,5 +415,5 @@ describe('repository helpers', () => {
 })
 
 /**
- * @import { PageQuestion } from '@defra/forms-model'
+ * @import { PageQuestion, Page, ComponentDef } from '@defra/forms-model'
  */

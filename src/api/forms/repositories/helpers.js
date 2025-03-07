@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 
 import {
   ControllerType,
+  formDefinitionV2PayloadSchema,
   hasComponents,
   hasComponentsEvenIfNoNext
 } from '@defra/forms-model'
@@ -165,6 +166,24 @@ export function findComponentsWithoutIds(formDefinition) {
 }
 
 /**
+ * Adds ids to all the pages and components where they are missing
+ * @param {FormDefinition} definition
+ */
+export function populateDefinitionIds(definition) {
+  const validatedFormDefinition =
+    /** @type {{ error?: ValidationError; value: FormDefinition }} */
+    (formDefinitionV2PayloadSchema.validate(definition))
+  const { error, value } = validatedFormDefinition
+
+  if (error) {
+    throw error
+  }
+
+  return value
+}
+
+/**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, PageStart, PageQuestion, PageTerminal, PageRepeat, PageFileUpload} from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
+ * @import { ValidationError } from 'joi'
  */
