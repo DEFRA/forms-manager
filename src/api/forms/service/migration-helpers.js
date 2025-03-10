@@ -9,7 +9,12 @@ import {
 
 /**
  * @param {FormDefinition} definition
- * @returns {{readonly summary: PageSummary | undefined, shouldRepositionSummary: boolean, summaryExists: boolean}}
+ * @returns {{
+ *  readonly summary: PageSummary | undefined;
+ *  shouldRepositionSummary: boolean;
+ *  summaryExists: boolean;
+ *  indexOf: number;
+ * }}
  */
 export function summaryHelper(definition) {
   const lastIndex = definition.pages.length - 1
@@ -38,8 +43,6 @@ export function summaryHelper(definition) {
  * @returns {Page[]}
  */
 function removeSummary(pages, indexOf) {
-  // toSpliced is not handled correctly by typescript-eslint
-  // eslint-disable-next-line  @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call
   return /** @type {Page[]} */ (pages.toSpliced(indexOf, 1))
 }
 

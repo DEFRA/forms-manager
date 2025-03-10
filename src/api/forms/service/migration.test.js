@@ -1,16 +1,18 @@
-import { ControllerType } from '@defra/forms-model'
+import { ControllerType, Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
 import {
   buildDefinition,
   buildQuestionPage,
-  buildSummaryPage
+  buildSummaryPage,
+  buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as migrationHelperStubs from '~/src/api/forms/service/migration-helpers.js'
 import {
-  addPageIdsPipeline,
+  migrateDefinitionToV2,
   repositionSummaryPipeline
 } from '~/src/api/forms/service/migration.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -28,8 +30,59 @@ const summaryPage = buildSummaryPage()
 
 describe('migration', () => {
   const id = '661e4ca5039739ef2902b214'
+  const v4Id = '083f2f65-7c1d-48e0-a195-3f6b0836ad08'
   // const pageId = 'ffefd409-f3f4-49fe-882e-6e89f44631b1'
   const dateUsedInFakeTime = new Date('2020-01-01')
+  const defaultAudit = {
+    'draft.updatedAt': dateUsedInFakeTime,
+    'draft.updatedBy': author,
+    updatedAt: dateUsedInFakeTime,
+    updatedBy: author
+  }
+
+  const summaryWithoutId = buildSummaryPage()
+  delete summaryWithoutId.id
+  const summaryWithId = buildSummaryPage({
+    id: v4Id
+  })
+  const componentWithoutId = buildTextFieldComponent({
+    id: undefined,
+    name: 'CWId'
+  })
+  const componentWithId = buildTextFieldComponent({
+    ...componentWithoutId,
+    id: '17f791b5-ecef-40a3-a4c5-e1865f7f3aea'
+  })
+  const questionPageWithoutId = buildQuestionPage({
+    components: [componentWithoutId]
+  })
+  delete questionPageWithoutId.id
+
+  const questionPageWithId = buildQuestionPage({
+    ...questionPageWithoutId,
+    id: '20d966ab-b926-449a-ad86-9236d44980ab'
+  })
+  const questionPageWithIdAndComponentIds = buildQuestionPage({
+    ...questionPageWithId,
+    components: [componentWithId]
+  })
+
+  const versionOne = buildDefinition({
+    pages: [summaryWithoutId, questionPageWithoutId],
+    engine: Engine.V1
+  })
+  const versionTwo = buildDefinition({
+    pages: [questionPageWithIdAndComponentIds, summaryWithId],
+    engine: Engine.V2
+  })
+
+  const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+  const expectMetadataUpdate = () => {
+    expect(dbMetadataSpy).toHaveBeenCalled()
+    const [formId, updateFilter] = dbMetadataSpy.mock.calls[0]
+    expect(formId).toBe(id)
+    expect(updateFilter.$set).toEqual(defaultAudit)
+  }
 
   beforeAll(async () => {
     await prepareDb(pino())
@@ -163,57 +216,48 @@ describe('migration', () => {
     })
   })
 
-  describe('addPageIdsPipeline', () => {
-    it('should add ids to each of the pages where they are missing', async () => {
-      const pageOneWithoutId = buildQuestionPage({
-        path: '/page-one'
-      })
-      delete pageOneWithoutId.id
-      const pageTwoWithId = buildQuestionPage({
-        path: '/path-two'
-      })
-      const summaryPageWithoutId = buildSummaryPage({
-        path: '/summary'
-      })
-      delete summaryPageWithoutId.id
+  describe('migrateDefinitionToV2', () => {
+    const getMock = jest
+      .mocked(formDefinition.get)
+      .mockResolvedValue(versionOne)
 
-      const definition = buildDefinition({
-        pages: [pageOneWithoutId, pageTwoWithId, summaryPageWithoutId]
-      })
+    it('should migrate a v1 definition to v2', async () => {
+      const upsertMock = jest.mocked(formDefinition.upsert)
+      jest
+        .spyOn(migrationHelperStubs, 'migrateToV2')
+        .mockReturnValueOnce(versionTwo)
 
-      jest.mocked(formDefinition.get).mockResolvedValue(definition)
+      getMock.mockResolvedValueOnce(versionOne)
 
-      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
-      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPageFieldByPath')
+      const updatedDefinition = await migrateDefinitionToV2(id, author)
 
-      await addPageIdsPipeline(id, author)
+      expect(upsertMock).toHaveBeenCalled()
+      const [finalExpectedId, finalExpectedDefinition] =
+        upsertMock.mock.calls[0]
 
-      expect(dbDefinitionSpy).toHaveBeenCalledTimes(2)
-      expect(dbMetadataSpy).toHaveBeenCalledTimes(1)
+      expect(finalExpectedId).toBe(id)
+      expect(finalExpectedDefinition).toEqual(versionTwo)
 
-      const [formId1, path1, fieldsToUpdate1] = dbDefinitionSpy.mock.calls[0]
-      const [formId2, path2, fieldsToUpdate2] = dbDefinitionSpy.mock.calls[1]
-      const [formId3, updateFilter] = dbMetadataSpy.mock.calls[0]
-
-      expect([formId1, formId2, formId3]).toEqual([id, id, id])
-      expect([path1, path2]).toEqual(['/page-one', '/summary'])
-      expect(fieldsToUpdate1).toMatchObject({ id: expect.any(String) })
-      expect(fieldsToUpdate2).toMatchObject({ id: expect.any(String) })
-
-      expect(updateFilter.$set).toEqual({
-        'draft.updatedAt': dateUsedInFakeTime,
-        'draft.updatedBy': author,
-        updatedAt: dateUsedInFakeTime,
-        updatedBy: author
-      })
+      expectMetadataUpdate()
+      expect(updatedDefinition).toEqual(versionTwo)
     })
 
-    it('should surface any errors', async () => {
+    it('should do nothing if definition is v2 already', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValue(versionTwo)
+      const definition = await migrateDefinitionToV2(id, author)
+      expect(definition).toEqual(versionTwo)
+      expect(formDefinition.get).toHaveBeenCalledTimes(1)
+      expect(formDefinition.upsert).not.toHaveBeenCalled()
+      expect(dbMetadataSpy).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors correctly', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValue(versionOne)
       jest
-        .spyOn(formDefinition, 'get')
-        .mockRejectedValueOnce(Boom.internal('any'))
-      await expect(addPageIdsPipeline(id, author)).rejects.toThrow(
-        Boom.internal('any')
+        .mocked(formDefinition.upsert)
+        .mockRejectedValueOnce(Boom.internal('err'))
+      await expect(migrateDefinitionToV2(id, author)).rejects.toThrow(
+        Boom.internal('err')
       )
     })
   })

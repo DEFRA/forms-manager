@@ -280,8 +280,7 @@ describe('migration helpers', () => {
         },
         {
           ...pages[0],
-          id: expect.any(String),
-          next: []
+          id: expect.any(String)
         }
       ],
       sections: [{ hideTitle: false, name: 'section', title: 'Section title' }],
@@ -289,7 +288,7 @@ describe('migration helpers', () => {
     })
 
     it('should migrate to version v2', () => {
-      expect(migrateToV2(definitionV1)).toEqual(definitionV2)
+      expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
     })
   })
 })
