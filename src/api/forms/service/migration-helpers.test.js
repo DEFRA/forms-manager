@@ -11,7 +11,6 @@ import {
 import {
   migrateToV2,
   populateComponentIds,
-  populateDefinitionIds,
   repositionSummary,
   summaryHelper
 } from '~/src/api/forms/service/migration-helpers.js'
@@ -70,11 +69,6 @@ describe('migration helpers', () => {
     components: [componentOneNoId, componentTwoNoId]
   })
   delete pageTwoNoIds.id
-  const formDefinitionV1 = buildDefinition({
-    engine: Engine.V1,
-    pages: [pageOne, pageTwo, summaryPageWithoutComponents],
-    sections: [{ hideTitle: false, name: 'section', title: 'Section title' }]
-  })
 
   describe('summaryHelper', () => {
     it('should push the summary to the end if it not in the correct place', () => {
@@ -191,64 +185,6 @@ describe('migration helpers', () => {
     })
   })
 
-  describe('populateDefinitionIds', () => {
-    it('should add page and component ids if they are missing', () => {
-      const definition = buildDefinition({
-        pages: [pageOneUndefinedId, pageTwoNoIds, summaryPageWithoutComponents],
-        sections: [
-          { hideTitle: false, name: 'section', title: 'Section title' }
-        ]
-      })
-
-      const pages = /** @type {[PageQuestion, PageQuestion, Page]} */ (
-        formDefinitionV1.pages
-      )
-
-      const components = /** @type {[ComponentDef, ComponentDef]} */ (
-        pages[1].components
-      )
-
-      expect(populateDefinitionIds(definition)).toMatchObject({
-        ...formDefinitionV1,
-        pages: [
-          {
-            ...pages[0],
-            id: expect.any(String)
-          },
-          {
-            ...pages[1],
-            id: expect.any(String),
-            components: [
-              {
-                ...components[0],
-                id: expect.any(String)
-              },
-              {
-                ...components[1],
-                id: expect.any(String)
-              }
-            ]
-          },
-          {
-            ...pages[2],
-            id: expect.any(String)
-          }
-        ]
-      })
-    })
-    it('should not perform any changes if component and page ids exist', () => {
-      expect(populateDefinitionIds(formDefinitionV1)).toMatchObject(
-        formDefinitionV1
-      )
-    })
-    it('should throw if there is some error in validation', () => {
-      // @ts-expect-error undefined is not a valid formDefinition
-      expect(() => populateDefinitionIds(undefined)).toThrow(
-        new ValidationError('"value" is required', [], undefined)
-      )
-    })
-  })
-
   describe('migrateToV2', () => {
     const pages = /** @type {[Page, PageQuestion, PageQuestion]} */ ([
       summaryPageWithoutComponents,
@@ -296,6 +232,59 @@ describe('migration helpers', () => {
 
     it('should migrate to version v2', () => {
       expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
+    })
+
+    it('should throw if there is some error in validation', () => {
+      // @ts-expect-error undefined is not a valid formDefinition
+      expect(() => migrateToV2(undefined)).toThrow(
+        new ValidationError('"value" is required', [], undefined)
+      )
+    })
+
+    it('should not perform any changes if component and page ids exist', () => {
+      const definition = buildDefinition({
+        pages: [pageOneUndefinedId, pageTwoNoIds, summaryPageWithoutComponents],
+        sections: [
+          { hideTitle: false, name: 'section', title: 'Section title' }
+        ]
+      })
+
+      const pages = /** @type {[PageQuestion, PageQuestion, Page]} */ (
+        definition.pages
+      )
+
+      const components = /** @type {[ComponentDef, ComponentDef]} */ (
+        pages[1].components
+      )
+
+      expect(migrateToV2(definition)).toMatchObject({
+        ...definition,
+        engine: Engine.V2,
+        pages: [
+          {
+            ...pages[0],
+            id: expect.any(String)
+          },
+          {
+            ...pages[1],
+            id: expect.any(String),
+            components: [
+              {
+                ...components[0],
+                id: expect.any(String)
+              },
+              {
+                ...components[1],
+                id: expect.any(String)
+              }
+            ]
+          },
+          {
+            ...pages[2],
+            id: expect.any(String)
+          }
+        ]
+      })
     })
   })
 })

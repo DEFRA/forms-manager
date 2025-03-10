@@ -94,10 +94,11 @@ export function populateComponentIds(pageWithoutComponentIds) {
 }
 
 /**
- * Adds ids to all the pages and components where they are missing
+ * Migrates a v1 definition to v2
  * @param {FormDefinition} definition
+ * @returns {FormDefinition}
  */
-export function populateDefinitionIds(definition) {
+export function migrateToV2(definition) {
   const validatedFormDefinition =
     /** @type {{ error?: ValidationError; value: FormDefinition }} */
     (formDefinitionV2PayloadSchema.validate(definition))
@@ -107,27 +108,9 @@ export function populateDefinitionIds(definition) {
     throw error
   }
 
-  return value
-}
+  value.engine = Engine.V2
 
-/**
- * Helper function to set the engine to v2 - use only in migrateToV2
- * @param {FormDefinition} definition
- * @returns {FormDefinition}
- */
-function setEngineToV2(definition) {
-  return {
-    ...definition,
-    engine: Engine.V2
-  }
-}
-
-/**
- * Migrates a v1 definition to v2
- * @param {FormDefinition} definition
- */
-export function migrateToV2(definition) {
-  return setEngineToV2(populateDefinitionIds(repositionSummary(definition)))
+  return repositionSummary(value)
 }
 
 /**
