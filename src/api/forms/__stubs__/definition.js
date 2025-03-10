@@ -49,15 +49,6 @@ export function buildStatusPage(partialStatusPage) {
 }
 
 /**
- * Creates a page array with a summary at the end
- * @param {Page[]} pages
- * @returns {Page[]}
- */
-export function buildPages(pages) {
-  return /** @type {Page[]} */ [...pages, buildSummaryPage({})]
-}
-
-/**
  * Builds a form definition
  * @param {Partial<FormDefinition>} partialDefinition
  * @returns {FormDefinition}
