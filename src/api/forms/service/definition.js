@@ -235,8 +235,7 @@ export async function createDraftFromLive(formId, author) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
- * @import { WithId, ClientSession } from 'mongodb'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
+ * @import { ClientSession } from 'mongodb'
  * @import { State } from '~/src/api/forms/service/shared.js'
  */

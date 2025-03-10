@@ -120,5 +120,5 @@ export async function migrateDefinitionToV2(formId, author) {
 // TODO: add migrate to V1
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, Page, PageSummary } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, PageSummary } from '@defra/forms-model'
  */

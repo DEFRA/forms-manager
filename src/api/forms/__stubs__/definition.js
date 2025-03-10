@@ -78,6 +78,5 @@ export function buildTextFieldComponent(partialTextField = {}) {
   }
 }
 /**
- * @import { FormDefinition, Page, PageSummary, PageQuestion, PageStatus, TextFieldComponent } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
+ * @import { FormDefinition, PageSummary, PageQuestion, PageStatus, TextFieldComponent } from '@defra/forms-model'
  */

@@ -226,7 +226,3 @@ describe('repository helpers', () => {
     })
   })
 })
-
-/**
- * @import { PageQuestion, Page, ComponentDef } from '@defra/forms-model'
- */

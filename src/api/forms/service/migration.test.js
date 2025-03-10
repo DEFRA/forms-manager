@@ -262,7 +262,3 @@ describe('migration', () => {
     })
   })
 })
-
-/**
- * @import { WithId } from 'mongodb'
- */

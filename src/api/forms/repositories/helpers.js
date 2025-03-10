@@ -113,7 +113,6 @@ export function findComponentsWithoutIds(formDefinition) {
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary, ComponentDef, PageStart, PageQuestion, PageTerminal, PageRepeat, PageFileUpload} from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
- * @import { ValidationError } from 'joi'
  */
