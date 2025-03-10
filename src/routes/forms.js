@@ -25,6 +25,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
   patchFieldsOnDraftDefinitionPage
@@ -36,6 +37,7 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
+  migrateDefinitionParamSchema,
   pageByIdSchema,
   patchPageSchema,
   prependQuerySchema,
@@ -220,6 +222,24 @@ export default [
     options: {
       validate: {
         payload: updateFormDefinitionSchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/migrate/{version}',
+    /**
+     * @param {MigrateDraftFormRequest} request
+     */
+    handler(request) {
+      const { auth, params } = request
+      const author = getAuthor(auth.credentials.user)
+
+      return migrateDefinitionToV2(params.id, author)
+    },
+    options: {
+      validate: {
+        params: migrateDefinitionParamSchema
       }
     }
   },
@@ -418,6 +438,6 @@ export default [
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

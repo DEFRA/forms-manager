@@ -4,9 +4,9 @@ import { ObjectId } from 'mongodb'
 
 import {
   findComponent,
-  populateComponentIds,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
+import { populateComponentIds } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -545,7 +545,6 @@ export async function updatePageFields(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
   )
 }
-
 /**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'

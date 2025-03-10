@@ -49,15 +49,6 @@ export function buildStatusPage(partialStatusPage) {
 }
 
 /**
- * Creates a page array with a summary at the end
- * @param {Page[]} pages
- * @returns {Page[]}
- */
-export function buildPages(pages) {
-  return /** @type {Page[]} */ [...pages, buildSummaryPage({})]
-}
-
-/**
  * Builds a form definition
  * @param {Partial<FormDefinition>} partialDefinition
  * @returns {FormDefinition}
@@ -76,6 +67,7 @@ export function buildDefinition(partialDefinition) {
  */
 export function buildTextFieldComponent(partialTextField = {}) {
   return /** @satisfies {TextFieldComponent} */ {
+    id: '407dd0d7-cce9-4f43-8e1f-7d89cb698875',
     name: 'TextField',
     title: 'Text field',
     type: ComponentType.TextField,
@@ -86,6 +78,5 @@ export function buildTextFieldComponent(partialTextField = {}) {
   }
 }
 /**
- * @import { FormDefinition, Page, PageSummary, PageQuestion, PageStatus, TextFieldComponent } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
+ * @import { FormDefinition, PageSummary, PageQuestion, PageStatus, TextFieldComponent } from '@defra/forms-model'
  */

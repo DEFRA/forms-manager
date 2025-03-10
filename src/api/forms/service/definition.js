@@ -31,6 +31,7 @@ export async function listForms(options) {
  * @param {ClientSession | undefined} [session]
  */
 export function getFormDefinition(formId, state = DRAFT, session = undefined) {
+  // TODO: if form def is v1 and target v2 - use decorator
   return formDefinition.get(formId, state, session)
 }
 
@@ -234,8 +235,7 @@ export async function createDraftFromLive(formId, author) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
- * @import { WithId, ClientSession } from 'mongodb'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
+ * @import { ClientSession } from 'mongodb'
  * @import { State } from '~/src/api/forms/service/shared.js'
  */

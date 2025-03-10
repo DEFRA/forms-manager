@@ -1,4 +1,3 @@
-import { ControllerType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
@@ -16,8 +15,7 @@ import {
 import {
   createPageOnDraftDefinition,
   getFormDefinitionPage,
-  patchFieldsOnDraftDefinitionPage,
-  repositionSummaryPipeline
+  patchFieldsOnDraftDefinitionPage
 } from '~/src/api/forms/service/page.js'
 import { empty as emptyFormWithSummary } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -46,134 +44,6 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
-  })
-
-  describe('repositionSummaryPipeline', () => {
-    const summary = buildSummaryPage()
-
-    it('should reposition summary if it exists but is not at the end', async () => {
-      const initialSummary = buildSummaryPage()
-      delete initialSummary.id
-
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
-
-      const formDefinition1 = buildDefinition({
-        pages: [initialSummary, buildQuestionPage()]
-      })
-
-      const returnedSummary = await repositionSummaryPipeline(
-        id,
-        formDefinition1,
-        author
-      )
-
-      expect(removeMatchingPagesSpy).toHaveBeenCalled()
-      expect(addPageAtPositionSpy).toHaveBeenCalled()
-      expect(formMetadataUpdateSpy).toHaveBeenCalled()
-
-      const [formId1, matchCriteria, , state] =
-        removeMatchingPagesSpy.mock.calls[0]
-      const [formId2, calledSummary, , options] =
-        addPageAtPositionSpy.mock.calls[0]
-      const [formId3, updateFilter] = formMetadataUpdateSpy.mock.calls[0]
-
-      expect(formId1).toBe(id)
-      expect(formId2).toBe(id)
-      expect(formId3).toBe(id)
-      expect(matchCriteria).toEqual({ controller: ControllerType.Summary })
-      expect(calledSummary).toEqual(summary)
-      expect(state).toBeUndefined()
-      expect(options).toEqual({})
-      expect(updateFilter.$set).toEqual({
-        'draft.updatedAt': dateUsedInFakeTime,
-        'draft.updatedBy': author,
-        updatedAt: dateUsedInFakeTime,
-        updatedBy: author
-      })
-      expect(returnedSummary.summary).toEqual(summary)
-    })
-
-    it('should not reposition the summary if no pages exist', async () => {
-      const formDefinition1 = buildDefinition({
-        pages: []
-      })
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
-      await repositionSummaryPipeline(id, formDefinition1, author)
-
-      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
-      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
-      expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
-    })
-
-    it('should not reposition the summary if summary is at the end', async () => {
-      const formDefinition1 = buildDefinition({
-        pages: [buildQuestionPage(), summaryPage]
-      })
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
-      await repositionSummaryPipeline(id, formDefinition1, author)
-
-      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
-      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
-      expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
-    })
-
-    it('should not reposition the summary if pages do not contain a summary', async () => {
-      const formDefinition1 = buildDefinition({
-        pages: [buildQuestionPage()]
-      })
-
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
-      await repositionSummaryPipeline(id, formDefinition1, author)
-
-      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
-      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
-      expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
-    })
-
-    it('should surface errors correctly', async () => {
-      jest
-        .mocked(formDefinition.addPageAtPosition)
-        .mockRejectedValueOnce(Boom.badRequest('Error'))
-
-      const formDefinition1 = buildDefinition({
-        pages: [summary, buildQuestionPage()]
-      })
-      await expect(
-        repositionSummaryPipeline('123', formDefinition1, author)
-      ).rejects.toThrow(Boom.badRequest('Error'))
-    })
   })
 
   describe('getFormDefinitionPage', () => {
@@ -408,8 +278,3 @@ describe('Forms service', () => {
     })
   })
 })
-
-/**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions, PatchPageFields } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
- */

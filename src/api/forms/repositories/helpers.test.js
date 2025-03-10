@@ -7,9 +7,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import {
   findComponent,
-  findPage,
-  populateComponentIds,
-  summaryHelper
+  findPage
 } from '~/src/api/forms/repositories/helpers.js'
 
 describe('repository helpers', () => {
@@ -21,7 +19,6 @@ describe('repository helpers', () => {
   const component = buildTextFieldComponent({
     id: componentId
   })
-  const questionPage = buildQuestionPage()
   const summary = buildSummaryPage()
 
   const questionPageWithComponent = buildQuestionPage({
@@ -36,51 +33,10 @@ describe('repository helpers', () => {
   })
   const statusPage = buildStatusPage({})
 
-  describe('summaryHelper', () => {
-    it('should push the summary to the end if it not in the correct place', () => {
-      const definition = buildDefinition({
-        pages: [summary, questionPage]
-      })
-      expect(summaryHelper(definition)).toEqual({
-        shouldRepositionSummary: true,
-        summaryExists: true,
-        summary
-      })
-    })
-
-    it('should not push summary to the end if it is in the correct place', () => {
-      const definition = buildDefinition({
-        pages: [questionPage, summary]
-      })
-      expect(summaryHelper(definition)).toEqual({
-        shouldRepositionSummary: false,
-        summaryExists: true,
-        summary
-      })
-    })
-
-    it('should not push summary to the end if no pages', () => {
-      const definition = buildDefinition({
-        pages: []
-      })
-      expect(summaryHelper(definition)).toEqual({
-        shouldRepositionSummary: false,
-        summaryExists: false,
-        summary: undefined
-      })
-    })
-
-    it('should not push summary to the end if summary page does not exist', () => {
-      const definition = buildDefinition({
-        pages: [questionPage]
-      })
-      expect(summaryHelper(definition)).toEqual({
-        shouldRepositionSummary: false,
-        summaryExists: false,
-        summary: undefined
-      })
-    })
+  const componentWithoutAnId = buildTextFieldComponent({
+    name: 'CwAid'
   })
+  delete componentWithoutAnId.id
 
   describe('findPage', () => {
     it('should find page if page exists in definition', () => {
@@ -127,43 +83,4 @@ describe('repository helpers', () => {
       expect(findComponent(definition, pageId, componentId)).toEqual(component)
     })
   })
-
-  describe('populateComponentIds', () => {
-    it('should return unchanged if no components in page', () => {
-      const testPage = buildQuestionPage()
-      const page = populateComponentIds(testPage)
-      expect(page).toEqual(testPage)
-    })
-
-    it('should return unchanged if page is not one with components', () => {
-      const testPage = buildStatusPage({})
-      const page = populateComponentIds(testPage)
-      expect(page).toEqual(testPage)
-    })
-
-    it('should return unchanged if page has a component but component already has id', () => {
-      const testPage = buildQuestionPage({
-        components: [
-          buildTextFieldComponent({
-            id: 'f0449907-e3fe-4c9e-a954-dc4f8ae778f8'
-          })
-        ]
-      })
-      const page = populateComponentIds(testPage)
-      expect(page).toEqual(testPage)
-    })
-
-    it('should return populated if page has a component where component has no id', () => {
-      const testPage = buildQuestionPage({
-        components: [buildTextFieldComponent()]
-      })
-      expect(testPage.components[0].id).toBeUndefined()
-      const page = /** @type {PageQuestion} */ (populateComponentIds(testPage))
-      expect(page.components[0].id).toBeDefined()
-    })
-  })
 })
-
-/**
- * @import { PageQuestion } from '@defra/forms-model'
- */
