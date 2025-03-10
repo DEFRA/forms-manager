@@ -2,6 +2,11 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
+import {
+  buildDefinition,
+  buildQuestionPage,
+  buildSummaryPage
+} from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -19,6 +24,7 @@ import {
   createLiveFromDraft,
   getFormDefinition,
   listForms,
+  reorderDraftFormDefinitionPages,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
 import {
@@ -48,8 +54,23 @@ describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
   const dateUsedInFakeTime = new Date('2020-01-01')
+  const defaultAudit = {
+    'draft.updatedAt': dateUsedInFakeTime,
+    'draft.updatedBy': author,
+    updatedAt: dateUsedInFakeTime,
+    updatedBy: author
+  }
 
   let definition = emptyFormWithSummary()
+
+  const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+  const expectMetadataUpdate = () => {
+    expect(dbMetadataSpy).toHaveBeenCalled()
+    const [formId, updateFilter] = dbMetadataSpy.mock.calls[0]
+    expect(formId).toBe(id)
+    expect(updateFilter.$set).toEqual(defaultAudit)
+  }
 
   beforeAll(async () => {
     await prepareDb(pino())
@@ -962,6 +983,61 @@ describe('Forms service', () => {
       ).rejects.toThrow(
         Boom.badRequest(`Form with ID '123' has no draft state`)
       )
+    })
+  })
+
+  describe('reorderDraftFormDefinitionPages', () => {
+    const pageOneId = 'e6511b1c-c813-43d7-92c4-d84ba35d5f62'
+    const pageTwoId = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+    const summaryPageId = 'b90e6453-d4c1-46a4-a233-3dbee566c79e'
+
+    const pageOne = buildQuestionPage({
+      id: pageOneId,
+      title: 'Page One'
+    })
+    const pageTwo = buildQuestionPage({
+      id: pageTwoId,
+      title: 'Page Two'
+    })
+    const summaryPage = buildSummaryPage({
+      id: summaryPageId
+    })
+
+    const definition = buildDefinition({
+      pages: [pageTwo, pageOne, summaryPage]
+    })
+
+    beforeEach(() => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+    })
+
+    it('should reorder the pages', async () => {
+      const expectedDefinition = buildDefinition({
+        pages: [pageOne, pageTwo, summaryPage]
+      })
+      const orderList = [pageOneId, pageOneId]
+      const result = await reorderDraftFormDefinitionPages(
+        id,
+        orderList,
+        author
+      )
+
+      const [, upsertedDefinition] = jest.mocked(formDefinition.upsert).mock
+        .calls[0]
+      expect(upsertedDefinition).toEqual(expectedDefinition)
+      expect(result).toEqual(expectedDefinition)
+      expectMetadataUpdate()
+    })
+
+    it('should not do any updates if no order list is sent', async () => {
+      const returnedDefinition = await reorderDraftFormDefinitionPages(
+        id,
+        [],
+        author
+      )
+      expect(returnedDefinition).toEqual(definition)
+      expect(formDefinition.upsert).not.toHaveBeenCalled()
+      expect(formMetadata.update).not.toHaveBeenCalled()
     })
   })
 })
