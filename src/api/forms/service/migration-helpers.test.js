@@ -242,8 +242,9 @@ describe('migration helpers', () => {
       )
     })
     it('should throw if there is some error in validation', () => {
+      // @ts-expect-error undefined is not a valid formDefinition
       expect(() => populateDefinitionIds(undefined)).toThrow(
-        new ValidationError('"value" is required')
+        new ValidationError('"value" is required', [], undefined)
       )
     })
   })
