@@ -1,4 +1,5 @@
 import { Engine } from '@defra/forms-model'
+import { ValidationError } from 'joi'
 
 import {
   buildDefinition,
@@ -238,6 +239,11 @@ describe('migration helpers', () => {
     it('should not perform any changes if component and page ids exist', () => {
       expect(populateDefinitionIds(formDefinitionV1)).toMatchObject(
         formDefinitionV1
+      )
+    })
+    it('should throw if there is some error in validation', () => {
+      expect(() => populateDefinitionIds(undefined)).toThrow(
+        new ValidationError('"value" is required')
       )
     })
   })
