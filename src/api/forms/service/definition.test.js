@@ -1039,6 +1039,18 @@ describe('Forms service', () => {
       expect(formDefinition.upsert).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })
+
+    it('should surface errors', async () => {
+      const boomInternal = Boom.internal('Something went wrong')
+      jest.mocked(formDefinition.upsert).mockRejectedValueOnce(boomInternal)
+      await expect(
+        reorderDraftFormDefinitionPages(
+          id,
+          ['5a1c2ef7-ed4e-4ec7-9119-226fc3063bda'],
+          author
+        )
+      ).rejects.toThrow(boomInternal)
+    })
   })
 })
 
