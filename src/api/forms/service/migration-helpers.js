@@ -93,6 +93,20 @@ export function populateComponentIds(pageWithoutComponentIds) {
   }
 }
 
+const migrationSteps = [repositionSummary]
+
+/**
+ * Apply transformations to FormDefinition
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition} definition
+ */
+function applyMigrationSteps(definition) {
+  return migrationSteps.reduce(
+    (acc, transformation) => transformation(acc),
+    definition
+  )
+}
+
 /**
  * Migrates a v1 definition to v2
  * @param {FormDefinition} definition
@@ -108,9 +122,11 @@ export function migrateToV2(definition) {
     throw error
   }
 
-  value.engine = Engine.V2
+  const migratedDefinition = applyMigrationSteps(value)
 
-  return repositionSummary(value)
+  migratedDefinition.engine = Engine.V2
+
+  return migratedDefinition
 }
 
 /**
