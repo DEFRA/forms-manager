@@ -81,10 +81,7 @@ export function repositionSummary(definition) {
  */
 export function applyPageTitles(definition) {
   const changedPages = definition.pages.map((page) => {
-    if (
-      page.controller !== ControllerType.Summary &&
-      (!page.title || page.title === '')
-    ) {
+    if (page.controller !== ControllerType.Summary && !page.title) {
       return {
         ...page,
         title: hasComponents(page) ? page.components[0].title : ''
