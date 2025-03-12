@@ -1,4 +1,4 @@
-import { Engine } from '@defra/forms-model'
+import { ControllerType, Engine } from '@defra/forms-model'
 import { ValidationError } from 'joi'
 
 import {
@@ -9,6 +9,7 @@ import {
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import {
+  applyPageTitles,
   migrateToV2,
   populateComponentIds,
   repositionSummary,
@@ -287,8 +288,72 @@ describe('migration helpers', () => {
       })
     })
   })
+
+  describe('applyPageTitles', () => {
+    const pages = /** @type {[PageQuestion, PageQuestion, Page]} */ ([
+      pageOne,
+      pageTwoNoIds,
+      summaryPageWithoutComponents
+    ])
+
+    const definitionV1 = buildDefinition({
+      pages,
+      sections: [{ hideTitle: false, name: 'section', title: 'Section title' }],
+      engine: Engine.V1
+    })
+
+    const pageOneModel = /** @type {PageQuestion} */ (definitionV1.pages[0])
+
+    const pageTwoModel = /** @type {PageQuestion} */ (definitionV1.pages[1])
+
+    it('should add page titles from first component per page', () => {
+      pageOneModel.title = ''
+      pageOneModel.components[0].title = 'Text field page 1'
+      pageTwoModel.title = ''
+      pageTwoModel.components[0].title = 'Text field page 2'
+      const res = applyPageTitles(definitionV1)
+      expect(res.pages[0].title).toBe('Text field page 1')
+      expect(res.pages[1].title).toBe('Text field page 2')
+    })
+
+    it('should not add page titles if they already exist', () => {
+      pageOneModel.title = 'Page title 1'
+      pageOneModel.components[0].title = 'Text field page 1'
+      pageTwoModel.title = 'Page title 2'
+      pageTwoModel.components[0].title = 'Text field page 2'
+      const res = applyPageTitles(definitionV1)
+      expect(res.pages[0].title).toBe('Page title 1')
+      expect(res.pages[1].title).toBe('Page title 2')
+    })
+
+    it('should leave page title to be blank if no applicable values', () => {
+      pageOneModel.title = ''
+      pageOneModel.components[0].title = ''
+      pageTwoModel.title = ''
+      pageTwoModel.components[0].title = ''
+      const res = applyPageTitles(definitionV1)
+      expect(res.pages[0].title).toBe('')
+      expect(res.pages[1].title).toBe('')
+    })
+
+    it('should leave page title to be blank if no applicable components', () => {
+      definitionV1.pages[0] = /** @type {PageStatus} */ {
+        title: '',
+        path: '/status1',
+        controller: ControllerType.Status
+      }
+      definitionV1.pages[1] = /** @type {PageStatus} */ {
+        title: '',
+        path: '/status2',
+        controller: ControllerType.Status
+      }
+      const res = applyPageTitles(definitionV1)
+      expect(res.pages[0].title).toBe('')
+      expect(res.pages[1].title).toBe('')
+    })
+  })
 })
 
 /**
- * @import { PageQuestion, Page, ComponentDef } from '@defra/forms-model'
+ * @import { PageQuestion, Page, PageStatus, ComponentDef } from '@defra/forms-model'
  */

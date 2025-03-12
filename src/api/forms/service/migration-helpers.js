@@ -72,6 +72,22 @@ export function repositionSummary(definition) {
 }
 
 /**
+ * Applies page titles if they are missing
+ * @param {FormDefinition} definition
+ */
+export function applyPageTitles(definition) {
+  for (const page of definition.pages.filter(
+    (p) => p.controller !== ControllerType.Summary
+  )) {
+    if (!page.title || page.title === '') {
+      page.title = hasComponents(page) ? page.components[0].title : ''
+    }
+  }
+
+  return definition
+}
+
+/**
  * @param {Page} pageWithoutComponentIds
  */
 export function populateComponentIds(pageWithoutComponentIds) {
@@ -93,7 +109,7 @@ export function populateComponentIds(pageWithoutComponentIds) {
   }
 }
 
-const migrationSteps = [repositionSummary]
+const migrationSteps = [repositionSummary, applyPageTitles]
 
 /**
  * Apply transformations to FormDefinition
