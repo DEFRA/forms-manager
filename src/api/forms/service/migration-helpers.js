@@ -81,10 +81,7 @@ export function repositionSummary(definition) {
  */
 export function applyPageTitles(definition) {
   const changedPages = definition.pages.map((page) => {
-    if (
-      page.controller !== ControllerType.Summary &&
-      (!page.title || page.title === '')
-    ) {
+    if (page.controller !== ControllerType.Summary && !page.title) {
       return {
         ...page,
         title: hasComponents(page) ? page.components[0].title : ''
@@ -143,21 +140,25 @@ export function convertDeclaration(originalDefinition) {
     (p) => p.controller === ControllerType.Summary
   )
 
+  if (summaryPage) {
+    summaryPage.components = summaryPage.components ?? []
+  }
+
   if (!summaryPage && definition.declaration) {
     throw new Error('Cannot migrate declaration as unable to find Summary Page')
   }
 
-  if (summaryPage) {
-    summaryPage.components = summaryPage.components ?? []
+  if (!summaryPage && !definition.declaration) {
+    return definition
+  }
 
-    if (definition.declaration) {
-      const declaration = /** @type {MarkdownComponent} */ (
-        getComponentDefaults({ type: ComponentType.Markdown })
-      )
-      declaration.content = definition.declaration
-      summaryPage.components.unshift(declaration)
-      delete definition.declaration
-    }
+  if (definition.declaration) {
+    const declaration = /** @type {MarkdownComponent} */ (
+      getComponentDefaults({ type: ComponentType.Markdown })
+    )
+    declaration.content = definition.declaration
+    summaryPage.components.unshift(declaration)
+    delete definition.declaration
   }
 
   return definition
