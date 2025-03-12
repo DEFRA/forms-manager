@@ -81,7 +81,10 @@ export function repositionSummary(definition) {
  */
 export function applyPageTitles(definition) {
   const changedPages = definition.pages.map((page) => {
-    if (page.controller !== ControllerType.Summary && !page.title) {
+    if (
+      page.controller !== ControllerType.Summary &&
+      (!page.title || page.title === '')
+    ) {
       return {
         ...page,
         title: hasComponents(page) ? page.components[0].title : ''
@@ -140,25 +143,21 @@ export function convertDeclaration(originalDefinition) {
     (p) => p.controller === ControllerType.Summary
   )
 
-  if (summaryPage) {
-    summaryPage.components = summaryPage.components ?? []
-  }
-
   if (!summaryPage && definition.declaration) {
     throw new Error('Cannot migrate declaration as unable to find Summary Page')
   }
 
-  if (!summaryPage && !definition.declaration) {
-    return definition
-  }
+  if (summaryPage) {
+    summaryPage.components = summaryPage.components ?? []
 
-  if (definition.declaration) {
-    const declaration = /** @type {MarkdownComponent} */ (
-      getComponentDefaults({ type: ComponentType.Markdown })
-    )
-    declaration.content = definition.declaration
-    summaryPage.components.unshift(declaration)
-    delete definition.declaration
+    if (definition.declaration) {
+      const declaration = /** @type {MarkdownComponent} */ (
+        getComponentDefaults({ type: ComponentType.Markdown })
+      )
+      declaration.content = definition.declaration
+      summaryPage.components.unshift(declaration)
+      delete definition.declaration
+    }
   }
 
   return definition
@@ -228,6 +227,6 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
+ * @import { FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
  * @import { ValidationError } from 'joi'
  */
