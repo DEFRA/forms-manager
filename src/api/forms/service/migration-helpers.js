@@ -210,20 +210,20 @@ function applyMigrationSteps(definition) {
  * @returns {FormDefinition}
  */
 export function migrateToV2(definition) {
+  const migratedDefinition = applyMigrationSteps(definition)
+
+  migratedDefinition.engine = Engine.V2
+
   const validatedFormDefinition =
     /** @type {{ error?: ValidationError; value: FormDefinition }} */
-    (formDefinitionV2PayloadSchema.validate(definition))
+    (formDefinitionV2PayloadSchema.validate(migratedDefinition))
   const { error, value } = validatedFormDefinition
 
   if (error) {
     throw error
   }
 
-  const migratedDefinition = applyMigrationSteps(value)
-
-  migratedDefinition.engine = Engine.V2
-
-  return migratedDefinition
+  return value
 }
 
 /**
