@@ -1,10 +1,14 @@
 import { randomUUID } from 'crypto'
 
 import {
+  ComponentType,
   ControllerType,
   Engine,
   formDefinitionV2PayloadSchema,
-  hasComponents
+  getComponentDefaults,
+  hasComponents,
+  hasComponentsEvenIfNoNext,
+  hasFormField
 } from '@defra/forms-model'
 
 /**
@@ -76,12 +80,81 @@ export function repositionSummary(definition) {
  * @param {FormDefinition} definition
  */
 export function applyPageTitles(definition) {
-  for (const page of definition.pages.filter(
-    (p) => p.controller !== ControllerType.Summary
-  )) {
-    if (!page.title || page.title === '') {
-      page.title = hasComponents(page) ? page.components[0].title : ''
+  const changedPages = definition.pages.map((page) => {
+    if (
+      page.controller !== ControllerType.Summary &&
+      (!page.title || page.title === '')
+    ) {
+      return {
+        ...page,
+        title: hasComponents(page) ? page.components[0].title : ''
+      }
     }
+
+    return page
+  })
+
+  return {
+    ...definition,
+    pages: changedPages
+  }
+}
+
+/**
+ * Migrates component fields
+ * @param {FormDefinition} definition
+ */
+export function migrateComponentFields(definition) {
+  const changedPages = definition.pages.map((page) => {
+    if (!hasComponentsEvenIfNoNext(page)) {
+      return page
+    }
+
+    const changeComponents = page.components.map((comp) => {
+      if (hasFormField(comp)) {
+        return {
+          ...comp,
+          shortDescription: comp.title
+        }
+      }
+      return comp
+    })
+
+    return {
+      ...page,
+      components: changeComponents
+    }
+  })
+
+  return {
+    ...definition,
+    pages: changedPages
+  }
+}
+
+/**
+ * Converts declaration text to a guidance component
+ * @param {FormDefinition} originalDefinition
+ */
+export function convertDeclaration(originalDefinition) {
+  const definition = structuredClone(originalDefinition)
+
+  const summaryPage = definition.pages.find(
+    (p) => p.controller === ControllerType.Summary
+  )
+  if (!summaryPage) {
+    return definition
+  }
+
+  summaryPage.components = summaryPage.components ?? []
+
+  if (definition.declaration !== undefined && definition.declaration !== '') {
+    const declaration = /** @type {MarkdownComponent} */ (
+      getComponentDefaults({ type: ComponentType.Markdown })
+    )
+    declaration.content = definition.declaration
+    summaryPage.components.unshift(declaration)
+    delete definition.declaration
   }
 
   return definition
@@ -109,7 +182,12 @@ export function populateComponentIds(pageWithoutComponentIds) {
   }
 }
 
-const migrationSteps = [repositionSummary, applyPageTitles]
+const migrationSteps = [
+  repositionSummary,
+  applyPageTitles,
+  migrateComponentFields,
+  convertDeclaration
+]
 
 /**
  * Apply transformations to FormDefinition
@@ -146,6 +224,6 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
  * @import { ValidationError } from 'joi'
  */
