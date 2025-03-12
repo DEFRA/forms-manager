@@ -492,6 +492,20 @@ describe('migration helpers', () => {
       expect(summaryPageRes.components).toHaveLength(0)
       expect(res.declaration).toBeUndefined()
     })
+
+    it('should throw if no summary page', () => {
+      const testDefinition3 = buildDefinition({
+        pages: [],
+        sections: [
+          { hideTitle: false, name: 'section', title: 'Section title' }
+        ],
+        engine: Engine.V1
+      })
+
+      expect(() => convertDeclaration(testDefinition3)).toThrow(
+        'Cannot migrate as unable to find Summary Page'
+      )
+    })
   })
 })
 
