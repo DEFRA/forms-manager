@@ -5,7 +5,8 @@
  */
 
 /**
- * Creates an object of keys and their desired position based on the pageOrder
+ * Creates an object of keys and their desired position based on the pageOrder (pure function)
+ * For ['a','b''c'] will return { a: -2, b: -1, c: -0 }
  * @param {string[]} pageOrder
  * @returns {PageOrderHelper}
  */
