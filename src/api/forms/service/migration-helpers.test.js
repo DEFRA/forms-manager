@@ -493,17 +493,18 @@ describe('migration helpers', () => {
       expect(res.declaration).toBeUndefined()
     })
 
-    it('should throw if no summary page', () => {
+    it('should throw if no summary page but a declaration', () => {
       const testDefinition3 = buildDefinition({
         pages: [],
         sections: [
           { hideTitle: false, name: 'section', title: 'Section title' }
         ],
-        engine: Engine.V1
+        engine: Engine.V1,
+        declaration: 'Some declaration'
       })
 
       expect(() => convertDeclaration(testDefinition3)).toThrow(
-        'Cannot migrate as unable to find Summary Page'
+        'Cannot migrate declaration as unable to find Summary Page'
       )
     })
   })

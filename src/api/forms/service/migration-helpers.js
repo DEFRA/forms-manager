@@ -142,19 +142,22 @@ export function convertDeclaration(originalDefinition) {
   const summaryPage = definition.pages.find(
     (p) => p.controller === ControllerType.Summary
   )
-  if (!summaryPage) {
-    throw new Error('Cannot migrate as unable to find Summary Page')
+
+  if (!summaryPage && definition.declaration) {
+    throw new Error('Cannot migrate declaration as unable to find Summary Page')
   }
 
-  summaryPage.components = summaryPage.components ?? []
+  if (summaryPage) {
+    summaryPage.components = summaryPage.components ?? []
 
-  if (definition.declaration) {
-    const declaration = /** @type {MarkdownComponent} */ (
-      getComponentDefaults({ type: ComponentType.Markdown })
-    )
-    declaration.content = definition.declaration
-    summaryPage.components.unshift(declaration)
-    delete definition.declaration
+    if (definition.declaration) {
+      const declaration = /** @type {MarkdownComponent} */ (
+        getComponentDefaults({ type: ComponentType.Markdown })
+      )
+      declaration.content = definition.declaration
+      summaryPage.components.unshift(declaration)
+      delete definition.declaration
+    }
   }
 
   return definition
