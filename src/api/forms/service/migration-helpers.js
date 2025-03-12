@@ -1,10 +1,14 @@
 import { randomUUID } from 'crypto'
 
 import {
+  ComponentType,
   ControllerType,
   Engine,
   formDefinitionV2PayloadSchema,
-  hasComponents
+  getComponentDefaults,
+  hasComponents,
+  hasComponentsEvenIfNoNext,
+  hasFormField
 } from '@defra/forms-model'
 
 /**
@@ -72,6 +76,91 @@ export function repositionSummary(definition) {
 }
 
 /**
+ * Applies page titles if they are missing
+ * @param {FormDefinition} definition
+ */
+export function applyPageTitles(definition) {
+  const changedPages = definition.pages.map((page) => {
+    if (page.controller !== ControllerType.Summary && !page.title) {
+      return {
+        ...page,
+        title: hasComponents(page) ? page.components[0].title : ''
+      }
+    }
+
+    return page
+  })
+
+  return {
+    ...definition,
+    pages: changedPages
+  }
+}
+
+/**
+ * Migrates component fields
+ * @param {FormDefinition} definition
+ */
+export function migrateComponentFields(definition) {
+  const changedPages = definition.pages.map((page) => {
+    if (!hasComponentsEvenIfNoNext(page)) {
+      return page
+    }
+
+    const changeComponents = page.components.map((comp) => {
+      if (hasFormField(comp)) {
+        return {
+          ...comp,
+          shortDescription: comp.title
+        }
+      }
+      return comp
+    })
+
+    return {
+      ...page,
+      components: changeComponents
+    }
+  })
+
+  return {
+    ...definition,
+    pages: changedPages
+  }
+}
+
+/**
+ * Converts declaration text to a guidance component
+ * @param {FormDefinition} originalDefinition
+ */
+export function convertDeclaration(originalDefinition) {
+  const definition = structuredClone(originalDefinition)
+
+  const summaryPage = definition.pages.find(
+    (p) => p.controller === ControllerType.Summary
+  )
+
+  if (!summaryPage && definition.declaration) {
+    throw new Error('Cannot migrate declaration as unable to find Summary Page')
+  }
+
+  if (summaryPage) {
+    summaryPage.components = summaryPage.components ?? []
+
+    if (definition.declaration) {
+      const declaration = /** @type {MarkdownComponent} */ (
+        getComponentDefaults({ type: ComponentType.Markdown })
+      )
+      declaration.content = definition.declaration
+      summaryPage.components.unshift(declaration)
+      delete definition.declaration
+    }
+  }
+
+  return definition
+}
+
+/**
  * @param {Page} pageWithoutComponentIds
  */
 export function populateComponentIds(pageWithoutComponentIds) {
@@ -93,27 +182,48 @@ export function populateComponentIds(pageWithoutComponentIds) {
   }
 }
 
+const migrationSteps = [
+  repositionSummary,
+  applyPageTitles,
+  migrateComponentFields,
+  convertDeclaration
+]
+
+/**
+ * Apply transformations to FormDefinition
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition} definition
+ */
+function applyMigrationSteps(definition) {
+  return migrationSteps.reduce(
+    (acc, transformation) => transformation(acc),
+    definition
+  )
+}
+
 /**
  * Migrates a v1 definition to v2
  * @param {FormDefinition} definition
  * @returns {FormDefinition}
  */
 export function migrateToV2(definition) {
+  const migratedDefinition = applyMigrationSteps(definition)
+
+  migratedDefinition.engine = Engine.V2
+
   const validatedFormDefinition =
     /** @type {{ error?: ValidationError; value: FormDefinition }} */
-    (formDefinitionV2PayloadSchema.validate(definition))
+    (formDefinitionV2PayloadSchema.validate(migratedDefinition))
   const { error, value } = validatedFormDefinition
 
   if (error) {
     throw error
   }
 
-  value.engine = Engine.V2
-
-  return repositionSummary(value)
+  return value
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary } from '@defra/forms-model'
+ * @import { FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
  * @import { ValidationError } from 'joi'
  */
