@@ -143,12 +143,12 @@ export function convertDeclaration(originalDefinition) {
     (p) => p.controller === ControllerType.Summary
   )
   if (!summaryPage) {
-    return definition
+    throw new Error('Cannot migrate as unable to find Summary Page')
   }
 
   summaryPage.components = summaryPage.components ?? []
 
-  if (definition.declaration !== undefined && definition.declaration !== '') {
+  if (definition.declaration) {
     const declaration = /** @type {MarkdownComponent} */ (
       getComponentDefaults({ type: ComponentType.Markdown })
     )
