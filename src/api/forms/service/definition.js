@@ -3,6 +3,7 @@ import Boom from '@hapi/boom'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { reorderPages } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
   DRAFT,
@@ -231,6 +232,68 @@ export async function createDraftFromLive(formId, author) {
     logger.error(err, `Create draft to edit for form ID ${formId} failed`)
 
     throw err
+  }
+}
+
+/**
+ * Based on a list of Page ids will reorder the pages
+ * @param {string} formId
+ * @param {string[]} orderList
+ * @param {FormMetadataAuthor} author
+ */
+export async function reorderDraftFormDefinitionPages(
+  formId,
+  orderList,
+  author
+) {
+  logger.info(
+    `Reordering pages on Form Definition (draft) for form ID ${formId}`
+  )
+
+  const form = await getFormDefinition(formId)
+
+  if (!orderList.length) {
+    return form
+  }
+
+  const session = client.startSession()
+
+  try {
+    const newForm = await session.withTransaction(async () => {
+      const reorderedForm = reorderPages(form, orderList)
+
+      // Update the form definition
+      await formDefinition.upsert(formId, reorderedForm, session)
+
+      logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+
+      // Update the `updatedAt/By` fields of the draft state
+      const now = new Date()
+      await formMetadata.update(
+        formId,
+        {
+          $set: partialAuditFields(now, author)
+        },
+        session
+      )
+
+      return reorderedForm
+    })
+
+    logger.info(
+      `Reordered pages on Form Definition (draft) for form ID ${formId}`
+    )
+
+    return newForm
+  } catch (err) {
+    logger.error(
+      err,
+      `Reordering pages on form definition (draft) for form ID ${formId} failed`
+    )
+
+    throw err
+  } finally {
+    await session.endSession()
   }
 }
 

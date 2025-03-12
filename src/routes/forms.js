@@ -16,6 +16,7 @@ import {
   createLiveFromDraft,
   getFormDefinition,
   listForms,
+  reorderDraftFormDefinitionPages,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
 import {
@@ -41,6 +42,7 @@ import {
   pageByIdSchema,
   patchPageSchema,
   prependQuerySchema,
+  sortIdsSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
@@ -262,6 +264,24 @@ export default [
     }
   },
   {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/pages/order',
+    /**
+     * @param {SortDraftFormPagesRequest} request
+     */
+    handler(request) {
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
+      return reorderDraftFormDefinitionPages(params.id, payload, author)
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        payload: sortIdsSchema
+      }
+    }
+  },
+  {
     method: 'PATCH',
     path: '/forms/{id}/definition/draft/pages/{pageId}',
     /**
@@ -438,6 +458,6 @@ export default [
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

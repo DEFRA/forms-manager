@@ -2,7 +2,9 @@ import { organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import {
+  buildDefinition,
   buildQuestionPage,
+  buildSummaryPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
@@ -15,7 +17,8 @@ import {
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
-  listForms
+  listForms,
+  reorderDraftFormDefinitionPages
 } from '~/src/api/forms/service/definition.js'
 import {
   createForm,
@@ -632,6 +635,39 @@ describe('Forms route', () => {
       ])
     })
 
+    test('Testing POST /forms/{id}/definition/draft/pages/order reorders the pages in the db', async () => {
+      const pageOneId = '5113a8ab-b297-46b5-b732-7fe42660c4db'
+      const pageTwoId = 'd3dc6af2-3235-4455-80f7-941f0bf69c4f'
+
+      const expectedDefinition = buildDefinition({
+        pages: [
+          buildQuestionPage({
+            id: pageOneId,
+            title: 'Page one'
+          }),
+          buildQuestionPage({
+            id: pageOneId,
+            title: 'Page two'
+          }),
+          buildSummaryPage()
+        ]
+      })
+      jest
+        .mocked(reorderDraftFormDefinitionPages)
+        .mockResolvedValue(expectedDefinition)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/order`,
+        payload: [pageOneId, pageTwoId],
+        auth
+      })
+
+      expect(response.result).toEqual(expectedDefinition)
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+    })
+
     test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/components/{componentId} updates a component on a page', async () => {
       const updatedComponent = buildTextFieldComponent({
         id: componentId,
@@ -1003,6 +1039,28 @@ describe('Forms route', () => {
         statusCode: 400,
         validation: {
           keys: ['id', 'path'],
+          source: 'payload'
+        }
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/pages/order with invalid payload returns validation errors', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/order/`,
+        payload: ['not-a-valid-uuid'],
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        error: 'Bad Request',
+        message:
+          '"[0]" must be a valid GUID. "value" does not contain 1 required value(s)',
+        statusCode: 400,
+        validation: {
+          keys: ['0', ''],
           source: 'payload'
         }
       })

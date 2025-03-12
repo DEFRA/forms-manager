@@ -69,3 +69,8 @@ export const migrateDefinitionParamSchema = Joi.object()
     version: Joi.string().allow('v1', 'v2').required()
   })
   .required()
+
+export const sortIdsSchema = Joi.array()
+  .items(Joi.string().uuid().required())
+  .min(1)
+  .required()
