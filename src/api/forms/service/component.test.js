@@ -1,3 +1,4 @@
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
@@ -162,7 +163,7 @@ describe('Forms service', () => {
       expect(components).toEqual([
         { ...textFieldComponent, id: expect.any(String) }
       ])
-      expect(state).toEqual({ state: DRAFT })
+      expect(state).toEqual({ state: FormStatus.Draft })
 
       expect(metaFormId).toBe('123')
 
@@ -191,7 +192,7 @@ describe('Forms service', () => {
 
       const [, , , , options] = dbDefinitionSpy.mock.calls[0]
 
-      expect(options).toEqual({ state: DRAFT, position: 0 })
+      expect(options).toEqual({ state: FormStatus.Draft, position: 0 })
     })
 
     it('should fail if page does not exist', async () => {

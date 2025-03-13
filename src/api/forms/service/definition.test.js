@@ -1,3 +1,4 @@
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
@@ -48,7 +49,6 @@ const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
 const author = getAuthor()
-const DRAFT = 'draft'
 
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
@@ -851,7 +851,7 @@ describe('Forms service', () => {
           perPage: 10,
           author: 'Henrique Chase',
           organisations: ['Defra'],
-          status: ['live']
+          status: [FormStatus.Live]
         }
 
         jest.mocked(formMetadata.list).mockResolvedValue({
@@ -877,7 +877,7 @@ describe('Forms service', () => {
           perPage: 10,
           author: 'Henrique Chase',
           organisations: ['Defra', 'Natural England'],
-          status: ['live', DRAFT]
+          status: [FormStatus.Live, FormStatus.Draft]
         }
 
         jest.mocked(formMetadata.list).mockResolvedValue({

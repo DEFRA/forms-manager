@@ -1,4 +1,4 @@
-import { ControllerType, Engine } from '@defra/forms-model'
+import { ControllerType, Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -35,11 +35,6 @@ const mockSession = author
 const formId = '1eabd1437567fe1b26708bbb'
 const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
 const componentId = 'e296d931-2364-4b17-9049-1aa1afea29d3'
-
-/**
- * @typedef {'draft' | 'live'} State
- */
-const DRAFT = /** @type {State} */ ('draft')
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -101,7 +96,7 @@ describe('form-definition-repository', () => {
     })
 
     it('should handle a call inside a session', async () => {
-      await get(formId, DRAFT, mockSession)
+      await get(formId, FormStatus.Draft, mockSession)
       const [, options] = mockCollection.findOne.mock.calls[0]
 
       expect(options).toEqual({
@@ -118,7 +113,7 @@ describe('form-definition-repository', () => {
           formId,
           { controller: ControllerType.Summary },
           mockSession,
-          'live'
+          FormStatus.Live
         )
       ).rejects.toThrow(
         Boom.badRequest(
@@ -148,7 +143,9 @@ describe('form-definition-repository', () => {
 
     it('should not edit a live summary', async () => {
       await expect(
-        addPageAtPosition('1234', page, mockSession, { state: 'live' })
+        addPageAtPosition('1234', page, mockSession, {
+          state: FormStatus.Live
+        })
       ).rejects.toThrow(
         Boom.badRequest('Cannot remove add on live form ID 1234')
       )
@@ -191,7 +188,7 @@ describe('form-definition-repository', () => {
 
     it('should fail if form is live', async () => {
       await expect(
-        updatePage(formId, pageId, page, mockSession, 'live')
+        updatePage(formId, pageId, page, mockSession, FormStatus.Live)
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot update page on a live form - 1eabd1437567fe1b26708bbb'
@@ -220,7 +217,7 @@ describe('form-definition-repository', () => {
     it('should fail if form is live', async () => {
       await expect(
         addComponents(formId, pageId, [component], mockSession, {
-          state: 'live'
+          state: FormStatus.Live
         })
       ).rejects.toThrow(
         Boom.badRequest(
@@ -336,7 +333,7 @@ describe('form-definition-repository', () => {
           componentId,
           component,
           mockSession,
-          'live'
+          FormStatus.Live
         )
       ).rejects.toThrow(
         Boom.badRequest(
@@ -413,7 +410,13 @@ describe('form-definition-repository', () => {
 
     it('should fail if form is live', async () => {
       await expect(
-        updatePageFields(formId, pageId, pageFields, mockSession, 'live')
+        updatePageFields(
+          formId,
+          pageId,
+          pageFields,
+          mockSession,
+          FormStatus.Live
+        )
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
@@ -425,7 +428,13 @@ describe('form-definition-repository', () => {
   describe('deleteComponent', () => {
     it('should fail if form is live', async () => {
       await expect(
-        deleteComponent(formId, pageId, componentId, mockSession, 'live')
+        deleteComponent(
+          formId,
+          pageId,
+          componentId,
+          mockSession,
+          FormStatus.Live
+        )
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot delete component on a live form - 1eabd1437567fe1b26708bbb'
@@ -452,7 +461,13 @@ describe('form-definition-repository', () => {
     it('should fail if form is live', async () => {
       const mockDefinition = buildDefinition({})
       await expect(
-        setEngineVersion(formId, Engine.V2, mockDefinition, mockSession, 'live')
+        setEngineVersion(
+          formId,
+          Engine.V2,
+          mockDefinition,
+          mockSession,
+          FormStatus.Live
+        )
       ).rejects.toThrow(
         Boom.badRequest('Cannot update the engine version of a live form')
       )

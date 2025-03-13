@@ -1,3 +1,4 @@
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
@@ -6,7 +7,6 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { reorderPages } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
-  DRAFT,
   logger,
   mapForm,
   partialAuditFields
@@ -28,10 +28,14 @@ export async function listForms(options) {
 /**
  * Retrieves the form definition content for a given form ID
  * @param {string} formId - the ID of the form
- * @param {State} state - the form state
+ * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
  */
-export function getFormDefinition(formId, state = DRAFT, session = undefined) {
+export function getFormDefinition(
+  formId,
+  state = FormStatus.Draft,
+  session = undefined
+) {
   // TODO: if form def is v1 and target v2 - use decorator
   return formDefinition.get(formId, state, session)
 }
@@ -122,7 +126,10 @@ export async function createLiveFromDraft(formId, author) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
     }
 
-    const draftFormDefinition = await formDefinition.get(formId, DRAFT)
+    const draftFormDefinition = await formDefinition.get(
+      formId,
+      FormStatus.Draft
+    )
 
     if (!draftFormDefinition.startPage) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
@@ -147,7 +154,7 @@ export async function createLiveFromDraft(formId, author) {
           updatedAt: now,
           updatedBy: author
         }
-      : partialAuditFields(now, author, 'live') // Partially update the live state fields
+      : partialAuditFields(now, author, FormStatus.Live) // Partially update the live state fields
 
     const session = client.startSession()
 

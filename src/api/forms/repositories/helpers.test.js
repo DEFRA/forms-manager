@@ -34,7 +34,7 @@ describe('repository helpers', () => {
   const statusPage = buildStatusPage({})
 
   const componentWithoutAnId = buildTextFieldComponent({
-    name: 'CwAid'
+    name: 'Ghcbmw'
   })
   delete componentWithoutAnId.id
 

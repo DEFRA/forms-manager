@@ -1,3 +1,5 @@
+import { FormStatus } from '@defra/forms-model'
+
 import {
   addDateFieldStage,
   addRankingStage,
@@ -56,14 +58,14 @@ describe('Form metadata aggregation', () => {
 
     describe('with status filter', () => {
       it('should create status filter for live forms', () => {
-        const result = buildFilterConditions({ status: ['live'] })
+        const result = buildFilterConditions({ status: [FormStatus.Live] })
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }]
         })
       })
 
       it('should create status filter for draft forms', () => {
-        const result = buildFilterConditions({ status: ['draft'] })
+        const result = buildFilterConditions({ status: [FormStatus.Draft] })
         expect(result).toEqual({
           $or: [{ live: { $exists: false } }]
         })
@@ -72,7 +74,9 @@ describe('Form metadata aggregation', () => {
 
     describe('with multiple status values', () => {
       it('should create combined status filter', () => {
-        const result = buildFilterConditions({ status: ['live', 'draft'] })
+        const result = buildFilterConditions({
+          status: [FormStatus.Live, FormStatus.Draft]
+        })
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }, { live: { $exists: false } }]
         })
@@ -85,7 +89,7 @@ describe('Form metadata aggregation', () => {
           title: 'Wildlife Permit Application',
           author: 'Henrique Silva',
           organisations: ['Natural England', 'Defra'],
-          status: ['live']
+          status: [FormStatus.Live]
         })
 
         expect(result).toEqual({
@@ -125,7 +129,7 @@ describe('Form metadata aggregation', () => {
           'Wildlife Permit Application',
           'Henrique',
           ['Defra'],
-          ['live']
+          [FormStatus.Live]
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
@@ -305,7 +309,7 @@ describe('Form metadata aggregation', () => {
           { name: 'Sarah Wilson (Natural England)' }
         ],
         organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
-        status: [{ statuses: ['live', 'draft'] }]
+        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }]
       }
 
       const result = processFilterResults(filterResults)
