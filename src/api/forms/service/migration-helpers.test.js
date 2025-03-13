@@ -3,6 +3,8 @@ import { ValidationError } from 'joi'
 
 import {
   buildDefinition,
+  buildList,
+  buildListItem,
   buildQuestionPage,
   buildStatusPage,
   buildSummaryPage,
@@ -197,113 +199,6 @@ describe('migration helpers', () => {
       expect(testPage.components[0].id).toBeUndefined()
       const page = /** @type {PageQuestion} */ (populateComponentIds(testPage))
       expect(page.components[0].id).toBeDefined()
-    })
-  })
-
-  describe('migrateToV2', () => {
-    const pages = /** @type {[Page, PageQuestion, PageQuestion]} */ ([
-      summaryPageWithoutComponents,
-      pageOneUndefinedId,
-      pageTwoNoIds
-    ])
-
-    const components = /** @type {[ComponentDef, ComponentDef]} */ (
-      pages[2].components
-    )
-    const definitionV1 = buildDefinition({
-      pages,
-      sections: [{ hideTitle: false, name: 'section', title: 'Section title' }],
-      engine: Engine.V1
-    })
-
-    const definitionV2 = buildDefinition({
-      pages: [
-        {
-          ...pages[1],
-          id: expect.any(String)
-        },
-        {
-          ...pages[2],
-          id: expect.any(String),
-          components: [
-            {
-              ...components[0],
-              id: expect.any(String)
-            },
-            {
-              ...components[1],
-              id: expect.any(String)
-            }
-          ]
-        },
-        {
-          ...pages[0],
-          id: expect.any(String)
-        }
-      ],
-      sections: [{ hideTitle: false, name: 'section', title: 'Section title' }],
-      engine: Engine.V2
-    })
-
-    it('should migrate to version v2', () => {
-      expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
-    })
-
-    it('should throw if there is some error in validation', () => {
-      const partialDefinition = /** @type {Partial<FormDefinition>} */ {
-        unknownProperty: true
-      }
-      // @ts-expect-error unknownProperty is not a valid property of formDefinition
-      const invalidDefinition = buildDefinition(partialDefinition)
-      expect(() => migrateToV2(invalidDefinition)).toThrow(
-        new ValidationError('"unknownProperty" is not allowed', [], undefined)
-      )
-    })
-
-    it('should not perform any changes if component and page ids exist', () => {
-      const definition = buildDefinition({
-        pages: [pageOneUndefinedId, pageTwoNoIds, summaryPageWithoutComponents],
-        sections: [
-          { hideTitle: false, name: 'section', title: 'Section title' }
-        ]
-      })
-
-      const pages = /** @type {[PageQuestion, PageQuestion, Page]} */ (
-        definition.pages
-      )
-
-      const components = /** @type {[ComponentDef, ComponentDef]} */ (
-        pages[1].components
-      )
-
-      expect(migrateToV2(definition)).toMatchObject({
-        ...definition,
-        engine: Engine.V2,
-        pages: [
-          {
-            ...pages[0],
-            id: expect.any(String)
-          },
-          {
-            ...pages[1],
-            id: expect.any(String),
-            components: [
-              {
-                ...components[0],
-                id: expect.any(String)
-              },
-              {
-                ...components[1],
-                id: expect.any(String)
-              }
-            ]
-          },
-          {
-            ...pages[2],
-            id: expect.any(String)
-          }
-        ]
-      })
     })
   })
 
@@ -510,6 +405,133 @@ describe('migration helpers', () => {
       expect(() => convertDeclaration(testDefinition3)).toThrow(
         'Cannot migrate declaration as unable to find Summary Page'
       )
+    })
+  })
+
+  describe('migrateToV2', () => {
+    const pages = /** @type {[Page, PageQuestion, PageQuestion]} */ ([
+      summaryPageWithoutComponents,
+      pageOneUndefinedId,
+      pageTwoNoIds
+    ])
+
+    const components = /** @type {[ComponentDef, ComponentDef]} */ (
+      pages[2].components
+    )
+    const countryList = buildList({
+      items: [
+        buildListItem({
+          value: 'england',
+          text: 'England'
+        })
+      ]
+    })
+
+    const definitionV1 = buildDefinition({
+      pages,
+      sections: [{ hideTitle: false, name: 'section', title: 'Section title' }],
+      engine: Engine.V1,
+      lists: [countryList]
+    })
+
+    const definitionV2 = {
+      ...buildDefinition({
+        sections: [
+          { hideTitle: false, name: 'section', title: 'Section title' }
+        ],
+        engine: Engine.V2
+      }),
+      pages: [
+        {
+          ...pages[1],
+          id: expect.any(String)
+        },
+        {
+          ...pages[2],
+          id: expect.any(String),
+          components: [
+            {
+              ...components[0],
+              id: expect.any(String)
+            },
+            {
+              ...components[1],
+              id: expect.any(String)
+            }
+          ]
+        },
+        {
+          ...pages[0],
+          id: expect.any(String)
+        }
+      ],
+      lists: [
+        {
+          ...countryList,
+          id: expect.any(String)
+        }
+      ]
+    }
+
+    it('should migrate to version v2', () => {
+      expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
+    })
+
+    it('should throw if there is some error in validation', () => {
+      const partialDefinition = /** @type {Partial<FormDefinition>} */ {
+        unknownProperty: true
+      }
+      // @ts-expect-error unknownProperty is not a valid property of formDefinition
+      const invalidDefinition = buildDefinition(partialDefinition)
+      expect(() => migrateToV2(invalidDefinition)).toThrow(
+        new ValidationError('"unknownProperty" is not allowed', [], undefined)
+      )
+    })
+
+    it('should not perform any changes if component and page ids exist', () => {
+      const definition = buildDefinition({
+        pages: [pageOneUndefinedId, pageTwoNoIds, summaryPageWithoutComponents],
+        sections: [
+          { hideTitle: false, name: 'section', title: 'Section title' }
+        ]
+      })
+
+      const pages = /** @type {[PageQuestion, PageQuestion, Page]} */ (
+        definition.pages
+      )
+
+      const components = /** @type {[ComponentDef, ComponentDef]} */ (
+        pages[1].components
+      )
+
+      expect(migrateToV2(definition)).toMatchObject({
+        ...definition,
+        engine: Engine.V2,
+        pages: [
+          {
+            ...pages[0],
+            id: expect.any(String)
+          },
+          {
+            ...pages[1],
+            id: expect.any(String),
+            components: [
+              {
+                ...components[0],
+                id: expect.any(String)
+              },
+              {
+                ...components[1],
+                id: expect.any(String)
+              }
+            ]
+          },
+          {
+            ...pages[2],
+            id: expect.any(String)
+          }
+        ]
+      })
     })
   })
 })
