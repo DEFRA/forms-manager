@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -7,11 +8,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
-import {
-  DRAFT,
-  logger,
-  partialAuditFields
-} from '~/src/api/forms/service/shared.js'
+import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -44,7 +41,7 @@ export async function getFormDefinitionPageComponent(
 
   const definition = /** @type {FormDefinition} */ await getFormDefinition(
     formId,
-    DRAFT,
+    FormStatus.Draft,
     session
   )
   const component = findComponent(definition, pageId, componentId)
@@ -98,7 +95,7 @@ export async function createComponentOnDraftDefinition(
         pageId,
         createdComponents,
         session,
-        { state: DRAFT, ...positionOptions }
+        { state: FormStatus.Draft, ...positionOptions }
       )
 
       // Update the form with the new draft state
@@ -154,7 +151,7 @@ export async function updateComponentOnDraftDefinition(
             componentId,
             componentPayload,
             session,
-            DRAFT
+            FormStatus.Draft
           )
 
         // Update the form with the new draft state
@@ -210,7 +207,7 @@ export async function deleteComponentOnDraftDefinition(
           pageId,
           componentId,
           session,
-          DRAFT
+          FormStatus.Draft
         )
 
         // Update the form with the new draft state

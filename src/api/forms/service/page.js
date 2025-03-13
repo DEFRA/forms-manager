@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 
-import { Engine } from '@defra/forms-model'
+import { Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -12,7 +12,6 @@ import {
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { repositionSummaryPipeline } from '~/src/api/forms/service/migration.js'
 import {
-  DRAFT,
   SUMMARY_PAGE_ID,
   logger,
   partialAuditFields
@@ -50,7 +49,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   const session = client.startSession()
 
   /** @type {FormDefinition} */
-  const formDraftDefinition = await getFormDefinition(formId, DRAFT)
+  const formDraftDefinition = await getFormDefinition(formId, FormStatus.Draft)
 
   uniquePathGate(
     formDraftDefinition,
@@ -65,7 +64,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   )
 
   /**
-   * @type {{ position?: number; state?: 'live' | 'draft' }}
+   * @type {{ position?: number; state?: FormStatus }}
    */
   const options = {}
 
@@ -117,7 +116,7 @@ export async function getFormDefinitionPage(formId, pageId, session) {
 
   const definition = /** @type {FormDefinition} */ await getFormDefinition(
     formId,
-    DRAFT,
+    FormStatus.Draft,
     session
   )
 
@@ -161,7 +160,7 @@ export async function patchFieldsOnDraftDefinitionPage(
           pageId,
           pageFieldsToUpdate,
           session,
-          DRAFT
+          FormStatus.Draft
         )
 
         page = await getFormDefinitionPage(formId, pageId, session)

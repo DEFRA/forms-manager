@@ -1,4 +1,4 @@
-import { organisations } from '@defra/forms-model'
+import { FormStatus, organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import {
@@ -140,7 +140,7 @@ describe('Forms route', () => {
   const mockFilters = {
     authors: ['Joe Bloggs', 'Jane Doe', 'Enrique Chase'],
     organisations: ['Defra', 'Natural England'],
-    status: ['live', 'draft']
+    status: [FormStatus.Live, FormStatus.Draft]
   }
 
   describe('Success responses', () => {

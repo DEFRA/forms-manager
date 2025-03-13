@@ -26,17 +26,17 @@ describe('migration helpers', () => {
   })
 
   const componentWithoutAnId = buildTextFieldComponent({
-    name: 'CwAid'
+    name: 'Ghcbma'
   })
   delete componentWithoutAnId.id
 
   const componentOne = buildTextFieldComponent({
     id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
-    name: 'CwAid1'
+    name: 'Ghcbmb'
   })
   const componentTwo = buildTextFieldComponent({
     id: '52e34be1-a528-4e10-a5eb-06aed317fb7f',
-    name: 'CwAid2'
+    name: 'Ghcbmw'
   })
   const componentOneNoId = buildTextFieldComponent({
     ...componentOne,

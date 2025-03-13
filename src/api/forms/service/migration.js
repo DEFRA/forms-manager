@@ -1,4 +1,4 @@
-import { ControllerType, Engine } from '@defra/forms-model'
+import { ControllerType, Engine, FormStatus } from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -7,11 +7,7 @@ import {
   summaryHelper
 } from '~/src/api/forms/service/migration-helpers.js'
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
-import {
-  DRAFT,
-  logger,
-  partialAuditFields
-} from '~/src/api/forms/service/shared.js'
+import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -82,7 +78,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
  * @param {FormMetadataAuthor} author
  */
 export async function migrateDefinitionToV2(formId, author) {
-  const formDraftDefinition = await formDefinition.get(formId, DRAFT)
+  const formDraftDefinition = await formDefinition.get(formId, FormStatus.Draft)
 
   if (formDraftDefinition.engine === Engine.V2) {
     return formDraftDefinition
