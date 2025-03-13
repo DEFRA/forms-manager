@@ -1,3 +1,5 @@
+import { FormStatus } from '@defra/forms-model'
+
 import { escapeRegExp } from '~/src/helpers/string-utils.js'
 
 /**
@@ -25,7 +27,9 @@ export function buildFilterConditions(options) {
 
   if (status && status.length > 0) {
     conditions.$or = status.map((s) =>
-      s === 'live' ? { live: { $exists: true } } : { live: { $exists: false } }
+      s === FormStatus.Live
+        ? { live: { $exists: true } }
+        : { live: { $exists: false } }
     )
   }
 
@@ -278,7 +282,7 @@ export function processFilterResults(filterResults) {
  */
 
 /**
- * @import { FormStatus, FilterOptions } from '@defra/forms-model'
+ * @import { FilterOptions } from '@defra/forms-model'
  */
 
 /**

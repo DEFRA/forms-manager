@@ -1,4 +1,5 @@
 /* eslint-env jest */
+import { FormStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -102,7 +103,7 @@ export const formMetadataWithLiveDocument = {
 export const mockFilters = {
   authors: ['Joe Bloggs', 'Jane Doe', 'Enrique Chase'],
   organisations: ['Defra', 'Natural England'],
-  status: ['live', DRAFT]
+  status: [FormStatus.Live, FormStatus.Draft]
 }
 
 /**

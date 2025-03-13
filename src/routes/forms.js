@@ -1,4 +1,5 @@
 import {
+  FormStatus,
   componentSchema,
   formMetadataInputKeys,
   formMetadataInputSchema,
@@ -394,7 +395,7 @@ export default [
       const { params } = request
       const { id } = params
 
-      return getFormDefinition(id, 'live')
+      return getFormDefinition(id, FormStatus.Live)
     },
     options: {
       auth: false,
