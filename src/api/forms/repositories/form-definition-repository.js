@@ -553,7 +553,70 @@ export async function updatePageFields(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
   )
 }
+
+// db["form-definition"].updateOne(
+//   { _id: ObjectId("67d2e5fffaaba7c4f24dcf3b")},
+//   {
+//     $push: {
+//       "draft.lists": {
+//         $each: [
+//           {
+//             id: "c9addb88-6812-4c8c-ab58-f64eb8eef6aa",
+//             title: "Countries",
+//             name: "OhxUEH",
+//             type: "string",
+//             items: []
+//           }
+//         ]
+//       }
+//     }
+//   }
+// )
+
 /**
- * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields } from '@defra/forms-model'
+ * Pushes a list to the end of the draft definition list array
+ * @param {string} formId
+ * @param {List[]} lists
+ * @param {ClientSession} session
+ * @param {FormStatus} state
+ */
+export async function addLists(
+  formId,
+  lists,
+  session,
+  state = FormStatus.Draft
+) {
+  if (state === FormStatus.Live) {
+    throw Boom.badRequest(`Cannot add lists to a live form - ${formId}`)
+  }
+
+  logger.info(`Adding new lists to form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId)
+    },
+    {
+      $push: {
+        'draft.lists': {
+          $each: lists
+        }
+      }
+    },
+    {
+      session
+    }
+  )
+
+  logger.info(`Added new lists to form ID ${formId}`)
+
+  return lists
+}
+/**
+ * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields, List } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
  */
