@@ -49,6 +49,8 @@ import {
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
+export const ROUTE_FORMS = '/forms/{id}'
+
 /**
  * @type {ServerRoute[]}
  */
@@ -100,7 +102,7 @@ export default [
   },
   {
     method: 'PATCH',
-    path: '/forms/{id}',
+    path: ROUTE_FORMS,
     /**
      * @param {RequestFormMetadataUpdateById} request
      */
@@ -130,7 +132,7 @@ export default [
   },
   {
     method: 'GET',
-    path: '/forms/{id}',
+    path: ROUTE_FORMS,
     /**
      * @param {RequestFormById} request
      */
@@ -168,7 +170,7 @@ export default [
   },
   {
     method: 'DELETE',
-    path: '/forms/{id}',
+    path: ROUTE_FORMS,
     /**
      * @param {RequestFormById} request
      */
