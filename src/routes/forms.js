@@ -3,6 +3,7 @@ import {
   componentSchema,
   formMetadataInputKeys,
   formMetadataInputSchema,
+  listSchemaV2,
   pageSchemaV2,
   queryOptionsSchema
 } from '@defra/forms-model'
@@ -13,6 +14,7 @@ import {
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
 import {
+  addListsToDraftFormDefinition,
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
@@ -453,12 +455,39 @@ export default [
         params: formByIdSchema
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/lists',
+    /**
+     * @param {CreateListDraftFormPagesRequest} request
+     */
+    async handler(request) {
+      const { auth, params, payload } = request
+      const { id } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Recreate the draft state from live using the author in the credentials
+      const [list] = await addListsToDraftFormDefinition(id, [payload], author)
+
+      return {
+        id: list.id,
+        list,
+        status: 'created'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        payload: listSchemaV2
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
