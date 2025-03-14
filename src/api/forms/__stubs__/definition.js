@@ -99,7 +99,7 @@ export function buildDefaultListItem(value) {
  * @param {Partial<List>} partialList
  * @returns {List}
  */
-export function buildList(partialList) {
+export function buildList(partialList = {}) {
   return /** @type {List} */ (
     structuredClone({
       items: [],

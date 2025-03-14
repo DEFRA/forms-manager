@@ -5,6 +5,7 @@ import { pino } from 'pino'
 
 import {
   buildDefinition,
+  buildList,
   buildQuestionPage,
   buildSummaryPage
 } from '~/src/api/forms/__stubs__/definition.js'
@@ -21,6 +22,7 @@ import {
   mockFilters
 } from '~/src/api/forms/service/__stubs__/service.js'
 import {
+  addListsToDraftFormDefinition,
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
@@ -1049,6 +1051,34 @@ describe('Forms service', () => {
           ['5a1c2ef7-ed4e-4ec7-9119-226fc3063bda'],
           author
         )
+      ).rejects.toThrow(boomInternal)
+    })
+  })
+
+  describe('addListsToDraftFormDefinition', () => {
+    it('should add a list of lists to the form definition', async () => {
+      const expectedLists = [buildList()]
+      const addListsMock = jest
+        .mocked(formDefinition.addLists)
+        .mockResolvedValueOnce(expectedLists)
+
+      const result = await addListsToDraftFormDefinition(
+        id,
+        expectedLists,
+        author
+      )
+      const [expectedFormId, listToInsert, , state] = addListsMock.mock.calls[0]
+      expect(expectedFormId).toBe(id)
+      expect(listToInsert).toEqual(expectedLists)
+      expect(state).toBeUndefined()
+      expect(result).toEqual(expectedLists)
+      expectMetadataUpdate()
+    })
+    it('should surface errors', async () => {
+      const boomInternal = Boom.internal('Something went wrong')
+      jest.mocked(formDefinition.addLists).mockRejectedValueOnce(boomInternal)
+      await expect(
+        addListsToDraftFormDefinition(id, [buildList()], author)
       ).rejects.toThrow(boomInternal)
     })
   })
