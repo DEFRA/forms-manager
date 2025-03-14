@@ -4,6 +4,8 @@ import { ObjectId } from 'mongodb'
 
 import {
   buildDefinition,
+  buildList,
+  buildListItem,
   buildQuestionPage,
   buildSummaryPage,
   buildTextFieldComponent
@@ -11,6 +13,7 @@ import {
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
+  addLists,
   addPageAtPosition,
   deleteComponent,
   get,
@@ -441,7 +444,7 @@ describe('form-definition-repository', () => {
         )
       )
     })
-    it('should delte a component', async () => {
+    it('should delete a component', async () => {
       await deleteComponent(formId, pageId, componentId, mockSession)
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
 
@@ -507,6 +510,43 @@ describe('form-definition-repository', () => {
       mockDefinition.engine = Engine.V2
       await setEngineVersion(formId, Engine.V2, mockDefinition, mockSession)
       expect(mockCollection.updateOne).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('addLists', () => {
+    it('should add an array of lists', async () => {
+      const lists = [
+        buildList({
+          id: 'daa6c67c-a734-4c28-a93a-ffd9651f44c4',
+          items: [buildListItem()]
+        }),
+        buildList({
+          id: 'eb68b22f-b6ba-4358-8cba-b61282fecdb1',
+          items: []
+        })
+      ]
+      const returnedLists = await addLists(formId, lists, mockSession)
+      expect(lists).toEqual(returnedLists)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $push: {
+          'draft.lists': {
+            $each: lists
+          }
+        }
+      })
+    })
+
+    it('should fail if form is live', async () => {
+      await expect(
+        addLists(formId, [], mockSession, FormStatus.Live)
+      ).rejects.toThrow(
+        Boom.badRequest(`Cannot add lists to a live form - ${formId}`)
+      )
     })
   })
 })
