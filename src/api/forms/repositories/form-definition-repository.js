@@ -554,25 +554,6 @@ export async function updatePageFields(
   )
 }
 
-// db["form-definition"].updateOne(
-//   { _id: ObjectId("67d2e5fffaaba7c4f24dcf3b")},
-//   {
-//     $push: {
-//       "draft.lists": {
-//         $each: [
-//           {
-//             id: "c9addb88-6812-4c8c-ab58-f64eb8eef6aa",
-//             title: "Countries",
-//             name: "OhxUEH",
-//             type: "string",
-//             items: []
-//           }
-//         ]
-//       }
-//     }
-//   }
-// )
-
 /**
  * Pushes a list to the end of the draft definition list array
  * @param {string} formId
