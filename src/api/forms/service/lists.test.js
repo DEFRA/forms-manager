@@ -5,7 +5,7 @@ import { buildList } from '~/src/api/forms/__stubs__/definition.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
-import { addListsToDraftFormDefinition } from '~/src/api/forms/service/definition.js'
+import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
 
@@ -72,8 +72,3 @@ describe('lists', () => {
     })
   })
 })
-
-/**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions, PatchPageFields } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
- */

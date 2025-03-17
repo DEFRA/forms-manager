@@ -15,7 +15,6 @@ import {
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
 import {
-  addListsToDraftFormDefinition,
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
@@ -29,6 +28,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
@@ -43,6 +43,7 @@ jest.mock('~/src/api/forms/service/definition.js')
 jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')
 jest.mock('~/src/api/forms/service/migration.js')
+jest.mock('~/src/api/forms/service/lists.js')
 
 describe('Forms route', () => {
   /** @type {Server} */

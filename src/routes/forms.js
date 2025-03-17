@@ -14,7 +14,6 @@ import {
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
 import {
-  addListsToDraftFormDefinition,
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
@@ -29,6 +28,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,

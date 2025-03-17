@@ -1055,6 +1055,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions, PatchPageFields } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */
