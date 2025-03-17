@@ -55,5 +55,63 @@ export async function addListsToDraftFormDefinition(formId, lists, author) {
 }
 
 /**
+ * Add a list of new lists to the draft form definition
+ * @param {string} formId
+ * @param {string} listId
+ * @param {List} list
+ * @param {FormMetadataAuthor} author
+ */
+export async function updateListOnDraftFormDefinition(
+  formId,
+  listId,
+  list,
+  author
+) {
+  logger.info(
+    `Updating list ${listId} on Form Definition (draft) for form ID ${formId}`
+  )
+
+  const session = client.startSession()
+
+  try {
+    const updatedList = await session.withTransaction(async () => {
+      // Update the list on the form definition
+      const returnedLists = await formDefinition.updateList(
+        formId,
+        listId,
+        list,
+        session
+      )
+
+      const now = new Date()
+      await formMetadata.update(
+        formId,
+        {
+          $set: partialAuditFields(now, author)
+        },
+        session
+      )
+
+      return returnedLists
+    })
+
+    logger.info(
+      `Updated list ${listId} on Form Definition (draft) for form ID ${formId}`
+    )
+
+    return updatedList
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to update list ${listId} on Form Definition (draft) for form ID ${formId}`
+    )
+
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
  * @import { FormMetadataAuthor, List } from '@defra/forms-model'
  */

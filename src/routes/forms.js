@@ -28,7 +28,10 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
-import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
+import {
+  addListsToDraftFormDefinition,
+  updateListOnDraftFormDefinition
+} from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
@@ -41,6 +44,8 @@ import {
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
+  listByIdSchema,
+  listSchemaWithRequiredIdSchema,
   migrateDefinitionParamSchema,
   pageByIdSchema,
   patchPageSchema,
@@ -484,12 +489,44 @@ export default [
         payload: listSchemaV2
       }
     }
+  },
+  {
+    method: 'PUT',
+    path: '/forms/{id}/definition/draft/lists/{listId}',
+    /**
+     * @param {UpdateListDraftFormPagesRequest} request
+     */
+    async handler(request) {
+      const { auth, params, payload } = request
+      const { id, listId } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Recreate the draft state from live using the author in the credentials
+      const updatedList = await updateListOnDraftFormDefinition(
+        id,
+        listId,
+        payload,
+        author
+      )
+
+      return {
+        id: updatedList.id,
+        list: updatedList,
+        status: 'updated'
+      }
+    },
+    options: {
+      validate: {
+        params: listByIdSchema,
+        payload: listSchemaWithRequiredIdSchema
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

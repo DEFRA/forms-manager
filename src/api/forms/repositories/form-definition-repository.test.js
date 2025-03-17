@@ -20,6 +20,7 @@ import {
   removeMatchingPages,
   setEngineVersion,
   updateComponent,
+  updateList,
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -547,6 +548,37 @@ describe('form-definition-repository', () => {
       ).rejects.toThrow(
         Boom.badRequest(`Cannot add lists to a live form - ${formId}`)
       )
+    })
+  })
+
+  describe('updateList', () => {
+    const listId = 'daa6c67c-a734-4c28-a93a-ffd9651f44c4'
+    const listItem = buildList({
+      id: listId,
+      items: [buildListItem()]
+    })
+
+    it('should update a list', async () => {
+      jest.mocked(mockCollection.updateOne).mockResolvedValueOnce(listItem)
+
+      const returnedList = await updateList(
+        formId,
+        listId,
+        listItem,
+        mockSession
+      )
+      expect(returnedList).toEqual(listItem)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.lists.id': listId
+      })
+      expect(update).toMatchObject({
+        $set: {
+          'draft.lists.$': listItem
+        }
+      })
     })
   })
 })

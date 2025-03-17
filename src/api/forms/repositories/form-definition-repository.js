@@ -597,6 +597,41 @@ export async function addLists(
 
   return lists
 }
+
+/**
+ * Updates a Draft Form list by id
+ * @param {string} formId
+ * @param {string} listId
+ * @param {List} listItem
+ * @param {ClientSession} session
+ * @returns {Promise<List>}
+ */
+export async function updateList(formId, listId, listItem, session) {
+  logger.info(`Updating list with id ${listId} on form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      'draft.lists.id': listId
+    },
+    {
+      $set: {
+        'draft.lists.$': listItem
+      }
+    },
+    {
+      session
+    }
+  )
+
+  logger.info(`Updated list with id ${listId} on form ID ${formId}`)
+
+  return listItem
+}
 /**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields, List } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
