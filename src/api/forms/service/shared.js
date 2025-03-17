@@ -1,6 +1,8 @@
 import { FormStatus } from '@defra/forms-model'
 
+import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
+import { client } from '~/src/mongo.js'
 
 export const logger = createLogger()
 export const defaultAuthor = {
@@ -90,10 +92,6 @@ export function getLastUpdated(document) {
 }
 
 /**
- * @import { FormMetadataAuthor } from '@defra/forms-model'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
- */
-/**
  * @param {Partial<FormMetadataDocument>} document - form metadata document
  * @returns {{ createdAt: Date, createdBy: FormMetadataAuthor }}
  */
@@ -111,6 +109,53 @@ export function getCreated(document) {
 }
 
 /**
- * @import { FormMetadataDocument, FormMetadata } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
+ * Abstraction of a generic service method
+ * @template T
+ * @param {string} formId
+ * @param {(session: ClientSession) => Promise<T>} asyncHandler
+ * @param {FormMetadataAuthor} author
+ * @param {string} startLog
+ * @param {string} endLog
+ * @param {string} failLog
+ * @returns {Promise<T>}
+ */
+export async function callSessionTransaction(
+  formId,
+  asyncHandler,
+  author,
+  startLog,
+  endLog,
+  failLog
+) {
+  logger.info(startLog)
+
+  const session = client.startSession()
+
+  try {
+    const sessionReturn = await session.withTransaction(async () => {
+      const handlerReturn = await asyncHandler(session)
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+
+      return handlerReturn
+    })
+    logger.info(endLog)
+
+    return sessionReturn
+  } catch (err) {
+    logger.error(err, failLog)
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+/**
+ * @import { FormMetadataDocument, FormMetadata, FormMetadataAuthor } from '@defra/forms-model'
+ * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { WithId, ClientSession } from 'mongodb'
  */
