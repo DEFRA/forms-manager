@@ -8,10 +8,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import {
-  DRAFT,
-  formMetadataDocument
-} from '~/src/api/forms/service/__stubs__/service.js'
+import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
   createPageOnDraftDefinition,
   getFormDefinitionPage,
@@ -247,13 +244,12 @@ describe('Forms service', () => {
       })
 
       expect(dbDefinitionSpy).toHaveBeenCalled()
-      const [formId, calledPageId, pageFieldsToUpdate, , state] =
+      const [formId, calledPageId, pageFieldsToUpdate] =
         dbDefinitionSpy.mock.calls[0]
 
       expect(formId).toBe('123')
       expect(calledPageId).toBe(pageId)
       expect(pageFieldsToUpdate).toEqual(pageFields)
-      expect(state).toBe(DRAFT)
 
       expect(dbDefinitionGetSpy.mock.calls[1][2]).toMatchObject({
         withTransaction: expect.anything()
