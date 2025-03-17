@@ -3,6 +3,7 @@ import Boom from '@hapi/boom'
 
 import {
   buildDefinition,
+  buildList,
   buildQuestionPage,
   buildSummaryPage,
   buildTextFieldComponent
@@ -27,6 +28,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
@@ -41,6 +43,7 @@ jest.mock('~/src/api/forms/service/definition.js')
 jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')
 jest.mock('~/src/api/forms/service/migration.js')
+jest.mock('~/src/api/forms/service/lists.js')
 
 describe('Forms route', () => {
   /** @type {Server} */
@@ -749,6 +752,45 @@ describe('Forms route', () => {
         createComponentOnDraftDefinitionMock.mock.calls[0]
       expect(prepend).toBe(true)
     })
+
+    test('Testing POST /forms/{id}/definition/draft/lists', async () => {
+      const list = buildList({
+        id: undefined
+      })
+
+      const expectedList = {
+        ...buildList({
+          ...list
+        }),
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      }
+
+      const createComponentOnDraftDefinitionMock = jest
+        .mocked(addListsToDraftFormDefinition)
+        .mockResolvedValue([expectedList])
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/lists`,
+        payload: list,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83',
+        list: expectedList,
+        status: 'created'
+      })
+      const [, lists] = createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect(lists).toEqual([
+        {
+          ...expectedList,
+          id: expect.any(String)
+        }
+      ])
+    })
   })
 
   describe('Error responses', () => {
@@ -1134,6 +1176,30 @@ describe('Forms route', () => {
         })
       }
     )
+
+    test('Testing POST /forms/{id}/definition/draft/lists with invalid payload returns validation errors', async () => {
+      const invalidListPayload = buildList({
+        // @ts-expect-error invalid parameter
+        unknown: 1
+      })
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/lists`,
+        payload: invalidListPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"unknown" is not allowed',
+        statusCode: 400,
+        validation: {
+          keys: ['unknown']
+        }
+      })
+    })
 
     test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/component/{componentId} with invalid payload returns validation errors', async () => {
       const invalidPatchPayload = {

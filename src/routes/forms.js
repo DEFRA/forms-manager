@@ -3,6 +3,7 @@ import {
   componentSchema,
   formMetadataInputKeys,
   formMetadataInputSchema,
+  listSchemaV2,
   pageSchemaV2,
   queryOptionsSchema
 } from '@defra/forms-model'
@@ -27,6 +28,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
@@ -46,6 +48,8 @@ import {
   sortIdsSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
+
+export const ROUTE_FORMS = '/forms/{id}'
 
 /**
  * @type {ServerRoute[]}
@@ -98,7 +102,7 @@ export default [
   },
   {
     method: 'PATCH',
-    path: '/forms/{id}',
+    path: ROUTE_FORMS,
     /**
      * @param {RequestFormMetadataUpdateById} request
      */
@@ -128,7 +132,7 @@ export default [
   },
   {
     method: 'GET',
-    path: '/forms/{id}',
+    path: ROUTE_FORMS,
     /**
      * @param {RequestFormById} request
      */
@@ -166,7 +170,7 @@ export default [
   },
   {
     method: 'DELETE',
-    path: '/forms/{id}',
+    path: ROUTE_FORMS,
     /**
      * @param {RequestFormById} request
      */
@@ -453,12 +457,39 @@ export default [
         params: formByIdSchema
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/lists',
+    /**
+     * @param {CreateListDraftFormPagesRequest} request
+     */
+    async handler(request) {
+      const { auth, params, payload } = request
+      const { id } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Recreate the draft state from live using the author in the credentials
+      const [list] = await addListsToDraftFormDefinition(id, [payload], author)
+
+      return {
+        id: list.id,
+        list,
+        status: 'created'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        payload: listSchemaV2
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
