@@ -604,20 +604,9 @@ export async function addLists(
  * @param {string} listId
  * @param {List} listItem
  * @param {ClientSession} session
- * @param {FormStatus} [state]
  * @returns {Promise<List>}
  */
-export async function updateList(
-  formId,
-  listId,
-  listItem,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot update a list on a live form - ${formId}`)
-  }
-
+export async function updateList(formId, listId, listItem, session) {
   logger.info(`Updating list with id ${listId} on form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
