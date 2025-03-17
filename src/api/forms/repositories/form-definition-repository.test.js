@@ -17,6 +17,7 @@ import {
   addPageAtPosition,
   deleteComponent,
   get,
+  removeList,
   removeMatchingPages,
   setEngineVersion,
   updateComponent,
@@ -586,6 +587,33 @@ describe('form-definition-repository', () => {
         updateList(formId, listId, listItem, mockSession, FormStatus.Live)
       ).rejects.toThrow(
         Boom.badRequest(`Cannot update a list on a live form - ${formId}`)
+      )
+    })
+  })
+
+  describe('removeList', () => {
+    const listId = 'daa6c67c-a734-4c28-a93a-ffd9651f44c4'
+
+    it('should delete a list', async () => {
+      await removeList(formId, listId, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.lists.id': listId
+      })
+      expect(update).toMatchObject({
+        $pull: {
+          'draft.lists': { id: listId }
+        }
+      })
+    })
+
+    it('should fail if form is live', async () => {
+      await expect(
+        removeList(formId, listId, mockSession, FormStatus.Live)
+      ).rejects.toThrow(
+        Boom.badRequest(`Cannot remove a list on a live form - ${formId}`)
       )
     })
   })
