@@ -840,8 +840,9 @@ describe('Forms route', () => {
         id: listId,
         status: 'deleted'
       })
-      const [calledFormId, calledId] =
-        removeListOnDraftFormDefinition.mock.calls[0]
+      const [calledFormId, calledId] = jest.mocked(
+        removeListOnDraftFormDefinition
+      ).mock.calls[0]
       expect(calledFormId).toEqual(id)
       expect(calledId).toEqual(listId)
     })
