@@ -28,7 +28,10 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
-import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
+import {
+  addListsToDraftFormDefinition,
+  updateListOnDraftFormDefinition
+} from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
@@ -791,6 +794,35 @@ describe('Forms route', () => {
         }
       ])
     })
+
+    test('Testing PUT /forms/{id}/definition/draft/lists', async () => {
+      const listId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      const list = buildList({
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      })
+
+      const updateList = jest
+        .mocked(updateListOnDraftFormDefinition)
+        .mockResolvedValue(list)
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/lists/${listId}`,
+        payload: list,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83',
+        list,
+        status: 'updated'
+      })
+      const [, calledId, calledList] = updateList.mock.calls[0]
+      expect(calledId).toEqual(listId)
+      expect(calledList).toEqual(list)
+    })
   })
 
   describe('Error responses', () => {
@@ -1197,6 +1229,29 @@ describe('Forms route', () => {
         statusCode: 400,
         validation: {
           keys: ['unknown']
+        }
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/lists/{listId} with invalid payload returns validation errors', async () => {
+      const invalidListPayload = buildList({
+        id: undefined
+      })
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/lists/8d05e220-2145-40f4-9508-fe946dec6fd9`,
+        payload: invalidListPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"id" is required',
+        statusCode: 400,
+        validation: {
+          keys: ['id']
         }
       })
     })
