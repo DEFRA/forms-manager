@@ -632,6 +632,35 @@ export async function updateList(formId, listId, listItem, session) {
 
   return listItem
 }
+
+/**
+ * Updates a component with component id
+ * @param {string} formId
+ * @param {string} listId
+ * @param {ClientSession} session
+ */
+export async function removeList(formId, listId, session) {
+  logger.info(`Deleting list ID ${listId} on form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    { _id: new ObjectId(formId), 'draft.lists.id': listId },
+    {
+      $pull: {
+        'draft.lists': {
+          id: listId
+        }
+      }
+    },
+    { session }
+  )
+
+  logger.info(`Deleted list ID ${listId} on form ID ${formId}`)
+}
+
 /**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields, List } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'

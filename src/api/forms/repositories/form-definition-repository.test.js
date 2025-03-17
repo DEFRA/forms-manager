@@ -17,6 +17,7 @@ import {
   addPageAtPosition,
   deleteComponent,
   get,
+  removeList,
   removeMatchingPages,
   setEngineVersion,
   updateComponent,
@@ -577,6 +578,25 @@ describe('form-definition-repository', () => {
       expect(update).toMatchObject({
         $set: {
           'draft.lists.$': listItem
+        }
+      })
+    })
+  })
+
+  describe('removeList', () => {
+    const listId = 'daa6c67c-a734-4c28-a93a-ffd9651f44c4'
+
+    it('should delete a list', async () => {
+      await removeList(formId, listId, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.lists.id': listId
+      })
+      expect(update).toMatchObject({
+        $pull: {
+          'draft.lists': { id: listId }
         }
       })
     })

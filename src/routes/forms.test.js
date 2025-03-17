@@ -30,6 +30,7 @@ import {
 } from '~/src/api/forms/service/index.js'
 import {
   addListsToDraftFormDefinition,
+  removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
@@ -795,7 +796,7 @@ describe('Forms route', () => {
       ])
     })
 
-    test('Testing PUT /forms/{id}/definition/draft/lists', async () => {
+    test('Testing PUT /forms/{id}/definition/draft/lists/{listId}', async () => {
       const listId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
       const list = buildList({
         id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
@@ -822,6 +823,28 @@ describe('Forms route', () => {
       const [, calledId, calledList] = updateList.mock.calls[0]
       expect(calledId).toEqual(listId)
       expect(calledList).toEqual(list)
+    })
+
+    test('Testing DELETE /forms/{id}/definition/draft/lists/{listId}', async () => {
+      const listId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}/definition/draft/lists/${listId}`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: listId,
+        status: 'deleted'
+      })
+      const [calledFormId, calledId] = jest.mocked(
+        removeListOnDraftFormDefinition
+      ).mock.calls[0]
+      expect(calledFormId).toEqual(id)
+      expect(calledId).toEqual(listId)
     })
   })
 

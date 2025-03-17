@@ -30,6 +30,7 @@ import {
 } from '~/src/api/forms/service/index.js'
 import {
   addListsToDraftFormDefinition,
+  removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
@@ -521,12 +522,37 @@ export default [
         payload: listSchemaWithRequiredIdSchema
       }
     }
+  },
+  {
+    method: 'DELETE',
+    path: '/forms/{id}/definition/draft/lists/{listId}',
+    /**
+     * @param {DeleteListDraftFormPagesRequest} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, listId } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Recreate the draft state from live using the author in the credentials
+      await removeListOnDraftFormDefinition(id, listId, author)
+
+      return {
+        id: listId,
+        status: 'deleted'
+      }
+    },
+    options: {
+      validate: {
+        params: listByIdSchema
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest, DeleteListDraftFormPagesRequest} from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

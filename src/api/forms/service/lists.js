@@ -55,7 +55,7 @@ export async function addListsToDraftFormDefinition(formId, lists, author) {
 }
 
 /**
- * Add a list of new lists to the draft form definition
+ * Update a list on the draft form definition
  * @param {string} formId
  * @param {string} listId
  * @param {List} list
@@ -104,6 +104,49 @@ export async function updateListOnDraftFormDefinition(
     logger.error(
       err,
       `Failed to update list ${listId} on Form Definition (draft) for form ID ${formId}`
+    )
+
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
+ * Remove a list from the draft form definition
+ * @param {string} formId
+ * @param {string} listId
+ * @param {FormMetadataAuthor} author
+ */
+export async function removeListOnDraftFormDefinition(formId, listId, author) {
+  logger.info(
+    `Removing list ${listId} on Form Definition (draft) for form ID ${formId}`
+  )
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      // Update the list on the form definition
+      await formDefinition.removeList(formId, listId, session)
+
+      const now = new Date()
+      await formMetadata.update(
+        formId,
+        {
+          $set: partialAuditFields(now, author)
+        },
+        session
+      )
+    })
+
+    logger.info(
+      `Removed list ${listId} on Form Definition (draft) for form ID ${formId}`
+    )
+  } catch (err) {
+    logger.error(
+      err,
+      `Failed to remove list ${listId} on Form Definition (draft) for form ID ${formId}`
     )
 
     throw err
