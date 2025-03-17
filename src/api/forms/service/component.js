@@ -74,10 +74,13 @@ export async function createComponentOnDraftDefinition(
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addComponents(formId, pageId, components, session, {
-        state: FormStatus.Draft,
-        ...positionOptions
-      })
+      await formDefinition.addComponents(
+        formId,
+        pageId,
+        components,
+        session,
+        positionOptions
+      )
 
       // Update the form with the new draft state
       await formMetadata.update(
@@ -131,8 +134,7 @@ export async function updateComponentOnDraftDefinition(
             pageId,
             componentId,
             componentPayload,
-            session,
-            FormStatus.Draft
+            session
           )
 
         // Update the form with the new draft state
@@ -187,8 +189,7 @@ export async function deleteComponentOnDraftDefinition(
           formId,
           pageId,
           componentId,
-          session,
-          FormStatus.Draft
+          session
         )
 
         // Update the form with the new draft state

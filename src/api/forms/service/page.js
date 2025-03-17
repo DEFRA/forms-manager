@@ -146,8 +146,7 @@ export async function patchFieldsOnDraftDefinitionPage(
           formId,
           pageId,
           pageFieldsToUpdate,
-          session,
-          FormStatus.Draft
+          session
         )
 
         page = await getFormDefinitionPage(formId, pageId, session)

@@ -1,4 +1,3 @@
-import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
@@ -61,7 +60,6 @@ const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
 const author = getAuthor()
-const DRAFT = 'draft'
 
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
@@ -163,7 +161,7 @@ describe('Forms service', () => {
       expect(formId).toBe('123')
       expect(calledPageId).toBe(pageId)
       expect(components).toEqual([textFieldComponent])
-      expect(state).toEqual({ state: FormStatus.Draft })
+      expect(state).toEqual({})
 
       expect(metaFormId).toBe('123')
 
@@ -192,7 +190,7 @@ describe('Forms service', () => {
 
       const [, , , , options] = dbDefinitionSpy.mock.calls[0]
 
-      expect(options).toEqual({ state: FormStatus.Draft, position: 0 })
+      expect(options).toEqual({ position: 0 })
     })
 
     it('should fail if page does not exist', async () => {
@@ -252,21 +250,14 @@ describe('Forms service', () => {
 
       expect(component).toEqual(newTextFieldComponent)
       expect(dbDefinitionSpy).toHaveBeenCalled()
-      const [
-        calledFormId,
-        calledPageId,
-        calledComponentId,
-        calledComponent,
-        ,
-        calledState
-      ] = dbDefinitionSpy.mock.calls[0]
+      const [calledFormId, calledPageId, calledComponentId, calledComponent] =
+        dbDefinitionSpy.mock.calls[0]
 
-      expect([
-        calledFormId,
-        calledPageId,
-        calledComponentId,
-        calledState
-      ]).toEqual([id, pageId, componentId, DRAFT])
+      expect([calledFormId, calledPageId, calledComponentId]).toEqual([
+        id,
+        pageId,
+        componentId
+      ])
       expect(calledComponent).toEqual(newTextFieldComponent)
       const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
       expect(metaFormId).toBe(id)
@@ -332,15 +323,14 @@ describe('Forms service', () => {
       await deleteComponentOnDraftDefinition(id, pageId, componentId2, author)
 
       expect(dbDefinitionSpy).toHaveBeenCalled()
-      const [calledFormId, calledPageId, calledComponentId, , calledState] =
+      const [calledFormId, calledPageId, calledComponentId] =
         dbDefinitionSpy.mock.calls[0]
 
-      expect([
-        calledFormId,
-        calledPageId,
-        calledComponentId,
-        calledState
-      ]).toEqual([id, pageId, componentId2, DRAFT])
+      expect([calledFormId, calledPageId, calledComponentId]).toEqual([
+        id,
+        pageId,
+        componentId2
+      ])
       const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
       expect(metaFormId).toBe(id)
 
