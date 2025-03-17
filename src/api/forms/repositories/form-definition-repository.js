@@ -601,7 +601,7 @@ export async function addLists(
 /**
  * Updates a Draft Form list by id
  * @param {string} formId
- * @param {string} listItemId
+ * @param {string} listId
  * @param {List} listItem
  * @param {ClientSession} session
  * @param {FormStatus} [state]
@@ -609,7 +609,7 @@ export async function addLists(
  */
 export async function updateList(
   formId,
-  listItemId,
+  listId,
   listItem,
   session,
   state = FormStatus.Draft
@@ -618,7 +618,7 @@ export async function updateList(
     throw Boom.badRequest(`Cannot update a list on a live form - ${formId}`)
   }
 
-  logger.info(`Updating list with id ${listItemId} on form ID ${formId}`)
+  logger.info(`Updating list with id ${listId} on form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
@@ -627,7 +627,7 @@ export async function updateList(
   await coll.updateOne(
     {
       _id: new ObjectId(formId),
-      'draft.lists.id': listItemId
+      'draft.lists.id': listId
     },
     {
       $set: {
@@ -639,7 +639,7 @@ export async function updateList(
     }
   )
 
-  logger.info(`Updated list with id ${listItemId} on form ID ${formId}`)
+  logger.info(`Updated list with id ${listId} on form ID ${formId}`)
 
   return listItem
 }
