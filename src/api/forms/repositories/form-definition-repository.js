@@ -597,6 +597,51 @@ export async function addLists(
 
   return lists
 }
+
+/**
+ * Updates a Draft Form list by id
+ * @param {string} formId
+ * @param {string} listItemId
+ * @param {List} listItem
+ * @param {ClientSession} session
+ * @param {FormStatus} [state]
+ */
+export async function updateList(
+  formId,
+  listItemId,
+  listItem,
+  session,
+  state = FormStatus.Draft
+) {
+  if (state === FormStatus.Live) {
+    throw Boom.badRequest(`Cannot update a list on a live form - ${formId}`)
+  }
+
+  logger.info(`Updating list with id ${listItemId} on form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      'draft.lists.id': listItemId
+    },
+    {
+      $set: {
+        'draft.lists.$': listItem
+      }
+    },
+    {
+      session
+    }
+  )
+
+  logger.info(`Updated list with id ${listItemId} on form ID ${formId}`)
+
+  return listItem
+}
 /**
  * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields, List } from '@defra/forms-model'
  * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
