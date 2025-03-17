@@ -7,6 +7,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
   addListsToDraftFormDefinition,
+  removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -104,6 +105,28 @@ describe('lists', () => {
       jest.mocked(formDefinition.updateList).mockRejectedValueOnce(boomInternal)
       await expect(
         updateListOnDraftFormDefinition(id, listId, listToUpdate, author)
+      ).rejects.toThrow(boomInternal)
+    })
+  })
+
+  describe('removeListOnDraftFormDefinition', () => {
+    const listId = '47cfaf57-6cda-44aa-9268-f37c674823d2'
+
+    it('should remove a list on the form definition', async () => {
+      await removeListOnDraftFormDefinition(id, listId, author)
+      const [expectedFormId, expectedListId, , state] = jest.mocked(
+        formDefinition.removeList
+      ).mock.calls[0]
+      expect(expectedFormId).toBe(id)
+      expect(expectedListId).toBe(listId)
+      expect(state).toBeUndefined()
+      expectMetadataUpdate()
+    })
+    it('should surface errors', async () => {
+      const boomInternal = Boom.internal('Something went wrong')
+      jest.mocked(formDefinition.removeList).mockRejectedValueOnce(boomInternal)
+      await expect(
+        removeListOnDraftFormDefinition(id, listId, author)
       ).rejects.toThrow(boomInternal)
     })
   })
