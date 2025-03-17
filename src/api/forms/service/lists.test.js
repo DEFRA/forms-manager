@@ -5,7 +5,10 @@ import { buildList } from '~/src/api/forms/__stubs__/definition.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
-import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
+import {
+  addListsToDraftFormDefinition,
+  updateListOnDraftFormDefinition
+} from '~/src/api/forms/service/lists.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
 
@@ -68,6 +71,39 @@ describe('lists', () => {
       jest.mocked(formDefinition.addLists).mockRejectedValueOnce(boomInternal)
       await expect(
         addListsToDraftFormDefinition(id, [buildList()], author)
+      ).rejects.toThrow(boomInternal)
+    })
+  })
+
+  describe('updateListOnDraftFormDefinition', () => {
+    const listToUpdate = buildList()
+    const listId = '47cfaf57-6cda-44aa-9268-f37c674823d2'
+
+    it('should update a list on the form definition', async () => {
+      const updateListMock = jest
+        .mocked(formDefinition.updateList)
+        .mockResolvedValueOnce(listToUpdate)
+
+      const result = await updateListOnDraftFormDefinition(
+        id,
+        listId,
+        listToUpdate,
+        author
+      )
+      const [expectedFormId, expectedListId, expectedListToUpdate, , state] =
+        updateListMock.mock.calls[0]
+      expect(expectedFormId).toBe(id)
+      expect(expectedListId).toBe(listId)
+      expect(expectedListToUpdate).toEqual(listToUpdate)
+      expect(state).toBeUndefined()
+      expect(result).toEqual(listToUpdate)
+      expectMetadataUpdate()
+    })
+    it('should surface errors', async () => {
+      const boomInternal = Boom.internal('Something went wrong')
+      jest.mocked(formDefinition.updateList).mockRejectedValueOnce(boomInternal)
+      await expect(
+        updateListOnDraftFormDefinition(id, listId, listToUpdate, author)
       ).rejects.toThrow(boomInternal)
     })
   })

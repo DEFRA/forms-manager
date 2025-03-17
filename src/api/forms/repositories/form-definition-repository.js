@@ -605,6 +605,7 @@ export async function addLists(
  * @param {List} listItem
  * @param {ClientSession} session
  * @param {FormStatus} [state]
+ * @returns {Promise<List>}
  */
 export async function updateList(
   formId,
