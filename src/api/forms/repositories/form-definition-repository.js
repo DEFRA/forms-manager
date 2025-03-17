@@ -638,18 +638,8 @@ export async function updateList(formId, listId, listItem, session) {
  * @param {string} formId
  * @param {string} listId
  * @param {ClientSession} session
- * @param {FormStatus} [state]
  */
-export async function removeList(
-  formId,
-  listId,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot remove a list on a live form - ${formId}`)
-  }
-
+export async function removeList(formId, listId, session) {
   logger.info(`Deleting list ID ${listId} on form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (

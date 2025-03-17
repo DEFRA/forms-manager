@@ -113,12 +113,11 @@ describe('lists', () => {
 
     it('should remove a list on the form definition', async () => {
       await removeListOnDraftFormDefinition(id, listId, author)
-      const [expectedFormId, expectedListId, , state] = jest.mocked(
+      const [expectedFormId, expectedListId] = jest.mocked(
         formDefinition.removeList
       ).mock.calls[0]
       expect(expectedFormId).toBe(id)
       expect(expectedListId).toBe(listId)
-      expect(state).toBeUndefined()
       expectMetadataUpdate()
     })
     it('should surface errors', async () => {

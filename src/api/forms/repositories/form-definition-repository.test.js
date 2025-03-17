@@ -600,14 +600,6 @@ describe('form-definition-repository', () => {
         }
       })
     })
-
-    it('should fail if form is live', async () => {
-      await expect(
-        removeList(formId, listId, mockSession, FormStatus.Live)
-      ).rejects.toThrow(
-        Boom.badRequest(`Cannot remove a list on a live form - ${formId}`)
-      )
-    })
   })
 })
 
