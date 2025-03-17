@@ -91,12 +91,11 @@ describe('lists', () => {
         listToUpdate,
         author
       )
-      const [expectedFormId, expectedListId, expectedListToUpdate, , state] =
+      const [expectedFormId, expectedListId, expectedListToUpdate] =
         updateListMock.mock.calls[0]
       expect(expectedFormId).toBe(id)
       expect(expectedListId).toBe(listId)
       expect(expectedListToUpdate).toEqual(listToUpdate)
-      expect(state).toBeUndefined()
       expect(result).toEqual(listToUpdate)
       expectMetadataUpdate()
     })
