@@ -112,21 +112,6 @@ describe('form-definition-repository', () => {
   })
 
   describe('removeMatchingPages', () => {
-    it('should not edit a live summary', async () => {
-      await expect(
-        removeMatchingPages(
-          formId,
-          { controller: ControllerType.Summary },
-          mockSession,
-          FormStatus.Live
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot remove page on live form ID 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
-
     it('should remove a page', async () => {
       await removeMatchingPages(
         formId,
@@ -145,16 +130,6 @@ describe('form-definition-repository', () => {
 
   describe('addPageAtPosition', () => {
     const page = buildQuestionPage()
-
-    it('should not edit a live summary', async () => {
-      await expect(
-        addPageAtPosition('1234', page, mockSession, {
-          state: FormStatus.Live
-        })
-      ).rejects.toThrow(
-        Boom.badRequest('Cannot remove add on live form ID 1234')
-      )
-    })
 
     it('should add a page at position', async () => {
       await addPageAtPosition(formId, page, mockSession, { position: -1 })
@@ -191,15 +166,6 @@ describe('form-definition-repository', () => {
       components: [buildTextFieldComponent({})]
     })
 
-    it('should fail if form is live', async () => {
-      await expect(
-        updatePage(formId, pageId, page, mockSession, FormStatus.Live)
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot update page on a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
     it('should update a page', async () => {
       await updatePage(formId, pageId, page, mockSession)
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
@@ -218,18 +184,6 @@ describe('form-definition-repository', () => {
 
   describe('addComponents', () => {
     const component = buildTextFieldComponent()
-
-    it('should fail if form is live', async () => {
-      await expect(
-        addComponents(formId, pageId, [component], mockSession, {
-          state: FormStatus.Live
-        })
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot add component to a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
 
     it('should add a component to a page', async () => {
       await addComponents(formId, pageId, [component], mockSession)
@@ -329,23 +283,6 @@ describe('form-definition-repository', () => {
         )
       )
     })
-
-    it('should fail if state is live', async () => {
-      await expect(
-        updateComponent(
-          formId,
-          pageId,
-          componentId,
-          component,
-          mockSession,
-          FormStatus.Live
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot update component on a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
   })
 
   describe('updatePageFields', () => {
@@ -412,22 +349,6 @@ describe('form-definition-repository', () => {
         }
       })
     })
-
-    it('should fail if form is live', async () => {
-      await expect(
-        updatePageFields(
-          formId,
-          pageId,
-          pageFields,
-          mockSession,
-          FormStatus.Live
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
   })
 
   describe('removePage', () => {
@@ -460,21 +381,6 @@ describe('form-definition-repository', () => {
   })
 
   describe('deleteComponent', () => {
-    it('should fail if form is live', async () => {
-      await expect(
-        deleteComponent(
-          formId,
-          pageId,
-          componentId,
-          mockSession,
-          FormStatus.Live
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot delete component on a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
     it('should delete a component', async () => {
       await deleteComponent(formId, pageId, componentId, mockSession)
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
@@ -570,14 +476,6 @@ describe('form-definition-repository', () => {
           }
         }
       })
-    })
-
-    it('should fail if form is live', async () => {
-      await expect(
-        addLists(formId, [], mockSession, FormStatus.Live)
-      ).rejects.toThrow(
-        Boom.badRequest(`Cannot add lists to a live form - ${formId}`)
-      )
     })
   })
 

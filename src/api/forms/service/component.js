@@ -95,7 +95,7 @@ export async function createComponentOnDraftDefinition(
         pageId,
         createdComponents,
         session,
-        { state: FormStatus.Draft, ...positionOptions }
+        positionOptions
       )
 
       // Update the form with the new draft state
@@ -150,8 +150,7 @@ export async function updateComponentOnDraftDefinition(
             pageId,
             componentId,
             componentPayload,
-            session,
-            FormStatus.Draft
+            session
           )
 
         // Update the form with the new draft state
@@ -206,8 +205,7 @@ export async function deleteComponentOnDraftDefinition(
           formId,
           pageId,
           componentId,
-          session,
-          FormStatus.Draft
+          session
         )
 
         // Update the form with the new draft state
