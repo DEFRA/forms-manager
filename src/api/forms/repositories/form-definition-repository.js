@@ -567,7 +567,7 @@ export async function removePage(formId, pageId, session) {
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
-  await coll.updateOne(
+  const definition = await coll.findOneAndUpdate(
     { _id: new ObjectId(formId), 'draft.pages.id': pageId },
     {
       $pull: {
@@ -576,6 +576,15 @@ export async function removePage(formId, pageId, session) {
     },
     { session }
   )
+
+  if (!definition) {
+    logger.error(
+      `Failed to delete page ID ${pageId} on form ID ${formId}.  Form not found`
+    )
+    throw Boom.notFound(
+      `Form with ID ${formId} not found. Failed to delete page ID ${pageId}.`
+    )
+  }
 
   logger.info(`Deleted page ID ${pageId} on form ID ${formId}`)
 }

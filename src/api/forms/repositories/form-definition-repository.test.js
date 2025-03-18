@@ -82,10 +82,9 @@ describe('form-definition-repository', () => {
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
   })
+  const mockDefinition = buildDefinition({})
 
   describe('get', () => {
-    const mockDefinition = buildDefinition({})
-
     beforeEach(() => {
       mockCollection.findOne.mockResolvedValue({
         draft: mockDefinition
@@ -433,8 +432,9 @@ describe('form-definition-repository', () => {
 
   describe('removePage', () => {
     it('should remove a page from a draft component', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce(mockDefinition)
       await removePage(formId, pageId, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      const [filter, update] = mockCollection.findOneAndUpdate.mock.calls[0]
 
       expect(filter).toMatchObject({
         _id: new ObjectId(formId),
@@ -447,6 +447,15 @@ describe('form-definition-repository', () => {
           }
         }
       })
+    })
+
+    it('should fail if definition does not exist', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce(null)
+      await expect(removePage(formId, pageId, mockSession)).rejects.toThrow(
+        Boom.notFound(
+          'Form with ID 1eabd1437567fe1b26708bbb not found. Failed to delete page ID 87ffdbd3-9e43-41e2-8db3-98ade26ca0b7.'
+        )
+      )
     })
   })
 
