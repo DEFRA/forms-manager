@@ -191,60 +191,6 @@ export async function patchFieldsOnDraftDefinitionPage(
  * Updates a component and throws a Boom.notFound if page or component is not found
  * @param {string} formId
  * @param {string} pageId
- * @param {string} componentId
- * @param {FormMetadataAuthor} author
- */
-export async function deleteComponentOnDraftDefinition(
-  formId,
-  pageId,
-  componentId,
-  author
-) {
-  logger.info(
-    `Deleting Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
-  )
-
-  const session = client.startSession()
-
-  try {
-    await session.withTransaction(
-      async () => {
-        await formDefinition.deleteComponent(
-          formId,
-          pageId,
-          componentId,
-          session,
-          FormStatus.Draft
-        )
-
-        // Update the form with the new draft state
-        await formMetadata.update(
-          formId,
-          { $set: partialAuditFields(new Date(), author) },
-          session
-        )
-      },
-      { readPreference: 'primary' }
-    )
-  } catch (err) {
-    logger.error(
-      err,
-      `Failed to delete Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
-    )
-    throw err
-  } finally {
-    await session.endSession()
-  }
-
-  logger.info(
-    `Deleted Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
-  )
-}
-
-/**
- * Updates a component and throws a Boom.notFound if page or component is not found
- * @param {string} formId
- * @param {string} pageId
  * @param {FormMetadataAuthor} author
  */
 export async function deletePageOnDraftDefinition(formId, pageId, author) {
