@@ -36,6 +36,7 @@ import {
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
+  deletePageOnDraftDefinition,
   patchFieldsOnDraftDefinitionPage
 } from '~/src/api/forms/service/page.js'
 import { createServer } from '~/src/api/server.js'
@@ -845,6 +846,27 @@ describe('Forms route', () => {
       ).mock.calls[0]
       expect(calledFormId).toEqual(id)
       expect(calledId).toEqual(listId)
+    })
+
+    test('Testing DELETE /forms/{id}/definition/draft/pages/{pageId}', async () => {
+      const pageId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}/definition/draft/pages/${pageId}`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: pageId,
+        status: 'deleted'
+      })
+      const [calledFormId, calledId] = jest.mocked(deletePageOnDraftDefinition)
+        .mock.calls[0]
+      expect(calledFormId).toEqual(id)
+      expect(calledId).toEqual(pageId)
     })
   })
 

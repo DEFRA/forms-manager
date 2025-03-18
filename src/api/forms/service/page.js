@@ -188,6 +188,38 @@ export async function patchFieldsOnDraftDefinitionPage(
 }
 
 /**
+ * Updates a component and throws a Boom.notFound if page or component is not found
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {FormMetadataAuthor} author
+ */
+export async function deletePageOnDraftDefinition(formId, pageId, author) {
+  logger.info(`Deleting Page ID ${pageId} on Form ID ${formId}`)
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await formDefinition.removePage(formId, pageId, session)
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } catch (err) {
+    logger.error(err, `Failed to delete Page ID ${pageId} on Form ID ${formId}`)
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Deleted Page ID ${pageId} on Form ID ${formId}`)
+}
+
+/**
  * @import { FormDefinition, FormMetadataAuthor, Page, PageSummary, PatchPageFields } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */

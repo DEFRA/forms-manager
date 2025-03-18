@@ -19,6 +19,7 @@ import {
   get,
   removeList,
   removeMatchingPages,
+  removePage,
   setEngineVersion,
   updateComponent,
   updateList,
@@ -81,10 +82,9 @@ describe('form-definition-repository', () => {
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
   })
+  const mockDefinition = buildDefinition({})
 
   describe('get', () => {
-    const mockDefinition = buildDefinition({})
-
     beforeEach(() => {
       mockCollection.findOne.mockResolvedValue({
         draft: mockDefinition
@@ -425,6 +425,35 @@ describe('form-definition-repository', () => {
       ).rejects.toThrow(
         Boom.badRequest(
           'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
+        )
+      )
+    })
+  })
+
+  describe('removePage', () => {
+    it('should remove a page from a draft component', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce(mockDefinition)
+      await removePage(formId, pageId, mockSession)
+      const [filter, update] = mockCollection.findOneAndUpdate.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toMatchObject({
+        $pull: {
+          'draft.pages': {
+            id: pageId
+          }
+        }
+      })
+    })
+
+    it('should fail if definition does not exist', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce(null)
+      await expect(removePage(formId, pageId, mockSession)).rejects.toThrow(
+        Boom.notFound(
+          'Form with ID 1eabd1437567fe1b26708bbb not found. Failed to delete page ID 87ffdbd3-9e43-41e2-8db3-98ade26ca0b7.'
         )
       )
     })

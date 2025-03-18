@@ -555,6 +555,41 @@ export async function updatePageFields(
 }
 
 /**
+ * Updates a component with component id
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {ClientSession} session
+ */
+export async function removePage(formId, pageId, session) {
+  logger.info(`Deleting page ID ${pageId} on form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const definition = await coll.findOneAndUpdate(
+    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
+    {
+      $pull: {
+        'draft.pages': { id: pageId }
+      }
+    },
+    { session }
+  )
+
+  if (!definition) {
+    logger.error(
+      `Failed to delete page ID ${pageId} on form ID ${formId}.  Form not found`
+    )
+    throw Boom.notFound(
+      `Form with ID ${formId} not found. Failed to delete page ID ${pageId}.`
+    )
+  }
+
+  logger.info(`Deleted page ID ${pageId} on form ID ${formId}`)
+}
+
+/**
  * Pushes a list to the end of the draft definition list array
  * @param {string} formId
  * @param {List[]} lists
