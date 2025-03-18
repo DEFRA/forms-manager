@@ -36,6 +36,7 @@ import {
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import {
   createPageOnDraftDefinition,
+  deletePageOnDraftDefinition,
   patchFieldsOnDraftDefinitionPage
 } from '~/src/api/forms/service/page.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -56,7 +57,10 @@ import {
 } from '~/src/models/forms.js'
 
 export const ROUTE_FORMS = '/forms/{id}'
-
+export const ROUTE_PAGES = '/forms/{id}/definition/draft/pages/{pageId}'
+export const ROUTE_COMPONENTS =
+  '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}'
+export const ROUTE_LISTS = '/forms/{id}/definition/draft/lists/{listId}'
 /**
  * @type {ServerRoute[]}
  */
@@ -294,7 +298,7 @@ export default [
   },
   {
     method: 'PATCH',
-    path: '/forms/{id}/definition/draft/pages/{pageId}',
+    path: ROUTE_PAGES,
     /**
      * @param {PatchPageRequest} request
      */
@@ -347,7 +351,7 @@ export default [
   },
   {
     method: 'PUT',
-    path: '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}',
+    path: ROUTE_COMPONENTS,
     /**
      * @param {RequestUpdateComponent} request
      */
@@ -373,7 +377,7 @@ export default [
   },
   {
     method: 'DELETE',
-    path: '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}',
+    path: ROUTE_COMPONENTS,
     /**
      * @param {RequestUpdateComponent} request
      */
@@ -493,7 +497,7 @@ export default [
   },
   {
     method: 'PUT',
-    path: '/forms/{id}/definition/draft/lists/{listId}',
+    path: ROUTE_LISTS,
     /**
      * @param {UpdateListDraftFormPagesRequest} request
      */
@@ -525,7 +529,7 @@ export default [
   },
   {
     method: 'DELETE',
-    path: '/forms/{id}/definition/draft/lists/{listId}',
+    path: ROUTE_LISTS,
     /**
      * @param {DeleteListDraftFormPagesRequest} request
      */
@@ -547,12 +551,37 @@ export default [
         params: listByIdSchema
       }
     }
+  },
+  {
+    method: 'DELETE',
+    path: ROUTE_PAGES,
+    /**
+     * @param {DeletePageDraftFormRequest} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, pageId } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Recreate the draft state from live using the author in the credentials
+      await deletePageOnDraftDefinition(id, pageId, author)
+
+      return {
+        id: pageId,
+        status: 'deleted'
+      }
+    },
+    options: {
+      validate: {
+        params: pageByIdSchema
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest, DeleteListDraftFormPagesRequest} from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest, DeleteListDraftFormPagesRequest, DeletePageDraftFormRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
