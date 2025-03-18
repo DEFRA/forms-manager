@@ -19,6 +19,7 @@ import {
   get,
   removeList,
   removeMatchingPages,
+  removePage,
   setEngineVersion,
   updateComponent,
   updateList,
@@ -427,6 +428,25 @@ describe('form-definition-repository', () => {
           'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
         )
       )
+    })
+  })
+
+  describe('removePage', () => {
+    it('should remove a page from a draft component', async () => {
+      await removePage(formId, pageId, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toMatchObject({
+        $pull: {
+          'draft.pages': {
+            id: pageId
+          }
+        }
+      })
     })
   })
 
