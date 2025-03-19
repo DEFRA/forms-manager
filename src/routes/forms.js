@@ -4,7 +4,7 @@ import {
   formMetadataInputKeys,
   formMetadataInputSchema,
   listSchemaV2,
-  pageSchemaV2,
+  pageSchemaPayloadV2,
   queryOptionsSchema
 } from '@defra/forms-model'
 
@@ -274,7 +274,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: pageSchemaV2
+        payload: pageSchemaPayloadV2
       }
     }
   },

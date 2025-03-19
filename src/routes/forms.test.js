@@ -100,13 +100,6 @@ describe('Forms route', () => {
     title: 'Updated title for page'
   }
 
-  const stubPageObject = /** @type {PageStart} */ {
-    title: 'What is your name?',
-    path: '/what-is-your-name',
-    next: [],
-    components: [stubTextFieldComponent]
-  }
-
   /**
    * @satisfies {FormMetadata}
    */
@@ -600,20 +593,28 @@ describe('Forms route', () => {
       })
     })
 
-    test('Testing POST /forms/{id}/definition/draft/pages adds a new page to the db', async () => {
-      const expectedPage = buildQuestionPage({})
-      jest.mocked(createPageOnDraftDefinition).mockResolvedValue(expectedPage)
+    test('Testing POST /forms/{id}/definition/draft/pages adds a new page to the db and populates id', async () => {
+      const pagePayload = buildQuestionPage({
+        id: undefined
+      })
+      const createPageMock = jest.mocked(createPageOnDraftDefinition)
+      createPageMock.mockResolvedValue(pagePayload)
 
       const response = await server.inject({
         method: 'POST',
         url: `/forms/${id}/definition/draft/pages`,
-        payload: stubPageObject,
+        payload: pagePayload,
         auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(expectedPage)
+      expect(response.result).toEqual(pagePayload)
+      expect(createPageMock).toHaveBeenCalledWith(
+        id,
+        { ...pagePayload, id: expect.any(String) },
+        { ...author, id: expect.any(String) }
+      )
     })
 
     test('Testing PATCH /forms/{id}/definition/draft/pages/{pageId} updates fields on a page', async () => {
@@ -1154,10 +1155,10 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Bad Request',
-        message: '"id" must be a valid GUID. "path" contains an invalid value',
+        message: '"path" contains an invalid value. "id" must be a valid GUID',
         statusCode: 400,
         validation: {
-          keys: ['id', 'path'],
+          keys: ['path', 'id'],
           source: 'payload'
         }
       })
