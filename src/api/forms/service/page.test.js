@@ -8,10 +8,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import {
-  DRAFT,
-  formMetadataDocument
-} from '~/src/api/forms/service/__stubs__/service.js'
+import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
   createPageOnDraftDefinition,
   deletePageOnDraftDefinition,
@@ -98,14 +95,14 @@ describe('Page service', () => {
         author
       )
       const dbOperationArgs = dbMetadataSpy.mock.calls[0]
-      const [formId1, page1, , options] = dbDefinitionSpy.mock.calls[0]
+      const [formId1, page1, , position] = dbDefinitionSpy.mock.calls[0]
 
       expect(formId1).toBe(id)
       expect(page1).toMatchObject({
         ...formDefinitionPageCustomisedTitle,
         id: expect.any(String)
       })
-      expect(options).toEqual({ position: -1 })
+      expect(position).toBe(-1)
       expect(dbOperationArgs[0]).toBe(id)
       expect(dbOperationArgs[1].$set).toEqual({
         'draft.updatedAt': dateUsedInFakeTime,
@@ -149,7 +146,7 @@ describe('Page service', () => {
           id: expect.any(String)
         },
         expect.anything(),
-        {}
+        undefined
       )
       expect(dbOperationArgs[0]).toBe(id)
       expect(dbOperationArgs[1].$set).toEqual({
@@ -248,13 +245,12 @@ describe('Page service', () => {
       })
 
       expect(dbDefinitionSpy).toHaveBeenCalled()
-      const [formId, calledPageId, pageFieldsToUpdate, , state] =
+      const [formId, calledPageId, pageFieldsToUpdate] =
         dbDefinitionSpy.mock.calls[0]
 
       expect(formId).toBe('123')
       expect(calledPageId).toBe(pageId)
       expect(pageFieldsToUpdate).toEqual(pageFields)
-      expect(state).toBe(DRAFT)
 
       expect(dbDefinitionGetSpy.mock.calls[1][2]).toMatchObject({
         withTransaction: expect.anything()

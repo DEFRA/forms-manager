@@ -236,17 +236,8 @@ export async function updateName(
  * @param {string} formId - the ID of the form
  * @param {{ controller: ControllerType.Summary }} matchCriteria - new name for the form
  * @param {ClientSession} session
- * @param {FormStatus} [state] - state of the form to update
  */
-export async function removeMatchingPages(
-  formId,
-  matchCriteria,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot remove page on live form ID ${formId}`)
-  }
+export async function removeMatchingPages(formId, matchCriteria, session) {
   logger.info(`Removing page on ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
@@ -268,18 +259,9 @@ export async function removeMatchingPages(
  * @param {string} formId - the ID of the form
  * @param {Page} page - new name for the form
  * @param {ClientSession} session
- * @param {{ position?: number; state?: FormStatus }} options
+ * @param {number|undefined} [position]
  */
-export async function addPageAtPosition(
-  formId,
-  page,
-  session,
-  { position, state = FormStatus.Draft }
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot remove add on live form ID ${formId}`)
-  }
-
+export async function addPageAtPosition(formId, page, session, position) {
   logger.info(`Adding page on Form ID ${formId}`)
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
@@ -312,20 +294,9 @@ export async function addPageAtPosition(
  * @param {string} pageId
  * @param {Page} page
  * @param {ClientSession} session
- * @param {FormStatus} [state]
  * @returns {Promise<void>}
  */
-export async function updatePage(
-  formId,
-  pageId,
-  page,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot update page on a live form - ${formId}`)
-  }
-
+export async function updatePage(formId, pageId, page, session) {
   logger.info(`Updating page ID ${pageId} on form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
@@ -347,7 +318,7 @@ export async function updatePage(
  * @param {string} pageId
  * @param {ComponentDef[]} components
  * @param {ClientSession} session
- * @param {{ state?: FormStatus; position?: number }} [options]
+ * @param {{ position?: number }} [options]
  * @returns {Promise<void>}
  */
 export async function addComponents(
@@ -355,12 +326,8 @@ export async function addComponents(
   pageId,
   components,
   session,
-  { position, state = FormStatus.Draft } = {}
+  { position } = {}
 ) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot add component to a live form - ${formId}`)
-  }
-
   logger.info(`Adding a new component to form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
@@ -396,20 +363,14 @@ export async function addComponents(
  * @param {string} componentId
  * @param {ComponentDef} component
  * @param {ClientSession} session
- * @param {FormStatus} [state]
  */
 export async function updateComponent(
   formId,
   pageId,
   componentId,
   component,
-  session,
-  state = FormStatus.Draft
+  session
 ) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot update component on a live form - ${formId}`)
-  }
-
   logger.info(
     `Updating component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
@@ -455,19 +416,8 @@ export async function updateComponent(
  * @param {string} pageId
  * @param {string} componentId
  * @param {ClientSession} session
- * @param {FormStatus} [state]
  */
-export async function deleteComponent(
-  formId,
-  pageId,
-  componentId,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot delete component on a live form - ${formId}`)
-  }
-
+export async function deleteComponent(formId, pageId, componentId, session) {
   logger.info(
     `Deleting component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
@@ -499,19 +449,8 @@ export async function deleteComponent(
  * @param {string} pageId
  * @param {PatchPageFields} pageFields
  * @param {ClientSession} session
- * @param {FormStatus} state
  */
-export async function updatePageFields(
-  formId,
-  pageId,
-  pageFields,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot update pageFields on a live form - ${formId}`)
-  }
-
+export async function updatePageFields(formId, pageId, pageFields, session) {
   const pageFieldKeys = Object.keys(pageFields)
 
   logger.info(
@@ -594,18 +533,8 @@ export async function removePage(formId, pageId, session) {
  * @param {string} formId
  * @param {List[]} lists
  * @param {ClientSession} session
- * @param {FormStatus} state
  */
-export async function addLists(
-  formId,
-  lists,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest(`Cannot add lists to a live form - ${formId}`)
-  }
-
+export async function addLists(formId, lists, session) {
   logger.info(`Adding new lists to form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (

@@ -64,19 +64,19 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   )
 
   /**
-   * @type {{ position?: number; state?: FormStatus }}
+   * @type {number|undefined}
    */
-  const options = {}
+  let position
 
   if (summaryExists) {
-    options.position = -1
+    position = -1
   }
 
   const page = createPageWithId(newPage)
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPageAtPosition(formId, page, session, options)
+      await formDefinition.addPageAtPosition(formId, page, session, position)
 
       // Set to V2 if not already
       await formDefinition.setEngineVersion(
@@ -159,8 +159,7 @@ export async function patchFieldsOnDraftDefinitionPage(
           formId,
           pageId,
           pageFieldsToUpdate,
-          session,
-          FormStatus.Draft
+          session
         )
 
         page = await getFormDefinitionPage(formId, pageId, session)

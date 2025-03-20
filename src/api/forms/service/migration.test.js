@@ -119,8 +119,7 @@ describe('migration', () => {
       expect(addPageAtPositionSpy).toHaveBeenCalled()
       expect(formMetadataUpdateSpy).toHaveBeenCalled()
 
-      const [formId1, matchCriteria, , state] =
-        removeMatchingPagesSpy.mock.calls[0]
+      const [formId1, matchCriteria] = removeMatchingPagesSpy.mock.calls[0]
       const [formId2, calledSummary, , options] =
         addPageAtPositionSpy.mock.calls[0]
       const [formId3, updateFilter] = formMetadataUpdateSpy.mock.calls[0]
@@ -130,8 +129,7 @@ describe('migration', () => {
       expect(formId3).toBe(id)
       expect(matchCriteria).toEqual({ controller: ControllerType.Summary })
       expect(calledSummary).toEqual(summary)
-      expect(state).toBeUndefined()
-      expect(options).toEqual({})
+      expect(options).toBeUndefined()
       expect(updateFilter.$set).toEqual({
         'draft.updatedAt': dateUsedInFakeTime,
         'draft.updatedBy': author,

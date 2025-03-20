@@ -46,8 +46,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
       await formDefinition.addPageAtPosition(
         formId,
         /** @type {PageSummary} */ (summaryWithId),
-        session,
-        {}
+        session
       )
 
       // Update the form with the new draft state
