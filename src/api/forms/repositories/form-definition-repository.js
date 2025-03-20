@@ -259,9 +259,9 @@ export async function removeMatchingPages(formId, matchCriteria, session) {
  * @param {string} formId - the ID of the form
  * @param {Page} page - new name for the form
  * @param {ClientSession} session
- * @param {{ position?: number }} options
+ * @param {number|undefined} [position]
  */
-export async function addPageAtPosition(formId, page, session, { position }) {
+export async function addPageAtPosition(formId, page, session, position) {
   logger.info(`Adding page on Form ID ${formId}`)
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
@@ -491,6 +491,41 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
   logger.info(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
   )
+}
+
+/**
+ * Updates a component with component id
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {ClientSession} session
+ */
+export async function removePage(formId, pageId, session) {
+  logger.info(`Deleting page ID ${pageId} on form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const definition = await coll.findOneAndUpdate(
+    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
+    {
+      $pull: {
+        'draft.pages': { id: pageId }
+      }
+    },
+    { session }
+  )
+
+  if (!definition) {
+    logger.error(
+      `Failed to delete page ID ${pageId} on form ID ${formId}.  Form not found`
+    )
+    throw Boom.notFound(
+      `Form with ID ${formId} not found. Failed to delete page ID ${pageId}.`
+    )
+  }
+
+  logger.info(`Deleted page ID ${pageId} on form ID ${formId}`)
 }
 
 /**

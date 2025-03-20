@@ -11,6 +11,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
   createPageOnDraftDefinition,
+  deletePageOnDraftDefinition,
   getFormDefinitionPage,
   patchFieldsOnDraftDefinitionPage
 } from '~/src/api/forms/service/page.js'
@@ -27,7 +28,7 @@ jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const author = getAuthor()
 const summaryPage = buildSummaryPage()
-describe('Forms service', () => {
+describe('Page service', () => {
   const id = '661e4ca5039739ef2902b214'
   const dateUsedInFakeTime = new Date('2020-01-01')
   const pageId = 'ffefd409-f3f4-49fe-882e-6e89f44631b1'
@@ -94,14 +95,14 @@ describe('Forms service', () => {
         author
       )
       const dbOperationArgs = dbMetadataSpy.mock.calls[0]
-      const [formId1, page1, , options] = dbDefinitionSpy.mock.calls[0]
+      const [formId1, page1, , position] = dbDefinitionSpy.mock.calls[0]
 
       expect(formId1).toBe(id)
       expect(page1).toMatchObject({
         ...formDefinitionPageCustomisedTitle,
         id: expect.any(String)
       })
-      expect(options).toEqual({ position: -1 })
+      expect(position).toBe(-1)
       expect(dbOperationArgs[0]).toBe(id)
       expect(dbOperationArgs[1].$set).toEqual({
         'draft.updatedAt': dateUsedInFakeTime,
@@ -145,7 +146,7 @@ describe('Forms service', () => {
           id: expect.any(String)
         },
         expect.anything(),
-        {}
+        undefined
       )
       expect(dbOperationArgs[0]).toBe(id)
       expect(dbOperationArgs[1].$set).toEqual({
@@ -271,6 +272,39 @@ describe('Forms service', () => {
           'Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 not found on Form ID 123'
         )
       )
+    })
+  })
+
+  describe('deletePageOnDraftDefinition', () => {
+    it('should delete the page', async () => {
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'removePage')
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      await deletePageOnDraftDefinition(id, pageId, author)
+
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      const [calledFormId, calledPageId] = dbDefinitionSpy.mock.calls[0]
+
+      expect([calledFormId, calledPageId]).toEqual([id, pageId])
+      const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
+      expect(metaFormId).toBe(id)
+
+      expect(metaUpdateOperations.$set).toEqual({
+        'draft.updatedAt': dateUsedInFakeTime,
+        'draft.updatedBy': author,
+        updatedAt: dateUsedInFakeTime,
+        updatedBy: author
+      })
+    })
+
+    it('should surface any errors', async () => {
+      jest
+        .mocked(formDefinition.removePage)
+        .mockRejectedValueOnce(Boom.notFound('Form ID 123 not found'))
+
+      await expect(
+        deletePageOnDraftDefinition('123', pageId, author)
+      ).rejects.toThrow(Boom.notFound('Form ID 123 not found'))
     })
   })
 })

@@ -129,7 +129,7 @@ describe('migration', () => {
       expect(formId3).toBe(id)
       expect(matchCriteria).toEqual({ controller: ControllerType.Summary })
       expect(calledSummary).toEqual(summary)
-      expect(options).toEqual({})
+      expect(options).toBeUndefined()
       expect(updateFilter.$set).toEqual({
         'draft.updatedAt': dateUsedInFakeTime,
         'draft.updatedBy': author,

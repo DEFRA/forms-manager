@@ -64,19 +64,19 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   )
 
   /**
-   * @type {{ position?: number; state?: FormStatus }}
+   * @type {number|undefined}
    */
-  const options = {}
+  let position
 
   if (summaryExists) {
-    options.position = -1
+    position = -1
   }
 
   const page = createPageWithId(newPage)
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPageAtPosition(formId, page, session, options)
+      await formDefinition.addPageAtPosition(formId, page, session, position)
 
       // Set to V2 if not already
       await formDefinition.setEngineVersion(
@@ -184,6 +184,38 @@ export async function patchFieldsOnDraftDefinitionPage(
   }
 
   return /** @type {Page | undefined } */ (page)
+}
+
+/**
+ * Updates a component and throws a Boom.notFound if page or component is not found
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {FormMetadataAuthor} author
+ */
+export async function deletePageOnDraftDefinition(formId, pageId, author) {
+  logger.info(`Deleting Page ID ${pageId} on Form ID ${formId}`)
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await formDefinition.removePage(formId, pageId, session)
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } catch (err) {
+    logger.error(err, `Failed to delete Page ID ${pageId} on Form ID ${formId}`)
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Deleted Page ID ${pageId} on Form ID ${formId}`)
 }
 
 /**
