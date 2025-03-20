@@ -1,6 +1,6 @@
 import {
   FormStatus,
-  componentSchema,
+  componentSchemaV2,
   formMetadataInputKeys,
   formMetadataInputSchema,
   listSchemaV2,
@@ -344,7 +344,7 @@ export default [
     options: {
       validate: {
         params: pageByIdSchema,
-        payload: componentSchema,
+        payload: componentSchemaV2,
         query: prependQuerySchema
       }
     }

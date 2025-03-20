@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto'
-
 import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -10,17 +8,6 @@ import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
 import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
-
-/**
- * Adds id to a component
- * @param {ComponentDef} component
- * @returns {ComponentDef}
- */
-const addIdToComponent = (component) =>
-  /** @type {ComponentDef} */ ({
-    ...component,
-    id: randomUUID()
-  })
 
 /**
  * Gets a component from a formDefintion page if it exists, throws a Boom.notFound if not
@@ -79,9 +66,6 @@ export async function createComponentOnDraftDefinition(
 
   const session = client.startSession()
 
-  const createdComponents =
-    /** @type {ComponentDef[]} */ components.map(addIdToComponent)
-
   const positionOptions = /** @satisfies {{ position?: number }} */ {}
 
   if (prepend) {
@@ -90,13 +74,10 @@ export async function createComponentOnDraftDefinition(
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addComponents(
-        formId,
-        pageId,
-        createdComponents,
-        session,
-        { state: FormStatus.Draft, ...positionOptions }
-      )
+      await formDefinition.addComponents(formId, pageId, components, session, {
+        state: FormStatus.Draft,
+        ...positionOptions
+      })
 
       // Update the form with the new draft state
       await formMetadata.update(
@@ -117,7 +98,7 @@ export async function createComponentOnDraftDefinition(
 
   logger.info(`Added new component on Page ID ${pageId} on Form ID ${formId}`)
 
-  return createdComponents
+  return components
 }
 
 /**

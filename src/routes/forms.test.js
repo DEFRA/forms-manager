@@ -91,6 +91,7 @@ describe('Forms route', () => {
   }
 
   const stubTextFieldComponent = buildTextFieldComponent({
+    id: undefined,
     title: 'What is your name?',
     name: 'Ghcbmw'
   })
@@ -677,6 +678,40 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
     })
 
+    test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components adds a new component to a page', async () => {
+      const expectedComponent = buildTextFieldComponent({
+        ...stubTextFieldComponent,
+        id: '3813a55d-0958-47f9-8522-94b3fc3818d7'
+      })
+      const createComponentOnDraftDefinitionMock = jest
+        .mocked(createComponentOnDraftDefinition)
+        .mockResolvedValue([expectedComponent])
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components`,
+        payload: stubTextFieldComponent,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(expectedComponent)
+      const [calledFormId, calledPageId, components, , prepend] =
+        createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect([calledFormId, calledPageId, components, prepend]).toEqual([
+        id,
+        pageId,
+        [
+          {
+            ...stubTextFieldComponent,
+            id: expect.any(String)
+          }
+        ],
+        false
+      ])
+    })
+
     test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/components/{componentId} updates a component on a page', async () => {
       const updatedComponent = buildTextFieldComponent({
         id: componentId,
@@ -705,35 +740,6 @@ describe('Forms route', () => {
         calledComponentId,
         component
       ]).toEqual([id, pageId, componentId, updatedComponent])
-    })
-
-    test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components adds a new component to a page', async () => {
-      const expectedComponent = buildTextFieldComponent({
-        ...stubTextFieldComponent,
-        id: '3813a55d-0958-47f9-8522-94b3fc3818d7'
-      })
-      const createComponentOnDraftDefinitionMock = jest
-        .mocked(createComponentOnDraftDefinition)
-        .mockResolvedValue([expectedComponent])
-
-      const response = await server.inject({
-        method: 'POST',
-        url: `/forms/${id}/definition/draft/pages/${pageId}/components`,
-        payload: stubTextFieldComponent,
-        auth
-      })
-
-      expect(response.statusCode).toEqual(okStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(expectedComponent)
-      const [calledFormId, calledPageId, components, , prepend] =
-        createComponentOnDraftDefinitionMock.mock.calls[0]
-      expect([calledFormId, calledPageId, components, prepend]).toEqual([
-        id,
-        pageId,
-        [stubTextFieldComponent],
-        false
-      ])
     })
 
     test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components?prepend=true adds a new component to the start of a page', async () => {
