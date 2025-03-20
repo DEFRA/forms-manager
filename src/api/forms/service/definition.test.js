@@ -1,7 +1,13 @@
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
+import {
+  buildDefinition,
+  buildQuestionPage,
+  buildSummaryPage
+} from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -19,6 +25,7 @@ import {
   createLiveFromDraft,
   getFormDefinition,
   listForms,
+  reorderDraftFormDefinitionPages,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
 import {
@@ -42,14 +49,28 @@ const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
 const author = getAuthor()
-const DRAFT = 'draft'
 
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
   const dateUsedInFakeTime = new Date('2020-01-01')
+  const defaultAudit = {
+    'draft.updatedAt': dateUsedInFakeTime,
+    'draft.updatedBy': author,
+    updatedAt: dateUsedInFakeTime,
+    updatedBy: author
+  }
 
   let definition = emptyFormWithSummary()
+
+  const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+  const expectMetadataUpdate = () => {
+    expect(dbMetadataSpy).toHaveBeenCalled()
+    const [formId, updateFilter] = dbMetadataSpy.mock.calls[0]
+    expect(formId).toBe(id)
+    expect(updateFilter.$set).toEqual(defaultAudit)
+  }
 
   beforeAll(async () => {
     await prepareDb(pino())
@@ -830,7 +851,7 @@ describe('Forms service', () => {
           perPage: 10,
           author: 'Henrique Chase',
           organisations: ['Defra'],
-          status: ['live']
+          status: [FormStatus.Live]
         }
 
         jest.mocked(formMetadata.list).mockResolvedValue({
@@ -856,7 +877,7 @@ describe('Forms service', () => {
           perPage: 10,
           author: 'Henrique Chase',
           organisations: ['Defra', 'Natural England'],
-          status: ['live', DRAFT]
+          status: [FormStatus.Live, FormStatus.Draft]
         }
 
         jest.mocked(formMetadata.list).mockResolvedValue({
@@ -964,9 +985,76 @@ describe('Forms service', () => {
       )
     })
   })
+
+  describe('reorderDraftFormDefinitionPages', () => {
+    const pageOneId = 'e6511b1c-c813-43d7-92c4-d84ba35d5f62'
+    const pageTwoId = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+    const summaryPageId = 'b90e6453-d4c1-46a4-a233-3dbee566c79e'
+
+    const pageOne = buildQuestionPage({
+      id: pageOneId,
+      title: 'Page One'
+    })
+    const pageTwo = buildQuestionPage({
+      id: pageTwoId,
+      title: 'Page Two'
+    })
+    const summaryPage = buildSummaryPage({
+      id: summaryPageId
+    })
+
+    const definition = buildDefinition({
+      pages: [pageTwo, pageOne, summaryPage]
+    })
+
+    beforeEach(() => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+    })
+
+    it('should reorder the pages', async () => {
+      const expectedDefinition = buildDefinition({
+        pages: [pageOne, pageTwo, summaryPage]
+      })
+      const orderList = [pageOneId, pageOneId]
+      const result = await reorderDraftFormDefinitionPages(
+        id,
+        orderList,
+        author
+      )
+
+      const [, upsertedDefinition] = jest.mocked(formDefinition.upsert).mock
+        .calls[0]
+      expect(upsertedDefinition).toEqual(expectedDefinition)
+      expect(result).toEqual(expectedDefinition)
+      expectMetadataUpdate()
+    })
+
+    it('should not do any updates if no order list is sent', async () => {
+      const returnedDefinition = await reorderDraftFormDefinitionPages(
+        id,
+        [],
+        author
+      )
+      expect(returnedDefinition).toEqual(definition)
+      expect(formDefinition.upsert).not.toHaveBeenCalled()
+      expect(formMetadata.update).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors', async () => {
+      const boomInternal = Boom.internal('Something went wrong')
+      jest.mocked(formDefinition.upsert).mockRejectedValueOnce(boomInternal)
+      await expect(
+        reorderDraftFormDefinitionPages(
+          id,
+          ['5a1c2ef7-ed4e-4ec7-9119-226fc3063bda'],
+          author
+        )
+      ).rejects.toThrow(boomInternal)
+    })
+  })
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions, PatchPageFields } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

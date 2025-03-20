@@ -1,9 +1,11 @@
-import { ControllerType, Engine } from '@defra/forms-model'
+import { ControllerType, Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
   buildDefinition,
+  buildList,
+  buildListItem,
   buildQuestionPage,
   buildSummaryPage,
   buildTextFieldComponent
@@ -11,12 +13,16 @@ import {
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponents,
+  addLists,
   addPageAtPosition,
   deleteComponent,
   get,
+  removeList,
   removeMatchingPages,
+  removePage,
   setEngineVersion,
   updateComponent,
+  updateList,
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -35,11 +41,6 @@ const mockSession = author
 const formId = '1eabd1437567fe1b26708bbb'
 const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
 const componentId = 'e296d931-2364-4b17-9049-1aa1afea29d3'
-
-/**
- * @typedef {'draft' | 'live'} State
- */
-const DRAFT = /** @type {State} */ ('draft')
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -81,10 +82,9 @@ describe('form-definition-repository', () => {
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
   })
+  const mockDefinition = buildDefinition({})
 
   describe('get', () => {
-    const mockDefinition = buildDefinition({})
-
     beforeEach(() => {
       mockCollection.findOne.mockResolvedValue({
         draft: mockDefinition
@@ -101,7 +101,7 @@ describe('form-definition-repository', () => {
     })
 
     it('should handle a call inside a session', async () => {
-      await get(formId, DRAFT, mockSession)
+      await get(formId, FormStatus.Draft, mockSession)
       const [, options] = mockCollection.findOne.mock.calls[0]
 
       expect(options).toEqual({
@@ -112,21 +112,6 @@ describe('form-definition-repository', () => {
   })
 
   describe('removeMatchingPages', () => {
-    it('should not edit a live summary', async () => {
-      await expect(
-        removeMatchingPages(
-          formId,
-          { controller: ControllerType.Summary },
-          mockSession,
-          'live'
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot remove page on live form ID 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
-
     it('should remove a page', async () => {
       await removeMatchingPages(
         formId,
@@ -146,16 +131,8 @@ describe('form-definition-repository', () => {
   describe('addPageAtPosition', () => {
     const page = buildQuestionPage()
 
-    it('should not edit a live summary', async () => {
-      await expect(
-        addPageAtPosition('1234', page, mockSession, { state: 'live' })
-      ).rejects.toThrow(
-        Boom.badRequest('Cannot remove add on live form ID 1234')
-      )
-    })
-
     it('should add a page at position', async () => {
-      await addPageAtPosition(formId, page, mockSession, { position: -1 })
+      await addPageAtPosition(formId, page, mockSession, -1)
 
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
       expect(filter).toEqual({
@@ -167,7 +144,7 @@ describe('form-definition-repository', () => {
     })
 
     it('should add a page to the end', async () => {
-      await addPageAtPosition(formId, page, mockSession, {})
+      await addPageAtPosition(formId, page, mockSession)
 
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
       expect(filter).toEqual({
@@ -189,15 +166,6 @@ describe('form-definition-repository', () => {
       components: [buildTextFieldComponent({})]
     })
 
-    it('should fail if form is live', async () => {
-      await expect(
-        updatePage(formId, pageId, page, mockSession, 'live')
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot update page on a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
     it('should update a page', async () => {
       await updatePage(formId, pageId, page, mockSession)
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
@@ -216,18 +184,6 @@ describe('form-definition-repository', () => {
 
   describe('addComponents', () => {
     const component = buildTextFieldComponent()
-
-    it('should fail if form is live', async () => {
-      await expect(
-        addComponents(formId, pageId, [component], mockSession, {
-          state: 'live'
-        })
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot add component to a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
 
     it('should add a component to a page', async () => {
       await addComponents(formId, pageId, [component], mockSession)
@@ -327,23 +283,6 @@ describe('form-definition-repository', () => {
         )
       )
     })
-
-    it('should fail if state is live', async () => {
-      await expect(
-        updateComponent(
-          formId,
-          pageId,
-          componentId,
-          component,
-          mockSession,
-          'live'
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot update component on a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
   })
 
   describe('updatePageFields', () => {
@@ -410,29 +349,39 @@ describe('form-definition-repository', () => {
         }
       })
     })
+  })
 
-    it('should fail if form is live', async () => {
-      await expect(
-        updatePageFields(formId, pageId, pageFields, mockSession, 'live')
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot update pageFields on a live form - 1eabd1437567fe1b26708bbb'
+  describe('removePage', () => {
+    it('should remove a page from a draft component', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce(mockDefinition)
+      await removePage(formId, pageId, mockSession)
+      const [filter, update] = mockCollection.findOneAndUpdate.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toMatchObject({
+        $pull: {
+          'draft.pages': {
+            id: pageId
+          }
+        }
+      })
+    })
+
+    it('should fail if definition does not exist', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce(null)
+      await expect(removePage(formId, pageId, mockSession)).rejects.toThrow(
+        Boom.notFound(
+          'Form with ID 1eabd1437567fe1b26708bbb not found. Failed to delete page ID 87ffdbd3-9e43-41e2-8db3-98ade26ca0b7.'
         )
       )
     })
   })
 
   describe('deleteComponent', () => {
-    it('should fail if form is live', async () => {
-      await expect(
-        deleteComponent(formId, pageId, componentId, mockSession, 'live')
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Cannot delete component on a live form - 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
-    it('should delte a component', async () => {
+    it('should delete a component', async () => {
       await deleteComponent(formId, pageId, componentId, mockSession)
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
 
@@ -452,7 +401,13 @@ describe('form-definition-repository', () => {
     it('should fail if form is live', async () => {
       const mockDefinition = buildDefinition({})
       await expect(
-        setEngineVersion(formId, Engine.V2, mockDefinition, mockSession, 'live')
+        setEngineVersion(
+          formId,
+          Engine.V2,
+          mockDefinition,
+          mockSession,
+          FormStatus.Live
+        )
       ).rejects.toThrow(
         Boom.badRequest('Cannot update the engine version of a live form')
       )
@@ -492,6 +447,85 @@ describe('form-definition-repository', () => {
       mockDefinition.engine = Engine.V2
       await setEngineVersion(formId, Engine.V2, mockDefinition, mockSession)
       expect(mockCollection.updateOne).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('addLists', () => {
+    it('should add an array of lists', async () => {
+      const lists = [
+        buildList({
+          id: 'daa6c67c-a734-4c28-a93a-ffd9651f44c4',
+          items: [buildListItem()]
+        }),
+        buildList({
+          id: 'eb68b22f-b6ba-4358-8cba-b61282fecdb1',
+          items: []
+        })
+      ]
+      const returnedLists = await addLists(formId, lists, mockSession)
+      expect(lists).toEqual(returnedLists)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $push: {
+          'draft.lists': {
+            $each: lists
+          }
+        }
+      })
+    })
+  })
+
+  describe('updateList', () => {
+    const listId = 'daa6c67c-a734-4c28-a93a-ffd9651f44c4'
+    const listItem = buildList({
+      id: listId,
+      items: [buildListItem()]
+    })
+
+    it('should update a list', async () => {
+      jest.mocked(mockCollection.updateOne).mockResolvedValueOnce(listItem)
+
+      const returnedList = await updateList(
+        formId,
+        listId,
+        listItem,
+        mockSession
+      )
+      expect(returnedList).toEqual(listItem)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.lists.id': listId
+      })
+      expect(update).toMatchObject({
+        $set: {
+          'draft.lists.$': listItem
+        }
+      })
+    })
+  })
+
+  describe('removeList', () => {
+    const listId = 'daa6c67c-a734-4c28-a93a-ffd9651f44c4'
+
+    it('should delete a list', async () => {
+      await removeList(formId, listId, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId),
+        'draft.lists.id': listId
+      })
+      expect(update).toMatchObject({
+        $pull: {
+          'draft.lists': { id: listId }
+        }
+      })
     })
   })
 })

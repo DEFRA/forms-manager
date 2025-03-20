@@ -10,6 +10,12 @@
  * @typedef {Request<{ Server: { db: Db }, Payload: FormMetadataInput }>} RequestFormMetadataCreate
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: Partial<FormMetadataInput> }>} RequestFormMetadataUpdateById
  * @typedef {Request<{ Server: { db: Db }, Query: QueryOptions }>} RequestListForms
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {version: 'v1'|'v2'}, }>} MigrateDraftFormRequest
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: string[] }>} SortDraftFormPagesRequest
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: List }>} CreateListDraftFormPagesRequest
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {listId: string}, Payload: List }>} UpdateListDraftFormPagesRequest
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {listId: string} }>} DeleteListDraftFormPagesRequest
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIDAndPageByIdInput }>} DeletePageDraftFormRequest
  */
 
 /**
@@ -17,7 +23,7 @@
  */
 
 /**
- * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions } from '@defra/forms-model'
+ * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions, List } from '@defra/forms-model'
  * @import { Request } from '@hapi/hapi'
  * @import { Db } from 'mongodb'
  */

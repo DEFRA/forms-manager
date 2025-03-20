@@ -1,3 +1,5 @@
+import { FormStatus } from '@defra/forms-model'
+
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 export const logger = createLogger()
@@ -6,19 +8,15 @@ export const defaultAuthor = {
   id: '-1'
 }
 export const defaultDate = new Date('2024-06-25T23:00:00Z') // date we went live
-/**
- * @typedef {'draft' | 'live'} State
- */
 
-export const DRAFT = /** @type {State} */ ('draft')
 /**
  * Partially update the [state] fields
  * @param {Date} date
  * @param {FormMetadataAuthor} author
- * @param {string} state
+ * @param {FormStatus} state
  * @returns {PartialFormMetadataDocument}
  */
-export function partialAuditFields(date, author, state = DRAFT) {
+export function partialAuditFields(date, author, state = FormStatus.Draft) {
   return /** @type {PartialFormMetadataDocument} */ {
     [`${state}.updatedAt`]: date,
     [`${state}.updatedBy`]: author,

@@ -3,6 +3,7 @@ import {
   formDefinitionSchema,
   formMetadataInputSchema,
   idSchema,
+  listSchemaV2,
   pageSchemaV2,
   slugSchema
 } from '@defra/forms-model'
@@ -27,6 +28,19 @@ export const componentByIdSchema = Joi.object()
     id: idSchema,
     pageId: Joi.string().uuid().required(),
     componentId: Joi.string().uuid().required()
+  })
+  .required()
+
+export const listByIdSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    listId: Joi.string().uuid().required()
+  })
+  .required()
+
+export const listSchemaWithRequiredIdSchema = listSchemaV2
+  .keys({
+    id: Joi.string().uuid().required()
   })
   .required()
 
@@ -62,3 +76,15 @@ export const createFormSchema = Joi.object().keys({
 
 // Update form definition schema
 export const updateFormDefinitionSchema = formDefinitionSchema
+
+export const migrateDefinitionParamSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    version: Joi.string().allow('v1', 'v2').required()
+  })
+  .required()
+
+export const sortIdsSchema = Joi.array()
+  .items(Joi.string().uuid().required())
+  .min(1)
+  .required()

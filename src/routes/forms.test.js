@@ -1,8 +1,11 @@
-import { organisations } from '@defra/forms-model'
+import { FormStatus, organisations } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import {
+  buildDefinition,
+  buildList,
   buildQuestionPage,
+  buildSummaryPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
@@ -15,7 +18,8 @@ import {
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
-  listForms
+  listForms,
+  reorderDraftFormDefinitionPages
 } from '~/src/api/forms/service/definition.js'
 import {
   createForm,
@@ -25,7 +29,14 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import {
+  addListsToDraftFormDefinition,
+  removeListOnDraftFormDefinition,
+  updateListOnDraftFormDefinition
+} from '~/src/api/forms/service/lists.js'
+import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
+import {
   createPageOnDraftDefinition,
+  deletePageOnDraftDefinition,
   patchFieldsOnDraftDefinitionPage
 } from '~/src/api/forms/service/page.js'
 import { createServer } from '~/src/api/server.js'
@@ -36,6 +47,8 @@ jest.mock('~/src/api/forms/service/index.js')
 jest.mock('~/src/api/forms/service/definition.js')
 jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')
+jest.mock('~/src/api/forms/service/migration.js')
+jest.mock('~/src/api/forms/service/lists.js')
 
 describe('Forms route', () => {
   /** @type {Server} */
@@ -78,6 +91,7 @@ describe('Forms route', () => {
   }
 
   const stubTextFieldComponent = buildTextFieldComponent({
+    id: undefined,
     title: 'What is your name?',
     name: 'Ghcbmw'
   })
@@ -85,13 +99,6 @@ describe('Forms route', () => {
   /** @satisfies {PatchPageFields} */
   const stubPatchPageFields = {
     title: 'Updated title for page'
-  }
-
-  const stubPageObject = /** @type {PageStart} */ {
-    title: 'What is your name?',
-    path: '/what-is-your-name',
-    next: [],
-    components: [stubTextFieldComponent]
   }
 
   /**
@@ -135,7 +142,7 @@ describe('Forms route', () => {
   const mockFilters = {
     authors: ['Joe Bloggs', 'Jane Doe', 'Enrique Chase'],
     organisations: ['Defra', 'Natural England'],
-    status: ['live', 'draft']
+    status: [FormStatus.Live, FormStatus.Draft]
   }
 
   describe('Success responses', () => {
@@ -539,6 +546,20 @@ describe('Forms route', () => {
       expect(response.result).toEqual(stubFormDefinition)
     })
 
+    test('Testing GET /forms/{id}/definition/draft/migrate/v2 route migrates a form to v2 and returns a form definition', async () => {
+      jest.mocked(migrateDefinitionToV2).mockResolvedValue(stubFormDefinition)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/migrate/v2`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
+    })
+
     test('Testing POST /forms/{id}/create-live route returns a "created-live" status', async () => {
       jest.mocked(createLiveFromDraft).mockResolvedValue(undefined)
 
@@ -573,20 +594,28 @@ describe('Forms route', () => {
       })
     })
 
-    test('Testing POST /forms/{id}/definition/draft/pages adds a new page to the db', async () => {
-      const expectedPage = buildQuestionPage({})
-      jest.mocked(createPageOnDraftDefinition).mockResolvedValue(expectedPage)
+    test('Testing POST /forms/{id}/definition/draft/pages adds a new page to the db and populates id', async () => {
+      const pagePayload = buildQuestionPage({
+        id: undefined
+      })
+      const createPageMock = jest.mocked(createPageOnDraftDefinition)
+      createPageMock.mockResolvedValue(pagePayload)
 
       const response = await server.inject({
         method: 'POST',
         url: `/forms/${id}/definition/draft/pages`,
-        payload: stubPageObject,
+        payload: pagePayload,
         auth
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(expectedPage)
+      expect(response.result).toEqual(pagePayload)
+      expect(createPageMock).toHaveBeenCalledWith(
+        id,
+        { ...pagePayload, id: expect.any(String) },
+        { ...author, id: expect.any(String) }
+      )
     })
 
     test('Testing PATCH /forms/{id}/definition/draft/pages/{pageId} updates fields on a page', async () => {
@@ -613,6 +642,73 @@ describe('Forms route', () => {
         id,
         pageId,
         stubPatchPageFields
+      ])
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/pages/order reorders the pages in the db', async () => {
+      const pageOneId = '5113a8ab-b297-46b5-b732-7fe42660c4db'
+      const pageTwoId = 'd3dc6af2-3235-4455-80f7-941f0bf69c4f'
+
+      const expectedDefinition = buildDefinition({
+        pages: [
+          buildQuestionPage({
+            id: pageOneId,
+            title: 'Page one'
+          }),
+          buildQuestionPage({
+            id: pageOneId,
+            title: 'Page two'
+          }),
+          buildSummaryPage()
+        ]
+      })
+      jest
+        .mocked(reorderDraftFormDefinitionPages)
+        .mockResolvedValue(expectedDefinition)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/order`,
+        payload: [pageOneId, pageTwoId],
+        auth
+      })
+
+      expect(response.result).toEqual(expectedDefinition)
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components adds a new component to a page', async () => {
+      const expectedComponent = buildTextFieldComponent({
+        ...stubTextFieldComponent,
+        id: '3813a55d-0958-47f9-8522-94b3fc3818d7'
+      })
+      const createComponentOnDraftDefinitionMock = jest
+        .mocked(createComponentOnDraftDefinition)
+        .mockResolvedValue([expectedComponent])
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/${pageId}/components`,
+        payload: stubTextFieldComponent,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(expectedComponent)
+      const [calledFormId, calledPageId, components, , prepend] =
+        createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect([calledFormId, calledPageId, components, prepend]).toEqual([
+        id,
+        pageId,
+        [
+          {
+            ...stubTextFieldComponent,
+            id: expect.any(String)
+          }
+        ],
+        false
       ])
     })
 
@@ -646,35 +742,6 @@ describe('Forms route', () => {
       ]).toEqual([id, pageId, componentId, updatedComponent])
     })
 
-    test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components adds a new component to a page', async () => {
-      const expectedComponent = buildTextFieldComponent({
-        ...stubTextFieldComponent,
-        id: '3813a55d-0958-47f9-8522-94b3fc3818d7'
-      })
-      const createComponentOnDraftDefinitionMock = jest
-        .mocked(createComponentOnDraftDefinition)
-        .mockResolvedValue([expectedComponent])
-
-      const response = await server.inject({
-        method: 'POST',
-        url: `/forms/${id}/definition/draft/pages/${pageId}/components`,
-        payload: stubTextFieldComponent,
-        auth
-      })
-
-      expect(response.statusCode).toEqual(okStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(expectedComponent)
-      const [calledFormId, calledPageId, components, , prepend] =
-        createComponentOnDraftDefinitionMock.mock.calls[0]
-      expect([calledFormId, calledPageId, components, prepend]).toEqual([
-        id,
-        pageId,
-        [stubTextFieldComponent],
-        false
-      ])
-    })
-
     test('Testing POST /forms/{id}/definition/draft/pages/{pageId}/components?prepend=true adds a new component to the start of a page', async () => {
       const expectedComponent = buildTextFieldComponent({
         ...stubTextFieldComponent,
@@ -696,6 +763,117 @@ describe('Forms route', () => {
       const [, , , , prepend] =
         createComponentOnDraftDefinitionMock.mock.calls[0]
       expect(prepend).toBe(true)
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/lists', async () => {
+      const list = buildList({
+        id: undefined
+      })
+
+      const expectedList = {
+        ...buildList({
+          ...list
+        }),
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      }
+
+      const createComponentOnDraftDefinitionMock = jest
+        .mocked(addListsToDraftFormDefinition)
+        .mockResolvedValue([expectedList])
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/lists`,
+        payload: list,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83',
+        list: expectedList,
+        status: 'created'
+      })
+      const [, lists] = createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect(lists).toEqual([
+        {
+          ...expectedList,
+          id: expect.any(String)
+        }
+      ])
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/lists/{listId}', async () => {
+      const listId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      const list = buildList({
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      })
+
+      const updateList = jest
+        .mocked(updateListOnDraftFormDefinition)
+        .mockResolvedValue(list)
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/lists/${listId}`,
+        payload: list,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83',
+        list,
+        status: 'updated'
+      })
+      const [, calledId, calledList] = updateList.mock.calls[0]
+      expect(calledId).toEqual(listId)
+      expect(calledList).toEqual(list)
+    })
+
+    test('Testing DELETE /forms/{id}/definition/draft/lists/{listId}', async () => {
+      const listId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}/definition/draft/lists/${listId}`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: listId,
+        status: 'deleted'
+      })
+      const [calledFormId, calledId] = jest.mocked(
+        removeListOnDraftFormDefinition
+      ).mock.calls[0]
+      expect(calledFormId).toEqual(id)
+      expect(calledId).toEqual(listId)
+    })
+
+    test('Testing DELETE /forms/{id}/definition/draft/pages/{pageId}', async () => {
+      const pageId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}/definition/draft/pages/${pageId}`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id: pageId,
+        status: 'deleted'
+      })
+      const [calledFormId, calledId] = jest.mocked(deletePageOnDraftDefinition)
+        .mock.calls[0]
+      expect(calledFormId).toEqual(id)
+      expect(calledId).toEqual(pageId)
     })
   })
 
@@ -983,10 +1161,32 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Bad Request',
-        message: '"id" must be a valid GUID. "path" contains an invalid value',
+        message: '"path" contains an invalid value. "id" must be a valid GUID',
         statusCode: 400,
         validation: {
-          keys: ['id', 'path'],
+          keys: ['path', 'id'],
+          source: 'payload'
+        }
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/pages/order with invalid payload returns validation errors', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/pages/order/`,
+        payload: ['not-a-valid-uuid'],
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        error: 'Bad Request',
+        message:
+          '"[0]" must be a valid GUID. "value" does not contain 1 required value(s)',
+        statusCode: 400,
+        validation: {
+          keys: ['0', ''],
           source: 'payload'
         }
       })
@@ -1061,6 +1261,53 @@ describe('Forms route', () => {
       }
     )
 
+    test('Testing POST /forms/{id}/definition/draft/lists with invalid payload returns validation errors', async () => {
+      const invalidListPayload = buildList({
+        // @ts-expect-error invalid parameter
+        unknown: 1
+      })
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/lists`,
+        payload: invalidListPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"unknown" is not allowed',
+        statusCode: 400,
+        validation: {
+          keys: ['unknown']
+        }
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/lists/{listId} with invalid payload returns validation errors', async () => {
+      const invalidListPayload = buildList({
+        id: undefined
+      })
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/lists/8d05e220-2145-40f4-9508-fe946dec6fd9`,
+        payload: invalidListPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"id" is required',
+        statusCode: 400,
+        validation: {
+          keys: ['id']
+        }
+      })
+    })
+
     test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/component/{componentId} with invalid payload returns validation errors', async () => {
       const invalidPatchPayload = {
         id: 1234
@@ -1088,6 +1335,7 @@ describe('Forms route', () => {
       const componentWithoutAnId = buildTextFieldComponent({
         title: 'New component title'
       })
+      delete componentWithoutAnId.id
 
       const response = await server.inject({
         method: 'PUT',

@@ -1,11 +1,12 @@
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { reorderPages } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
-  DRAFT,
   logger,
   mapForm,
   partialAuditFields
@@ -27,10 +28,15 @@ export async function listForms(options) {
 /**
  * Retrieves the form definition content for a given form ID
  * @param {string} formId - the ID of the form
- * @param {State} state - the form state
+ * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
  */
-export function getFormDefinition(formId, state = DRAFT, session = undefined) {
+export function getFormDefinition(
+  formId,
+  state = FormStatus.Draft,
+  session = undefined
+) {
+  // TODO: if form def is v1 and target v2 - use decorator
   return formDefinition.get(formId, state, session)
 }
 
@@ -120,7 +126,10 @@ export async function createLiveFromDraft(formId, author) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
     }
 
-    const draftFormDefinition = await formDefinition.get(formId, DRAFT)
+    const draftFormDefinition = await formDefinition.get(
+      formId,
+      FormStatus.Draft
+    )
 
     if (!draftFormDefinition.startPage) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
@@ -145,7 +154,7 @@ export async function createLiveFromDraft(formId, author) {
           updatedAt: now,
           updatedBy: author
         }
-      : partialAuditFields(now, author, 'live') // Partially update the live state fields
+      : partialAuditFields(now, author, FormStatus.Live) // Partially update the live state fields
 
     const session = client.startSession()
 
@@ -234,8 +243,68 @@ export async function createDraftFromLive(formId, author) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
- * @import { WithId, ClientSession } from 'mongodb'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
- * @import { State } from '~/src/api/forms/service/shared.js'
+ * Based on a list of Page ids will reorder the pages
+ * @param {string} formId
+ * @param {string[]} orderList
+ * @param {FormMetadataAuthor} author
+ */
+export async function reorderDraftFormDefinitionPages(
+  formId,
+  orderList,
+  author
+) {
+  logger.info(
+    `Reordering pages on Form Definition (draft) for form ID ${formId}`
+  )
+
+  const form = await getFormDefinition(formId)
+
+  if (!orderList.length) {
+    return form
+  }
+
+  const session = client.startSession()
+
+  try {
+    const newForm = await session.withTransaction(async () => {
+      const reorderedForm = reorderPages(form, orderList)
+
+      // Update the form definition
+      await formDefinition.upsert(formId, reorderedForm, session)
+
+      logger.info(`Updating form metadata (draft) for form ID ${formId}`)
+
+      // Update the `updatedAt/By` fields of the draft state
+      const now = new Date()
+      await formMetadata.update(
+        formId,
+        {
+          $set: partialAuditFields(now, author)
+        },
+        session
+      )
+
+      return reorderedForm
+    })
+
+    logger.info(
+      `Reordered pages on Form Definition (draft) for form ID ${formId}`
+    )
+
+    return newForm
+  } catch (err) {
+    logger.error(
+      err,
+      `Reordering pages on form definition (draft) for form ID ${formId} failed`
+    )
+
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
+ * @import { ClientSession } from 'mongodb'
  */

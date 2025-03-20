@@ -1,18 +1,15 @@
-import { randomUUID } from 'crypto'
-
-import { ControllerType, Engine } from '@defra/forms-model'
+import { Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   findPage,
-  summaryHelper,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
+import { repositionSummaryPipeline } from '~/src/api/forms/service/migration.js'
 import {
-  DRAFT,
   SUMMARY_PAGE_ID,
   logger,
   partialAuditFields
@@ -29,78 +26,6 @@ export const addIdToSummary = (summaryPage) => ({
 })
 
 /**
- * Repositions the summary page if it's not the last index of pages
- * @param {string} formId
- * @param {FormDefinition} definition
- * @param {FormMetadataAuthor} author
- */
-export async function repositionSummaryPipeline(formId, definition, author) {
-  const summaryResult = summaryHelper(definition)
-  const { shouldRepositionSummary } = summaryResult
-
-  logger.info(`Checking position of summary on ${formId}`)
-
-  if (!shouldRepositionSummary) {
-    logger.info(`Position of summary on ${formId} correct`)
-    return summaryResult
-  }
-
-  logger.info(`Updating position of summary on Form ID ${formId}`)
-
-  const session = client.startSession()
-
-  const { summary } = summaryResult
-  const summaryDefined = /** @type {PageSummary} */ (summary)
-  const summaryWithId = addIdToSummary(summaryDefined)
-
-  try {
-    await session.withTransaction(async () => {
-      await formDefinition.removeMatchingPages(
-        formId,
-        { controller: ControllerType.Summary },
-        session
-      )
-
-      await formDefinition.addPageAtPosition(
-        formId,
-        /** @type {PageSummary} */ (summaryWithId),
-        session,
-        {}
-      )
-
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
-    })
-  } catch (err) {
-    logger.error(
-      err,
-      `Failed to update position of summary on Form ID ${formId}`
-    )
-    throw err
-  } finally {
-    await session.endSession()
-  }
-
-  logger.info(`Updated position of summary on Form ID ${formId}`)
-
-  return { ...summaryResult, summary: summaryWithId }
-}
-
-/**
- * Adds an id to a page
- * @param {Page} pageWithoutId
- * @returns {Page}
- */
-const createPageWithId = (pageWithoutId) => ({
-  ...pageWithoutId,
-  id: randomUUID()
-})
-
-/**
  * Adds a new page to a draft definition and calls repositionSummaryPipeline if the summary exists
  * @param {string} formId
  * @param {Page} newPage
@@ -112,7 +37,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   const session = client.startSession()
 
   /** @type {FormDefinition} */
-  const formDraftDefinition = await getFormDefinition(formId, DRAFT)
+  const formDraftDefinition = await getFormDefinition(formId, FormStatus.Draft)
 
   uniquePathGate(
     formDraftDefinition,
@@ -125,20 +50,19 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
     formDraftDefinition,
     author
   )
+
   /**
-   * @type {{ position?: number; state?: 'live' | 'draft' }}
+   * @type {number|undefined}
    */
-  const options = {}
+  let position
 
   if (summaryExists) {
-    options.position = -1
+    position = -1
   }
-
-  const page = createPageWithId(newPage)
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPageAtPosition(formId, page, session, options)
+      await formDefinition.addPageAtPosition(formId, newPage, session, position)
 
       // Set to V2 if not already
       await formDefinition.setEngineVersion(
@@ -164,7 +88,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   logger.info(`Created new page for form with ID ${formId}`)
 
-  return page
+  return newPage
 }
 
 /**
@@ -178,7 +102,7 @@ export async function getFormDefinitionPage(formId, pageId, session) {
 
   const definition = /** @type {FormDefinition} */ await getFormDefinition(
     formId,
-    DRAFT,
+    FormStatus.Draft,
     session
   )
 
@@ -211,6 +135,7 @@ export async function patchFieldsOnDraftDefinitionPage(
   const fields = Object.entries(pageFieldsToUpdate)
 
   let page
+
   try {
     // Check that page exists
     await getFormDefinitionPage(formId, pageId, session)
@@ -221,8 +146,7 @@ export async function patchFieldsOnDraftDefinitionPage(
           formId,
           pageId,
           pageFieldsToUpdate,
-          session,
-          DRAFT
+          session
         )
 
         page = await getFormDefinitionPage(formId, pageId, session)
@@ -247,6 +171,38 @@ export async function patchFieldsOnDraftDefinitionPage(
   }
 
   return /** @type {Page | undefined } */ (page)
+}
+
+/**
+ * Updates a component and throws a Boom.notFound if page or component is not found
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {FormMetadataAuthor} author
+ */
+export async function deletePageOnDraftDefinition(formId, pageId, author) {
+  logger.info(`Deleting Page ID ${pageId} on Form ID ${formId}`)
+
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      await formDefinition.removePage(formId, pageId, session)
+
+      // Update the form with the new draft state
+      await formMetadata.update(
+        formId,
+        { $set: partialAuditFields(new Date(), author) },
+        session
+      )
+    })
+  } catch (err) {
+    logger.error(err, `Failed to delete Page ID ${pageId} on Form ID ${formId}`)
+    throw err
+  } finally {
+    await session.endSession()
+  }
+
+  logger.info(`Deleted Page ID ${pageId} on Form ID ${formId}`)
 }
 
 /**
