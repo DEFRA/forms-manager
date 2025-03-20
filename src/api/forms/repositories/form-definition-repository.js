@@ -259,9 +259,9 @@ export async function removeMatchingPages(formId, matchCriteria, session) {
  * @param {string} formId - the ID of the form
  * @param {Page} page - new name for the form
  * @param {ClientSession} session
- * @param {{ position?: number }} options
+ * @param {number|undefined} [position]
  */
-export async function addPageAtPosition(formId, page, session, { position }) {
+export async function addPageAtPosition(formId, page, session, position) {
   logger.info(`Adding page on Form ID ${formId}`)
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)

@@ -52,17 +52,17 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   )
 
   /**
-   * @type {{ position?: number; state?: FormStatus }}
+   * @type {number|undefined}
    */
-  const options = {}
+  let position
 
   if (summaryExists) {
-    options.position = -1
+    position = -1
   }
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPageAtPosition(formId, newPage, session, options)
+      await formDefinition.addPageAtPosition(formId, newPage, session, position)
 
       // Set to V2 if not already
       await formDefinition.setEngineVersion(

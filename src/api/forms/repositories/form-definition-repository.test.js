@@ -132,7 +132,7 @@ describe('form-definition-repository', () => {
     const page = buildQuestionPage()
 
     it('should add a page at position', async () => {
-      await addPageAtPosition(formId, page, mockSession, { position: -1 })
+      await addPageAtPosition(formId, page, mockSession, -1)
 
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
       expect(filter).toEqual({
@@ -144,7 +144,7 @@ describe('form-definition-repository', () => {
     })
 
     it('should add a page to the end', async () => {
-      await addPageAtPosition(formId, page, mockSession, {})
+      await addPageAtPosition(formId, page, mockSession)
 
       const [filter, update] = mockCollection.updateOne.mock.calls[0]
       expect(filter).toEqual({
