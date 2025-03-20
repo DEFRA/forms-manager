@@ -7,6 +7,46 @@
   },
   "item": [
     {
+      "name": "Setup tests /forms/:form_id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Health",
       "event": [
         {
@@ -88,15 +128,13 @@
             "exec": [
               "pm.test(\"response is ok\", function () {",
               "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
               "    pm.expect(response.slug).to.eq('api-test-form')",
               "    pm.expect(response.status).to.eq('created')",
               "    pm.expect(response.id).to.be.a('String')",
-              "});",
-              "",
-              "pm.test('set variables', function(){",
               "    pm.collectionVariables.set(\"form_id\", response.id);",
               "    pm.collectionVariables.set(\"form_slug\", response.slug);",
-              "})"
+              "});"
             ],
             "type": "text/javascript",
             "packages": {}
@@ -146,6 +184,7 @@
             "exec": [
               "pm.test(\"response is ok\", function () {",
               "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
               "    pm.expect(response.status).to.eq('updated')",
               "});"
             ],
@@ -387,6 +426,7 @@
               "    pm.expect(response.pages[0].path).to.eq('/v1-page')",
               "    pm.expect(response.pages[0].id).to.be.a('String')    ",
               "    pm.expect(response.engine).to.eq('V2')",
+              "    pm.collectionVariables.set('page_id_v1', response.pages[0].id)",
               "});"
             ],
             "type": "text/javascript",
@@ -428,6 +468,118 @@
             "draft",
             "migrate",
             "v2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition/draft/pages 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.collectionVariables.set('page_id_3', response.id)",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Question - should be page 3\",\n    \"path\": \"/page-3\",\n    \"components\": [\n        {\n            \"title\": \"Is this Page 3?\",\n            \"type\": \"TextField\",\n            \"name\": \"AbcDeH\"\n        }\n    ],\n    \"next\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/pages",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "pages"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition/draft/pages 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.collectionVariables.set('page_id_2', response.id)",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"What is your name to delete?\",\n    \"path\": \"/what-is-your-name-to-delete\",\n    \"components\": [\n        {\n            \"title\": \"What is your name to delete?\",\n            \"type\": \"TextField\",\n            \"name\": \"AbcDeG\"\n        }\n    ],\n    \"next\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/pages",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "pages"
           ]
         }
       },
@@ -490,62 +642,6 @@
       "response": []
     },
     {
-      "name": "/forms/:form_id/definition/draft/pages Copy",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"response is ok\", function () {",
-              "    pm.response.to.have.status(200);",
-              "    const response = pm.response.json()",
-              "    pm.collectionVariables.set('page_id', response.id)",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {}
-          }
-        },
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"What is your name to delete2?\",\n    \"path\": \"/what-is-your-name-to-delete2\",\n    \"components\": [\n        {\n            \"title\": \"What is your name to delete?\",\n            \"type\": \"TextField\",\n            \"name\": \"AbcDeG\"\n        }\n    ],\n    \"next\": []\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{root}}/forms/{{form_id}}/definition/draft/pages",
-          "host": [
-            "{{root}}"
-          ],
-          "path": [
-            "forms",
-            "{{form_id}}",
-            "definition",
-            "draft",
-            "pages"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
       "name": "/forms/:form_id/definition/draft/pages/order",
       "event": [
         {
@@ -554,6 +650,11 @@
             "exec": [
               "pm.test(\"response is ok\", function () {",
               "    pm.response.to.have.status(200);",
+              "    const {pages} = pm.response.json()",
+              "    pm.expect(pages[0].path).to.eq('/what-is-your-address')",
+              "    pm.expect(pages[1].path).to.eq('/what-is-your-name-to-delete')",
+              "    pm.expect(pages[2].path).to.eq('/page-3')",
+              "    pm.expect(pages[3].path).to.eq('/v1-page')",
               "});"
             ],
             "type": "text/javascript",
@@ -566,7 +667,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "[\n  \"7ec759c3-1bcf-4f82-aa98-8a1682250e00\",\n  \"27dfab66-0ebc-4b83-bddc-b5fe56b12682\",\n  \"31cc5395-80f0-43ec-b02c-345c11aecaed\"\n]",
+          "raw": "[\n  \"{{page_id}}\",\n  \"{{page_id_2}}\",\n  \"{{page_id_3}}\",\n  \"{{page_id_v1}}\"\n]",
           "options": {
             "raw": {
               "language": "json"
@@ -574,13 +675,13 @@
           }
         },
         "url": {
-          "raw": "{{root}}/forms/67ade425d6e8ab1116b0aa9a/definition/draft/pages/order",
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/pages/order",
           "host": [
             "{{root}}"
           ],
           "path": [
             "forms",
-            "67ade425d6e8ab1116b0aa9a",
+            "{{form_id}}",
             "definition",
             "draft",
             "pages",
@@ -685,6 +786,93 @@
       "response": []
     },
     {
+      "name": "/forms/:form_id/definition/draft/pages/:page_id/components/:component_id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Ghcbmw\",\n    \"title\": \"Check add id 2\",\n    \"type\": \"RadiosField\",\n    \"hint\": \"\",\n    \"list\": \"KRcpKo\",\n    \"options\": {},\n    \"schema\": {},\n    \"id\": \"{{component_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/pages/{{page_id}}/components/{{component_id}}",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "pages",
+            "{{page_id}}",
+            "components",
+            "{{component_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition/draft/pages/:page_id/components/:component_id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.expect(response.status).to.eq('deleted')",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/pages/{{page_id}}/components/{{component_id}}",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "pages",
+            "{{page_id}}",
+            "components",
+            "{{component_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "/forms/:form_id/definition/draft/lists",
       "event": [
         {
@@ -725,53 +913,6 @@
             "definition",
             "draft",
             "lists"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "/forms/:form_id/definition/draft/pages/:page_id/components/:component_id",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"response is ok\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"name\": \"Ghcbmw\",\n    \"title\": \"Check add id 2\",\n    \"type\": \"RadiosField\",\n    \"hint\": \"\",\n    \"list\": \"KRcpKo\",\n    \"options\": {},\n    \"schema\": {},\n    \"id\": \"17b6bcac-e452-4106-91a9-32a2d9afec5b\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{root}}/forms/{{form_id}}/definition/draft/pages/{{page_id}}/components/{{component_id}}",
-          "host": [
-            "{{root}}"
-          ],
-          "path": [
-            "forms",
-            "{{form_id}}",
-            "definition",
-            "draft",
-            "pages",
-            "{{page_id}}",
-            "components",
-            "{{component_id}}"
           ]
         }
       },
@@ -853,6 +994,51 @@
             "draft",
             "lists",
             "{{list_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition/draft Copy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft"
           ]
         }
       },
@@ -969,6 +1155,286 @@
           "path": [
             "forms",
             "{{form_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Setup Form to Delete /forms",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// this could fail"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Form to Go Live\",\n    \"organisation\": \"Defra\",\n    \"teamName\": \"Forms Team\",\n    \"teamEmail\": \"name@example.gov.uk\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Find form to go live",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const { data } = pm.response.json()",
+              "    const {id} = data.find(form => form.slug === 'form-to-go-live')",
+              "    pm.expect(id).to.be.a('String')",
+              "    pm.collectionVariables.set('go_live_form_id', id)",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.expect(response.status).to.eq('updated')",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contact\": {\n    \"phone\": \"01234567890\",\n    \"email\": {\n        \"address\": \"{{email}}\",\n        \"responseTime\": \"1 day\"\n    },\n    \"online\": {\n        \"url\": \"http://localhost:3000\",\n        \"text\": \"Some text\"\n    }\n  },\n  \"submissionGuidance\": \"Here is some guidance\",\n  \"privacyNoticeUrl\": \"https://www.gov.uk/help/privacy-notice\",\n  \"notificationEmail\": \"{{email}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "{{root}}/forms/{{go_live_form_id}}/create-draft",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const { status } = pm.response.json()",
+              "    pm.expect(status).to.eq('created-draft')",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/create-draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "create-draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "{{root}}/forms/{{form_id}}/create-live",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const { status } = pm.response.json()",
+              "    pm.expect(status).to.eq('created-live')",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/create-live",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "create-live"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition"
           ]
         }
       },
@@ -1091,6 +1557,22 @@
     },
     {
       "key": "list_id",
+      "value": ""
+    },
+    {
+      "key": "page_id_v1",
+      "value": ""
+    },
+    {
+      "key": "page_id_3",
+      "value": ""
+    },
+    {
+      "key": "page_id_2",
+      "value": ""
+    },
+    {
+      "key": "go_live_form_id",
       "value": ""
     }
   ]
