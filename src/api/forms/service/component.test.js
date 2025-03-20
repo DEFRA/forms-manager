@@ -137,7 +137,9 @@ describe('Forms service', () => {
       ...definition,
       pages: [questionPage, ...definition.pages]
     })
-    const textFieldComponent = buildTextFieldComponent()
+    const textFieldComponent = buildTextFieldComponent({
+      id: '6926d073-fb9a-49f5-a7f3-ac433587267a'
+    })
 
     it('should add a component to the end of a DraftDefinition page', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
@@ -158,9 +160,7 @@ describe('Forms service', () => {
 
       expect(formId).toBe('123')
       expect(calledPageId).toBe(pageId)
-      expect(components).toEqual([
-        { ...textFieldComponent, id: expect.any(String) }
-      ])
+      expect(components).toEqual([textFieldComponent])
       expect(state).toEqual({})
 
       expect(metaFormId).toBe('123')
