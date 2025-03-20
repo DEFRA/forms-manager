@@ -95,14 +95,14 @@ describe('Page service', () => {
         author
       )
       const dbOperationArgs = dbMetadataSpy.mock.calls[0]
-      const [formId1, page1, , options] = dbDefinitionSpy.mock.calls[0]
+      const [formId1, page1, , position] = dbDefinitionSpy.mock.calls[0]
 
       expect(formId1).toBe(id)
       expect(page1).toMatchObject({
         ...formDefinitionPageCustomisedTitle,
         id: expect.any(String)
       })
-      expect(options).toEqual({ position: -1 })
+      expect(position).toBe(-1)
       expect(dbOperationArgs[0]).toBe(id)
       expect(dbOperationArgs[1].$set).toEqual({
         'draft.updatedAt': dateUsedInFakeTime,
@@ -146,7 +146,7 @@ describe('Page service', () => {
           id: expect.any(String)
         },
         expect.anything(),
-        {}
+        undefined
       )
       expect(dbOperationArgs[0]).toBe(id)
       expect(dbOperationArgs[1].$set).toEqual({
