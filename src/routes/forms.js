@@ -1,10 +1,10 @@
 import {
   FormStatus,
-  componentSchema,
+  componentSchemaV2,
   formMetadataInputKeys,
   formMetadataInputSchema,
   listSchemaV2,
-  pageSchemaV2,
+  pageSchemaPayloadV2,
   queryOptionsSchema
 } from '@defra/forms-model'
 
@@ -274,7 +274,7 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: pageSchemaV2
+        payload: pageSchemaPayloadV2
       }
     }
   },
@@ -344,7 +344,7 @@ export default [
     options: {
       validate: {
         params: pageByIdSchema,
-        payload: componentSchema,
+        payload: componentSchemaV2,
         query: prependQuerySchema
       }
     }

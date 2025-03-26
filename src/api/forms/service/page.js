@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto'
-
 import { Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -25,16 +23,6 @@ import { client } from '~/src/mongo.js'
 export const addIdToSummary = (summaryPage) => ({
   id: SUMMARY_PAGE_ID,
   ...summaryPage
-})
-
-/**
- * Adds an id to a page
- * @param {Page} pageWithoutId
- * @returns {Page}
- */
-const createPageWithId = (pageWithoutId) => ({
-  ...pageWithoutId,
-  id: randomUUID().toString()
 })
 
 /**
@@ -72,11 +60,9 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
     position = -1
   }
 
-  const page = createPageWithId(newPage)
-
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPageAtPosition(formId, page, session, position)
+      await formDefinition.addPageAtPosition(formId, newPage, session, position)
 
       // Set to V2 if not already
       await formDefinition.setEngineVersion(
@@ -102,7 +88,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   logger.info(`Created new page for form with ID ${formId}`)
 
-  return page
+  return newPage
 }
 
 /**
@@ -149,6 +135,7 @@ export async function patchFieldsOnDraftDefinitionPage(
   const fields = Object.entries(pageFieldsToUpdate)
 
   let page
+
   try {
     // Check that page exists
     await getFormDefinitionPage(formId, pageId, session)
