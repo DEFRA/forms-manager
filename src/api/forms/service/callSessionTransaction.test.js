@@ -3,7 +3,7 @@ import { pino } from 'pino'
 
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
-import { callSessionTransaction } from '~/src/api/forms/service/shared.js'
+import { callSessionTransaction } from '~/src/api/forms/service/callSessionTransaction.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
 
@@ -48,9 +48,11 @@ describe('lists', () => {
         id,
         transactionHandler,
         author,
-        'started',
-        'finished',
-        'failed'
+        {
+          start: 'started',
+          end: 'finished',
+          fail: 'failed'
+        }
       )
 
       expect(transactionHandler).toHaveBeenCalled()
@@ -67,14 +69,11 @@ describe('lists', () => {
         .mockRejectedValue(Boom.notFound('Not found'))
 
       await expect(
-        callSessionTransaction(
-          id,
-          transactionHandler,
-          author,
-          'started',
-          'finished',
-          'failed'
-        )
+        callSessionTransaction(id, transactionHandler, author, {
+          start: 'started',
+          end: 'finished',
+          fail: 'failed'
+        })
       ).rejects.toThrow(Boom.notFound('Not found'))
     })
   })
