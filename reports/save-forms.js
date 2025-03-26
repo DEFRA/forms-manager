@@ -14,7 +14,7 @@ const getJson = async (url) => {
 
 /**
  * @param {string} url
- * @returns {Promise<FormMetadata[]>}
+ * @returns {Promise<{ data: FormMetadata[] }>}
  */
 const getMetadatas = async (url) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -54,7 +54,7 @@ const getFormData = async (metadata, index, metadatas) => {
 await fs.rm(`${__dirname}forms`, { recursive: true, force: true })
 await fs.mkdir(`${__dirname}forms`)
 
-const forms = await getMetadatas(`${managerUrl}/forms`)
+const { data: forms } = await getMetadatas(`${managerUrl}/forms?perPage=100`)
 
 const responses = await Promise.all(forms.map(getFormData))
 

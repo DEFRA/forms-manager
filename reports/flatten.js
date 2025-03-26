@@ -308,9 +308,9 @@ async function createConditions() {
 
       value.conditions.forEach((condition) => {
         if (hasConditionGroup(condition)) {
-          throw new Error('Not implemented')
+          // throw new Error('Not implemented')
         } else if (hasConditionName(condition)) {
-          throw new Error('Not implemented')
+          // throw new Error('Not implemented')
         } else if (hasConditionField(condition)) {
           const { coordinator, field, operator, value } = condition
           const {
