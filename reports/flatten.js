@@ -204,7 +204,8 @@ async function createLists() {
     'name',
     'title',
     'type',
-    'itemCount'
+    'itemCount',
+    'itemConditionCount'
   ]
 
   /**
@@ -230,7 +231,8 @@ async function createLists() {
         name,
         title,
         type,
-        items.length.toString()
+        items.length.toString(),
+        items.filter((item) => item.condition).length.toString()
       ])
     }
 
