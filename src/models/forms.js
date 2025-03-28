@@ -54,7 +54,8 @@ export const prependQuerySchema = Joi.object().keys({
 export const patchPageSchema = Joi.object()
   .keys({
     title: pageSchemaV2.extract('title').optional(),
-    path: pageSchemaV2.extract('path').optional()
+    path: pageSchemaV2.extract('path').optional(),
+    controller: pageSchemaV2.extract('controller').optional().allow(null)
   })
   .required()
   .min(1)

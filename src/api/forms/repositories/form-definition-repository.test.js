@@ -311,7 +311,8 @@ describe('form-definition-repository', () => {
       expect(update).toEqual({
         $set: {
           'draft.pages.$.title': 'Updated page title'
-        }
+        },
+        $unset: {}
       })
     })
 
@@ -330,7 +331,8 @@ describe('form-definition-repository', () => {
       expect(update).toEqual({
         $set: {
           'draft.pages.$.path': '/updated-page-title'
-        }
+        },
+        $unset: {}
       })
     })
 
@@ -346,6 +348,50 @@ describe('form-definition-repository', () => {
         $set: {
           'draft.pages.$.title': 'Updated page title',
           'draft.pages.$.path': '/updated-page-title'
+        },
+        $unset: {}
+      })
+    })
+
+    it('should set controller', async () => {
+      pageFields = {
+        title: 'Updated page title',
+        controller: ControllerType.FileUpload
+      }
+      await updatePageFields(formId, pageId, pageFields, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$.title': 'Updated page title',
+          'draft.pages.$.controller': ControllerType.FileUpload
+        },
+        $unset: {}
+      })
+    })
+
+    it('should unset controller', async () => {
+      pageFields = {
+        title: 'Updated page title',
+        controller: null
+      }
+      await updatePageFields(formId, pageId, pageFields, mockSession)
+      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({
+        _id: new ObjectId(formId),
+        'draft.pages.id': pageId
+      })
+      expect(update).toEqual({
+        $set: {
+          'draft.pages.$.title': 'Updated page title'
+        },
+        $unset: {
+          'draft.pages.$.controller': ''
         }
       })
     })

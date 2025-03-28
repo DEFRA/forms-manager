@@ -462,17 +462,31 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
   )
 
   /**
-   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string }}
+   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string, 'draft.pages.$.controller'?: string }}
    */
   const fieldsToSet = {}
 
-  const { title, path } = pageFields
+  /**
+   * @type {{ 'draft.pages.$.controller'?: "" }}
+   */
+  const fieldsToUnSet = {}
+
+  const { title, path, controller } =
+    /** @type {{ title: string | undefined, path: string | undefined, controller: ControllerType | undefined | null }} */ (
+      pageFields
+    )
 
   if (title || title === '') {
     fieldsToSet['draft.pages.$.title'] = title
   }
   if (path) {
     fieldsToSet['draft.pages.$.path'] = path
+  }
+  if (controller) {
+    fieldsToSet['draft.pages.$.controller'] = controller
+  }
+  if (controller === null) {
+    fieldsToUnSet['draft.pages.$.controller'] = ''
   }
 
   await coll.updateOne(
@@ -481,7 +495,8 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
       'draft.pages.id': pageId
     },
     {
-      $set: fieldsToSet
+      $set: fieldsToSet,
+      $unset: fieldsToUnSet
     },
     {
       session
