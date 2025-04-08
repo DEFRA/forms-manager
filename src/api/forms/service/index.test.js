@@ -2,6 +2,7 @@ import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
+import { buildList } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -21,6 +22,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import { addListsToDraftFormDefinition } from '~/src/api/forms/service/lists.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -353,6 +355,42 @@ describe('Forms service', () => {
       await expect(updateFormMetadata(id, input, author)).rejects.toThrow(
         Boom.badRequest('Form title duplicate title already exists')
       )
+    })
+  })
+
+  describe('high level tests', () => {
+    const defaultAudit = {
+      'draft.updatedAt': dateUsedInFakeTime,
+      'draft.updatedBy': author,
+      updatedAt: dateUsedInFakeTime,
+      updatedBy: author
+    }
+    const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+    const expectMetadataUpdate = () => {
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      const [formId, updateFilter] = dbMetadataSpy.mock.calls[0]
+      expect(formId).toBe(id)
+      expect(updateFilter.$set).toEqual(defaultAudit)
+    }
+
+    describe('addListsToDraftFormDefinition', () => {
+      it('should add a list of lists to the form definition', async () => {
+        const expectedLists = [buildList()]
+        const addListsMock = jest
+          .mocked(formDefinition.addLists)
+          .mockResolvedValueOnce(expectedLists)
+
+        const result = await addListsToDraftFormDefinition(
+          id,
+          expectedLists,
+          author
+        )
+        const [expectedFormId, listToInsert] = addListsMock.mock.calls[0]
+        expect(expectedFormId).toBe(id)
+        expect(listToInsert).toEqual(expectedLists)
+        expect(result).toEqual(expectedLists)
+        expectMetadataUpdate()
+      })
     })
   })
 })

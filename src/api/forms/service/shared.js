@@ -90,10 +90,6 @@ export function getLastUpdated(document) {
 }
 
 /**
- * @import { FormMetadataAuthor } from '@defra/forms-model'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
- */
-/**
  * @param {Partial<FormMetadataDocument>} document - form metadata document
  * @returns {{ createdAt: Date, createdBy: FormMetadataAuthor }}
  */
@@ -111,6 +107,7 @@ export function getCreated(document) {
 }
 
 /**
- * @import { FormMetadataDocument, FormMetadata } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
+ * @import { FormMetadataDocument, FormMetadata, FormMetadataAuthor } from '@defra/forms-model'
+ * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { WithId, ClientSession } from 'mongodb'
  */
