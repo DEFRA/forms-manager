@@ -17,6 +17,9 @@ export const transformErrors = {
           response.output.payload.statusCode = response.statusCode
           response.output.payload.message = response.message
           response.output.payload.error = response.name
+        } else {
+          // Allow custom payload in addition to standard Boom properties
+          response.output.payload.data = response.data
         }
       }
 

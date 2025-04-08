@@ -221,6 +221,11 @@ describe('Page service', () => {
           pages: [expectedPage, summaryPage]
         })
       )
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        buildDefinition({
+          pages: [expectedPage, summaryPage]
+        })
+      )
       const page = await patchFieldsOnDraftDefinitionPage(
         '123',
         pageId,
@@ -252,13 +257,18 @@ describe('Page service', () => {
       expect(calledPageId).toBe(pageId)
       expect(pageFieldsToUpdate).toEqual(pageFields)
 
-      expect(dbDefinitionGetSpy.mock.calls[1][2]).toMatchObject({
+      expect(dbDefinitionGetSpy.mock.calls[2][2]).toMatchObject({
         withTransaction: expect.anything()
       })
     })
 
     it('should fail if the page does not exist', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(initialDefinition)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        buildDefinition({
+          pages: []
+        })
+      )
       jest.mocked(formDefinition.get).mockResolvedValueOnce(
         buildDefinition({
           pages: []
