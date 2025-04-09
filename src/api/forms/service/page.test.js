@@ -283,6 +283,38 @@ describe('Page service', () => {
         )
       )
     })
+
+    it('should fail if updating to duplicate path', async () => {
+      const pageOne = buildQuestionPage({
+        id: 'p1',
+        path: '/page-one'
+      })
+      const pageTwo = buildQuestionPage({
+        id: 'p2',
+        path: '/page-two'
+      })
+      const definition1 = buildDefinition({
+        ...definition,
+        pages: [pageOne, pageTwo]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      const pageFieldsForConflict = /** @satisfies {PatchPageFields} */ {
+        title: 'Updated Title',
+        path: '/page-one'
+      }
+
+      await expect(
+        patchFieldsOnDraftDefinitionPage(
+          '123',
+          'p2',
+          pageFieldsForConflict,
+          author
+        )
+      ).rejects.toThrow(Boom.notFound('Duplicate page path on Form ID 123'))
+    })
   })
 
   describe('deletePageOnDraftDefinition', () => {
