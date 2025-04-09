@@ -221,6 +221,11 @@ describe('Page service', () => {
           pages: [expectedPage, summaryPage]
         })
       )
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        buildDefinition({
+          pages: [expectedPage, summaryPage]
+        })
+      )
       const page = await patchFieldsOnDraftDefinitionPage(
         '123',
         pageId,
@@ -252,13 +257,18 @@ describe('Page service', () => {
       expect(calledPageId).toBe(pageId)
       expect(pageFieldsToUpdate).toEqual(pageFields)
 
-      expect(dbDefinitionGetSpy.mock.calls[1][2]).toMatchObject({
+      expect(dbDefinitionGetSpy.mock.calls[2][2]).toMatchObject({
         withTransaction: expect.anything()
       })
     })
 
     it('should fail if the page does not exist', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(initialDefinition)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        buildDefinition({
+          pages: []
+        })
+      )
       jest.mocked(formDefinition.get).mockResolvedValueOnce(
         buildDefinition({
           pages: []
@@ -272,6 +282,68 @@ describe('Page service', () => {
           'Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 not found on Form ID 123'
         )
       )
+    })
+
+    it('should fail if updating to duplicate path', async () => {
+      const pageOne = buildQuestionPage({
+        id: 'p1',
+        path: '/page-one'
+      })
+      const pageTwo = buildQuestionPage({
+        id: 'p2',
+        path: '/page-two'
+      })
+      const definition1 = buildDefinition({
+        ...definition,
+        pages: [pageOne, pageTwo]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      const pageFieldsForConflict = /** @satisfies {PatchPageFields} */ {
+        title: 'Updated Title',
+        path: '/page-one'
+      }
+
+      await expect(
+        patchFieldsOnDraftDefinitionPage(
+          '123',
+          'p2',
+          pageFieldsForConflict,
+          author
+        )
+      ).rejects.toThrow(Boom.notFound('Duplicate page path on Form ID 123'))
+    })
+
+    it('should not fail if not updating path', async () => {
+      const pageOne = buildQuestionPage({
+        id: 'p1',
+        path: '/page-one'
+      })
+      const pageTwo = buildQuestionPage({
+        id: 'p2',
+        path: '/page-two'
+      })
+      const definition1 = buildDefinition({
+        ...definition,
+        pages: [pageOne, pageTwo]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+
+      const pageFieldsForConflict = /** @satisfies {PatchPageFields} */ {
+        title: 'Updated Title'
+      }
+
+      const res = await patchFieldsOnDraftDefinitionPage(
+        '123',
+        'p2',
+        pageFieldsForConflict,
+        author
+      )
+      expect(res).toBeDefined()
     })
   })
 

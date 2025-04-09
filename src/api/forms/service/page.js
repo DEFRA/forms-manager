@@ -1,4 +1,4 @@
-import { Engine, FormStatus } from '@defra/forms-model'
+import { ApiErrorCode, Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -42,7 +42,8 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
   uniquePathGate(
     formDraftDefinition,
     newPage.path,
-    `Duplicate page path on Form ID ${formId}`
+    `Duplicate page path on Form ID ${formId}`,
+    ApiErrorCode.DuplicatePagePathComponent
   )
 
   const { summaryExists } = await repositionSummaryPipeline(
@@ -139,6 +140,22 @@ export async function patchFieldsOnDraftDefinitionPage(
   try {
     // Check that page exists
     await getFormDefinitionPage(formId, pageId, session)
+
+    if (pageFieldsToUpdate.path) {
+      /** @type {FormDefinition} */
+      const formDraftDefinition = await getFormDefinition(
+        formId,
+        FormStatus.Draft
+      )
+
+      uniquePathGate(
+        formDraftDefinition,
+        pageFieldsToUpdate.path,
+        `Duplicate page path on Form ID ${formId}`,
+        ApiErrorCode.DuplicatePagePathPage,
+        pageId
+      )
+    }
 
     await session.withTransaction(
       async () => {

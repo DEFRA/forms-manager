@@ -1188,6 +1188,9 @@ describe('Forms route', () => {
         validation: {
           keys: ['0', ''],
           source: 'payload'
+        },
+        custom: {
+          defaultError: expect.anything()
         }
       })
     })
