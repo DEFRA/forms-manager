@@ -59,13 +59,13 @@ export function findComponent(definition, pageId, componentId) {
  * @param {ApiErrorFunctionCode} [functionCode]
  * @param {string} [excludePageId]
  */
-export const uniquePathGate = (
+export function uniquePathGate(
   formDraftDefinition,
   path,
   message,
   functionCode = ApiErrorFunctionCode.General,
   excludePageId = ''
-) => {
+) {
   if (
     formDraftDefinition.pages.some(
       (page) => page.path === path && page.id !== excludePageId
