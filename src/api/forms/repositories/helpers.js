@@ -1,7 +1,4 @@
-import {
-  ApiErrorFunctionCode,
-  hasComponentsEvenIfNoNext
-} from '@defra/forms-model'
+import { ApiErrorCode, hasComponentsEvenIfNoNext } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -56,14 +53,14 @@ export function findComponent(definition, pageId, componentId) {
  * @param {FormDefinition} formDraftDefinition
  * @param {string} path
  * @param {string} message
- * @param {ApiErrorFunctionCode} [functionCode]
+ * @param {ApiErrorCode} [errorCode]
  * @param {string} [excludePageId]
  */
 export function uniquePathGate(
   formDraftDefinition,
   path,
   message,
-  functionCode = ApiErrorFunctionCode.General,
+  errorCode = ApiErrorCode.General,
   excludePageId = ''
 ) {
   if (
@@ -71,7 +68,7 @@ export function uniquePathGate(
       (page) => page.path === path && page.id !== excludePageId
     )
   ) {
-    throw Boom.conflict(message, { functionCode })
+    throw Boom.conflict(message, { errorCode })
   }
 }
 

@@ -1,4 +1,4 @@
-import { ApiErrorFunctionCode } from '@defra/forms-model'
+import { ApiErrorCode } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import {
@@ -222,7 +222,7 @@ describe('repository helpers', () => {
           definition1,
           '/page-two',
           'Duplicate page path found',
-          ApiErrorFunctionCode.DuplicatePagePathPage,
+          ApiErrorCode.DuplicatePagePathPage,
           'p2'
         )
       }).not.toThrow()
