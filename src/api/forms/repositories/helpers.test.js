@@ -1,3 +1,4 @@
+import { ApiErrorFunctionCode } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import {
@@ -11,8 +12,10 @@ import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   findComponent,
   findPage,
-  removeById
+  removeById,
+  uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
+import { empty as emptyFormWithSummary } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
@@ -158,6 +161,71 @@ describe('repository helpers', () => {
       ).rejects.toThrow(
         "Failed to delete id '111bd1111222fe1b33333ccc' from 'my-collection'. Expected deleted count of 1, received 0"
       )
+    })
+  })
+
+  describe('uniquePathGate', () => {
+    it('should throw if not unique', () => {
+      const definition = emptyFormWithSummary()
+      const pageOne = buildQuestionPage({
+        id: 'p1',
+        path: '/page-one'
+      })
+      const pageTwo = buildQuestionPage({
+        id: 'p2',
+        path: '/page-two'
+      })
+      const definition1 = buildDefinition({
+        ...definition,
+        pages: [pageOne, pageTwo]
+      })
+      expect(() => {
+        uniquePathGate(definition1, '/page-one', 'Duplicate page path found')
+      }).toThrow('Duplicate page path found')
+    })
+
+    it('should not throw if unique', () => {
+      const definition = emptyFormWithSummary()
+      const pageOne = buildQuestionPage({
+        id: 'p1',
+        path: '/page-one'
+      })
+      const pageTwo = buildQuestionPage({
+        id: 'p2',
+        path: '/page-two'
+      })
+      const definition1 = buildDefinition({
+        ...definition,
+        pages: [pageOne, pageTwo]
+      })
+      expect(() => {
+        uniquePathGate(definition1, '/page-three', 'Duplicate page path found')
+      }).not.toThrow()
+    })
+
+    it('should not throw if unique, despite updating current page to same as existing path', () => {
+      const definition = emptyFormWithSummary()
+      const pageOne = buildQuestionPage({
+        id: 'p1',
+        path: '/page-one'
+      })
+      const pageTwo = buildQuestionPage({
+        id: 'p2',
+        path: '/page-two'
+      })
+      const definition1 = buildDefinition({
+        ...definition,
+        pages: [pageOne, pageTwo]
+      })
+      expect(() => {
+        uniquePathGate(
+          definition1,
+          '/page-two',
+          'Duplicate page path found',
+          ApiErrorFunctionCode.DuplicatePagePathPage,
+          'p2'
+        )
+      }).not.toThrow()
     })
   })
 })
