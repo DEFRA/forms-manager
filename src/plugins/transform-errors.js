@@ -19,7 +19,7 @@ export const transformErrors = {
           response.output.payload.error = response.name
         } else {
           // Allow custom payload in addition to standard Boom properties
-          response.output.payload.data = response.data
+          response.output.payload.custom = response.data
         }
       }
 
