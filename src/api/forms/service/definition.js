@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
@@ -131,7 +131,10 @@ export async function createLiveFromDraft(formId, author) {
       FormStatus.Draft
     )
 
-    if (!draftFormDefinition.startPage) {
+    if (
+      draftFormDefinition.engine !== Engine.V2 &&
+      !draftFormDefinition.startPage
+    ) {
       throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
     }
 
