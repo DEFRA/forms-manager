@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
@@ -281,6 +281,20 @@ describe('Forms service', () => {
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
       )
+    })
+
+    it('should succeed to create a live state from existing draft form when there is no start page when engine is V2', async () => {
+      const draftV2DefinitionNoStartPage = /** @type {FormDefinition} */ ({
+        ...definition,
+        engine: Engine.V2
+      })
+      delete draftV2DefinitionNoStartPage.startPage
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(draftV2DefinitionNoStartPage)
+
+      await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
   })
 
