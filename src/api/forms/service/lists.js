@@ -4,6 +4,17 @@ import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
+ * Returns true if there is a duplicate title or name in the list
+ * @param {FormDefinition} definition
+ * @param {List} newList
+ */
+export function listIsDuplicate(definition, newList) {
+  return definition.lists.some(
+    (list) => list.name === newList.name || list.title === newList.title
+  )
+}
+
+/**
  * Add a list of new lists to the draft form definition
  * @param {string} formId
  * @param {List[]} lists
@@ -156,5 +167,5 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
 }
 
 /**
- * @import { FormMetadataAuthor, List } from '@defra/forms-model'
+ * @import { FormMetadataAuthor, List, FormDefinition } from '@defra/forms-model'
  */

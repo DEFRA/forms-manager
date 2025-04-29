@@ -1,12 +1,14 @@
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
+import { buildDefinition } from '~/.server/api/forms/__stubs__/definition.js'
 import { buildList } from '~/src/api/forms/__stubs__/definition.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
   addListsToDraftFormDefinition,
+  listIsDuplicate,
   removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
@@ -46,6 +48,45 @@ describe('lists', () => {
 
   beforeEach(() => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+  })
+
+  describe('listIsDuplicate', () => {
+    const list = buildList({
+      items: [],
+      name: 'YhmNDL',
+      title: 'String List'
+    })
+    const formDefinition = buildDefinition({
+      lists: [list]
+    })
+
+    it('should return true if list title is a duplicate', () => {
+      const list2 = buildList({
+        ...list,
+        name: 'AdeXAx'
+      })
+
+      expect(listIsDuplicate(formDefinition, list2)).toBe(true)
+    })
+
+    it('should return true if list name is a duplicate', () => {
+      const list2 = buildList({
+        ...list,
+        title: 'New String List with same name'
+      })
+
+      expect(listIsDuplicate(formDefinition, list2)).toBe(true)
+    })
+
+    it('should return false if neither name or title is a duplicate', () => {
+      const list2 = buildList({
+        ...list,
+        title: 'New String List with same name',
+        name: 'AdeXAx'
+      })
+
+      expect(listIsDuplicate(formDefinition, list2)).toBe(false)
+    })
   })
 
   describe('addListsToDraftFormDefinition', () => {
