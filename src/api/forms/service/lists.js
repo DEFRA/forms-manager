@@ -54,8 +54,8 @@ export function updatedListIsDuplicate(listId) {
  * @param {string} formId
  * @param {List} list
  * @param {ClientSession} session
- * @param { FormDefinition | undefined } definition
- * @param {DuplicateFn} duplicateFn
+ * @param {FormDefinition | undefined} [definition]
+ * @param {DuplicateFn} [duplicateFn]
  * @returns {Promise<FormDefinition>}
  */
 export async function duplicateListGuard(
@@ -253,5 +253,5 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
 
 /**
  * @import { FormMetadataAuthor, List, FormDefinition } from '@defra/forms-model'
- * @import { ClientSession } from 'mongo'
+ * @import { ClientSession } from 'mongodb'
  */
