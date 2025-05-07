@@ -162,34 +162,37 @@ export async function updateListOnDraftFormDefinition(
   const session = client.startSession()
 
   try {
-    const updatedList = await session.withTransaction(async () => {
-      await duplicateListGuard(
-        formId,
-        list,
-        session,
-        undefined,
-        updatedListIsDuplicate(listId)
-      )
+    const updatedList = await session.withTransaction(
+      async () => {
+        await duplicateListGuard(
+          formId,
+          list,
+          session,
+          undefined,
+          updatedListIsDuplicate(listId)
+        )
 
-      // Update the list on the form definition
-      const returnedLists = await formDefinition.updateList(
-        formId,
-        listId,
-        list,
-        session
-      )
+        // Update the list on the form definition
+        const returnedLists = await formDefinition.updateList(
+          formId,
+          listId,
+          list,
+          session
+        )
 
-      const now = new Date()
-      await formMetadata.update(
-        formId,
-        {
-          $set: partialAuditFields(now, author)
-        },
-        session
-      )
+        const now = new Date()
+        await formMetadata.update(
+          formId,
+          {
+            $set: partialAuditFields(now, author)
+          },
+          session
+        )
 
-      return returnedLists
-    })
+        return returnedLists
+      },
+      { readPreference: 'primary' }
+    )
 
     logger.info(
       `Updated list ${listId} on Form Definition (draft) for form ID ${formId}`
