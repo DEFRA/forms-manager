@@ -1,17 +1,80 @@
+import { FormStatus } from '@defra/forms-model'
+import Boom from '@hapi/boom'
+
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
+ * @typedef {(formDefintion: FormDefinition, list:List) => boolean} DuplicateFn
+ */
+
+/**
+ * @param {List[]} lists
+ * @param {List} newList
+ * @returns {boolean}
+ */
+export function duplicateListInLists(lists, newList) {
+  return lists.some(
+    (list) => list.name === newList.name || list.title === newList.title
+  )
+}
+
+/**
  * Returns true if there is a duplicate title or name in the list
  * @param {FormDefinition} definition
  * @param {List} newList
+ * @satisfies {DuplicateFn}
  */
 export function listIsDuplicate(definition, newList) {
-  return definition.lists.some(
-    (list) => list.name === newList.name || list.title === newList.title
-  )
+  return duplicateListInLists(definition.lists, newList)
+}
+
+/**
+ * Performs check to see if duplicate list name or title is found, but ignores list id
+ * @param {string} listId
+ * @returns {DuplicateFn}
+ */
+export function updatedListIsDuplicate(listId) {
+  /**
+   * @satisfies {DuplicateFn}
+   * @param {FormDefinition} definition
+   * @param {List} newList
+   */
+  return (definition, newList) => {
+    const listsWithoutEdited = definition.lists.filter(
+      (list) => list.id !== listId
+    )
+    return duplicateListInLists(listsWithoutEdited, newList)
+  }
+}
+/**
+ * Fails if the list name or title is duplicate
+ * @param {string} formId
+ * @param {List} list
+ * @param {ClientSession} session
+ * @param { FormDefinition | undefined } definition
+ * @param {DuplicateFn} duplicateFn
+ * @returns {Promise<FormDefinition>}
+ */
+export async function duplicateListGuard(
+  formId,
+  list,
+  session,
+  definition,
+  duplicateFn = listIsDuplicate
+) {
+  if (!definition) {
+    definition = await formDefinition.get(formId, FormStatus.Draft, session)
+  }
+
+  const isDuplicate = duplicateFn(definition, list)
+
+  if (isDuplicate) {
+    throw Boom.conflict('Duplicate list name or title found.')
+  }
+  return definition
 }
 
 /**
@@ -28,25 +91,39 @@ export async function addListsToDraftFormDefinition(formId, lists, author) {
   const session = client.startSession()
 
   try {
-    const newForm = await session.withTransaction(async () => {
-      // Add the lists to the form definition
-      const returnedLists = await formDefinition.addLists(
-        formId,
-        lists,
-        session
-      )
+    /** @type { FormDefinition | undefined } */
+    let definition
+    const newForm = await session.withTransaction(
+      async () => {
+        for (const list of lists) {
+          await duplicateListGuard(
+            formId,
+            list,
+            session,
+            definition,
+            listIsDuplicate
+          )
+        }
+        // Add the lists to the form definition
+        const returnedLists = await formDefinition.addLists(
+          formId,
+          lists,
+          session
+        )
 
-      const now = new Date()
-      await formMetadata.update(
-        formId,
-        {
-          $set: partialAuditFields(now, author)
-        },
-        session
-      )
+        const now = new Date()
+        await formMetadata.update(
+          formId,
+          {
+            $set: partialAuditFields(now, author)
+          },
+          session
+        )
 
-      return returnedLists
-    })
+        return returnedLists
+      },
+      { readPreference: 'primary' }
+    )
 
     logger.info(
       `Added lists ${lists.map((list) => list.name).join(', ')} on Form Definition (draft) for form ID ${formId}`
@@ -168,4 +245,5 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
 
 /**
  * @import { FormMetadataAuthor, List, FormDefinition } from '@defra/forms-model'
+ * @import { ClientSession } from 'mongo'
  */

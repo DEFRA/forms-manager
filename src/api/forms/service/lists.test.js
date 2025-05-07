@@ -8,9 +8,11 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
   addListsToDraftFormDefinition,
+  duplicateListGuard,
   listIsDuplicate,
   removeListOnDraftFormDefinition,
-  updateListOnDraftFormDefinition
+  updateListOnDraftFormDefinition,
+  updatedListIsDuplicate
 } from '~/src/api/forms/service/lists.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -32,6 +34,7 @@ describe('lists', () => {
     updatedAt: dateUsedInFakeTime,
     updatedBy: author
   }
+  const mockSession = author
 
   const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
 
@@ -42,6 +45,15 @@ describe('lists', () => {
     expect(updateFilter.$set).toEqual(defaultAudit)
   }
 
+  const exampleList = buildList({
+    id: '5fa9c135-5397-4372-b168-f75e21fc19e4',
+    name: 'AbcDe',
+    title: 'Original List Title'
+  })
+  const formDefinitionWithList = buildDefinition({
+    lists: [exampleList]
+  })
+
   beforeAll(async () => {
     await prepareDb(pino())
   })
@@ -51,46 +63,102 @@ describe('lists', () => {
   })
 
   describe('listIsDuplicate', () => {
-    const list = buildList({
-      items: [],
-      name: 'YhmNDL',
-      title: 'String List'
-    })
-    const formDefinition = buildDefinition({
-      lists: [list]
-    })
-
     it('should return true if list title is a duplicate', () => {
       const list2 = buildList({
-        ...list,
+        ...exampleList,
         name: 'AdeXAx'
       })
 
-      expect(listIsDuplicate(formDefinition, list2)).toBe(true)
+      expect(listIsDuplicate(formDefinitionWithList, list2)).toBe(true)
     })
 
     it('should return true if list name is a duplicate', () => {
       const list2 = buildList({
-        ...list,
+        ...exampleList,
         title: 'New String List with same name'
       })
 
-      expect(listIsDuplicate(formDefinition, list2)).toBe(true)
+      expect(listIsDuplicate(formDefinitionWithList, list2)).toBe(true)
     })
 
     it('should return false if neither name or title is a duplicate', () => {
       const list2 = buildList({
-        ...list,
+        ...exampleList,
         title: 'New String List with same name',
         name: 'AdeXAx'
       })
 
-      expect(listIsDuplicate(formDefinition, list2)).toBe(false)
+      expect(listIsDuplicate(formDefinitionWithList, list2)).toBe(false)
+    })
+
+    it('should return true if list name is a duplicate a', () => {
+      const list2 = buildList({
+        ...exampleList,
+        title: 'New String List with same name'
+      })
+
+      expect(listIsDuplicate(formDefinitionWithList, list2)).toBe(true)
+    })
+  })
+
+  describe('updatedListIsDuplicate', () => {
+    const list2Id = 'e9fb7014-a0f6-4d17-8642-53aa1d9956ba'
+    const list2 = buildList({
+      id: list2Id,
+      name: 'jdIemWP',
+      title: 'Edited Title'
+    })
+    const formDefinitionWithTwoLists = buildDefinition({
+      ...formDefinitionWithList,
+      lists: [exampleList, list2]
+    })
+
+    it('should return true if new name / title of list being updated is duplicate of other list', () => {
+      const updatedList = buildList({
+        ...list2,
+        name: 'AbcDe',
+        title: 'Original List Title'
+      })
+      expect(
+        updatedListIsDuplicate(list2Id)(formDefinitionWithTwoLists, updatedList)
+      ).toBe(true)
+    })
+
+    it('should return false if new name / title is only the same as the current name / title', () => {
+      expect(
+        updatedListIsDuplicate(list2Id)(formDefinitionWithTwoLists, list2)
+      ).toBe(false)
+    })
+  })
+
+  describe('duplicateListGuard', () => {
+    it('should fail with a Boom.conflict given duplicate list name or id', async () => {
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(formDefinitionWithList)
+
+      await expect(
+        duplicateListGuard('abc', exampleList, mockSession)
+      ).rejects.toThrow(Boom.conflict('Duplicate list name or title found.'))
+    })
+
+    it('should pass given unique list', async () => {
+      const receivedDefinition = await duplicateListGuard(
+        'abc',
+        buildList(),
+        mockSession,
+        formDefinitionWithList,
+        listIsDuplicate
+      )
+      expect(receivedDefinition).toEqual(formDefinitionWithList)
     })
   })
 
   describe('addListsToDraftFormDefinition', () => {
     it('should add a list of lists to the form definition', async () => {
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(formDefinitionWithList)
       const expectedLists = [buildList()]
       const addListsMock = jest
         .mocked(formDefinition.addLists)
@@ -108,11 +176,11 @@ describe('lists', () => {
       expectMetadataUpdate()
     })
     it('should surface errors', async () => {
-      const boomInternal = Boom.internal('Something went wrong')
-      jest.mocked(formDefinition.addLists).mockRejectedValueOnce(boomInternal)
+      const boomConflict = Boom.conflict('Duplicate found')
+      jest.mocked(formDefinition.get).mockRejectedValueOnce(boomConflict)
       await expect(
         addListsToDraftFormDefinition(id, [buildList()], author)
-      ).rejects.toThrow(boomInternal)
+      ).rejects.toThrow(boomConflict)
     })
   })
 
@@ -121,6 +189,9 @@ describe('lists', () => {
     const listId = '47cfaf57-6cda-44aa-9268-f37c674823d2'
 
     it('should update a list on the form definition', async () => {
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(formDefinitionWithList)
       const updateListMock = jest
         .mocked(formDefinition.updateList)
         .mockResolvedValueOnce(listToUpdate)
