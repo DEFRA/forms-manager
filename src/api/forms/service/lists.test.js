@@ -185,10 +185,9 @@ describe('lists', () => {
   })
 
   describe('updateListOnDraftFormDefinition', () => {
-    const listToUpdate = buildList()
-    const listId = '47cfaf57-6cda-44aa-9268-f37c674823d2'
-
     it('should update a list on the form definition', async () => {
+      const listToUpdate = buildList()
+      const listId = '47cfaf57-6cda-44aa-9268-f37c674823d2'
       jest
         .mocked(formDefinition.get)
         .mockResolvedValueOnce(formDefinitionWithList)
@@ -210,12 +209,29 @@ describe('lists', () => {
       expect(result).toEqual(listToUpdate)
       expectMetadataUpdate()
     })
-    it('should surface errors', async () => {
-      const boomInternal = Boom.internal('Something went wrong')
-      jest.mocked(formDefinition.updateList).mockRejectedValueOnce(boomInternal)
+    it('should throw a conflict if updated list name or title exists in other list', async () => {
+      const list2Id = 'e9fb7014-a0f6-4d17-8642-53aa1d9956ba'
+      const list2 = buildList({
+        id: list2Id,
+        name: 'jdIemWP',
+        title: 'Edited Title'
+      })
+      const formDefinitionWithTwoLists = buildDefinition({
+        ...formDefinitionWithList,
+        lists: [exampleList, list2]
+      })
+      const updatedList = buildList({
+        ...list2,
+        name: 'AbcDe',
+        title: 'Original List Title'
+      })
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(formDefinitionWithTwoLists)
       await expect(
-        updateListOnDraftFormDefinition(id, listId, listToUpdate, author)
-      ).rejects.toThrow(boomInternal)
+        updateListOnDraftFormDefinition(id, list2Id, updatedList, author)
+      ).rejects.toThrow(Boom.conflict('Duplicate list name or title found.'))
     })
   })
 

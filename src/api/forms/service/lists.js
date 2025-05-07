@@ -163,6 +163,14 @@ export async function updateListOnDraftFormDefinition(
 
   try {
     const updatedList = await session.withTransaction(async () => {
+      await duplicateListGuard(
+        formId,
+        list,
+        session,
+        undefined,
+        updatedListIsDuplicate(listId)
+      )
+
       // Update the list on the form definition
       const returnedLists = await formDefinition.updateList(
         formId,
