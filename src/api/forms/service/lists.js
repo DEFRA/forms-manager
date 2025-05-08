@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormStatus, formDefinitionSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -7,73 +7,22 @@ import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
- * @typedef {(formDefintion: FormDefinition, list:List) => boolean} DuplicateFn
- */
-
-/**
- * @param {List[]} lists
- * @param {List} newList
- * @returns {boolean}
- */
-export function duplicateListInLists(lists, newList) {
-  return lists.some(
-    (list) => list.name === newList.name || list.title === newList.title
-  )
-}
-
-/**
- * Returns true if there is a duplicate title or name in the list
- * @param {FormDefinition} definition
- * @param {List} newList
- * @satisfies {DuplicateFn}
- */
-export function listIsDuplicate(definition, newList) {
-  return duplicateListInLists(definition.lists, newList)
-}
-
-/**
- * Performs check to see if duplicate list name or title is found, but ignores list id
- * @param {string} listId
- * @returns {DuplicateFn}
- */
-export function updatedListIsDuplicate(listId) {
-  /**
-   * @satisfies {DuplicateFn}
-   * @param {FormDefinition} definition
-   * @param {List} newList
-   */
-  return (definition, newList) => {
-    const listsWithoutEdited = definition.lists.filter(
-      (list) => list.id !== listId
-    )
-    return duplicateListInLists(listsWithoutEdited, newList)
-  }
-}
-/**
  * Fails if the list name or title is duplicate
  * @param {string} formId
- * @param {List} list
  * @param {ClientSession} session
- * @param {FormDefinition | undefined} [definition]
- * @param {DuplicateFn} [duplicateFn]
  * @returns {Promise<FormDefinition>}
  */
-export async function duplicateListGuard(
-  formId,
-  list,
-  session,
-  definition,
-  duplicateFn = listIsDuplicate
-) {
-  if (!definition) {
-    definition = await formDefinition.get(formId, FormStatus.Draft, session)
-  }
+export async function duplicateListGuard(formId, session) {
+  const definition = await formDefinition.get(formId, FormStatus.Draft, session)
 
-  const isDuplicate = duplicateFn(definition, list)
+  const { error } = formDefinitionSchema
+    .extract('lists')
+    .validate(definition.lists)
 
-  if (isDuplicate) {
+  if (error) {
     throw Boom.conflict('Duplicate list name or title found.')
   }
+
   return definition
 }
 
@@ -91,25 +40,16 @@ export async function addListsToDraftFormDefinition(formId, lists, author) {
   const session = client.startSession()
 
   try {
-    /** @type { FormDefinition | undefined } */
-    let definition
     const newForm = await session.withTransaction(
       async () => {
-        for (const list of lists) {
-          await duplicateListGuard(
-            formId,
-            list,
-            session,
-            definition,
-            listIsDuplicate
-          )
-        }
         // Add the lists to the form definition
         const returnedLists = await formDefinition.addLists(
           formId,
           lists,
           session
         )
+
+        await duplicateListGuard(formId, session)
 
         const now = new Date()
         await formMetadata.update(
@@ -164,14 +104,6 @@ export async function updateListOnDraftFormDefinition(
   try {
     const updatedList = await session.withTransaction(
       async () => {
-        await duplicateListGuard(
-          formId,
-          list,
-          session,
-          undefined,
-          updatedListIsDuplicate(listId)
-        )
-
         // Update the list on the form definition
         const returnedLists = await formDefinition.updateList(
           formId,
@@ -179,6 +111,8 @@ export async function updateListOnDraftFormDefinition(
           list,
           session
         )
+
+        await duplicateListGuard(formId, session)
 
         const now = new Date()
         await formMetadata.update(
