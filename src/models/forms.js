@@ -4,6 +4,7 @@ import {
   formMetadataInputSchema,
   idSchema,
   listSchemaV2,
+  pageRepeatSchema,
   pageSchemaV2,
   slugSchema
 } from '@defra/forms-model'
@@ -55,7 +56,8 @@ export const patchPageSchema = Joi.object()
   .keys({
     title: pageSchemaV2.extract('title').optional(),
     path: pageSchemaV2.extract('path').optional(),
-    controller: pageSchemaV2.extract('controller').optional().allow(null)
+    controller: pageSchemaV2.extract('controller').optional().allow(null),
+    repeat: pageRepeatSchema.optional().allow(null)
   })
   .required()
   .min(1)
