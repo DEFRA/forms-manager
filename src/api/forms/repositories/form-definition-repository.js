@@ -462,17 +462,17 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
   )
 
   /**
-   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string, 'draft.pages.$.controller'?: string }}
+   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string, 'draft.pages.$.controller'?: string, 'draft.pages.$.repeat'?: Repeat }}
    */
   const fieldsToSet = {}
 
   /**
-   * @type {{ 'draft.pages.$.controller'?: "" }}
+   * @type {{ 'draft.pages.$.controller'?: '', 'draft.pages.$.repeat'?: '' }}
    */
   const fieldsToUnSet = {}
 
-  const { title, path, controller } =
-    /** @type {{ title: string | undefined, path: string | undefined, controller: ControllerType | undefined | null }} */ (
+  const { title, path, controller, repeat } =
+    /** @type {{ title: string | undefined, path: string | undefined, controller: ControllerType | undefined | null, repeat: Repeat | undefined | null }} */ (
       pageFields
     )
 
@@ -487,6 +487,14 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
   }
   if (controller === null) {
     fieldsToUnSet['draft.pages.$.controller'] = ''
+  }
+
+  // Repeater
+  if (repeat) {
+    fieldsToSet['draft.pages.$.repeat'] = repeat
+  }
+  if (repeat === null) {
+    fieldsToUnSet['draft.pages.$.repeat'] = ''
   }
 
   await coll.updateOne(
@@ -641,6 +649,6 @@ export async function removeList(formId, listId, session) {
 }
 
 /**
- * @import { FormDefinition, Page, PageSummary, ComponentDef, ControllerType, PatchPageFields, List } from '@defra/forms-model'
- * @import { ClientSession, Collection, Document, InferIdType, FindOptions } from 'mongodb'
+ * @import { FormDefinition, Page, Repeat, ComponentDef, ControllerType, PatchPageFields, List } from '@defra/forms-model'
+ * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  */
