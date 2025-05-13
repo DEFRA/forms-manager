@@ -492,7 +492,8 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
   // Repeater
   if (repeat) {
     fieldsToSet['draft.pages.$.repeat'] = repeat
-  } else if (repeat === null) {
+  }
+  if (repeat === null) {
     fieldsToUnSet['draft.pages.$.repeat'] = ''
   }
 
