@@ -62,43 +62,35 @@ export const auth = {
             try {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- we know this is a stringified JSON array
               const parsed = JSON.parse(groupsClaim)
-
               if (Array.isArray(parsed)) {
                 processedGroups = parsed
               } else {
                 logger.warn(
-                  `Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'. Defaulting to no groups.`
+                  `Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'`
                 )
               }
             } catch (error) {
               const errorMessage =
                 error instanceof Error ? error.message : 'Unknown parsing error'
               logger.error(
-                `Auth: User ${oid}: Failed to parse 'groups' claim string as JSON: '${String(groupsClaim)}'. Error: ${errorMessage}. Defaulting to no groups.`
+                `Auth: User ${oid}: Failed to parse 'groups' claim: ${errorMessage}`
               )
             }
           } else if (Array.isArray(groupsClaim)) {
             processedGroups = groupsClaim
           } else {
-            logger.debug(
-              `Auth: User ${oid}: 'groups' claim is neither a string nor an array (type: ${typeof groupsClaim}). Defaulting to no groups.`
-            )
+            processedGroups = []
           }
-
-          logger.debug(
-            `Auth: User ${oid}: Validating with processed groups: [${processedGroups.join(', ')}]`
-          )
 
           if (!processedGroups.includes(roleEditorGroupId)) {
             logger.warn(
-              `Auth: User ${oid}: Authorisation failed. Editor group ID "${roleEditorGroupId}" not found in token groups: [${processedGroups.join(', ')}]`
+              `Auth: User ${oid}: Authorisation failed. Required group "${roleEditorGroupId}" not found`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${oid}: passed authorisation`)
           return {
             isValid: true,
             credentials: {
