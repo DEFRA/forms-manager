@@ -86,14 +86,14 @@ export const auth = {
 
           if (!processedGroups.includes(roleEditorGroupId)) {
             logger.warn(
-              `Auth: User ${oid}: Authorization failed. Editor group ID "${roleEditorGroupId}" not found in token groups: [${processedGroups.join(', ')}]`
+              `Auth: User ${oid}: Authorisation failed. Editor group ID "${roleEditorGroupId}" not found in token groups: [${processedGroups.join(', ')}]`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${oid}: passed authorization`)
+          logger.debug(`User ${oid}: passed authorisation`)
           return {
             isValid: true,
             credentials: {

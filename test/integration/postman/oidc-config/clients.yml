@@ -1,15 +1,12 @@
-- ClientId: "newman-test-client" # Changed from client_id
+- ClientId: "newman-test-client"
   ClientSecrets:
-    - "newman-mock-secret" # Directly provide the secret string as a list item
-  AllowedGrantTypes: ["password"] # Changed from grant_types
-  RedirectUris: ["http://localhost/dev/null"] # Changed from redirect_uris
+    - "newman-mock-secret"
+  AllowedGrantTypes: ["password"]
+  RedirectUris: ["http://localhost/dev/null"]
   AllowedScopes:
     - "openid"
     - "profile"
     - "email"
-    # - "groups" # This scope itself is not standardly defined by oidc-server-mock.
-                 # The 'group' *claim* will be included via the ApiResource's UserClaims.
-    - "newman-test-client"   # <--- ADDED: Request the API scope linked to your API Resource
-  AccessTokenType: "Jwt" # Explicitly set access token type for this client
-  AlwaysIncludeUserClaimsInIdToken: true # Ensures claims like oid, group appear in the ID token too
-  # UpdateUserClaimsOnTokenRefresh: true # Optional 
+    - "newman-test-client"
+  AccessTokenType: "Jwt"
+  AlwaysIncludeUserClaimsInIdToken: true
