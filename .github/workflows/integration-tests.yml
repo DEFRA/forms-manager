@@ -2,7 +2,7 @@ name: Integration Tests
 
 on:
   push:
-    branches: [ main, feat/526440-api-tests ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -20,7 +20,7 @@ jobs:
         node-version: '22'
 
     - name: Run Integration Tests (PR)
-      if: github.event_name == 'pull_request' && github.head_ref != 'feat/526440-api-tests'
+      if: github.event_name == 'pull_request'
       run: npm run test:integration
 
     - name: Run Integration Tests with Reports
@@ -30,7 +30,7 @@ jobs:
         npm run test:integration:start
         npm run test:integration:wait
         
-        # Generate reports
+        # Generate reports - directly use docker compose to avoid script conflicts
         mkdir -p ./newman/reports
         docker compose -f docker-compose.integration-test.yml run --rm \
           -v ${PWD}/newman/reports:/etc/newman/reports \
@@ -41,12 +41,12 @@ jobs:
           --reporter-html-export /etc/newman/reports/newman-report.html
         
         EXIT_CODE=$?
-        npm run test:integration:stop
+        npm run test:integration:stop  # Make sure this script exists in package.json
         exit $EXIT_CODE
 
     - name: Upload Test Report
       uses: actions/upload-artifact@v4
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/526440-api-tests')
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
       with:
         name: integration-test-report
         path: ./newman/reports/newman-report.html
