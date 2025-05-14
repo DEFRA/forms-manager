@@ -14,10 +14,39 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Cache node modules
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Cache Docker images
+      uses: actions/cache@v3
+      with:
+        path: /tmp/docker-save
+        key: ${{ runner.os }}-docker-${{ hashFiles('docker-compose.integration-test.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+
+    - name: Load Docker images from cache
+      run: |
+        mkdir -p /tmp/docker-save
+        if ls /tmp/docker-save/*.tar >/dev/null 2>&1; then
+          echo "Loading Docker images from cache"
+          for image in /tmp/docker-save/*.tar; do
+            echo "Loading image: $image"
+            docker load -i "$image"
+          done
+        else
+          echo "No cached Docker images found"
+        fi
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22'
+        cache: 'npm'
 
     - name: Run Integration Tests (PR)
       if: github.event_name == 'pull_request'
@@ -42,6 +71,16 @@ jobs:
         EXIT_CODE=$?
         npm run test:integration:stop
         exit $EXIT_CODE
+
+    # Save Docker images for future runs
+    - name: Save Docker images to cache
+      if: always()
+      run: |
+        mkdir -p /tmp/docker-save
+        docker images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>" | while read -r image; do
+          echo "Saving image: $image"
+          docker save -o "/tmp/docker-save/$(echo "$image" | tr '/:' '_').tar" "$image"
+        done
 
     - name: Upload Test Report
       uses: actions/upload-artifact@v4
