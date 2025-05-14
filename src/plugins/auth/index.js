@@ -79,6 +79,10 @@ export const auth = {
             }
           } else if (Array.isArray(groupsClaim)) {
             processedGroups = groupsClaim
+          } else {
+            logger.debug(
+              `Auth: User ${oid}: 'groups' claim is neither a string nor an array (type: ${typeof groupsClaim}). Defaulting to no groups.`
+            )
           }
 
           logger.debug(

@@ -23,14 +23,13 @@ jobs:
       if: github.event_name == 'pull_request'
       run: npm run test:integration
 
-    - name: Run Integration Tests with Reports
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/526440-api-tests')
+    - name: Run Integration Tests with Reports (Main)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
         npm run test:integration:setup
         npm run test:integration:start
         npm run test:integration:wait
-        
-        # Generate reports - directly use docker compose to avoid script conflicts
+
         mkdir -p ./newman/reports
         docker compose -f docker-compose.integration-test.yml run --rm \
           -v ${PWD}/newman/reports:/etc/newman/reports \
@@ -39,9 +38,9 @@ jobs:
           -r cli,json,html \
           --reporter-json-export /etc/newman/reports/newman-summary.json \
           --reporter-html-export /etc/newman/reports/newman-report.html
-        
+
         EXIT_CODE=$?
-        npm run test:integration:stop  # Make sure this script exists in package.json
+        npm run test:integration:stop
         exit $EXIT_CODE
 
     - name: Upload Test Report
