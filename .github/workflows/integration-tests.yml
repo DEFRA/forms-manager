@@ -1,0 +1,30 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js (to run npm scripts)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Run Integration Tests using Docker Compose (via npm script)
+      run: npm run test:integration
+
+    - name: Upload Test Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: integration-test-report
+        path: ./newman-reports/newman-report.html

@@ -37,38 +37,71 @@ export const auth = {
           const user = artifacts.decoded.payload
 
           if (!user) {
-            logger.error('Authentication error: Missing user')
+            logger.error('Auth: Missing user from token payload.')
             return {
               isValid: false
             }
           }
 
-          const { oid, groups = [] } = user
+          const { oid } = user
+          const groupsClaim = user.groups
 
           if (!oid) {
-            logger.error('Authentication error: user.oid is missing')
+            logger.error('Auth: User OID is missing in token payload.')
             return {
               isValid: false
             }
+          }
+
+          let processedGroups = []
+
+          // For the integration tests, the OIDC mock server sends the 'groups' claim as a stringified JSON array which
+          // requires parsing, while a real Azure AD would typically provide 'groups' as a proper array.
+          // We handle both formats for flexibility between test and production environments.
+          if (typeof groupsClaim === 'string') {
+            try {
+              const parsed = JSON.parse(groupsClaim)
+
+              if (Array.isArray(parsed)) {
+                processedGroups = parsed
+              } else {
+                logger.warn(
+                  `Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'. Defaulting to no groups.`
+                )
+              }
+            } catch (error) {
+              const errorMessage =
+                error instanceof Error ? error.message : 'Unknown parsing error'
+              logger.error(
+                `Auth: User ${oid}: Failed to parse 'groups' claim string as JSON: '${String(groupsClaim)}'. Error: ${errorMessage}. Defaulting to no groups.`
+              )
+            }
+          } else if (Array.isArray(groupsClaim)) {
+            processedGroups = groupsClaim
           }
 
           logger.debug(
-            `User ${oid}: validating against groups: ${groups.length ? groups.join(', ') : '[]'}`
+            `Auth: User ${oid}: Validating with processed groups: [${processedGroups.join(', ')}]`
           )
 
-          if (!groups.includes(roleEditorGroupId)) {
+          if (!processedGroups.includes(roleEditorGroupId)) {
             logger.warn(
-              `User ${oid}: failed authorisation. "${roleEditorGroupId}" not in groups`
+              `Auth: User ${oid}: Authorization failed. Editor group ID "${roleEditorGroupId}" not found in token groups: [${processedGroups.join(', ')}]`
             )
             return {
               isValid: false
             }
           }
 
-          logger.debug(`User ${oid}: passed authorisation`)
+          logger.debug(`User ${oid}: passed authorization`)
           return {
             isValid: true,
-            credentials: { user }
+            credentials: {
+              user: {
+                ...user,
+                groups: processedGroups
+              }
+            }
           }
         }
       })
