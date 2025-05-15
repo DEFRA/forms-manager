@@ -6,6 +6,7 @@ import {
   findComponent,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
+import { validateDocumentSchemaGuard } from '~/src/api/forms/repositories/validate-document-schema-guard.ts'
 import { populateComponentIds } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
@@ -594,13 +595,14 @@ export async function addLists(formId, lists, session) {
  * @returns {Promise<List>}
  */
 export async function updateList(formId, listId, listItem, session) {
+  // All of this will be wrapped in a transaction (coming through a session)
   logger.info(`Updating list with id ${listId} on form ID ${formId}`)
 
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
-  await coll.updateOne(
+  const document = await coll.findOneAndUpdate(
     {
       _id: new ObjectId(formId),
       'draft.lists.id': listId
@@ -614,6 +616,8 @@ export async function updateList(formId, listId, listItem, session) {
       session
     }
   )
+
+  validateDocumentSchemaGuard(document)
 
   logger.info(`Updated list with id ${listId} on form ID ${formId}`)
 
