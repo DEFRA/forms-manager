@@ -17,6 +17,9 @@ Core delivery platform Node.js Backend Template.
   - [Production Image](#production-image)
 - [Licence](#licence)
   - [About the licence](#about-the-licence)
+- [Integration testing](#integration-testing)
+  - [Local development with the integration test environment](#local-development-with-the-integration-test-environment)
+  - [Running Postman tests locally](#running-postman-tests-locally)
 
 ## Requirements
 
@@ -130,6 +133,39 @@ Run:
 ```bash
 docker run -e GITHUB_API_TOKEN -p 3001:3001 forms-manager
 ```
+
+## Integration testing
+
+### Local development with the integration test environment
+
+If you want to run the API with the integration test environment (which includes mock OIDC and test MongoDB):
+
+1. Set up the integration test environment:
+
+   ```bash
+   npm run test:integration:setup    # Start OIDC mock server and MongoDB
+   npm run test:integration:start    # Start the API service
+   npm run test:integration:wait     # Wait for the app to be ready
+   ```
+
+2. The API will be available at http://localhost:3001
+
+3. When finished, clean up the environment:
+   ```bash
+   npm run test:integration:stop
+   ```
+
+### Running Postman tests locally
+
+To run the integration tests manually in Postman:
+
+1. Set up the integration test environment as described above
+2. Import the test collection and environment into Postman:
+   - Collection: `test/integration/postman/forms-manager-ci-mock.postman_collection.json`
+   - Environment: `test/integration/postman/forms-manager-ci-mock.postman_environment.json`
+3. Ensure the environment variable `root` is set to `http://localhost:3001`
+4. Run the collection or individual requests through the Postman GUI
+5. Clean up the environment when done with `npm run test:integration:stop`
 
 ## Licence
 
