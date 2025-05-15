@@ -143,18 +143,19 @@ If you want to run the API with the integration test environment (which includes
 
 1. Set up the integration test environment:
 
-   ```bash
-   npm run test:integration:setup    # Start OIDC mock server and MongoDB
-   npm run test:integration:start    # Start the API service
-   npm run test:integration:wait     # Wait for the app to be ready
-   ```
+```bash
+npm run test:integration:setup    # Start OIDC mock server and MongoDB
+npm run test:integration:start    # Start the API service
+npm run test:integration:wait     # Wait for the app to be ready
+```
 
 2. The API will be available at http://localhost:3001
 
 3. When finished, clean up the environment:
-   ```bash
-   npm run test:integration:stop
-   ```
+
+```bash
+npm run test:integration:stop
+```
 
 ### Running Postman tests locally
 
@@ -162,8 +163,10 @@ To run the integration tests manually in Postman:
 
 1. Set up the integration test environment as described above
 2. Import the test collection and environment into Postman:
-   - Collection: `test/integration/postman/forms-manager-ci-mock.postman_collection.json`
-   - Environment: `test/integration/postman/forms-manager-ci-mock.postman_environment.json`
+
+- Collection: `test/integration/postman/forms-manager-ci-mock.postman_collection.json`
+- Environment: `test/integration/postman/forms-manager-ci-mock.postman_environment.json`
+
 3. Ensure the environment variable `root` is set to `http://localhost:3001`
 4. Run the collection or individual requests through the Postman GUI
 5. Clean up the environment when done with `npm run test:integration:stop`
@@ -174,61 +177,62 @@ To extend the integration test suite with new test cases:
 
 1. **Open the collection in Postman**:
 
-   - Import the collection if you haven't already: `test/integration/postman/forms-manager-ci-mock.postman_collection.json`
-   - Import the environment: `test/integration/postman/forms-manager-ci-mock.postman_environment.json`
+- Import the collection if you haven't already: `test/integration/postman/forms-manager-ci-mock.postman_collection.json`
+- Import the environment: `test/integration/postman/forms-manager-ci-mock.postman_environment.json`
 
 2. **Create a new request**:
 
-   - Right-click on the appropriate folder in the collection and select "Add Request"
-   - Name it clearly, describing what it tests (e.g., "Create Form - Valid Input")
-   - Set the HTTP method (GET, POST, PUT, etc.) and URL using environment variables: `{{root}}/forms`
+- Right-click on the appropriate folder in the collection and select "Add Request"
+- Name it clearly, describing what it tests (e.g., "Create Form - Valid Input")
+- Set the HTTP method (GET, POST, PUT, etc.) and URL using environment variables: `{{root}}/forms`
 
 3. **Configure authentication**:
 
-   - In the Authorization tab, select "Bearer Token"
-   - Use `{{accessToken}}` as the token value (the collection's pre-request scripts will handle token acquisition)
+- In the Authorization tab, select "Bearer Token"
+- Use `{{accessToken}}` as the token value (the collection's pre-request scripts will handle token acquisition)
 
 4. **Add request body or parameters** if needed:
 
-   - For POST/PUT requests, add your JSON body in the Body tab
-   - Use the "raw" format and select JSON
+- For POST/PUT requests, add your JSON body in the Body tab
+- Use the "raw" format and select JSON
 
 5. **Add pre-request scripts** if required:
 
-   - Use the Pre-request Script tab for setup logic
-   - Create test data or variables needed for this specific test
+- Use the Pre-request Script tab for setup logic
+- Create test data or variables needed for this specific test
 
 6. **Add test assertions**:
 
-   - In the Tests tab, write assertions to verify the response
-   - Example:
+- In the Tests tab, write assertions to verify the response
+- Example:
 
-     ```javascript
-     pm.test('Status code is 200', function () {
-       pm.response.to.have.status(200)
-     })
+  ```javascript
+  pm.test('Status code is 200', function () {
+    pm.response.to.have.status(200)
+  })
 
-     pm.test('Response has expected data', function () {
-       const responseData = pm.response.json()
-       pm.expect(responseData).to.have.property('id')
-       pm.expect(responseData.name).to.eql('Expected Name')
-     })
-     ```
+  pm.test('Response has expected data', function () {
+    const responseData = pm.response.json()
+    pm.expect(responseData).to.have.property('id')
+    pm.expect(responseData.name).to.eql('Expected Name')
+  })
+  ```
 
 7. **Test locally**:
 
-   - Start the integration environment with `npm run test:integration:setup && npm run test:integration:start && npm run test:integration:wait`
-   - Run your new request and verify it passes
-   - Make adjustments as needed
+- Start the integration environment with `npm run test:integration:setup && npm run test:integration:start && npm run test:integration:wait`
+- Run your new request and verify it passes
+- Make adjustments as needed
 
 8. **Export and commit**:
 
-   - Export the updated collection: File → Export → Collection
-   - Save it to `test/integration/postman/forms-manager-ci-mock.postman_collection.json`, overwriting the existing file
-   - Commit the updated collection file to the repository
+- Export the updated collection: File → Export → Collection
+- Save it to `test/integration/postman/forms-manager-ci-mock.postman_collection.json`, overwriting the existing file
+- Commit the updated collection file to the repository
 
 9. **Update documentation** if needed:
-   - If you're adding endpoints for new features, update the API endpoints section in this README
+
+If you're adding endpoints for new features, update the API endpoints section in this README
 
 The CI pipeline will automatically run your new test along with the existing ones on PRs and merges to main.
 
