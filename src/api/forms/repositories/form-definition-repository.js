@@ -1,4 +1,4 @@
-import { Engine, FormStatus } from '@defra/forms-model'
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -6,11 +6,53 @@ import {
   findComponent,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
+import { validate } from '~/src/api/forms/service/helpers/definition.js'
 import { populateComponentIds } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 const logger = createLogger()
+
+/**
+ * Updates a draft form definition
+ * @param {string | Filter<{ draft: FormDefinition }>} filter - the query filter
+ * @param {UpdateFilter<{ draft: FormDefinition }>} updateFilter - the update filter
+ * @param {ClientSession} session - the mongo transaction session
+ * @param {string} operation - the operation description
+ * @param {Document[]} [arrayFilters] - the array filters
+ */
+async function updateDraft(
+  filter,
+  updateFilter,
+  session,
+  operation,
+  arrayFilters
+) {
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  if (typeof filter === 'string') {
+    filter = { _id: new ObjectId(filter) }
+  }
+
+  const updateResult = await coll.findOneAndUpdate(filter, updateFilter, {
+    session,
+    returnDocument: 'after',
+    arrayFilters
+  })
+
+  if (!updateResult) {
+    throw Boom.notFound(
+      `Unexpected empty result from 'findOneAndUpdate' in '${operation}'`
+    )
+  }
+
+  // Validate form definition
+  validate(updateResult.draft)
+
+  return updateResult
+}
 
 /**
  * Adds a form to the Form Store
@@ -21,15 +63,13 @@ const logger = createLogger()
 export async function upsert(id, formDefinition, session) {
   logger.info(`Creating form definition (draft) for form ID ${id}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  const _id = new ObjectId(id)
-  await coll.updateOne(
-    { _id },
-    { $set: { draft: formDefinition } },
-    { upsert: true, session }
+  await updateDraft(
+    id,
+    {
+      $set: { draft: formDefinition }
+    },
+    session,
+    'upsert'
   )
 
   logger.info(`Created form definition (draft) for form ID ${id}`)
@@ -141,7 +181,7 @@ export async function get(
 }
 
 /**
- * Removes a form definition (both draft and live components)
+ * Removes a form definition
  * @param {string} formId - the ID of the form
  * @param {ClientSession} session
  */
@@ -154,28 +194,18 @@ export async function remove(formId, session) {
 }
 
 /**
- * Updates the engine version if applicable
+ * Updates the engine version of a draft form definition
  * @param {string} formId - the ID of the form
  * @param {Engine} engineVersion - the engine version e.g. 'V1' or 'V2'
  * @param {FormDefinition} definition - the form definition
  * @param {ClientSession} session
- * @param {FormStatus} [state] - state of the form to update
  */
 export async function setEngineVersion(
   formId,
   engineVersion,
   definition,
-  session,
-  state = FormStatus.Draft
+  session
 ) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest('Cannot update the engine version of a live form')
-  }
-
-  if (![Engine.V1, Engine.V2].includes(engineVersion)) {
-    throw Boom.badRequest(`Invalid engine version for form ID ${formId}`)
-  }
-
   if (definition.engine === engineVersion) {
     return
   }
@@ -184,14 +214,11 @@ export async function setEngineVersion(
     `Updating engine version to ${engineVersion} for form ID ${formId}`
   )
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
-    { _id: new ObjectId(formId) },
-    { $set: { [`${state}.engine`]: engineVersion } },
-    { session }
+  await updateDraft(
+    formId,
+    { $set: { 'draft.engine': engineVersion } },
+    session,
+    'setEngineVersion'
   )
 
   logger.info(
@@ -204,28 +231,15 @@ export async function setEngineVersion(
  * @param {string} formId - the ID of the form
  * @param {string} name - new name for the form
  * @param {ClientSession} session
- * @param {FormStatus} [state] - state of the form to update
  */
-export async function updateName(
-  formId,
-  name,
-  session,
-  state = FormStatus.Draft
-) {
-  if (state === FormStatus.Live) {
-    throw Boom.badRequest('Cannot update the name of a live form')
-  }
-
+export async function updateName(formId, name, session) {
   logger.info(`Updating form name for form ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
-    { _id: new ObjectId(formId) },
-    { $set: { [`${state}.name`]: name } },
-    { session }
+  await updateDraft(
+    formId,
+    { $set: { 'draft.name': name } },
+    session,
+    'setEngineVersion'
   )
 
   logger.info(`Updated form name for form ID ${formId}`)
@@ -240,15 +254,11 @@ export async function updateName(
 export async function removeMatchingPages(formId, matchCriteria, session) {
   logger.info(`Removing page on ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-  await coll.updateOne(
-    { _id: new ObjectId(formId) },
-    {
-      $pull: { 'draft.pages': matchCriteria }
-    },
-    { session }
+  await updateDraft(
+    formId,
+    { $pull: { 'draft.pages': matchCriteria } },
+    session,
+    'removeMatchingPages'
   )
 
   logger.info(`Removed page on ${formId}`)
@@ -263,9 +273,6 @@ export async function removeMatchingPages(formId, matchCriteria, session) {
  */
 export async function addPageAtPosition(formId, page, session, position) {
   logger.info(`Adding page on Form ID ${formId}`)
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
 
   const positionOptions = /** @satisfies {{ $position?: number }} */ {}
 
@@ -275,14 +282,15 @@ export async function addPageAtPosition(formId, page, session, position) {
 
   const newPage = populateComponentIds(page)
 
-  await coll.updateOne(
-    { _id: new ObjectId(formId) },
+  await updateDraft(
+    formId,
     {
       $push: {
         'draft.pages': { $each: [newPage], ...positionOptions }
       }
     },
-    { session }
+    session,
+    'addPageAtPosition'
   )
 
   logger.info(`Added page on Form ID ${formId}`)
@@ -299,21 +307,18 @@ export async function addPageAtPosition(formId, page, session, position) {
 export async function updatePage(formId, pageId, page, session) {
   logger.info(`Updating page ID ${pageId} on form ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
+  await updateDraft(
     { _id: new ObjectId(formId), 'draft.pages.id': pageId },
     { $set: { 'draft.pages.$': page } },
-    { session }
+    session,
+    'updatePage'
   )
 
   logger.info(`Updated page ID ${pageId} on form ID ${formId}`)
 }
 
 /**
- * Adds a new component to the end of a page->components array
+ * Adds a new component to the end of a page components array
  * @param {string} formId
  * @param {string} pageId
  * @param {ComponentDef[]} components
@@ -330,17 +335,13 @@ export async function addComponents(
 ) {
   logger.info(`Adding a new component to form ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
   const positionOptions = /** @satisfies {{ $position?: number }} */ {}
 
   if (position !== undefined) {
     positionOptions.$position = position
   }
 
-  await coll.updateOne(
+  await updateDraft(
     { _id: new ObjectId(formId), 'draft.pages.id': pageId },
     {
       $push: {
@@ -350,7 +351,8 @@ export async function addComponents(
         }
       }
     },
-    { session }
+    session,
+    'addComponents'
   )
 
   logger.info(`Added a new component to form ID ${formId}`)
@@ -375,11 +377,7 @@ export async function updateComponent(
     `Updating component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  const updatedDefinition = await coll.findOneAndUpdate(
+  const updateResult = await updateDraft(
     {
       _id: new ObjectId(formId),
       'draft.pages.id': pageId,
@@ -390,24 +388,16 @@ export async function updateComponent(
         'draft.pages.$[pageId].components.$[component]': component
       }
     },
-    {
-      session,
-      returnDocument: 'after',
-      arrayFilters: [{ 'pageId.id': pageId }, { 'component.id': componentId }]
-    }
+    session,
+    'updateComponent',
+    [{ 'pageId.id': pageId }, { 'component.id': componentId }]
   )
-
-  if (updatedDefinition === null) {
-    throw Boom.notFound(
-      `Component ID ${componentId} not found on Page ID ${pageId} & Form ID ${formId}`
-    )
-  }
 
   logger.info(
     `Updated component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
 
-  return findComponent(updatedDefinition.draft, pageId, componentId)
+  return findComponent(updateResult.draft, pageId, componentId)
 }
 
 /**
@@ -422,11 +412,7 @@ export async function deleteComponent(formId, pageId, componentId, session) {
     `Deleting component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
+  await updateDraft(
     { _id: new ObjectId(formId), 'draft.pages.id': pageId },
     {
       $pull: {
@@ -435,7 +421,8 @@ export async function deleteComponent(formId, pageId, componentId, session) {
         }
       }
     },
-    { session }
+    session,
+    'deleteComponent'
   )
 
   logger.info(
@@ -455,10 +442,6 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
 
   logger.info(
     `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
-  )
-
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
   )
 
   /**
@@ -497,7 +480,7 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
     fieldsToUnSet['draft.pages.$.repeat'] = ''
   }
 
-  await coll.updateOne(
+  await updateDraft(
     {
       _id: new ObjectId(formId),
       'draft.pages.id': pageId
@@ -506,9 +489,8 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
       $set: fieldsToSet,
       $unset: fieldsToUnSet
     },
-    {
-      session
-    }
+    session,
+    'updatePageFields'
   )
 
   logger.info(
@@ -525,28 +507,16 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
 export async function removePage(formId, pageId, session) {
   logger.info(`Deleting page ID ${pageId} on form ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  const definition = await coll.findOneAndUpdate(
+  await updateDraft(
     { _id: new ObjectId(formId), 'draft.pages.id': pageId },
     {
       $pull: {
         'draft.pages': { id: pageId }
       }
     },
-    { session }
+    session,
+    'removePage'
   )
-
-  if (!definition) {
-    logger.error(
-      `Failed to delete page ID ${pageId} on form ID ${formId}.  Form not found`
-    )
-    throw Boom.notFound(
-      `Form with ID ${formId} not found. Failed to delete page ID ${pageId}.`
-    )
-  }
 
   logger.info(`Deleted page ID ${pageId} on form ID ${formId}`)
 }
@@ -560,14 +530,8 @@ export async function removePage(formId, pageId, session) {
 export async function addLists(formId, lists, session) {
   logger.info(`Adding new lists to form ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
-    {
-      _id: new ObjectId(formId)
-    },
+  await updateDraft(
+    formId,
     {
       $push: {
         'draft.lists': {
@@ -575,9 +539,8 @@ export async function addLists(formId, lists, session) {
         }
       }
     },
-    {
-      session
-    }
+    session,
+    'addLists'
   )
 
   logger.info(`Added new lists to form ID ${formId}`)
@@ -596,11 +559,7 @@ export async function addLists(formId, lists, session) {
 export async function updateList(formId, listId, listItem, session) {
   logger.info(`Updating list with id ${listId} on form ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
+  await updateDraft(
     {
       _id: new ObjectId(formId),
       'draft.lists.id': listId
@@ -610,9 +569,8 @@ export async function updateList(formId, listId, listItem, session) {
         'draft.lists.$': listItem
       }
     },
-    {
-      session
-    }
+    session,
+    'updateList'
   )
 
   logger.info(`Updated list with id ${listId} on form ID ${formId}`)
@@ -629,11 +587,7 @@ export async function updateList(formId, listId, listItem, session) {
 export async function removeList(formId, listId, session) {
   logger.info(`Deleting list ID ${listId} on form ID ${formId}`)
 
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  await coll.updateOne(
+  await updateDraft(
     { _id: new ObjectId(formId), 'draft.lists.id': listId },
     {
       $pull: {
@@ -642,13 +596,14 @@ export async function removeList(formId, listId, session) {
         }
       }
     },
-    { session }
+    session,
+    'removeList'
   )
 
   logger.info(`Deleted list ID ${listId} on form ID ${formId}`)
 }
 
 /**
- * @import { FormDefinition, Page, Repeat, ComponentDef, ControllerType, PatchPageFields, List } from '@defra/forms-model'
- * @import { ClientSession, Collection, FindOptions } from 'mongodb'
+ * @import { FormDefinition, Page, Repeat, ComponentDef, ControllerType, PatchPageFields, List, Engine } from '@defra/forms-model'
+ * @import { ClientSession, Collection, FindOptions, UpdateFilter, Filter, Document } from 'mongodb'
  */
