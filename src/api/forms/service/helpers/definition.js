@@ -1,12 +1,11 @@
-/**
- * @typedef {{
- *     [k: string]: number
- * }} PageOrderHelper
- */
+import { formDefinitionSchema } from '@defra/forms-model'
+
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import { logger } from '~/src/api/forms/service/shared.js'
 
 /**
  * Creates an object of keys and their desired position based on the pageOrder (pure function)
- * For ['a','b''c'] will return { a: -2, b: -1, c: -0 }
+ * For ['a', 'b', 'c'] will return { a: -2, b: -1, c: -0 }
  * @param {string[]} pageOrder
  * @returns {PageOrderHelper}
  */
@@ -53,5 +52,31 @@ export function reorderPages(formDefinition, pageOrder) {
 }
 
 /**
- * @import { FormDefinition, Page } from '@defra/forms-model'
+ * Validates the form definition
+ * @param {FormDefinition} definition
+ */
+export function validate(definition) {
+  const { error } = formDefinitionSchema.validate(definition)
+
+  if (error) {
+    const name = definition.name ?? 'No name'
+
+    logger.warn(
+      `Form failed validation: '${error.message}'. Form name: '${name}'`
+    )
+
+    throw new InvalidFormDefinitionError(name, {
+      cause: error
+    })
+  }
+}
+
+/**
+ * @typedef {{
+ *     [k: string]: number
+ * }} PageOrderHelper
+ */
+
+/**
+ * @import { FormDefinition } from '@defra/forms-model'
  */
