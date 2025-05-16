@@ -48,20 +48,21 @@ jobs:
         node-version: '22'
         cache: 'npm'
 
-    - name: Run Integration Tests (PR)
-      if: github.event_name == 'pull_request'
-      run: npm run test:integration
+    # TEMPORARY: Comment out this step to avoid running tests twice on PR while testing reporting.
+    #           Uncomment before merging to main.
+    # - name: Run Integration Tests (PR)
+    #   if: github.event_name == 'pull_request'
+    #   run: npm run test:integration
 
     - name: Run Integration Tests with Reports (Main)
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request')
       run: |
         npm run test:integration:setup
         npm run test:integration:start
         npm run test:integration:wait
 
-        mkdir -p ./newman/reports
+        mkdir -p ./newman-reports
         docker compose -f docker-compose.integration-test.yml run --rm \
-          -v ${PWD}/newman/reports:/etc/newman/reports \
           newman run /etc/newman/forms-manager-ci-mock.postman_collection.json \
           -e /etc/newman/forms-manager-ci-mock.postman_environment.json \
           -r cli,json,html \
@@ -82,10 +83,12 @@ jobs:
           docker save -o "/tmp/docker-save/$(echo "$image" | tr '/:' '_').tar" "$image"
         done
 
+    # TEMPORARY: Modified 'if' condition to also run on pull_request for testing.
+    #           Revert to 'if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()' before merging.
     - name: Upload Test Report
       uses: actions/upload-artifact@v4
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+      if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request')) && success()
       with:
         name: integration-test-report
-        path: ./newman/reports/newman-report.html
+        path: ./newman-reports/newman-report.html
         if-no-files-found: warn
