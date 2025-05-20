@@ -1,6 +1,7 @@
 import {
   ControllerType,
   FormStatus,
+  formDefinitionSchema,
   hasComponentsEvenIfNoNext
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
@@ -24,6 +25,7 @@ import {
   deletePage,
   deletePages,
   get,
+  insert,
   updateComponent,
   updateList,
   updatePage,
@@ -165,7 +167,7 @@ describe('form-definition-repository', () => {
     expect(updateFilter.$set?.draft).toBeDefined()
 
     if (!updateFilter.$set?.draft) {
-      throw new Error('Unexpected draft on $set')
+      throw new Error('Unexpected empty draft on $set')
     }
 
     await verify(updateFilter.$set.draft)
@@ -536,6 +538,31 @@ describe('form-definition-repository', () => {
           expect(definition.lists).toHaveLength(0)
         }
       )
+    })
+  })
+
+  describe('insert', () => {
+    it('should insert a new draft definition', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue({ draft })
+
+      await insert(formId, draft, mockSession, formDefinitionSchema)
+
+      const [filter, update] = mockCollection.findOneAndUpdate.mock.calls[0]
+      expect(filter).toMatchObject({
+        _id: new ObjectId(formId)
+      })
+      expect(update).toMatchObject({
+        $setOnInsert: { draft: expect.any(Object) }
+      })
+
+      /** @type {UpdateFilter<{ draft: FormDefinition }>} */
+      const updateFilter = update
+
+      expect(updateFilter.$setOnInsert?.draft).toBeDefined()
+
+      if (!updateFilter.$setOnInsert?.draft) {
+        throw new Error('Unexpected empty draft on $setOnInsert')
+      }
     })
   })
 })

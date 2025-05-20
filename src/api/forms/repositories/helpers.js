@@ -215,6 +215,46 @@ export function uniquePathGate(
 /**
  * Updates a draft form definition
  * @param {string} formId - the form id
+ * @param {FormDefinition} definition - the form definitiom
+ * @param {ClientSession} session - the mongo transaction session
+ * @param {ObjectSchema<FormDefinition>} schema - the schema to use (defaults to V2)
+ */
+export async function insertDraft(
+  formId,
+  definition,
+  session,
+  schema = formDefinitionV2Schema
+) {
+  // Validate form definition
+  const draft = validate(definition, schema)
+
+  const id = { _id: new ObjectId(formId) }
+
+  // Persist the updated draft
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const insertResult = await coll.findOneAndUpdate(
+    id,
+    { $setOnInsert: { draft } },
+    {
+      upsert: true,
+      returnDocument: 'after',
+      session
+    }
+  )
+
+  if (!insertResult) {
+    throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
+  }
+
+  return insertResult
+}
+
+/**
+ * Updates a draft form definition
+ * @param {string} formId - the form id
  * @param {UpdateCallback} updateCallback - the update callback
  * @param {ClientSession} session - the mongo transaction session
  * @param {string} operation - the operation description

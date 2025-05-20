@@ -182,7 +182,7 @@ describe('migration', () => {
       .mockResolvedValue(versionOne)
 
     it('should migrate a v1 definition to v2', async () => {
-      const upsertMock = jest.mocked(formDefinition.upsert)
+      const updateMock = jest.mocked(formDefinition.update)
       jest
         .spyOn(migrationHelperStubs, 'migrateToV2')
         .mockReturnValueOnce(versionTwo)
@@ -191,9 +191,9 @@ describe('migration', () => {
 
       const updatedDefinition = await migrateDefinitionToV2(id, author)
 
-      expect(upsertMock).toHaveBeenCalled()
+      expect(updateMock).toHaveBeenCalled()
       const [finalExpectedId, finalExpectedDefinition] =
-        upsertMock.mock.calls[0]
+        updateMock.mock.calls[0]
 
       expect(finalExpectedId).toBe(id)
       expect(finalExpectedDefinition).toEqual(versionTwo)
@@ -207,14 +207,14 @@ describe('migration', () => {
       const definition = await migrateDefinitionToV2(id, author)
       expect(definition).toEqual(versionTwo)
       expect(formDefinition.get).toHaveBeenCalledTimes(1)
-      expect(formDefinition.upsert).not.toHaveBeenCalled()
+      expect(formDefinition.update).not.toHaveBeenCalled()
       expect(dbMetadataSpy).not.toHaveBeenCalled()
     })
 
     it('should surface errors correctly', async () => {
       jest.mocked(formDefinition.get).mockResolvedValue(versionOne)
       jest
-        .mocked(formDefinition.upsert)
+        .mocked(formDefinition.update)
         .mockRejectedValueOnce(Boom.internal('err'))
       await expect(migrateDefinitionToV2(id, author)).rejects.toThrow(
         Boom.internal('err')

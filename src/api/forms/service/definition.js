@@ -64,7 +64,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     try {
       await session.withTransaction(async () => {
         // Update the form definition
-        await formDefinition.upsert(
+        await formDefinition.update(
           formId,
           definition,
           session,

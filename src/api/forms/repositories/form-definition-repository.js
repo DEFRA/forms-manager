@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb'
 import {
   getComponent,
   getList,
+  insertDraft,
   modifyAddComponent,
   modifyAddList,
   modifyAddPage,
@@ -34,12 +35,27 @@ const logger = createLogger()
  * @param {ClientSession} session - mongo transaction session
  * @param {ObjectSchema<FormDefinition>} schema - the schema to use
  */
-export async function upsert(id, formDefinition, session, schema) {
-  logger.info(`Upserting form for form ID ${id}`)
+export async function insert(id, formDefinition, session, schema) {
+  logger.info(`Inserting form for form ID ${id}`)
 
-  await modifyDraft(id, () => formDefinition, session, 'upsert', schema)
+  await insertDraft(id, formDefinition, session, schema)
 
-  logger.info(`Upserted form for form ID ${id}`)
+  logger.info(`Inserted form for form ID ${id}`)
+}
+
+/**
+ * Update a form in the Form Store
+ * @param {string} id - id
+ * @param {FormDefinition} formDefinition - form definition (JSON object)
+ * @param {ClientSession} session - mongo transaction session
+ * @param {ObjectSchema<FormDefinition>} schema - the schema to use
+ */
+export async function update(id, formDefinition, session, schema) {
+  logger.info(`Updating form for form ID ${id}`)
+
+  await modifyDraft(id, () => formDefinition, session, 'update', schema)
+
+  logger.info(`Updated form for form ID ${id}`)
 }
 
 /**

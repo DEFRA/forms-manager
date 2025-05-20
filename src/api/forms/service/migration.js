@@ -88,7 +88,7 @@ export async function migrateDefinitionToV2(formId, author) {
     await session.withTransaction(async () => {
       updatedDraftDefinition = migrateToV2(formDraftDefinition)
 
-      await formDefinition.upsert(
+      await formDefinition.update(
         formId,
         updatedDraftDefinition,
         session,

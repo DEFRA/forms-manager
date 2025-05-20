@@ -67,7 +67,7 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.upsert).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue()
       jest.mocked(formTemplates.empty).mockReturnValue(definition)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
@@ -134,7 +134,7 @@ describe('Forms service', () => {
     })
 
     it('should throw an error when writing form def fails', async () => {
-      jest.mocked(formDefinition.upsert).mockRejectedValueOnce(new Error())
+      jest.mocked(formDefinition.update).mockRejectedValueOnce(new Error())
 
       const input = {
         ...formMetadataInput,

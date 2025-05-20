@@ -306,7 +306,7 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.upsert).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue()
       jest.mocked(formTemplates.empty).mockReturnValue(definition)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
@@ -373,7 +373,7 @@ describe('Forms service', () => {
     })
 
     it('should throw an error when writing form def fails', async () => {
-      jest.mocked(formDefinition.upsert).mockRejectedValueOnce(new Error())
+      jest.mocked(formDefinition.update).mockRejectedValueOnce(new Error())
 
       const input = {
         ...formMetadataInput,
@@ -933,7 +933,7 @@ describe('Forms service', () => {
       "A custom form name that shouldn't be allowed"
 
     it('should update the draft form definition with required attributes upon creation', async () => {
-      const upsertSpy = jest.spyOn(formDefinition, 'upsert')
+      const updateSpy = jest.spyOn(formDefinition, 'update')
       const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
 
       await updateDraftFormDefinition(
@@ -942,7 +942,7 @@ describe('Forms service', () => {
         author
       )
 
-      expect(upsertSpy).toHaveBeenCalledWith(
+      expect(updateSpy).toHaveBeenCalledWith(
         '123',
         {
           ...formDefinitionCustomisedTitle,
@@ -1044,7 +1044,7 @@ describe('Forms service', () => {
         author
       )
       expect(returnedDefinition).toEqual(definition)
-      expect(formDefinition.upsert).not.toHaveBeenCalled()
+      expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })
 
