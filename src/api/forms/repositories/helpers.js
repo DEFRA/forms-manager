@@ -230,7 +230,7 @@ export async function insertDraft(
 
   const id = { _id: new ObjectId(formId) }
 
-  // Persist the updated draft
+  // Persist the new draft
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
   )
