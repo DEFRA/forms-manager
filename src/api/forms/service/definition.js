@@ -1,10 +1,9 @@
-import { Engine, FormStatus } from '@defra/forms-model'
+import { Engine, FormStatus, formDefinitionSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { reorderPages } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
   logger,
@@ -65,19 +64,16 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     try {
       await session.withTransaction(async () => {
         // Update the form definition
-        await formDefinition.upsert(formId, definition, session)
+        await formDefinition.upsert(
+          formId,
+          definition,
+          session,
+          formDefinitionSchema
+        )
 
         logger.info(`Updating form metadata (draft) for form ID ${formId}`)
 
-        // Update the `updatedAt/By` fields of the draft state
-        const now = new Date()
-        await formMetadata.update(
-          formId,
-          {
-            $set: partialAuditFields(now, author)
-          },
-          session
-        )
+        await formMetadata.updateAudit(formId, author, session)
       })
     } finally {
       await session.endSession()
@@ -248,21 +244,17 @@ export async function createDraftFromLive(formId, author) {
 /**
  * Based on a list of Page ids will reorder the pages
  * @param {string} formId
- * @param {string[]} orderList
+ * @param {string[]} order
  * @param {FormMetadataAuthor} author
  */
-export async function reorderDraftFormDefinitionPages(
-  formId,
-  orderList,
-  author
-) {
+export async function reorderDraftFormDefinitionPages(formId, order, author) {
   logger.info(
     `Reordering pages on Form Definition (draft) for form ID ${formId}`
   )
 
   const form = await getFormDefinition(formId)
 
-  if (!orderList.length) {
+  if (!order.length) {
     return form
   }
 
@@ -270,22 +262,13 @@ export async function reorderDraftFormDefinitionPages(
 
   try {
     const newForm = await session.withTransaction(async () => {
-      const reorderedForm = reorderPages(form, orderList)
-
-      // Update the form definition
-      await formDefinition.upsert(formId, reorderedForm, session)
-
-      logger.info(`Updating form metadata (draft) for form ID ${formId}`)
-
-      // Update the `updatedAt/By` fields of the draft state
-      const now = new Date()
-      await formMetadata.update(
+      const reorderedForm = await formDefinition.reorderPages(
         formId,
-        {
-          $set: partialAuditFields(now, author)
-        },
+        order,
         session
       )
+
+      await formMetadata.updateAudit(formId, author, session)
 
       return reorderedForm
     })

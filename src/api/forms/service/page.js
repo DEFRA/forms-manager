@@ -9,11 +9,7 @@ import {
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { repositionSummaryPipeline } from '~/src/api/forms/service/migration.js'
-import {
-  SUMMARY_PAGE_ID,
-  logger,
-  partialAuditFields
-} from '~/src/api/forms/service/shared.js'
+import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -63,7 +59,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPageAtPosition(formId, newPage, session, position)
+      await formDefinition.addPage(formId, newPage, session, position)
 
       // Set to V2 if not already
       await formDefinition.setEngineVersion(
@@ -73,12 +69,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
         session
       )
 
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
+      await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
     logger.error(err, `Failed to add page on ${formId}`)
@@ -168,12 +159,7 @@ export async function patchFieldsOnDraftDefinitionPage(
 
         page = await getFormDefinitionPage(formId, pageId, session)
 
-        // Update the form with the new draft state
-        await formMetadata.update(
-          formId,
-          { $set: partialAuditFields(new Date(), author) },
-          session
-        )
+        await formMetadata.updateAudit(formId, author, session)
       },
       { readPreference: 'primary' }
     )
@@ -203,14 +189,9 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.removePage(formId, pageId, session)
+      await formDefinition.deletePage(formId, pageId, session)
 
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
+      await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
     logger.error(err, `Failed to delete Page ID ${pageId} on Form ID ${formId}`)

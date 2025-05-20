@@ -6,6 +6,7 @@ import { ControllerPath, ControllerType } from '@defra/forms-model'
 export function empty() {
   return /** @satisfies {FormDefinition} */ ({
     name: '',
+    engine: undefined,
     startPage: ControllerPath.Summary,
     pages: [
       {

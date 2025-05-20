@@ -3,76 +3,43 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
-  findComponent,
+  getComponent,
+  getList,
+  modifyAddComponent,
+  modifyAddList,
+  modifyAddPage,
+  modifyDeleteComponent,
+  modifyDeleteList,
+  modifyDeletePage,
+  modifyDeletePages,
+  modifyDraft,
+  modifyEngineVersion,
+  modifyName,
+  modifyReorderPages,
+  modifyUpdateComponent,
+  modifyUpdateList,
+  modifyUpdatePage,
+  modifyUpdatePageFields,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
-import { validate } from '~/src/api/forms/service/helpers/definition.js'
-import { populateComponentIds } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 const logger = createLogger()
 
 /**
- * Updates a draft form definition
- * @param {string | Filter<{ draft: FormDefinition }>} filter - the query filter
- * @param {UpdateFilter<{ draft: FormDefinition }>} updateFilter - the update filter
- * @param {ClientSession} session - the mongo transaction session
- * @param {string} operation - the operation description
- * @param {Document[]} [arrayFilters] - the array filters
- */
-async function updateDraft(
-  filter,
-  updateFilter,
-  session,
-  operation,
-  arrayFilters
-) {
-  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  if (typeof filter === 'string') {
-    filter = { _id: new ObjectId(filter) }
-  }
-
-  const updateResult = await coll.findOneAndUpdate(filter, updateFilter, {
-    session,
-    returnDocument: 'after',
-    arrayFilters
-  })
-
-  if (!updateResult) {
-    throw Boom.notFound(
-      `Unexpected empty result from 'findOneAndUpdate' in '${operation}'`
-    )
-  }
-
-  // Validate form definition
-  validate(updateResult.draft)
-
-  return updateResult
-}
-
-/**
  * Adds a form to the Form Store
  * @param {string} id - id
  * @param {FormDefinition} formDefinition - form definition (JSON object)
  * @param {ClientSession} session - mongo transaction session
+ * @param {ObjectSchema<FormDefinition>} schema - the schema to use
  */
-export async function upsert(id, formDefinition, session) {
-  logger.info(`Creating form definition (draft) for form ID ${id}`)
+export async function upsert(id, formDefinition, session, schema) {
+  logger.info(`Upserting form for form ID ${id}`)
 
-  await updateDraft(
-    id,
-    {
-      $set: { draft: formDefinition }
-    },
-    session,
-    'upsert'
-  )
+  await modifyDraft(id, () => formDefinition, session, 'upsert', schema)
 
-  logger.info(`Created form definition (draft) for form ID ${id}`)
+  logger.info(`Upserted form for form ID ${id}`)
 }
 
 /**
@@ -163,7 +130,7 @@ export async function get(
 
     const definition = /** @type {FormDefinition} */ result[state]
 
-    logger.info(`Form definition (${state}) for form ID ${formId} found`)
+    logger.info(`Got form definition (${state}) for form ID ${formId}`)
 
     return definition
   } catch (error) {
@@ -214,12 +181,10 @@ export async function setEngineVersion(
     `Updating engine version to ${engineVersion} for form ID ${formId}`
   )
 
-  await updateDraft(
-    formId,
-    { $set: { 'draft.engine': engineVersion } },
-    session,
-    'setEngineVersion'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyEngineVersion(draft, engineVersion)
+
+  await modifyDraft(formId, callback, session, 'setEngineVersion')
 
   logger.info(
     `Updated engine version to ${engineVersion} for form ID ${formId}`
@@ -235,31 +200,27 @@ export async function setEngineVersion(
 export async function updateName(formId, name, session) {
   logger.info(`Updating form name for form ID ${formId}`)
 
-  await updateDraft(
-    formId,
-    { $set: { 'draft.name': name } },
-    session,
-    'setEngineVersion'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyName(draft, name)
+
+  await modifyDraft(formId, callback, session, 'updateName')
 
   logger.info(`Updated form name for form ID ${formId}`)
 }
 
 /**
- * Removes pages that match the matchCriteria
+ * Removes pages that match the predicate
  * @param {string} formId - the ID of the form
- * @param {{ controller: ControllerType.Summary }} matchCriteria - new name for the form
+ * @param {RemovePagePredicate} predicate
  * @param {ClientSession} session
  */
-export async function removeMatchingPages(formId, matchCriteria, session) {
+export async function deletePages(formId, predicate, session) {
   logger.info(`Removing page on ${formId}`)
 
-  await updateDraft(
-    formId,
-    { $pull: { 'draft.pages': matchCriteria } },
-    session,
-    'removeMatchingPages'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyDeletePages(draft, predicate)
+
+  await modifyDraft(formId, callback, session, 'deletePages')
 
   logger.info(`Removed page on ${formId}`)
 }
@@ -267,37 +228,23 @@ export async function removeMatchingPages(formId, matchCriteria, session) {
 /**
  * Add a page at the position number - defaults to the last page
  * @param {string} formId - the ID of the form
- * @param {Page} page - new name for the form
+ * @param {Page} page - the new page
  * @param {ClientSession} session
- * @param {number|undefined} [position]
+ * @param {number | undefined} [position]
  */
-export async function addPageAtPosition(formId, page, session, position) {
-  logger.info(`Adding page on Form ID ${formId}`)
+export async function addPage(formId, page, session, position) {
+  logger.info(`Adding page on form ID ${formId}`)
 
-  const positionOptions = /** @satisfies {{ $position?: number }} */ {}
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyAddPage(draft, page, position)
 
-  if (position !== undefined) {
-    positionOptions.$position = position
-  }
+  await modifyDraft(formId, callback, session, 'addPage')
 
-  const newPage = populateComponentIds(page)
-
-  await updateDraft(
-    formId,
-    {
-      $push: {
-        'draft.pages': { $each: [newPage], ...positionOptions }
-      }
-    },
-    session,
-    'addPageAtPosition'
-  )
-
-  logger.info(`Added page on Form ID ${formId}`)
+  logger.info(`Added page on form ID ${formId}`)
 }
 
 /**
- * Updates a page with specific page id on forms
+ * Updates a page with specific page id
  * @param {string} formId
  * @param {string} pageId
  * @param {Page} page
@@ -307,53 +254,56 @@ export async function addPageAtPosition(formId, page, session, position) {
 export async function updatePage(formId, pageId, page, session) {
   logger.info(`Updating page ID ${pageId} on form ID ${formId}`)
 
-  await updateDraft(
-    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
-    { $set: { 'draft.pages.$': page } },
-    session,
-    'updatePage'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyUpdatePage(draft, page, pageId)
+
+  await modifyDraft(formId, callback, session, 'updatePage')
 
   logger.info(`Updated page ID ${pageId} on form ID ${formId}`)
 }
 
 /**
- * Adds a new component to the end of a page components array
+ * Reorders the pages
+ * @param {string} formId
+ * @param {string[]} order
+ * @param {ClientSession} session
+ */
+export async function reorderPages(formId, order, session) {
+  logger.info(`Reordering pages on form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyReorderPages(draft, order)
+
+  const result = await modifyDraft(formId, callback, session, 'reorderPages')
+
+  logger.info(`Reordered pages on form ID ${formId}`)
+
+  return result.draft
+}
+
+/**
+ * Adds a new component to the page components array
  * @param {string} formId
  * @param {string} pageId
- * @param {ComponentDef[]} components
+ * @param {ComponentDef} component
  * @param {ClientSession} session
  * @param {{ position?: number }} [options]
  * @returns {Promise<void>}
  */
-export async function addComponents(
+export async function addComponent(
   formId,
   pageId,
-  components,
+  component,
   session,
   { position } = {}
 ) {
   logger.info(`Adding a new component to form ID ${formId}`)
 
-  const positionOptions = /** @satisfies {{ $position?: number }} */ {}
+  /** @type {UpdateCallback} */
+  const callback = (draft) =>
+    modifyAddComponent(draft, pageId, component, position)
 
-  if (position !== undefined) {
-    positionOptions.$position = position
-  }
-
-  await updateDraft(
-    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
-    {
-      $push: {
-        'draft.pages.$.components': {
-          $each: components,
-          ...positionOptions
-        }
-      }
-    },
-    session,
-    'addComponents'
-  )
+  await modifyDraft(formId, callback, session, 'addComponent')
 
   logger.info(`Added a new component to form ID ${formId}`)
 }
@@ -377,31 +327,26 @@ export async function updateComponent(
     `Updating component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
 
-  const updateResult = await updateDraft(
-    {
-      _id: new ObjectId(formId),
-      'draft.pages.id': pageId,
-      'draft.pages.components.id': componentId
-    },
-    {
-      $set: {
-        'draft.pages.$[pageId].components.$[component]': component
-      }
-    },
+  /** @type {UpdateCallback} */
+  const callback = (draft) =>
+    modifyUpdateComponent(draft, pageId, componentId, component)
+
+  const updateResult = await modifyDraft(
+    formId,
+    callback,
     session,
-    'updateComponent',
-    [{ 'pageId.id': pageId }, { 'component.id': componentId }]
+    'updateComponent'
   )
 
   logger.info(
     `Updated component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
 
-  return findComponent(updateResult.draft, pageId, componentId)
+  return getComponent(updateResult.draft, pageId, componentId)
 }
 
 /**
- * Updates a component with component id
+ * Deletes a component with component id
  * @param {string} formId
  * @param {string} pageId
  * @param {string} componentId
@@ -412,18 +357,10 @@ export async function deleteComponent(formId, pageId, componentId, session) {
     `Deleting component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
 
-  await updateDraft(
-    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
-    {
-      $pull: {
-        'draft.pages.$.components': {
-          id: componentId
-        }
-      }
-    },
-    session,
-    'deleteComponent'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyDeleteComponent(draft, pageId, componentId)
+
+  await modifyDraft(formId, callback, session, 'deleteComponent')
 
   logger.info(
     `Deleted component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
@@ -444,54 +381,10 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
     `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
   )
 
-  /**
-   * @type {{ 'draft.pages.$.title'?: string; 'draft.pages.$.path'?: string, 'draft.pages.$.controller'?: string, 'draft.pages.$.repeat'?: Repeat }}
-   */
-  const fieldsToSet = {}
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyUpdatePageFields(draft, pageId, pageFields)
 
-  /**
-   * @type {{ 'draft.pages.$.controller'?: '', 'draft.pages.$.repeat'?: '' }}
-   */
-  const fieldsToUnSet = {}
-
-  const { title, path, controller, repeat } =
-    /** @type {{ title: string | undefined, path: string | undefined, controller: ControllerType | undefined | null, repeat: Repeat | undefined | null }} */ (
-      pageFields
-    )
-
-  if (title || title === '') {
-    fieldsToSet['draft.pages.$.title'] = title
-  }
-  if (path) {
-    fieldsToSet['draft.pages.$.path'] = path
-  }
-  if (controller) {
-    fieldsToSet['draft.pages.$.controller'] = controller
-  }
-  if (controller === null) {
-    fieldsToUnSet['draft.pages.$.controller'] = ''
-  }
-
-  // Repeater
-  if (repeat) {
-    fieldsToSet['draft.pages.$.repeat'] = repeat
-  }
-  if (repeat === null) {
-    fieldsToUnSet['draft.pages.$.repeat'] = ''
-  }
-
-  await updateDraft(
-    {
-      _id: new ObjectId(formId),
-      'draft.pages.id': pageId
-    },
-    {
-      $set: fieldsToSet,
-      $unset: fieldsToUnSet
-    },
-    session,
-    'updatePageFields'
-  )
+  await modifyDraft(formId, callback, session, 'updatePageFields')
 
   logger.info(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
@@ -499,111 +392,84 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
 }
 
 /**
- * Updates a component with component id
+ * Deletes a page with page id
  * @param {string} formId
  * @param {string} pageId
  * @param {ClientSession} session
  */
-export async function removePage(formId, pageId, session) {
+export async function deletePage(formId, pageId, session) {
   logger.info(`Deleting page ID ${pageId} on form ID ${formId}`)
 
-  await updateDraft(
-    { _id: new ObjectId(formId), 'draft.pages.id': pageId },
-    {
-      $pull: {
-        'draft.pages': { id: pageId }
-      }
-    },
-    session,
-    'removePage'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyDeletePage(draft, pageId)
+
+  await modifyDraft(formId, callback, session, 'deletePage')
 
   logger.info(`Deleted page ID ${pageId} on form ID ${formId}`)
 }
 
 /**
- * Pushes a list to the end of the draft definition list array
+ * Adds a new list
  * @param {string} formId
- * @param {List[]} lists
+ * @param {List} list
  * @param {ClientSession} session
  */
-export async function addLists(formId, lists, session) {
+export async function addList(formId, list, session) {
   logger.info(`Adding new lists to form ID ${formId}`)
 
-  await updateDraft(
-    formId,
-    {
-      $push: {
-        'draft.lists': {
-          $each: lists
-        }
-      }
-    },
-    session,
-    'addLists'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyAddList(draft, list)
 
-  logger.info(`Added new lists to form ID ${formId}`)
+  const result = await modifyDraft(formId, callback, session, 'addList')
 
-  return lists
+  logger.info(`Added new list to form ID ${formId}`)
+
+  const lists = result.draft.lists
+
+  return lists[lists.length - 1]
 }
 
 /**
- * Updates a Draft Form list by id
+ * Updates a list by id
  * @param {string} formId
  * @param {string} listId
- * @param {List} listItem
+ * @param {List} list
  * @param {ClientSession} session
  * @returns {Promise<List>}
  */
-export async function updateList(formId, listId, listItem, session) {
-  logger.info(`Updating list with id ${listId} on form ID ${formId}`)
+export async function updateList(formId, listId, list, session) {
+  logger.info(`Updating list with ID ${listId} on form ID ${formId}`)
 
-  await updateDraft(
-    {
-      _id: new ObjectId(formId),
-      'draft.lists.id': listId
-    },
-    {
-      $set: {
-        'draft.lists.$': listItem
-      }
-    },
-    session,
-    'updateList'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyUpdateList(draft, listId, list)
 
-  logger.info(`Updated list with id ${listId} on form ID ${formId}`)
+  const result = await modifyDraft(formId, callback, session, 'updateList')
 
-  return listItem
+  logger.info(`Updated list with ID ${listId} on form ID ${formId}`)
+
+  return getList(result.draft, listId)
 }
 
 /**
- * Updates a component with component id
+ * Removes a list by id
  * @param {string} formId
  * @param {string} listId
  * @param {ClientSession} session
  */
-export async function removeList(formId, listId, session) {
+export async function deleteList(formId, listId, session) {
   logger.info(`Deleting list ID ${listId} on form ID ${formId}`)
 
-  await updateDraft(
-    { _id: new ObjectId(formId), 'draft.lists.id': listId },
-    {
-      $pull: {
-        'draft.lists': {
-          id: listId
-        }
-      }
-    },
-    session,
-    'removeList'
-  )
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyDeleteList(draft, listId)
+
+  await modifyDraft(formId, callback, session, 'deleteList')
 
   logger.info(`Deleted list ID ${listId} on form ID ${formId}`)
 }
 
 /**
- * @import { FormDefinition, Page, Repeat, ComponentDef, ControllerType, PatchPageFields, List, Engine } from '@defra/forms-model'
- * @import { ClientSession, Collection, FindOptions, UpdateFilter, Filter, Document } from 'mongodb'
+ * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine } from '@defra/forms-model'
+ * @import { ClientSession, Collection, FindOptions } from 'mongodb'
+ * @import { ObjectSchema } from 'joi'
+ * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'
  */

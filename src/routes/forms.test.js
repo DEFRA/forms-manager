@@ -29,7 +29,7 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import {
-  addListsToDraftFormDefinition,
+  addListToDraftFormDefinition,
   removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
@@ -685,7 +685,7 @@ describe('Forms route', () => {
       })
       const createComponentOnDraftDefinitionMock = jest
         .mocked(createComponentOnDraftDefinition)
-        .mockResolvedValue([expectedComponent])
+        .mockResolvedValue(expectedComponent)
 
       const response = await server.inject({
         method: 'POST',
@@ -697,17 +697,15 @@ describe('Forms route', () => {
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toEqual(expectedComponent)
-      const [calledFormId, calledPageId, components, , prepend] =
+      const [calledFormId, calledPageId, component, , prepend] =
         createComponentOnDraftDefinitionMock.mock.calls[0]
-      expect([calledFormId, calledPageId, components, prepend]).toEqual([
+      expect([calledFormId, calledPageId, component, prepend]).toEqual([
         id,
         pageId,
-        [
-          {
-            ...stubTextFieldComponent,
-            id: expect.any(String)
-          }
-        ],
+        {
+          ...stubTextFieldComponent,
+          id: expect.any(String)
+        },
         false
       ])
     })
@@ -749,7 +747,7 @@ describe('Forms route', () => {
       })
       const createComponentOnDraftDefinitionMock = jest
         .mocked(createComponentOnDraftDefinition)
-        .mockResolvedValue([expectedComponent])
+        .mockResolvedValue(expectedComponent)
 
       const response = await server.inject({
         method: 'POST',
@@ -766,25 +764,25 @@ describe('Forms route', () => {
     })
 
     test('Testing POST /forms/{id}/definition/draft/lists', async () => {
-      const list = buildList({
+      const payload = buildList({
         id: undefined
       })
 
       const expectedList = {
         ...buildList({
-          ...list
+          ...payload
         }),
         id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
       }
 
       const createComponentOnDraftDefinitionMock = jest
-        .mocked(addListsToDraftFormDefinition)
-        .mockResolvedValue([expectedList])
+        .mocked(addListToDraftFormDefinition)
+        .mockResolvedValue(expectedList)
 
       const response = await server.inject({
         method: 'POST',
         url: `/forms/${id}/definition/draft/lists`,
-        payload: list,
+        payload,
         auth
       })
 
@@ -795,13 +793,11 @@ describe('Forms route', () => {
         list: expectedList,
         status: 'created'
       })
-      const [, lists] = createComponentOnDraftDefinitionMock.mock.calls[0]
-      expect(lists).toEqual([
-        {
-          ...expectedList,
-          id: expect.any(String)
-        }
-      ])
+      const [, list] = createComponentOnDraftDefinitionMock.mock.calls[0]
+      expect(list).toEqual({
+        ...expectedList,
+        id: expect.any(String)
+      })
     })
 
     test('Testing PUT /forms/{id}/definition/draft/lists/{listId}', async () => {

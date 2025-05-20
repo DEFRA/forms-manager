@@ -4,12 +4,14 @@ import {
   ComponentType,
   ControllerType,
   Engine,
-  formDefinitionV2PayloadSchema,
+  formDefinitionV2Schema,
   getComponentDefaults,
   hasComponents,
   hasComponentsEvenIfNoNext,
   hasFormField
 } from '@defra/forms-model'
+
+import { validate } from '~/src/api/forms/service/helpers/definition.js'
 
 /**
  * @param {FormDefinition} definition
@@ -211,19 +213,11 @@ export function migrateToV2(definition) {
 
   migratedDefinition.engine = Engine.V2
 
-  const validatedFormDefinition =
-    /** @type {{ error?: ValidationError; value: FormDefinition }} */
-    (formDefinitionV2PayloadSchema.validate(migratedDefinition))
-  const { error, value } = validatedFormDefinition
-
-  if (error) {
-    throw error
-  }
+  const value = validate(migratedDefinition, formDefinitionV2Schema)
 
   return value
 }
 
 /**
  * @import { FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
- * @import { ValidationError } from 'joi'
  */

@@ -9,7 +9,7 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
-  addListsToDraftFormDefinition,
+  addListToDraftFormDefinition,
   duplicateListGuard,
   removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
@@ -26,26 +26,20 @@ jest.mock('~/src/mongo.js')
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 describe('lists', () => {
   const id = '661e4ca5039739ef2902b214'
-  const author = getAuthor()
-  const dateUsedInFakeTime = new Date('2020-01-01')
-  const defaultAudit = {
-    'draft.updatedAt': dateUsedInFakeTime,
-    'draft.updatedBy': author,
-    updatedAt: dateUsedInFakeTime,
-    updatedBy: author
-  }
+  const defaultAuthor = getAuthor()
+
   /**
    * @type {any}
    */
-  const mockSession = author
+  const mockSession = defaultAuthor
 
-  const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+  const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
 
   const expectMetadataUpdate = () => {
     expect(dbMetadataSpy).toHaveBeenCalled()
-    const [formId, updateFilter] = dbMetadataSpy.mock.calls[0]
+    const [formId, author] = dbMetadataSpy.mock.calls[0]
     expect(formId).toBe(id)
-    expect(updateFilter.$set).toEqual(defaultAudit)
+    expect(author).toEqual(defaultAuthor)
   }
 
   const exampleList = buildList({
@@ -113,24 +107,24 @@ describe('lists', () => {
   })
 
   describe('addListsToDraftFormDefinition', () => {
-    it('should add a list of lists to the form definition', async () => {
+    it('should add a list to the form definition', async () => {
       jest
         .mocked(formDefinition.get)
         .mockResolvedValueOnce(formDefinitionWithList)
-      const expectedLists = [buildList()]
+      const expectedList = buildList()
       const addListsMock = jest
-        .mocked(formDefinition.addLists)
-        .mockResolvedValueOnce(expectedLists)
+        .mocked(formDefinition.addList)
+        .mockResolvedValueOnce(expectedList)
 
-      const result = await addListsToDraftFormDefinition(
+      const result = await addListToDraftFormDefinition(
         id,
-        expectedLists,
-        author
+        expectedList,
+        defaultAuthor
       )
       const [expectedFormId, listToInsert] = addListsMock.mock.calls[0]
       expect(expectedFormId).toBe(id)
-      expect(listToInsert).toEqual(expectedLists)
-      expect(result).toEqual(expectedLists)
+      expect(listToInsert).toEqual(expectedList)
+      expect(result).toEqual(expectedList)
       expectMetadataUpdate()
     })
     it('should fail with a conflict if there is a duplicate list', async () => {
@@ -138,7 +132,7 @@ describe('lists', () => {
         .mocked(formDefinition.get)
         .mockResolvedValue(formDefinitionWithDuplicateListName)
       await expect(
-        addListsToDraftFormDefinition(id, [buildList()], author)
+        addListToDraftFormDefinition(id, buildList(), defaultAuthor)
       ).rejects.toThrow(Boom.conflict('Duplicate list name or title found.'))
     })
   })
@@ -158,7 +152,7 @@ describe('lists', () => {
         id,
         listId,
         listToUpdate,
-        author
+        defaultAuthor
       )
       const [expectedFormId, expectedListId, expectedListToUpdate] =
         updateListMock.mock.calls[0]
@@ -177,7 +171,7 @@ describe('lists', () => {
           id,
           exampleListWithDuplicateTitleId,
           exampleListWithDuplicateTitle,
-          author
+          defaultAuthor
         )
       ).rejects.toThrow(Boom.conflict('Duplicate list name or title found.'))
     })
@@ -187,9 +181,9 @@ describe('lists', () => {
     const listId = '47cfaf57-6cda-44aa-9268-f37c674823d2'
 
     it('should remove a list on the form definition', async () => {
-      await removeListOnDraftFormDefinition(id, listId, author)
+      await removeListOnDraftFormDefinition(id, listId, defaultAuthor)
       const [expectedFormId, expectedListId] = jest.mocked(
-        formDefinition.removeList
+        formDefinition.deleteList
       ).mock.calls[0]
       expect(expectedFormId).toBe(id)
       expect(expectedListId).toBe(listId)
@@ -197,13 +191,10 @@ describe('lists', () => {
     })
     it('should surface errors', async () => {
       const boomInternal = Boom.internal('Something went wrong')
-      jest.mocked(formDefinition.removeList).mockRejectedValueOnce(boomInternal)
+      jest.mocked(formDefinition.deleteList).mockRejectedValueOnce(boomInternal)
       await expect(
-        removeListOnDraftFormDefinition(id, listId, author)
+        removeListOnDraftFormDefinition(id, listId, defaultAuthor)
       ).rejects.toThrow(boomInternal)
     })
   })
 })
-/**
- * @import { ClientSession } from 'mongodb'
- */

@@ -1,4 +1,4 @@
-import { ControllerType, Engine } from '@defra/forms-model'
+import { Engine } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
@@ -31,14 +31,6 @@ const summaryPage = buildSummaryPage()
 describe('migration', () => {
   const id = '661e4ca5039739ef2902b214'
   const v4Id = '083f2f65-7c1d-48e0-a195-3f6b0836ad08'
-  // const pageId = 'ffefd409-f3f4-49fe-882e-6e89f44631b1'
-  const dateUsedInFakeTime = new Date('2020-01-01')
-  const defaultAudit = {
-    'draft.updatedAt': dateUsedInFakeTime,
-    'draft.updatedBy': author,
-    updatedAt: dateUsedInFakeTime,
-    updatedBy: author
-  }
 
   const summaryWithoutId = buildSummaryPage()
   delete summaryWithoutId.id
@@ -76,12 +68,12 @@ describe('migration', () => {
     engine: Engine.V2
   })
 
-  const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+  const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
   const expectMetadataUpdate = () => {
     expect(dbMetadataSpy).toHaveBeenCalled()
     const [formId, updateFilter] = dbMetadataSpy.mock.calls[0]
     expect(formId).toBe(id)
-    expect(updateFilter.$set).toEqual(defaultAudit)
+    expect(updateFilter).toEqual(author)
   }
 
   beforeAll(async () => {
@@ -95,15 +87,9 @@ describe('migration', () => {
       const initialSummary = buildSummaryPage()
       delete initialSummary.id
 
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+      const deletePagesSpy = jest.spyOn(formDefinition, 'deletePages')
+      const addPageSpy = jest.spyOn(formDefinition, 'addPage')
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'updateAudit')
 
       const formDefinition1 = buildDefinition({
         pages: [initialSummary, buildQuestionPage()]
@@ -115,27 +101,21 @@ describe('migration', () => {
         author
       )
 
-      expect(removeMatchingPagesSpy).toHaveBeenCalled()
-      expect(addPageAtPositionSpy).toHaveBeenCalled()
+      expect(deletePagesSpy).toHaveBeenCalled()
+      expect(addPageSpy).toHaveBeenCalled()
       expect(formMetadataUpdateSpy).toHaveBeenCalled()
 
-      const [formId1, matchCriteria] = removeMatchingPagesSpy.mock.calls[0]
-      const [formId2, calledSummary, , options] =
-        addPageAtPositionSpy.mock.calls[0]
+      const [formId1, predicate] = deletePagesSpy.mock.calls[0]
+      const [formId2, calledSummary, , options] = addPageSpy.mock.calls[0]
       const [formId3, updateFilter] = formMetadataUpdateSpy.mock.calls[0]
 
       expect(formId1).toBe(id)
       expect(formId2).toBe(id)
       expect(formId3).toBe(id)
-      expect(matchCriteria).toEqual({ controller: ControllerType.Summary })
+      expect(typeof predicate).toBe('function')
       expect(calledSummary).toEqual(summary)
       expect(options).toBeUndefined()
-      expect(updateFilter.$set).toEqual({
-        'draft.updatedAt': dateUsedInFakeTime,
-        'draft.updatedBy': author,
-        updatedAt: dateUsedInFakeTime,
-        updatedBy: author
-      })
+      expect(updateFilter).toEqual(author)
       expect(returnedSummary.summary).toEqual(summary)
     })
 
@@ -143,19 +123,13 @@ describe('migration', () => {
       const formDefinition1 = buildDefinition({
         pages: []
       })
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+      const deletePagesSpy = jest.spyOn(formDefinition, 'deletePages')
+      const addPageSpy = jest.spyOn(formDefinition, 'addPage')
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'updateAudit')
       await repositionSummaryPipeline(id, formDefinition1, author)
 
-      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
-      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
+      expect(deletePagesSpy).not.toHaveBeenCalled()
+      expect(addPageSpy).not.toHaveBeenCalled()
       expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
     })
 
@@ -163,19 +137,13 @@ describe('migration', () => {
       const formDefinition1 = buildDefinition({
         pages: [buildQuestionPage(), summaryPage]
       })
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+      const deletePagesSpy = jest.spyOn(formDefinition, 'deletePages')
+      const addPageSpy = jest.spyOn(formDefinition, 'addPage')
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'updateAudit')
       await repositionSummaryPipeline(id, formDefinition1, author)
 
-      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
-      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
+      expect(deletePagesSpy).not.toHaveBeenCalled()
+      expect(addPageSpy).not.toHaveBeenCalled()
       expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
     })
 
@@ -184,25 +152,19 @@ describe('migration', () => {
         pages: [buildQuestionPage()]
       })
 
-      const removeMatchingPagesSpy = jest.spyOn(
-        formDefinition,
-        'removeMatchingPages'
-      )
-      const addPageAtPositionSpy = jest.spyOn(
-        formDefinition,
-        'addPageAtPosition'
-      )
-      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'update')
+      const deletePagesSpy = jest.spyOn(formDefinition, 'deletePages')
+      const addPageSpy = jest.spyOn(formDefinition, 'addPage')
+      const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'updateAudit')
       await repositionSummaryPipeline(id, formDefinition1, author)
 
-      expect(removeMatchingPagesSpy).not.toHaveBeenCalled()
-      expect(addPageAtPositionSpy).not.toHaveBeenCalled()
+      expect(deletePagesSpy).not.toHaveBeenCalled()
+      expect(addPageSpy).not.toHaveBeenCalled()
       expect(formMetadataUpdateSpy).not.toHaveBeenCalled()
     })
 
     it('should surface errors correctly', async () => {
       jest
-        .mocked(formDefinition.addPageAtPosition)
+        .mocked(formDefinition.addPage)
         .mockRejectedValueOnce(Boom.badRequest('Error'))
 
       const formDefinition1 = buildDefinition({

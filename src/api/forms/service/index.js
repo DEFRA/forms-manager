@@ -1,4 +1,4 @@
-import { slugify } from '@defra/forms-model'
+import { formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
@@ -27,7 +27,7 @@ export async function createForm(metadataInput, author) {
   const definition = { ...formTemplates.empty(), name: title }
 
   // Validate the form definition
-  validate(definition)
+  validate(definition, formDefinitionSchema)
 
   // Create the slug
   const slug = slugify(title)
@@ -64,7 +64,12 @@ export async function createForm(metadataInput, author) {
       metadata = mapForm({ ...document, _id })
 
       // Create the draft form definition
-      await formDefinition.upsert(metadata.id, definition, session)
+      await formDefinition.upsert(
+        metadata.id,
+        definition,
+        session,
+        formDefinitionSchema
+      )
     })
   } finally {
     await session.endSession()
