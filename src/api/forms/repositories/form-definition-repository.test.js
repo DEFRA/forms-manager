@@ -348,9 +348,7 @@ describe('form-definition-repository', () => {
       await expect(
         updateComponent(formId, pageId, componentId, component, mockSession)
       ).rejects.toThrow(
-        Boom.notFound(
-          "Document not found '1eabd1437567fe1b26708bbb' in 'updateComponent'"
-        )
+        Boom.notFound("Document not found '1eabd1437567fe1b26708bbb'")
       )
     })
   })
@@ -465,9 +463,7 @@ describe('form-definition-repository', () => {
       mockCollection.findOneAndUpdate.mockResolvedValueOnce(null)
 
       await expect(deletePage(formId, pageId, mockSession)).rejects.toThrow(
-        Boom.notFound(
-          "Document not found '1eabd1437567fe1b26708bbb' in 'deletePage'"
-        )
+        Boom.notFound("Document not found '1eabd1437567fe1b26708bbb'")
       )
     })
   })

@@ -53,7 +53,7 @@ export async function insert(id, formDefinition, session, schema) {
 export async function update(id, formDefinition, session, schema) {
   logger.info(`Updating form for form ID ${id}`)
 
-  await modifyDraft(id, () => formDefinition, session, 'update', schema)
+  await modifyDraft(id, () => formDefinition, session, schema)
 
   logger.info(`Updated form for form ID ${id}`)
 }
@@ -200,7 +200,7 @@ export async function setEngineVersion(
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyEngineVersion(draft, engineVersion)
 
-  await modifyDraft(formId, callback, session, 'setEngineVersion')
+  await modifyDraft(formId, callback, session)
 
   logger.info(
     `Updated engine version to ${engineVersion} for form ID ${formId}`
@@ -219,7 +219,7 @@ export async function updateName(formId, name, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyName(draft, name)
 
-  await modifyDraft(formId, callback, session, 'updateName')
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Updated form name for form ID ${formId}`)
 }
@@ -236,7 +236,7 @@ export async function deletePages(formId, predicate, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeletePages(draft, predicate)
 
-  await modifyDraft(formId, callback, session, 'deletePages')
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Removed page on ${formId}`)
 }
@@ -254,7 +254,7 @@ export async function addPage(formId, page, session, position) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyAddPage(draft, page, position)
 
-  await modifyDraft(formId, callback, session, 'addPage')
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Added page on form ID ${formId}`)
 }
@@ -273,7 +273,7 @@ export async function updatePage(formId, pageId, page, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyUpdatePage(draft, page, pageId)
 
-  await modifyDraft(formId, callback, session, 'updatePage')
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Updated page ID ${pageId} on form ID ${formId}`)
 }
@@ -290,7 +290,7 @@ export async function reorderPages(formId, order, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyReorderPages(draft, order)
 
-  const result = await modifyDraft(formId, callback, session, 'reorderPages')
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Reordered pages on form ID ${formId}`)
 
@@ -319,7 +319,7 @@ export async function addComponent(
   const callback = (draft) =>
     modifyAddComponent(draft, pageId, component, position)
 
-  await modifyDraft(formId, callback, session, 'addComponent')
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Added a new component to form ID ${formId}`)
 }
@@ -347,12 +347,7 @@ export async function updateComponent(
   const callback = (draft) =>
     modifyUpdateComponent(draft, pageId, componentId, component)
 
-  const updateResult = await modifyDraft(
-    formId,
-    callback,
-    session,
-    'updateComponent'
-  )
+  const updateResult = await modifyDraft(formId, callback, session)
 
   logger.info(
     `Updated component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
@@ -376,7 +371,7 @@ export async function deleteComponent(formId, pageId, componentId, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeleteComponent(draft, pageId, componentId)
 
-  await modifyDraft(formId, callback, session, 'deleteComponent')
+  await modifyDraft(formId, callback, session)
 
   logger.info(
     `Deleted component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
@@ -400,7 +395,7 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyUpdatePageFields(draft, pageId, pageFields)
 
-  await modifyDraft(formId, callback, session, 'updatePageFields')
+  await modifyDraft(formId, callback, session)
 
   logger.info(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
@@ -419,7 +414,7 @@ export async function deletePage(formId, pageId, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeletePage(draft, pageId)
 
-  await modifyDraft(formId, callback, session, 'deletePage')
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted page ID ${pageId} on form ID ${formId}`)
 }
@@ -436,7 +431,7 @@ export async function addList(formId, list, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyAddList(draft, list)
 
-  const result = await modifyDraft(formId, callback, session, 'addList')
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Added new list to form ID ${formId}`)
 
@@ -459,7 +454,7 @@ export async function updateList(formId, listId, list, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyUpdateList(draft, listId, list)
 
-  const result = await modifyDraft(formId, callback, session, 'updateList')
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Updated list with ID ${listId} on form ID ${formId}`)
 
@@ -478,7 +473,7 @@ export async function deleteList(formId, listId, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeleteList(draft, listId)
 
-  await modifyDraft(formId, callback, session, 'deleteList')
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted list ID ${listId} on form ID ${formId}`)
 }

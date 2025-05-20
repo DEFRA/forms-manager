@@ -257,14 +257,12 @@ export async function insertDraft(
  * @param {string} formId - the form id
  * @param {UpdateCallback} updateCallback - the update callback
  * @param {ClientSession} session - the mongo transaction session
- * @param {string} operation - the operation description
  * @param {ObjectSchema<FormDefinition>} schema - the schema to use (defaults to V2)
  */
 export async function modifyDraft(
   formId,
   updateCallback,
   session,
-  operation,
   schema = formDefinitionV2Schema
 ) {
   const coll = /** @satisfies {Collection<{draft?: FormDefinition}>} */ (
@@ -275,13 +273,11 @@ export async function modifyDraft(
   const document = await coll.findOne(id)
 
   if (!document) {
-    throw Boom.notFound(`Document not found '${formId}' in '${operation}'`)
+    throw Boom.notFound(`Document not found '${formId}'`)
   }
 
   if (!document.draft) {
-    throw Boom.notFound(
-      `Draft not found in document '${formId}' for update in '${operation}'`
-    )
+    throw Boom.notFound(`Draft not found in document '${formId}'`)
   }
 
   // Apply the update
@@ -305,9 +301,7 @@ export async function modifyDraft(
   )
 
   if (!updateResult) {
-    throw Boom.notFound(
-      `Unexpected empty result from 'findOneAndUpdate' in '${operation}'`
-    )
+    throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
   }
 
   return updateResult
