@@ -4,7 +4,7 @@ import {
   formMetadataInputKeys,
   formMetadataInputSchema,
   listSchemaV2,
-  pageSchemaPayloadV2,
+  pageSchemaV2,
   queryOptionsSchema
 } from '@defra/forms-model'
 
@@ -29,7 +29,7 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import {
-  addListsToDraftFormDefinition,
+  addListToDraftFormDefinition,
   removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
@@ -269,12 +269,13 @@ export default [
     handler(request) {
       const { auth, params, payload } = request
       const author = getAuthor(auth.credentials.user)
+
       return createPageOnDraftDefinition(params.id, payload, author)
     },
     options: {
       validate: {
         params: formByIdSchema,
-        payload: pageSchemaPayloadV2
+        payload: pageSchemaV2
       }
     }
   },
@@ -287,6 +288,7 @@ export default [
     handler(request) {
       const { auth, params, payload } = request
       const author = getAuthor(auth.credentials.user)
+
       return reorderDraftFormDefinitionPages(params.id, payload, author)
     },
     options: {
@@ -331,10 +333,10 @@ export default [
       const { prepend } = query
 
       const author = getAuthor(auth.credentials.user)
-      const [component] = await createComponentOnDraftDefinition(
+      const component = await createComponentOnDraftDefinition(
         id,
         pageId,
-        [payload],
+        payload,
         author,
         prepend
       )
@@ -479,8 +481,7 @@ export default [
       const { id } = params
       const author = getAuthor(auth.credentials.user)
 
-      // Recreate the draft state from live using the author in the credentials
-      const [list] = await addListsToDraftFormDefinition(id, [payload], author)
+      const list = await addListToDraftFormDefinition(id, payload, author)
 
       return {
         id: list.id,

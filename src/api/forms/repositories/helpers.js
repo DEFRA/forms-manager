@@ -1,8 +1,14 @@
-import { ApiErrorCode, hasComponentsEvenIfNoNext } from '@defra/forms-model'
+import {
+  ApiErrorCode,
+  formDefinitionV2Schema,
+  hasComponentsEvenIfNoNext,
+  hasRepeater
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
-import { db } from '~/src/mongo.js'
+import { validate } from '~/src/api/forms/service/helpers/definition.js'
+import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 /**
  * Removes a row in a MongoDB collection by its unique ID and fail if not completed.
@@ -32,16 +38,30 @@ export function findPage(definition, pageId) {
 }
 
 /**
- * Finds a component in a form definition by formId, pageId & componentId
+ * Get a page by id
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @throws {Boom}
+ */
+export function getPage(definition, pageId) {
+  const page = findPage(definition, pageId)
+
+  if (!page) {
+    throw Boom.notFound(`Page not found with id '${pageId}'`)
+  }
+
+  return page
+}
+
+/**
+ * Finds a component by pageId & componentId
  * @param {FormDefinition} definition
  * @param {string} pageId
  * @param {string} componentId
  * @returns {ComponentDef | undefined}
  */
 export function findComponent(definition, pageId, componentId) {
-  const page = /** @satisfies {Page | undefined} */ (
-    findPage(definition, pageId)
-  )
+  const page = findPage(definition, pageId)
 
   if (!hasComponentsEvenIfNoNext(page)) {
     return undefined
@@ -49,6 +69,126 @@ export function findComponent(definition, pageId, componentId) {
 
   return page.components.find((component) => component.id === componentId)
 }
+
+/**
+ * Get a component by pageId & componentId
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {string} componentId
+ * @throws {Boom}
+ */
+export function getComponent(definition, pageId, componentId) {
+  const page = getPage(definition, pageId)
+
+  if (!hasComponentsEvenIfNoNext(page)) {
+    throw Boom.notFound(
+      `Component not found on page '${page.id}' with id '${componentId}' - page has no components`
+    )
+  }
+
+  const idx = getComponentIndex(page, componentId)
+
+  return page.components[idx]
+}
+
+/**
+ * Find page index by id
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @returns {number}
+ */
+export function findPageIndex(definition, pageId) {
+  return definition.pages.findIndex((page) => page.id === pageId)
+}
+
+/**
+ * Get page index by id
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @returns {number}
+ * @throws {Boom}
+ */
+export function getPageIndex(definition, pageId) {
+  const idx = findPageIndex(definition, pageId)
+
+  if (idx === -1) {
+    throw Boom.notFound(`Page not found with id '${pageId}'`)
+  }
+
+  return idx
+}
+
+/**
+ * Find component index by id
+ * @param {Page} page
+ * @param {string} componentId
+ * @returns {number}
+ */
+export function findComponentIndex(page, componentId) {
+  return hasComponentsEvenIfNoNext(page)
+    ? page.components.findIndex((component) => component.id === componentId)
+    : -1
+}
+
+/**
+ * Get component index by id
+ * @param {Page} page
+ * @param {string} componentId
+ * @returns {number}
+ * @throws {Boom}
+ */
+export function getComponentIndex(page, componentId) {
+  const idx = findComponentIndex(page, componentId)
+
+  if (idx === -1) {
+    throw Boom.notFound(
+      `Component not found on page '${page.id}' with id '${componentId}'`
+    )
+  }
+
+  return idx
+}
+
+/**
+ * Find list index by id
+ * @param {FormDefinition} definition
+ * @param {string} listId
+ * @returns {number}
+ */
+export function findListIndex(definition, listId) {
+  return definition.lists.findIndex((list) => list.id === listId)
+}
+
+/**
+ * Get list index by id
+ * @param {FormDefinition} definition
+ * @param {string} listId
+ * @returns {number}
+ * @throws {Boom}
+ */
+export function getListIndex(definition, listId) {
+  const idx = findListIndex(definition, listId)
+
+  if (idx === -1) {
+    throw Boom.notFound(`List not found with id '${listId}'`)
+  }
+
+  return idx
+}
+
+/**
+ * Get list index by id
+ * @param {FormDefinition} definition
+ * @param {string} listId
+ * @returns {List}
+ * @throws {Boom}
+ */
+export function getList(definition, listId) {
+  const idx = getListIndex(definition, listId)
+
+  return definition.lists[idx]
+}
+
 /**
  * @param {FormDefinition} formDraftDefinition
  * @param {string} path
@@ -73,6 +213,357 @@ export function uniquePathGate(
 }
 
 /**
- * @import { FormDefinition, Page, ComponentDef } from '@defra/forms-model'
- * @import { ClientSession } from 'mongodb'
+ * Inserts a draft form definition
+ * @param {string} formId - the form id
+ * @param {FormDefinition} definition - the form definitiom
+ * @param {ClientSession} session - the mongo transaction session
+ * @param {ObjectSchema<FormDefinition>} schema - the schema to use (defaults to V2)
+ */
+export async function insertDraft(
+  formId,
+  definition,
+  session,
+  schema = formDefinitionV2Schema
+) {
+  // Validate form definition
+  const draft = validate(definition, schema)
+
+  const id = { _id: new ObjectId(formId) }
+
+  // Persist the new draft
+  const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const insertResult = await coll.findOneAndUpdate(
+    id,
+    { $setOnInsert: { draft } },
+    {
+      upsert: true,
+      returnDocument: 'after',
+      session
+    }
+  )
+
+  if (!insertResult) {
+    throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
+  }
+
+  return insertResult
+}
+
+/**
+ * Updates a draft form definition
+ * @param {string} formId - the form id
+ * @param {UpdateCallback} updateCallback - the update callback
+ * @param {ClientSession} session - the mongo transaction session
+ * @param {ObjectSchema<FormDefinition>} schema - the schema to use (defaults to V2)
+ */
+export async function modifyDraft(
+  formId,
+  updateCallback,
+  session,
+  schema = formDefinitionV2Schema
+) {
+  const coll = /** @satisfies {Collection<{draft?: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const id = { _id: new ObjectId(formId) }
+  const document = await coll.findOne(id)
+
+  if (!document) {
+    throw Boom.notFound(`Document not found '${formId}'`)
+  }
+
+  if (!document.draft) {
+    throw Boom.notFound(`Draft not found in document '${formId}'`)
+  }
+
+  // Apply the update
+  const updated = updateCallback(document.draft)
+
+  // Validate form definition
+  const draft = validate(updated, schema)
+
+  // Persist the updated draft
+  const coll2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const updateResult = await coll2.findOneAndUpdate(
+    id,
+    { $set: { draft } },
+    {
+      session,
+      returnDocument: 'after'
+    }
+  )
+
+  if (!updateResult) {
+    throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
+  }
+
+  return updateResult
+}
+
+/**
+ * Updates the engine version of a form definition
+ * @param {FormDefinition} definition
+ * @param {Engine} engineVersion
+ * @returns {FormDefinition}
+ */
+export function modifyEngineVersion(definition, engineVersion) {
+  definition.engine = engineVersion
+
+  return definition
+}
+
+/**
+ * Updates the name of a form definition
+ * @param {FormDefinition} definition
+ * @param {string} name - new name for the form
+ * @returns {FormDefinition}
+ */
+export function modifyName(definition, name) {
+  definition.name = name
+
+  return definition
+}
+
+/**
+ * Delete matching pages from a form definition
+ * @param {FormDefinition} definition
+ * @param {RemovePagePredicate} predicate
+ * @returns {FormDefinition}
+ */
+export function modifyDeletePages(definition, predicate) {
+  definition.pages = definition.pages.filter((page) => !predicate(page))
+
+  return definition
+}
+
+/**
+ * Add a page at the position number - defaults to the last page
+ * @param {FormDefinition} definition
+ * @param {Page} page
+ * @param {number | undefined} [position]
+ * @returns {FormDefinition}
+ */
+export function modifyAddPage(definition, page, position) {
+  if (position === undefined) {
+    definition.pages.push(page)
+  } else {
+    definition.pages.splice(position, 0, page)
+  }
+
+  return definition
+}
+
+/**
+ * Updates a page with specific page id
+ * @param {FormDefinition} definition
+ * @param {Page} page
+ * @param {string} pageId
+ * @returns {FormDefinition}
+ */
+export function modifyUpdatePage(definition, page, pageId) {
+  const idx = getPageIndex(definition, pageId)
+
+  definition.pages[idx] = page
+
+  return definition
+}
+
+/**
+ * Reorders the pages
+ * @param {FormDefinition} definition
+ * @param {string[]} order
+ * @returns {FormDefinition}
+ */
+export function modifyReorderPages(definition, order) {
+  const MAX = Number.MAX_SAFE_INTEGER
+
+  definition.pages.sort((a, b) => {
+    const posA = a.id && order.includes(a.id) ? order.indexOf(a.id) : MAX
+    const posB = b.id && order.includes(b.id) ? order.indexOf(b.id) : MAX
+
+    return posA - posB
+  })
+
+  return definition
+}
+
+/**
+ * Adds a new component to the end of a page components array
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {ComponentDef} component
+ * @param {number | undefined} [position]
+ * @returns {FormDefinition}
+ */
+export function modifyAddComponent(definition, pageId, component, position) {
+  const idx = getPageIndex(definition, pageId)
+  const page = definition.pages[idx]
+
+  if (hasComponentsEvenIfNoNext(page)) {
+    if (position === undefined) {
+      page.components.push(component)
+    } else {
+      page.components.splice(position, 0, component)
+    }
+  }
+
+  return definition
+}
+
+/**
+ * Updates a component with component id
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {string} componentId
+ * @param {ComponentDef} component
+ * @returns {FormDefinition}
+ */
+export function modifyUpdateComponent(
+  definition,
+  pageId,
+  componentId,
+  component
+) {
+  const pageIdx = getPageIndex(definition, pageId)
+  const page = definition.pages[pageIdx]
+  const componentIdx = getComponentIndex(page, componentId)
+
+  if (hasComponentsEvenIfNoNext(page)) {
+    page.components[componentIdx] = component
+  }
+
+  return definition
+}
+
+/**
+ * Deletes a component with component id
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {string} componentId
+ * @returns {FormDefinition}
+ */
+export function modifyDeleteComponent(definition, pageId, componentId) {
+  const page = getPage(definition, pageId)
+  const componentIdx = getComponentIndex(page, componentId)
+
+  if (hasComponentsEvenIfNoNext(page)) {
+    page.components.splice(componentIdx, 1)
+  }
+
+  return definition
+}
+
+/**
+ * Deletes a component with component id
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {PatchPageFields} pageFields
+ * @returns {FormDefinition}
+ */
+export function modifyUpdatePageFields(definition, pageId, pageFields) {
+  const page = getPage(definition, pageId)
+
+  const { title, path, controller, repeat } = pageFields
+
+  if (title || title === '') {
+    page.title = title
+  }
+  if (path) {
+    page.path = path
+  }
+  if (controller) {
+    page.controller = controller
+  }
+  if (controller === null) {
+    delete page.controller
+  }
+
+  // Repeater
+  if (repeat && hasRepeater(page)) {
+    page.repeat = repeat
+  }
+
+  return definition
+}
+
+/**
+ * Deletes a page with page id
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @returns {FormDefinition}
+ */
+export function modifyDeletePage(definition, pageId) {
+  const idx = getPageIndex(definition, pageId)
+
+  definition.pages.splice(idx, 1)
+
+  return definition
+}
+
+/**
+ * Adds a new list
+ * @param {FormDefinition} definition
+ * @param {List} list
+ * @returns {FormDefinition}
+ */
+export function modifyAddList(definition, list) {
+  definition.lists.push(list)
+
+  return definition
+}
+
+/**
+ * Updates a form list by id
+ * @param {FormDefinition} definition
+ * @param {string} listId
+ * @param {List} list
+ * @returns {FormDefinition}
+ */
+export function modifyUpdateList(definition, listId, list) {
+  const idx = getListIndex(definition, listId)
+
+  definition.lists[idx] = list
+
+  return definition
+}
+
+/**
+ * Removes a list by id
+ * @param {FormDefinition} definition
+ * @param {string} listId
+ * @returns {FormDefinition}
+ */
+export function modifyDeleteList(definition, listId) {
+  const idx = getListIndex(definition, listId)
+
+  definition.lists.splice(idx, 1)
+
+  return definition
+}
+
+/**
+ * The update callback method
+ * @callback UpdateCallback
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+
+/**
+ * The remove page predicate method
+ * @callback RemovePagePredicate
+ * @param {Page} page
+ * @returns {boolean}
+ */
+
+/**
+ * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine } from '@defra/forms-model'
+ * @import { ClientSession, Collection } from 'mongodb'
+ * @import { ObjectSchema } from 'joi'
  */

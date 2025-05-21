@@ -1,8 +1,16 @@
-import { ApiErrorCode } from '@defra/forms-model'
+import {
+  ApiErrorCode,
+  ControllerType,
+  Engine,
+  hasComponentsEvenIfNoNext,
+  hasRepeater
+} from '@defra/forms-model'
+import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
   buildDefinition,
+  buildList,
   buildQuestionPage,
   buildStatusPage,
   buildSummaryPage,
@@ -11,7 +19,28 @@ import {
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   findComponent,
+  findListIndex,
   findPage,
+  findPageIndex,
+  getComponent,
+  getList,
+  getListIndex,
+  getPage,
+  getPageIndex,
+  modifyAddComponent,
+  modifyAddList,
+  modifyAddPage,
+  modifyDeleteComponent,
+  modifyDeleteList,
+  modifyDeletePage,
+  modifyDeletePages,
+  modifyEngineVersion,
+  modifyName,
+  modifyReorderPages,
+  modifyUpdateComponent,
+  modifyUpdateList,
+  modifyUpdatePage,
+  modifyUpdatePageFields,
   removeById,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
@@ -71,11 +100,12 @@ describe('repository helpers', () => {
   const summaryPageId = '449a45f6-4541-4a46-91bd-8b8931b07b50'
   const statusPageId = '38a2946b-78d9-4b94-9a31-4aa979ce2a89'
   const componentId = '62559680-e45e-4178-acdc-68f6b65d42bb'
+  const listId = 'eb68b22f-b6ba-4358-8cba-b61282fecdb1'
 
   const component = buildTextFieldComponent({
     id: componentId
   })
-  const summary = buildSummaryPage()
+  const summaryPage = buildSummaryPage()
 
   const questionPageWithComponent = buildQuestionPage({
     id: pageId,
@@ -94,10 +124,17 @@ describe('repository helpers', () => {
   })
   delete componentWithoutAnId.id
 
+  const list = buildList({
+    id: listId,
+    items: []
+  })
+
+  const lists = [list]
+
   describe('findPage', () => {
     it('should find page if page exists in definition', () => {
       const definition = buildDefinition({
-        pages: [questionPageWithoutComponent, summary]
+        pages: [questionPageWithoutComponent, summaryPage]
       })
       expect(findPage(definition, pageId)).toEqual(questionPageWithoutComponent)
     })
@@ -110,10 +147,76 @@ describe('repository helpers', () => {
     })
   })
 
+  describe('getPage', () => {
+    it('should get page if page exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, summaryPage]
+      })
+      expect(getPage(definition, pageId)).toEqual(questionPageWithoutComponent)
+    })
+
+    it('should throw Boom.notFound if page is not found', () => {
+      const definition = buildDefinition({
+        pages: [summaryPageWithoutComponents]
+      })
+      expect(() => {
+        getPage(definition, 'incorrect-id')
+      }).toThrow(Boom.notFound("Page not found with id 'incorrect-id'"))
+    })
+  })
+
+  describe('findPageIndex', () => {
+    it('should find page index if page exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, summaryPage]
+      })
+      expect(findPageIndex(definition, pageId)).toBe(0)
+    })
+
+    it('should find summary page index if page exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, summaryPage]
+      })
+      expect(findPageIndex(definition, summaryPageId)).toBe(1)
+    })
+
+    it('should return -1 if page is not found', () => {
+      const definition = buildDefinition({
+        pages: [summaryPageWithoutComponents]
+      })
+      expect(findPageIndex(definition, 'incorrect-id')).toBe(-1)
+    })
+  })
+
+  describe('getPageIndex', () => {
+    it('should find page index if page exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, summaryPage]
+      })
+      expect(getPageIndex(definition, pageId)).toBe(0)
+    })
+
+    it('should find summary page index if page exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, summaryPage]
+      })
+      expect(getPageIndex(definition, summaryPageId)).toBe(1)
+    })
+
+    it('should throw Boom.notFound if page is not found', () => {
+      const definition = buildDefinition({
+        pages: [summaryPageWithoutComponents]
+      })
+      expect(() => {
+        getPageIndex(definition, 'incorrect-id')
+      }).toThrow(Boom.notFound("Page not found with id 'incorrect-id'"))
+    })
+  })
+
   describe('findComponent', () => {
     it('should return undefined if page is not found', () => {
       const definition = buildDefinition({
-        pages: [summary]
+        pages: [summaryPage]
       })
       expect(findComponent(definition, 'abc', 'def')).toBeUndefined()
     })
@@ -137,6 +240,96 @@ describe('repository helpers', () => {
         pages: [questionPageWithComponent]
       })
       expect(findComponent(definition, pageId, componentId)).toEqual(component)
+    })
+  })
+
+  describe('getComponent', () => {
+    it('should throw Boom.notFound if page has no components', () => {
+      const definition = buildDefinition({
+        pages: [summaryPage]
+      })
+      expect(() => {
+        getComponent(definition, summaryPageId, 'def')
+      }).toThrow(
+        Boom.notFound(
+          `Component not found on page '${summaryPageId}' with id 'def' - page has no components`
+        )
+      )
+    })
+
+    it('should throw Boom.notFound if component is not found', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+      expect(() => {
+        getComponent(definition, pageId, 'def')
+      }).toThrow(
+        Boom.notFound(`Component not found on page '${pageId}' with id 'def'`)
+      )
+    })
+
+    it('should return component if component is found', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+      expect(getComponent(definition, pageId, componentId)).toEqual(component)
+    })
+  })
+
+  describe('findListIndex', () => {
+    it('should find list index if list exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [],
+        lists
+      })
+      expect(findListIndex(definition, listId)).toBe(0)
+    })
+
+    it('should return -1 if list is not found', () => {
+      const definition = buildDefinition({
+        pages: [summaryPageWithoutComponents]
+      })
+      expect(findListIndex(definition, 'incorrect-id')).toBe(-1)
+    })
+  })
+
+  describe('getListIndex', () => {
+    it('should find list index if list exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [],
+        lists
+      })
+      expect(getListIndex(definition, listId)).toBe(0)
+    })
+
+    it('should throw Boom.notFound if list is not found', () => {
+      const definition = buildDefinition({
+        pages: [],
+        lists
+      })
+      expect(() => {
+        getListIndex(definition, 'incorrect-id')
+      }).toThrow(Boom.notFound("List not found with id 'incorrect-id'"))
+    })
+  })
+
+  describe('getList', () => {
+    it('should find list index if list exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [],
+        lists
+      })
+      expect(getList(definition, listId)).toEqual(list)
+    })
+
+    it('should throw Boom.notFound if list is not found', () => {
+      const definition = buildDefinition({
+        pages: [],
+        lists
+      })
+      expect(() => {
+        getList(definition, 'incorrect-id')
+      }).toThrow(Boom.notFound("List not found with id 'incorrect-id'"))
     })
   })
 
@@ -226,6 +419,364 @@ describe('repository helpers', () => {
           'p2'
         )
       }).not.toThrow()
+    })
+  })
+
+  describe('modifyEngineVersion', () => {
+    it('should update the engine version to V1', () => {
+      const definition = emptyFormWithSummary()
+      expect(definition.engine).toBeUndefined()
+
+      const modified = modifyEngineVersion(definition, Engine.V1)
+
+      expect(modified.engine).toBe(Engine.V1)
+    })
+
+    it('should update the engine version to V2', () => {
+      const definition = emptyFormWithSummary()
+      expect(definition.engine).toBeUndefined()
+
+      const modified = modifyEngineVersion(definition, Engine.V2)
+
+      expect(modified.engine).toBe(Engine.V2)
+    })
+  })
+
+  describe('modifyName', () => {
+    it('should update the name', () => {
+      const definition = emptyFormWithSummary()
+
+      expect(definition.name).toBe('')
+
+      const modified = modifyName(definition, 'New name')
+
+      expect(modified.name).toBe('New name')
+    })
+  })
+
+  describe('modifyRemoveMatchingPages', () => {
+    it('should remove the summary page', () => {
+      const definition = buildDefinition({
+        pages: [
+          questionPageWithComponent,
+          questionPageWithoutComponent,
+          summaryPage
+        ]
+      })
+
+      const modified = modifyDeletePages(
+        definition,
+        (page) => page.controller === ControllerType.Summary
+      )
+
+      expect(modified.pages).toHaveLength(2)
+      expect(modified.pages).toEqual([
+        questionPageWithComponent,
+        questionPageWithoutComponent
+      ])
+    })
+  })
+
+  describe('modifyAddPage', () => {
+    it('should add summary at the end', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, questionPageWithoutComponent]
+      })
+
+      const modified = modifyAddPage(definition, summaryPage)
+
+      expect(modified.pages).toHaveLength(3)
+      expect(modified.pages.at(2)).toBe(summaryPage)
+    })
+
+    it('should add question page to position 1', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, summaryPage]
+      })
+
+      const modified = modifyAddPage(
+        definition,
+        questionPageWithoutComponent,
+        1
+      )
+
+      expect(modified.pages).toHaveLength(3)
+      expect(modified.pages.at(1)).toBe(questionPageWithoutComponent)
+    })
+
+    it('should add summary at position -1', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, questionPageWithoutComponent]
+      })
+
+      const modified = modifyAddPage(definition, summaryPage, -1)
+
+      expect(modified.pages).toHaveLength(3)
+      expect(modified.pages.at(1)).toBe(summaryPage)
+    })
+  })
+
+  describe('modifyUpdatePage', () => {
+    it('should update the question page', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, summaryPage]
+      })
+
+      const modified = modifyUpdatePage(
+        definition,
+        questionPageWithoutComponent,
+        pageId
+      )
+
+      expect(modified.pages.at(0)).toEqual(questionPageWithoutComponent)
+    })
+  })
+
+  describe('modifyReorderPages', () => {
+    it('should update the page order', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, summaryPage, statusPage]
+      })
+
+      const modified = modifyReorderPages(definition, [
+        statusPageId,
+        summaryPageId,
+        pageId
+      ])
+
+      expect(modified.pages.at(0)?.id).toEqual(statusPageId)
+      expect(modified.pages.at(1)?.id).toEqual(summaryPageId)
+      expect(modified.pages.at(2)?.id).toEqual(pageId)
+    })
+
+    it('should put unordered pages to the end order', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, summaryPage, statusPage]
+      })
+
+      const modified = modifyReorderPages(definition, [statusPageId, pageId])
+
+      expect(modified.pages.at(0)?.id).toEqual(statusPageId)
+      expect(modified.pages.at(1)?.id).toEqual(pageId)
+      expect(modified.pages.at(2)?.id).toEqual(summaryPageId)
+    })
+  })
+
+  describe('modifyAddComponent', () => {
+    it('should add the component to the page at the corrent position', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const newComponent = buildTextFieldComponent({
+        name: 'abcdef'
+      })
+      const modified = modifyAddComponent(definition, pageId, newComponent, 0)
+
+      const page = modified.pages.at(0)
+      expect(hasComponentsEvenIfNoNext(page)).toBe(true)
+      expect(hasComponentsEvenIfNoNext(page) && page.components).toHaveLength(2)
+      expect(hasComponentsEvenIfNoNext(page) && page.components.at(0)).toBe(
+        newComponent
+      )
+    })
+
+    it('should add the component to the page at end', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const newComponent = buildTextFieldComponent({
+        name: 'abcdef'
+      })
+      const modified = modifyAddComponent(definition, pageId, newComponent)
+
+      const page = modified.pages.at(0)
+      expect(hasComponentsEvenIfNoNext(page)).toBe(true)
+      expect(hasComponentsEvenIfNoNext(page) && page.components).toHaveLength(2)
+      expect(hasComponentsEvenIfNoNext(page) && page.components.at(1)).toBe(
+        newComponent
+      )
+    })
+  })
+
+  describe('modifyUpdateComponent', () => {
+    it('should update the component by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const updatedComponent = buildTextFieldComponent({
+        name: 'abcdef'
+      })
+      const modified = modifyUpdateComponent(
+        definition,
+        pageId,
+        componentId,
+        updatedComponent
+      )
+
+      const page = modified.pages.at(0)
+      expect(hasComponentsEvenIfNoNext(page)).toBe(true)
+      expect(hasComponentsEvenIfNoNext(page) && page.components.length).toBe(1)
+      expect(hasComponentsEvenIfNoNext(page) && page.components.at(0)).toBe(
+        updatedComponent
+      )
+    })
+  })
+
+  describe('modifyDeleteComponent', () => {
+    it('should delete the component by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyDeleteComponent(definition, pageId, componentId)
+
+      const page = modified.pages.at(0)
+      expect(hasComponentsEvenIfNoNext(page)).toBe(true)
+      expect(hasComponentsEvenIfNoNext(page) && page.components.length).toBe(0)
+    })
+  })
+
+  describe('modifyUpdatePageFields', () => {
+    it('should update the page title by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        title: 'New title'
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.title).toBe('New title')
+    })
+
+    it('should clear the page title by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        title: ''
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.title).toBe('')
+    })
+
+    it('should update the page path by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        path: '/new-path'
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.path).toBe('/new-path')
+    })
+
+    it('should update the page controller by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        controller: ControllerType.Terminal
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.controller).toBe(ControllerType.Terminal)
+    })
+
+    it('should clear the page controller by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        controller: null
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.controller).toBeUndefined()
+    })
+
+    it('should update the page repeat info by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const repeat = {
+        options: { name: 'abcdef', title: 'Pizza' },
+        schema: { min: 2, max: 5 }
+      }
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        controller: ControllerType.Repeat,
+        repeat
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.controller).toBe(ControllerType.Repeat)
+      expect(hasRepeater(page) && page.repeat).toBe(repeat)
+    })
+  })
+
+  describe('modifyDeletePage', () => {
+    it('should delete the page by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyDeletePage(definition, pageId)
+
+      expect(modified.pages).toHaveLength(0)
+    })
+  })
+
+  describe('modifyAddList', () => {
+    it('should add a new list', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyAddList(definition, list)
+
+      expect(modified.lists).toHaveLength(1)
+      expect(modified.lists.at(0)).toBe(list)
+    })
+  })
+
+  describe('modifyUpdateList', () => {
+    it('should update a list by id', () => {
+      const definition = buildDefinition({
+        pages: [],
+        lists
+      })
+      const newList = buildList({
+        id: 'f4e4afc8-e972-40c3-9e1b-61a3dfd6d2aa',
+        items: []
+      })
+      const modified = modifyUpdateList(definition, listId, newList)
+
+      expect(modified.lists).toHaveLength(1)
+      expect(modified.lists.at(0)).toBe(newList)
+    })
+  })
+
+  describe('modifyRemoveList', () => {
+    it('should remove a list by id', () => {
+      const definition = buildDefinition({
+        pages: [],
+        lists
+      })
+      const modified = modifyDeleteList(definition, listId)
+
+      expect(modified.lists).toHaveLength(0)
     })
   })
 })

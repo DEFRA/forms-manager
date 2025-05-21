@@ -3,9 +3,9 @@ import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
 import { removeFormErrorMessages } from '~/src/api/forms/constants.js'
-import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { validate } from '~/src/api/forms/service/helpers/definition.js'
 import {
   MongoError,
   logger,
@@ -27,13 +27,7 @@ export async function createForm(metadataInput, author) {
   const definition = { ...formTemplates.empty(), name: title }
 
   // Validate the form definition
-  const { error } = formDefinitionSchema.validate(definition)
-  if (error) {
-    logger.warn(`Form failed validation: '${metadataInput.title}'`)
-    throw new InvalidFormDefinitionError(metadataInput.title, {
-      cause: error
-    })
-  }
+  validate(definition, formDefinitionSchema)
 
   // Create the slug
   const slug = slugify(title)
@@ -70,7 +64,12 @@ export async function createForm(metadataInput, author) {
       metadata = mapForm({ ...document, _id })
 
       // Create the draft form definition
-      await formDefinition.upsert(metadata.id, definition, session)
+      await formDefinition.insert(
+        metadata.id,
+        definition,
+        session,
+        formDefinitionSchema
+      )
     })
   } finally {
     await session.endSession()

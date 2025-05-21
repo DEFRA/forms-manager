@@ -43,9 +43,10 @@ export function buildSummaryPage(partialSummaryPage = {}) {
 /**
  * @param {Partial<PageStatus>} partialStatusPage
  */
-export function buildStatusPage(partialStatusPage) {
+export function buildStatusPage(partialStatusPage = {}) {
   return /** @type {PageStatus} */ (
     structuredClone({
+      id: '38a2946b-78d9-4b94-9a31-4aa979ce2a89',
       title: 'Status',
       path: ControllerPath.Status,
       controller: ControllerType.Status,

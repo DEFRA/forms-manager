@@ -1,4 +1,4 @@
-import { ControllerPath, ControllerType } from '@defra/forms-model'
+import { ControllerPath, ControllerType, Engine } from '@defra/forms-model'
 
 /**
  * Function to return an empty form
@@ -6,6 +6,33 @@ import { ControllerPath, ControllerType } from '@defra/forms-model'
 export function empty() {
   return /** @satisfies {FormDefinition} */ ({
     name: '',
+    engine: undefined,
+    startPage: ControllerPath.Summary,
+    pages: [
+      {
+        title: 'Summary',
+        path: ControllerPath.Summary,
+        controller: ControllerType.Summary
+      }
+    ],
+    conditions: [],
+    sections: [
+      {
+        name: 'section',
+        title: 'Section title'
+      }
+    ],
+    lists: []
+  })
+}
+
+/**
+ * Function to return an empty V2 form
+ */
+export function emptyV2() {
+  return /** @satisfies {FormDefinition} */ ({
+    name: '',
+    engine: Engine.V2,
     startPage: ControllerPath.Summary,
     pages: [
       {

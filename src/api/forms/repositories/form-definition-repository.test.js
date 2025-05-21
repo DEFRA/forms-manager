@@ -1,4 +1,11 @@
-import { ControllerType, Engine, FormStatus } from '@defra/forms-model'
+import {
+  ControllerType,
+  Engine,
+  FormStatus,
+  formDefinitionSchema,
+  formDefinitionV2Schema,
+  hasComponentsEvenIfNoNext
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -12,20 +19,25 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
-  addComponents,
-  addLists,
-  addPageAtPosition,
+  addComponent,
+  addList,
+  addPage,
   deleteComponent,
+  deleteList,
+  deletePage,
+  deletePages,
   get,
-  removeList,
-  removeMatchingPages,
-  removePage,
+  insert,
+  reorderPages,
   setEngineVersion,
+  update,
   updateComponent,
   updateList,
+  updateName,
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
+import { emptyV2 } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
@@ -39,8 +51,11 @@ const author = getAuthor()
  */
 const mockSession = author
 const formId = '1eabd1437567fe1b26708bbb'
-const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
-const componentId = 'e296d931-2364-4b17-9049-1aa1afea29d3'
+const page1Id = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
+const page2Id = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+const component1Id = 'e296d931-2364-4b17-9049-1aa1afea29d3'
+const component2Id = '81f513ba-210f-4532-976c-82f8fc7ec2b6'
+const listId = 'eb68b22f-b6ba-4358-8cba-b61282fecdb1'
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -79,10 +94,107 @@ jest.mock('~/src/mongo.js', () => {
 })
 
 describe('form-definition-repository', () => {
+  /** @type {FormDefinition} */
+  let mockDefinition
+
+  /** @type {FormDefinition} */
+  let draft
+
+  /** @type {Page} */
+  let page1
+
+  /** @type {Page} */
+  let page2
+
+  /** @type {Page} */
+  let summaryPage
+
+  /** @type {List[]} */
+  let lists
+
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
+
+    mockDefinition = buildDefinition({})
+    const component1 = buildTextFieldComponent({
+      id: component1Id
+    })
+    page1 = buildQuestionPage({
+      id: page1Id,
+      title: 'Page One',
+      path: '/page-one',
+      components: [component1]
+    })
+    const component2 = buildTextFieldComponent({
+      id: component2Id
+    })
+    page2 = buildQuestionPage({
+      id: page2Id,
+      title: 'Page Two',
+      path: '/page-two',
+      components: [component2]
+    })
+    summaryPage = buildSummaryPage()
+
+    const list = buildList({
+      id: listId,
+      items: []
+    })
+
+    lists = [list]
+
+    draft = buildDefinition({
+      pages: [page1, page2, summaryPage],
+      lists
+    })
   })
-  const mockDefinition = buildDefinition({})
+
+  /**
+   * The update callback method
+   * @callback UpdateCallback
+   */
+
+  /**
+   * The verify callback method
+   * @callback VerifyCallback
+   * @param {FormDefinition} definition
+   */
+
+  /**
+   * Test helper
+   * @param {UpdateCallback} callback
+   * @param {VerifyCallback} verify
+   */
+  async function helper(callback, verify) {
+    mockCollection.findOne.mockReturnValue({ draft })
+    mockCollection.findOneAndUpdate.mockResolvedValue({ draft })
+
+    await callback()
+
+    const [filter] = mockCollection.findOne.mock.calls[0]
+    expect(filter).toMatchObject({
+      _id: new ObjectId(formId)
+    })
+
+    const [filter2, update] = mockCollection.findOneAndUpdate.mock.calls[0]
+    expect(filter2).toMatchObject({
+      _id: new ObjectId(formId)
+    })
+    expect(update).toMatchObject({
+      $set: { draft: expect.any(Object) }
+    })
+
+    /** @type {UpdateFilter<{ draft: FormDefinition }>} */
+    const updateFilter = update
+
+    expect(updateFilter.$set?.draft).toBeDefined()
+
+    if (!updateFilter.$set?.draft) {
+      throw new Error('Unexpected empty draft on $set')
+    }
+
+    await verify(updateFilter.$set.draft)
+  }
 
   describe('get', () => {
     beforeEach(() => {
@@ -111,471 +223,467 @@ describe('form-definition-repository', () => {
     })
   })
 
-  describe('removeMatchingPages', () => {
-    it('should remove a page', async () => {
-      await removeMatchingPages(
-        formId,
-        { controller: ControllerType.Summary },
-        mockSession
+  describe('deletePages', () => {
+    it('should delete a page with predicate', async () => {
+      await helper(
+        async () => {
+          await deletePages(
+            formId,
+            (page) => page.controller === ControllerType.Summary,
+            mockSession
+          )
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(2)
+        }
       )
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId)
-      })
-      expect(update).toMatchObject({
-        $pull: { 'draft.pages': { controller: 'SummaryPageController' } }
-      })
     })
   })
 
-  describe('addPageAtPosition', () => {
-    const page = buildQuestionPage()
+  describe('addPage', () => {
+    const page = buildQuestionPage({
+      id: '698b9a08-0853-4827-86e6-b900d59e03df',
+      path: '/new-path'
+    })
 
     it('should add a page at position', async () => {
-      await addPageAtPosition(formId, page, mockSession, -1)
-
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-      expect(filter).toEqual({
-        _id: new ObjectId(formId)
-      })
-      expect(update).toMatchObject({
-        $push: { 'draft.pages': { $each: [page], $position: -1 } }
-      })
+      await helper(
+        async () => {
+          await addPage(formId, page, mockSession, -1)
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(4)
+        }
+      )
     })
 
     it('should add a page to the end', async () => {
-      await addPageAtPosition(formId, page, mockSession)
-
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-      expect(filter).toEqual({
-        _id: new ObjectId(formId)
-      })
-      expect(update).toEqual({
-        $push: {
-          'draft.pages': { $each: [page] }
+      await helper(
+        async () => {
+          await addPage(formId, page, mockSession)
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(4)
         }
-      })
+      )
     })
   })
 
   describe('updatePage', () => {
-    const page = buildQuestionPage({
-      id: pageId,
-      title: 'New title',
-      path: 'New path',
-      components: [buildTextFieldComponent({})]
-    })
-
     it('should update a page', async () => {
-      await updatePage(formId, pageId, page, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      const newPage = buildQuestionPage({
+        id: page1Id,
+        title: 'New title',
+        path: '/new-path',
+        components: []
+      })
 
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toMatchObject({
-        $set: {
-          'draft.pages.$': page
+      await helper(
+        async () => {
+          await updatePage(formId, page1Id, newPage, mockSession)
+        },
+        (definition) => {
+          expect(definition.pages.at(0)).toEqual(newPage)
         }
-      })
+      )
     })
   })
 
-  describe('addComponents', () => {
-    const component = buildTextFieldComponent()
-
-    it('should add a component to a page', async () => {
-      await addComponents(formId, pageId, [component], mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toEqual({
-        $push: {
-          'draft.pages.$.components': {
-            $each: [component]
-          }
+  describe('updateEngineVersion', () => {
+    it('should update engine version to V1', async () => {
+      await helper(
+        async () => {
+          await setEngineVersion(formId, Engine.V1, mockSession)
+        },
+        (definition) => {
+          expect(definition.engine).toEqual(Engine.V1)
         }
-      })
+      )
     })
 
-    it('should add a component to a page a position x', async () => {
-      await addComponents(formId, pageId, [component], mockSession, {
-        position: 0
-      })
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-
-      expect(filter).toEqual({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toEqual({
-        $push: {
-          'draft.pages.$.components': {
-            $each: [component],
-            $position: 0
-          }
+    it('should update engine version to V2', async () => {
+      await helper(
+        async () => {
+          await setEngineVersion(formId, Engine.V2, mockSession)
+        },
+        (definition) => {
+          expect(definition.engine).toEqual(Engine.V2)
         }
-      })
+      )
+    })
+  })
+
+  describe('updateName', () => {
+    it('should update engine version to V1', async () => {
+      await helper(
+        async () => {
+          await updateName(formId, 'New Name', mockSession)
+        },
+        (definition) => {
+          expect(definition.name).toBe('New Name')
+        }
+      )
+    })
+
+    it('should update engine version to V2', async () => {
+      await helper(
+        async () => {
+          await setEngineVersion(formId, Engine.V2, mockSession)
+        },
+        (definition) => {
+          expect(definition.engine).toEqual(Engine.V2)
+        }
+      )
+    })
+  })
+
+  describe('reorderPages', () => {
+    it('should reorder pages', async () => {
+      const order = [page2Id, page1Id]
+
+      await helper(
+        async () => {
+          await reorderPages(formId, order, mockSession)
+        },
+        (definition) => {
+          expect(definition.pages.at(0)).toEqual(page2)
+          expect(definition.pages.at(1)).toEqual(page1)
+        }
+      )
+    })
+  })
+
+  describe('addComponent', () => {
+    const component = buildTextFieldComponent({
+      id: 'e07916d1-5bab-499d-9ff9-d3c0df0f88eb',
+      name: 'abcdef'
+    })
+
+    it('should add a component to a page', async () => {
+      await helper(
+        async () => {
+          await addComponent(formId, page1Id, component, mockSession)
+        },
+        (definition) => {
+          const page = definition.pages.at(0)
+          expect(
+            hasComponentsEvenIfNoNext(page) && page.components
+          ).toHaveLength(2)
+          expect(
+            hasComponentsEvenIfNoNext(page) && page.components.at(1)
+          ).toEqual(component)
+        }
+      )
+    })
+
+    it('should add a component to a page at position x', async () => {
+      await helper(
+        async () => {
+          await addComponent(formId, page1Id, component, mockSession, 0)
+        },
+        (definition) => {
+          const page = definition.pages.at(0)
+          expect(
+            hasComponentsEvenIfNoNext(page) && page.components
+          ).toHaveLength(2)
+          expect(
+            hasComponentsEvenIfNoNext(page) && page.components.at(0)
+          ).toEqual(component)
+        }
+      )
     })
   })
 
   describe('updateComponent', () => {
     const component = buildTextFieldComponent({
-      id: componentId
+      id: component1Id
     })
 
-    it('should update the component', async () => {
-      const expectedComponent = buildTextFieldComponent({
-        ...component,
-        title: 'New Component Title'
-      })
-      mockCollection.findOneAndUpdate.mockResolvedValue({
-        draft: buildDefinition({
-          pages: [
-            buildQuestionPage({
-              id: pageId,
-              components: [expectedComponent]
-            }),
-            buildSummaryPage()
-          ]
-        })
-      })
+    it('should update a component', async () => {
+      /** @type {ComponentDef} */
+      let savedComponent
 
-      const savedComponent = await updateComponent(
-        formId,
-        pageId,
-        componentId,
-        component,
-        mockSession
-      )
+      await helper(
+        async () => {
+          savedComponent = await updateComponent(
+            formId,
+            page1Id,
+            component1Id,
+            component,
+            mockSession
+          )
+        },
+        (definition) => {
+          const expectedComponent = buildTextFieldComponent({
+            ...component
+          })
+          const page = definition.pages.at(0)
+          expect(savedComponent).toEqual(expectedComponent)
 
-      const [filter, update, options] =
-        mockCollection.findOneAndUpdate.mock.calls[0]
-
-      expect(filter).toEqual({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId,
-        'draft.pages.components.id': componentId
-      })
-      expect(update).toEqual({
-        $set: {
-          'draft.pages.$[pageId].components.$[component]': component
+          expect(
+            hasComponentsEvenIfNoNext(page) && page.components
+          ).toHaveLength(1)
         }
-      })
-      expect(options).toMatchObject({
-        arrayFilters: [{ 'pageId.id': pageId }, { 'component.id': componentId }]
-      })
-      expect(savedComponent).toEqual(expectedComponent)
+      )
     })
 
     it('should fail if the component is not found', async () => {
-      mockCollection.findOneAndUpdate.mockResolvedValue(null)
+      mockCollection.findOne.mockResolvedValue(null)
 
       await expect(
-        updateComponent(formId, pageId, componentId, component, mockSession)
+        updateComponent(formId, page1Id, component1Id, component, mockSession)
       ).rejects.toThrow(
-        Boom.badRequest(
-          'Component ID e296d931-2364-4b17-9049-1aa1afea29d3 not found on Page ID 87ffdbd3-9e43-41e2-8db3-98ade26ca0b7 & Form ID 1eabd1437567fe1b26708bbb'
-        )
+        Boom.notFound("Document not found '1eabd1437567fe1b26708bbb'")
       )
     })
   })
 
   describe('updatePageFields', () => {
-    /** @satisfies {PatchPageFields} */
-    let pageFields = {}
+    it('should update a single page title', async () => {
+      await helper(
+        async () => {
+          const pageFields = {
+            title: 'Updated page title'
+          }
 
-    beforeEach(() => {
-      pageFields = {
-        title: 'Updated page title',
-        path: '/updated-page-title'
-      }
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
+        },
+        (definition) => {
+          const page = definition.pages.at(0)
+
+          expect(page?.title).toBe('Updated page title')
+        }
+      )
     })
 
-    it('should update a single page field', async () => {
-      pageFields = {
-        title: 'Updated page title'
-      }
+    it('should update a single page path', async () => {
+      await helper(
+        async () => {
+          const pageFields = {
+            path: '/updated-page-title'
+          }
 
-      await updatePageFields(formId, pageId, pageFields, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-
-      expect(filter).toEqual({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toEqual({
-        $set: {
-          'draft.pages.$.title': 'Updated page title'
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
-        $unset: {}
-      })
-    })
+        (definition) => {
+          const page = definition.pages.at(0)
 
-    it('should update a single page field 2', async () => {
-      pageFields = {
-        path: '/updated-page-title'
-      }
-
-      await updatePageFields(formId, pageId, pageFields, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-
-      expect(filter).toEqual({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toEqual({
-        $set: {
-          'draft.pages.$.path': '/updated-page-title'
-        },
-        $unset: {}
-      })
+          expect(page?.path).toBe('/updated-page-title')
+        }
+      )
     })
 
     it('should update multiple page fields', async () => {
-      await updatePageFields(formId, pageId, pageFields, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      await helper(
+        async () => {
+          const pageFields = {
+            title: 'Updated page title',
+            path: '/updated-page-title'
+          }
 
-      expect(filter).toEqual({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toEqual({
-        $set: {
-          'draft.pages.$.title': 'Updated page title',
-          'draft.pages.$.path': '/updated-page-title'
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
-        $unset: {}
-      })
+        (definition) => {
+          const page = definition.pages.at(0)
+
+          expect(page?.title).toBe('Updated page title')
+          expect(page?.path).toBe('/updated-page-title')
+        }
+      )
     })
 
     it('should set controller', async () => {
-      pageFields = {
-        title: 'Updated page title',
-        controller: ControllerType.FileUpload
-      }
-      await updatePageFields(formId, pageId, pageFields, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      await helper(
+        async () => {
+          const pageFields = {
+            title: 'Updated page title',
+            controller: ControllerType.FileUpload
+          }
 
-      expect(filter).toEqual({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toEqual({
-        $set: {
-          'draft.pages.$.title': 'Updated page title',
-          'draft.pages.$.controller': ControllerType.FileUpload
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
-        $unset: {}
-      })
+        (definition) => {
+          const page = definition.pages.at(0)
+
+          expect(page?.title).toBe('Updated page title')
+          expect(page?.controller).toBe(ControllerType.FileUpload)
+        }
+      )
     })
 
     it('should unset controller', async () => {
-      pageFields = {
-        title: 'Updated page title',
-        controller: null
-      }
-      await updatePageFields(formId, pageId, pageFields, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      await helper(
+        async () => {
+          /** @satisfies {PatchPageFields} */
+          const pageFields = {
+            title: 'Updated page title',
+            controller: null
+          }
 
-      expect(filter).toEqual({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toEqual({
-        $set: {
-          'draft.pages.$.title': 'Updated page title'
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
-        $unset: {
-          'draft.pages.$.controller': ''
+        (definition) => {
+          const page = definition.pages.at(0)
+
+          expect(page?.title).toBe('Updated page title')
+          expect(page?.controller).toBeUndefined()
         }
-      })
+      )
     })
   })
 
-  describe('removePage', () => {
-    it('should remove a page from a draft component', async () => {
-      mockCollection.findOneAndUpdate.mockResolvedValueOnce(mockDefinition)
-      await removePage(formId, pageId, mockSession)
-      const [filter, update] = mockCollection.findOneAndUpdate.mock.calls[0]
-
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toMatchObject({
-        $pull: {
-          'draft.pages': {
-            id: pageId
-          }
+  describe('deletePage', () => {
+    it('should delete a page from a draft', async () => {
+      await helper(
+        async () => {
+          await deletePage(formId, page1Id, mockSession)
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(2)
         }
-      })
+      )
     })
 
     it('should fail if definition does not exist', async () => {
       mockCollection.findOneAndUpdate.mockResolvedValueOnce(null)
-      await expect(removePage(formId, pageId, mockSession)).rejects.toThrow(
-        Boom.notFound(
-          'Form with ID 1eabd1437567fe1b26708bbb not found. Failed to delete page ID 87ffdbd3-9e43-41e2-8db3-98ade26ca0b7.'
-        )
+
+      await expect(deletePage(formId, page1Id, mockSession)).rejects.toThrow(
+        Boom.notFound("Document not found '1eabd1437567fe1b26708bbb'")
       )
     })
   })
 
   describe('deleteComponent', () => {
     it('should delete a component', async () => {
-      await deleteComponent(formId, pageId, componentId, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      await helper(
+        async () => {
+          await deleteComponent(formId, page1Id, component1Id, mockSession)
+        },
+        (definition) => {
+          const page = definition.pages.at(0)
 
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId),
-        'draft.pages.id': pageId
-      })
-      expect(update).toMatchObject({
-        $pull: {
-          'draft.pages.$.components': { id: componentId }
+          expect(
+            hasComponentsEvenIfNoNext(page) && page.components
+          ).toHaveLength(0)
         }
-      })
+      )
     })
   })
 
-  describe('setEngineVersion', () => {
-    it('should fail if form is live', async () => {
-      const mockDefinition = buildDefinition({})
-      await expect(
-        setEngineVersion(
-          formId,
-          Engine.V2,
-          mockDefinition,
-          mockSession,
-          FormStatus.Live
-        )
-      ).rejects.toThrow(
-        Boom.badRequest('Cannot update the engine version of a live form')
-      )
-    })
-    it('should fail if invalid version', async () => {
-      const mockDefinition = buildDefinition({})
-      await expect(
-        setEngineVersion(
-          formId,
-          /** @type {Engine} */ ('V9'),
-          mockDefinition,
-          mockSession
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          'Invalid engine version for form ID 1eabd1437567fe1b26708bbb'
-        )
-      )
-    })
-    it('should update the version if not already at V2', async () => {
-      const mockDefinition = buildDefinition({})
-      await setEngineVersion(formId, Engine.V2, mockDefinition, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId)
-      })
-      expect(update).toMatchObject({
-        $set: {
-          'draft.engine': 'V2'
-        }
-      })
-    })
-
-    it('should leave the version as is if already at V2', async () => {
-      const mockDefinition = buildDefinition({})
-      mockDefinition.engine = Engine.V2
-      await setEngineVersion(formId, Engine.V2, mockDefinition, mockSession)
-      expect(mockCollection.updateOne).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('addLists', () => {
+  describe('addList', () => {
     it('should add an array of lists', async () => {
-      const lists = [
-        buildList({
-          id: 'daa6c67c-a734-4c28-a93a-ffd9651f44c4',
-          items: [buildListItem()]
-        }),
-        buildList({
-          id: 'eb68b22f-b6ba-4358-8cba-b61282fecdb1',
-          items: []
-        })
-      ]
-      const returnedLists = await addLists(formId, lists, mockSession)
-      expect(lists).toEqual(returnedLists)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      const list = buildList({
+        id: '05a1f94e-17ff-4407-b20e-bbc76b346b3c',
+        title: 'New list',
+        name: 'abcdef',
+        items: []
+      })
 
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId)
-      })
-      expect(update).toMatchObject({
-        $push: {
-          'draft.lists': {
-            $each: lists
-          }
+      await helper(
+        async () => {
+          await addList(formId, list, mockSession)
+        },
+        (definition) => {
+          expect(definition.lists).toHaveLength(2)
         }
-      })
+      )
     })
   })
 
   describe('updateList', () => {
-    const listId = 'daa6c67c-a734-4c28-a93a-ffd9651f44c4'
-    const listItem = buildList({
+    const list = buildList({
       id: listId,
       items: [buildListItem()]
     })
 
     it('should update a list', async () => {
-      jest.mocked(mockCollection.updateOne).mockResolvedValueOnce(listItem)
-
-      const returnedList = await updateList(
-        formId,
-        listId,
-        listItem,
-        mockSession
-      )
-      expect(returnedList).toEqual(listItem)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
-
-      expect(filter).toMatchObject({
-        _id: new ObjectId(formId),
-        'draft.lists.id': listId
-      })
-      expect(update).toMatchObject({
-        $set: {
-          'draft.lists.$': listItem
+      await helper(
+        async () => {
+          await updateList(formId, listId, list, mockSession)
+        },
+        (definition) => {
+          expect(definition.lists).toHaveLength(1)
+          expect(definition.lists.at(0)?.items).toHaveLength(1)
         }
-      })
+      )
     })
   })
 
-  describe('removeList', () => {
-    const listId = 'daa6c67c-a734-4c28-a93a-ffd9651f44c4'
-
+  describe('deleteList', () => {
     it('should delete a list', async () => {
-      await removeList(formId, listId, mockSession)
-      const [filter, update] = mockCollection.updateOne.mock.calls[0]
+      await helper(
+        async () => {
+          await deleteList(formId, listId, mockSession)
+        },
+        (definition) => {
+          expect(definition.lists).toHaveLength(0)
+        }
+      )
+    })
+  })
 
+  describe('insert', () => {
+    it('should insert a new draft definition', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue({ draft })
+
+      await insert(formId, draft, mockSession, formDefinitionSchema)
+
+      const [filter, update] = mockCollection.findOneAndUpdate.mock.calls[0]
       expect(filter).toMatchObject({
-        _id: new ObjectId(formId),
-        'draft.lists.id': listId
+        _id: new ObjectId(formId)
       })
       expect(update).toMatchObject({
-        $pull: {
-          'draft.lists': { id: listId }
-        }
+        $setOnInsert: { draft: expect.any(Object) }
       })
+
+      /** @type {UpdateFilter<{ draft: FormDefinition }>} */
+      const updateFilter = update
+
+      expect(updateFilter.$setOnInsert?.draft).toBeDefined()
+
+      if (!updateFilter.$setOnInsert?.draft) {
+        throw new Error('Unexpected empty draft on $setOnInsert')
+      }
+    })
+  })
+
+  describe('update', () => {
+    it('should update a V1 draft definition', async () => {
+      const newDefinition = buildDefinition({})
+
+      await helper(
+        async () => {
+          await update(formId, newDefinition, mockSession, formDefinitionSchema)
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(1)
+          expect(definition.lists).toHaveLength(0)
+        }
+      )
+    })
+
+    it('should update a V2 draft definition', async () => {
+      const newV2Definition = emptyV2()
+
+      await helper(
+        async () => {
+          await update(
+            formId,
+            newV2Definition,
+            mockSession,
+            formDefinitionV2Schema
+          )
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(1)
+          expect(definition.lists).toHaveLength(0)
+        }
+      )
     })
   })
 })
 
 /**
- * @import { PatchPageFields } from '@defra/forms-model'
+ * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List } from '@defra/forms-model'
+ * @import { UpdateFilter } from 'mongodb'
  */

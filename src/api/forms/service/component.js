@@ -6,7 +6,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
-import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -49,14 +49,14 @@ export async function getFormDefinitionPageComponent(
  * Adds a component to the end of page components
  * @param {string} formId
  * @param {string} pageId
- * @param {ComponentDef[]} components
+ * @param {ComponentDef} component
  * @param {FormMetadataAuthor} author
  * @param {boolean} prepend
  */
 export async function createComponentOnDraftDefinition(
   formId,
   pageId,
-  components,
+  component,
   author,
   prepend = false
 ) {
@@ -66,28 +66,17 @@ export async function createComponentOnDraftDefinition(
 
   const session = client.startSession()
 
-  const positionOptions = /** @satisfies {{ position?: number }} */ {}
-
-  if (prepend) {
-    positionOptions.position = 0
-  }
-
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addComponents(
+      await formDefinition.addComponent(
         formId,
         pageId,
-        components,
+        component,
         session,
-        positionOptions
+        prepend ? 0 : undefined
       )
 
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
+      await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
     logger.error(
@@ -101,7 +90,7 @@ export async function createComponentOnDraftDefinition(
 
   logger.info(`Added new component on Page ID ${pageId} on Form ID ${formId}`)
 
-  return components
+  return component
 }
 
 /**
@@ -137,12 +126,7 @@ export async function updateComponentOnDraftDefinition(
             session
           )
 
-        // Update the form with the new draft state
-        await formMetadata.update(
-          formId,
-          { $set: partialAuditFields(new Date(), author) },
-          session
-        )
+        await formMetadata.updateAudit(formId, author, session)
 
         return formDefinitionPageComponent
       }
@@ -192,12 +176,7 @@ export async function deleteComponentOnDraftDefinition(
           session
         )
 
-        // Update the form with the new draft state
-        await formMetadata.update(
-          formId,
-          { $set: partialAuditFields(new Date(), author) },
-          session
-        )
+        await formMetadata.updateAudit(formId, author, session)
       },
       { readPreference: 'primary' }
     )

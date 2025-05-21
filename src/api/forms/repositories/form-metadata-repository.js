@@ -9,6 +9,7 @@ import {
   processFilterResults
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
+import { partialAuditFields } from '~/src/api/forms/service/shared.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -234,6 +235,20 @@ export async function update(formId, update, session) {
 }
 
 /**
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataAuthor} author
+ * @param {ClientSession} session - mongo transaction session
+ * @param {Date} [date] - defaults to new Date()
+ */
+export async function updateAudit(formId, author, session, date = new Date()) {
+  logger.info(`Updating audit fields for form with ID ${formId}`)
+
+  await update(formId, { $set: partialAuditFields(date, author) }, session)
+
+  logger.info(`Updated audit fields for form with ID ${formId}`)
+}
+
+/**
  * Removes a form metadata
  * @param {string} formId - ID of the form
  * @param {ClientSession} session
@@ -247,7 +262,7 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, QueryOptions, FilterOptions } from '@defra/forms-model'
+ * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  * @import { FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'

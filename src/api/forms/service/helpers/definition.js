@@ -1,57 +1,33 @@
-/**
- * @typedef {{
- *     [k: string]: number
- * }} PageOrderHelper
- */
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import { logger } from '~/src/api/forms/service/shared.js'
 
 /**
- * Creates an object of keys and their desired position based on the pageOrder (pure function)
- * For ['a','b''c'] will return { a: -2, b: -1, c: -0 }
- * @param {string[]} pageOrder
- * @returns {PageOrderHelper}
+ * Validates the form definition
+ * @param {FormDefinition} definition
+ * @param {ObjectSchema<FormDefinition>} schema
  */
-export function createOrder(pageOrder) {
-  return pageOrder
-    .slice()
-    .reverse()
-    .reduce((pageOrderChart, id, idx) => {
-      return {
-        ...pageOrderChart,
-        [id]: -idx
-      }
-    }, {})
-}
+export function validate(definition, schema) {
+  /** @type {{ error?: ValidationError; value: FormDefinition }} */
+  const result = schema.validate(definition)
 
-/**
- * Re-orders the pages in the definition
- * @param {FormDefinition} formDefinition
- * @param {string[]} pageOrder
- */
-export function reorderPages(formDefinition, pageOrder) {
-  const order = createOrder(pageOrder)
+  const { error, value } = result
 
-  return {
-    ...formDefinition,
-    pages: formDefinition.pages.toSorted((pageA, pageB) => {
-      const aId = pageA.id
-      const bId = pageB.id
+  if (error) {
+    const name = definition.name ?? 'No name'
 
-      const aPosition = aId !== undefined && aId in order ? order[aId] : 0
-      const bPosition = bId !== undefined && bId in order ? order[bId] : 0
+    logger.warn(
+      `Form failed validation: '${error.message}'. Form name: '${name}'`
+    )
 
-      if (aPosition < bPosition) {
-        return -1
-      }
-
-      if (aPosition > bPosition) {
-        return 1
-      }
-
-      return 0
+    throw new InvalidFormDefinitionError(name, {
+      cause: error
     })
   }
+
+  return value
 }
 
 /**
- * @import { FormDefinition, Page } from '@defra/forms-model'
+ * @import { FormDefinition } from '@defra/forms-model'
+ * @import { ObjectSchema, ValidationError } from 'joi'
  */

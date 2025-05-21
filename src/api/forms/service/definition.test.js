@@ -1,4 +1,4 @@
-import { Engine, FormStatus } from '@defra/forms-model'
+import { Engine, FormStatus, formDefinitionSchema } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
@@ -13,6 +13,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { modifyReorderPages } from '~/src/api/forms/repositories/helpers.js'
 import {
   formMetadataDocument,
   formMetadataInput,
@@ -54,22 +55,16 @@ describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
   const dateUsedInFakeTime = new Date('2020-01-01')
-  const defaultAudit = {
-    'draft.updatedAt': dateUsedInFakeTime,
-    'draft.updatedBy': author,
-    updatedAt: dateUsedInFakeTime,
-    updatedBy: author
-  }
 
   let definition = emptyFormWithSummary()
 
-  const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+  const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
 
   const expectMetadataUpdate = () => {
     expect(dbMetadataSpy).toHaveBeenCalled()
     const [formId, updateFilter] = dbMetadataSpy.mock.calls[0]
     expect(formId).toBe(id)
-    expect(updateFilter.$set).toEqual(defaultAudit)
+    expect(updateFilter).toEqual(author)
   }
 
   beforeAll(async () => {
@@ -311,7 +306,7 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.upsert).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue()
       jest.mocked(formTemplates.empty).mockReturnValue(definition)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
@@ -378,7 +373,7 @@ describe('Forms service', () => {
     })
 
     it('should throw an error when writing form def fails', async () => {
-      jest.mocked(formDefinition.upsert).mockRejectedValueOnce(new Error())
+      jest.mocked(formDefinition.update).mockRejectedValueOnce(new Error())
 
       const input = {
         ...formMetadataInput,
@@ -938,7 +933,7 @@ describe('Forms service', () => {
       "A custom form name that shouldn't be allowed"
 
     it('should update the draft form definition with required attributes upon creation', async () => {
-      const upsertSpy = jest.spyOn(formDefinition, 'upsert')
+      const updateSpy = jest.spyOn(formDefinition, 'update')
       const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
 
       await updateDraftFormDefinition(
@@ -947,13 +942,14 @@ describe('Forms service', () => {
         author
       )
 
-      expect(upsertSpy).toHaveBeenCalledWith(
+      expect(updateSpy).toHaveBeenCalledWith(
         '123',
         {
           ...formDefinitionCustomisedTitle,
           name: formMetadataDocument.title
         },
-        expect.anything()
+        expect.anything(),
+        formDefinitionSchema
       )
 
       expect(formMetadataGetSpy).toHaveBeenCalledWith('123')
@@ -964,7 +960,7 @@ describe('Forms service', () => {
     })
 
     test('should check if form update DB operation is called with correct form data', async () => {
-      const dbSpy = jest.spyOn(formMetadata, 'update')
+      const dbSpy = jest.spyOn(formMetadata, 'updateAudit')
 
       await updateDraftFormDefinition(
         '123',
@@ -976,12 +972,7 @@ describe('Forms service', () => {
 
       expect(dbSpy).toHaveBeenCalled()
       expect(dbOperationArgs[0]).toBe('123')
-      expect(dbOperationArgs[1].$set).toEqual({
-        'draft.updatedAt': dateUsedInFakeTime,
-        'draft.updatedBy': author,
-        updatedAt: dateUsedInFakeTime,
-        updatedBy: author
-      })
+      expect(dbOperationArgs[1]).toEqual(author)
     })
 
     it('should throw an error if the form has no draft state', async () => {
@@ -1026,19 +1017,22 @@ describe('Forms service', () => {
     })
 
     it('should reorder the pages', async () => {
+      const orderList = [pageOneId, pageOneId]
+      jest
+        .mocked(formDefinition.reorderPages)
+        .mockResolvedValueOnce(modifyReorderPages(definition, orderList))
+
       const expectedDefinition = buildDefinition({
         pages: [pageOne, pageTwo, summaryPage]
       })
-      const orderList = [pageOneId, pageOneId]
       const result = await reorderDraftFormDefinitionPages(
         id,
         orderList,
         author
       )
 
-      const [, upsertedDefinition] = jest.mocked(formDefinition.upsert).mock
-        .calls[0]
-      expect(upsertedDefinition).toEqual(expectedDefinition)
+      const [, order] = jest.mocked(formDefinition.reorderPages).mock.calls[0]
+      expect(order).toEqual(orderList)
       expect(result).toEqual(expectedDefinition)
       expectMetadataUpdate()
     })
@@ -1050,13 +1044,15 @@ describe('Forms service', () => {
         author
       )
       expect(returnedDefinition).toEqual(definition)
-      expect(formDefinition.upsert).not.toHaveBeenCalled()
+      expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })
 
     it('should surface errors', async () => {
       const boomInternal = Boom.internal('Something went wrong')
-      jest.mocked(formDefinition.upsert).mockRejectedValueOnce(boomInternal)
+      jest
+        .mocked(formDefinition.reorderPages)
+        .mockRejectedValueOnce(boomInternal)
       await expect(
         reorderDraftFormDefinitionPages(
           id,

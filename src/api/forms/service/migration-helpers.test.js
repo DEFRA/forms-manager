@@ -10,6 +10,7 @@ import {
   buildSummaryPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
   applyPageTitles,
   convertDeclaration,
@@ -484,7 +485,13 @@ describe('migration helpers', () => {
       // @ts-expect-error unknownProperty is not a valid property of formDefinition
       const invalidDefinition = buildDefinition(partialDefinition)
       expect(() => migrateToV2(invalidDefinition)).toThrow(
-        new ValidationError('"unknownProperty" is not allowed', [], undefined)
+        new InvalidFormDefinitionError('', {
+          cause: new ValidationError(
+            '"unknownProperty" is not allowed',
+            [],
+            undefined
+          )
+        })
       )
     })
 

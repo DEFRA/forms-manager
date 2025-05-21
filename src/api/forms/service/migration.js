@@ -1,4 +1,9 @@
-import { ControllerType, Engine, FormStatus } from '@defra/forms-model'
+import {
+  ControllerType,
+  Engine,
+  FormStatus,
+  formDefinitionV2Schema
+} from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -7,7 +12,7 @@ import {
   summaryHelper
 } from '~/src/api/forms/service/migration-helpers.js'
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
-import { logger, partialAuditFields } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -37,24 +42,15 @@ export async function repositionSummaryPipeline(formId, definition, author) {
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.removeMatchingPages(
+      await formDefinition.deletePages(
         formId,
-        { controller: ControllerType.Summary },
+        (page) => page.controller === ControllerType.Summary,
         session
       )
 
-      await formDefinition.addPageAtPosition(
-        formId,
-        /** @type {PageSummary} */ (summaryWithId),
-        session
-      )
+      await formDefinition.addPage(formId, summaryWithId, session)
 
-      // Update the form with the new draft state
-      await formMetadata.update(
-        formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
-      )
+      await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
     logger.error(
@@ -82,6 +78,7 @@ export async function migrateDefinitionToV2(formId, author) {
   if (formDraftDefinition.engine === Engine.V2) {
     return formDraftDefinition
   }
+
   logger.info(`Migrating form with ID ${formId} to engine version 2`)
 
   const session = client.startSession()
@@ -91,13 +88,14 @@ export async function migrateDefinitionToV2(formId, author) {
     await session.withTransaction(async () => {
       updatedDraftDefinition = migrateToV2(formDraftDefinition)
 
-      await formDefinition.upsert(formId, updatedDraftDefinition, session)
-
-      await formMetadata.update(
+      await formDefinition.update(
         formId,
-        { $set: partialAuditFields(new Date(), author) },
-        session
+        updatedDraftDefinition,
+        session,
+        formDefinitionV2Schema
       )
+
+      await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
     logger.error(
