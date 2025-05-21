@@ -246,24 +246,14 @@ describe('form-definition-repository', () => {
       path: '/new-path'
     })
 
-    it('should add a page at position', async () => {
-      await helper(
-        async () => {
-          await addPage(formId, page, mockSession, -1)
-        },
-        (definition) => {
-          expect(definition.pages).toHaveLength(4)
-        }
-      )
-    })
-
-    it('should add a page to the end', async () => {
+    it('should add a page at the correct position', async () => {
       await helper(
         async () => {
           await addPage(formId, page, mockSession)
         },
         (definition) => {
           expect(definition.pages).toHaveLength(4)
+          expect(definition.pages.at(2)).toEqual(page)
         }
       )
     })

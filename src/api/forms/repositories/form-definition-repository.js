@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb'
 import {
   getComponent,
   getList,
+  getPageInsertPosition,
   insertDraft,
   modifyAddComponent,
   modifyAddList,
@@ -232,17 +233,17 @@ export async function deletePages(formId, predicate, session) {
 }
 
 /**
- * Add a page at the position number - defaults to the last page
+ * Add a new page
  * @param {string} formId - the ID of the form
  * @param {Page} page - the new page
  * @param {ClientSession} session
- * @param {number | undefined} [position]
  */
-export async function addPage(formId, page, session, position) {
+export async function addPage(formId, page, session) {
   logger.info(`Adding page on form ID ${formId}`)
 
   /** @type {UpdateCallback} */
-  const callback = (draft) => modifyAddPage(draft, page, position)
+  const callback = (draft) =>
+    modifyAddPage(draft, page, getPageInsertPosition(draft))
 
   await modifyDraft(formId, callback, session)
 

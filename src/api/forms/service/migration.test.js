@@ -106,7 +106,7 @@ describe('migration', () => {
       expect(formMetadataUpdateSpy).toHaveBeenCalled()
 
       const [formId1, predicate] = deletePagesSpy.mock.calls[0]
-      const [formId2, calledSummary, , options] = addPageSpy.mock.calls[0]
+      const [formId2, calledSummary] = addPageSpy.mock.calls[0]
       const [formId3, updateFilter] = formMetadataUpdateSpy.mock.calls[0]
 
       expect(formId1).toBe(id)
@@ -114,7 +114,6 @@ describe('migration', () => {
       expect(formId3).toBe(id)
       expect(typeof predicate).toBe('function')
       expect(calledSummary).toEqual(summary)
-      expect(options).toBeUndefined()
       expect(updateFilter).toEqual(author)
       expect(returnedSummary.summary).toEqual(summary)
     })

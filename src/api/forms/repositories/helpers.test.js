@@ -27,6 +27,7 @@ import {
   getListIndex,
   getPage,
   getPageIndex,
+  getPageInsertPosition,
   modifyAddComponent,
   modifyAddList,
   modifyAddPage,
@@ -210,6 +211,22 @@ describe('repository helpers', () => {
       expect(() => {
         getPageIndex(definition, 'incorrect-id')
       }).toThrow(Boom.notFound("Page not found with id 'incorrect-id'"))
+    })
+  })
+
+  describe('getPageInsertPosition', () => {
+    it('should return -1 if a summary page exists', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, summaryPage]
+      })
+      expect(getPageInsertPosition(definition)).toBe(-1)
+    })
+
+    it('should return undefined if a summary page does not exist', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent]
+      })
+      expect(getPageInsertPosition(definition)).toBeUndefined()
     })
   })
 
