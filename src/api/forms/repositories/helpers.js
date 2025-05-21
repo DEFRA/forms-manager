@@ -213,7 +213,7 @@ export function uniquePathGate(
 }
 
 /**
- * Updates a draft form definition
+ * Inserts a draft form definition
  * @param {string} formId - the form id
  * @param {FormDefinition} definition - the form definitiom
  * @param {ClientSession} session - the mongo transaction session
