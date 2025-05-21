@@ -180,19 +180,9 @@ export async function remove(formId, session) {
  * Updates the engine version of a draft form definition
  * @param {string} formId - the ID of the form
  * @param {Engine} engineVersion - the engine version e.g. 'V1' or 'V2'
- * @param {FormDefinition} definition - the form definition
  * @param {ClientSession} session
  */
-export async function setEngineVersion(
-  formId,
-  engineVersion,
-  definition,
-  session
-) {
-  if (definition.engine === engineVersion) {
-    return
-  }
-
+export async function setEngineVersion(formId, engineVersion, session) {
   logger.info(
     `Updating engine version to ${engineVersion} for form ID ${formId}`
   )

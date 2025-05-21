@@ -1,7 +1,9 @@
 import {
   ControllerType,
+  Engine,
   FormStatus,
   formDefinitionSchema,
+  formDefinitionV2Schema,
   hasComponentsEvenIfNoNext
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
@@ -26,11 +28,16 @@ import {
   deletePages,
   get,
   insert,
+  reorderPages,
+  setEngineVersion,
+  update,
   updateComponent,
   updateList,
+  updateName,
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
+import { emptyV2 } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
@@ -44,8 +51,10 @@ const author = getAuthor()
  */
 const mockSession = author
 const formId = '1eabd1437567fe1b26708bbb'
-const pageId = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
-const componentId = 'e296d931-2364-4b17-9049-1aa1afea29d3'
+const page1Id = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
+const page2Id = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+const component1Id = 'e296d931-2364-4b17-9049-1aa1afea29d3'
+const component2Id = '81f513ba-210f-4532-976c-82f8fc7ec2b6'
 const listId = 'eb68b22f-b6ba-4358-8cba-b61282fecdb1'
 
 jest.mock('~/src/mongo.js', () => {
@@ -92,7 +101,10 @@ describe('form-definition-repository', () => {
   let draft
 
   /** @type {Page} */
-  let questionPageWithComponent
+  let page1
+
+  /** @type {Page} */
+  let page2
 
   /** @type {Page} */
   let summaryPage
@@ -104,12 +116,23 @@ describe('form-definition-repository', () => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
 
     mockDefinition = buildDefinition({})
-    const component = buildTextFieldComponent({
-      id: componentId
+    const component1 = buildTextFieldComponent({
+      id: component1Id
     })
-    questionPageWithComponent = buildQuestionPage({
-      id: pageId,
-      components: [component]
+    page1 = buildQuestionPage({
+      id: page1Id,
+      title: 'Page One',
+      path: '/page-one',
+      components: [component1]
+    })
+    const component2 = buildTextFieldComponent({
+      id: component2Id
+    })
+    page2 = buildQuestionPage({
+      id: page2Id,
+      title: 'Page Two',
+      path: '/page-two',
+      components: [component2]
     })
     summaryPage = buildSummaryPage()
 
@@ -121,7 +144,7 @@ describe('form-definition-repository', () => {
     lists = [list]
 
     draft = buildDefinition({
-      pages: [questionPageWithComponent, summaryPage],
+      pages: [page1, page2, summaryPage],
       lists
     })
   })
@@ -211,7 +234,7 @@ describe('form-definition-repository', () => {
           )
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(1)
+          expect(definition.pages).toHaveLength(2)
         }
       )
     })
@@ -229,7 +252,7 @@ describe('form-definition-repository', () => {
           await addPage(formId, page, mockSession, -1)
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(3)
+          expect(definition.pages).toHaveLength(4)
         }
       )
     })
@@ -240,7 +263,7 @@ describe('form-definition-repository', () => {
           await addPage(formId, page, mockSession)
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(3)
+          expect(definition.pages).toHaveLength(4)
         }
       )
     })
@@ -249,7 +272,7 @@ describe('form-definition-repository', () => {
   describe('updatePage', () => {
     it('should update a page', async () => {
       const newPage = buildQuestionPage({
-        id: pageId,
+        id: page1Id,
         title: 'New title',
         path: '/new-path',
         components: []
@@ -257,10 +280,74 @@ describe('form-definition-repository', () => {
 
       await helper(
         async () => {
-          await updatePage(formId, pageId, newPage, mockSession)
+          await updatePage(formId, page1Id, newPage, mockSession)
         },
         (definition) => {
           expect(definition.pages.at(0)).toEqual(newPage)
+        }
+      )
+    })
+  })
+
+  describe('updateEngineVersion', () => {
+    it('should update engine version to V1', async () => {
+      await helper(
+        async () => {
+          await setEngineVersion(formId, Engine.V1, mockSession)
+        },
+        (definition) => {
+          expect(definition.engine).toEqual(Engine.V1)
+        }
+      )
+    })
+
+    it('should update engine version to V2', async () => {
+      await helper(
+        async () => {
+          await setEngineVersion(formId, Engine.V2, mockSession)
+        },
+        (definition) => {
+          expect(definition.engine).toEqual(Engine.V2)
+        }
+      )
+    })
+  })
+
+  describe('updateName', () => {
+    it('should update engine version to V1', async () => {
+      await helper(
+        async () => {
+          await updateName(formId, 'New Name', mockSession)
+        },
+        (definition) => {
+          expect(definition.name).toBe('New Name')
+        }
+      )
+    })
+
+    it('should update engine version to V2', async () => {
+      await helper(
+        async () => {
+          await setEngineVersion(formId, Engine.V2, mockSession)
+        },
+        (definition) => {
+          expect(definition.engine).toEqual(Engine.V2)
+        }
+      )
+    })
+  })
+
+  describe('reorderPages', () => {
+    it('should reorder pages', async () => {
+      const order = [page2Id, page1Id]
+
+      await helper(
+        async () => {
+          await reorderPages(formId, order, mockSession)
+        },
+        (definition) => {
+          expect(definition.pages.at(0)).toEqual(page2)
+          expect(definition.pages.at(1)).toEqual(page1)
         }
       )
     })
@@ -275,7 +362,7 @@ describe('form-definition-repository', () => {
     it('should add a component to a page', async () => {
       await helper(
         async () => {
-          await addComponent(formId, pageId, component, mockSession)
+          await addComponent(formId, page1Id, component, mockSession)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -292,7 +379,7 @@ describe('form-definition-repository', () => {
     it('should add a component to a page at position x', async () => {
       await helper(
         async () => {
-          await addComponent(formId, pageId, component, mockSession, 0)
+          await addComponent(formId, page1Id, component, mockSession, 0)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -309,7 +396,7 @@ describe('form-definition-repository', () => {
 
   describe('updateComponent', () => {
     const component = buildTextFieldComponent({
-      id: componentId
+      id: component1Id
     })
 
     it('should update a component', async () => {
@@ -320,8 +407,8 @@ describe('form-definition-repository', () => {
         async () => {
           savedComponent = await updateComponent(
             formId,
-            pageId,
-            componentId,
+            page1Id,
+            component1Id,
             component,
             mockSession
           )
@@ -344,7 +431,7 @@ describe('form-definition-repository', () => {
       mockCollection.findOne.mockResolvedValue(null)
 
       await expect(
-        updateComponent(formId, pageId, componentId, component, mockSession)
+        updateComponent(formId, page1Id, component1Id, component, mockSession)
       ).rejects.toThrow(
         Boom.notFound("Document not found '1eabd1437567fe1b26708bbb'")
       )
@@ -359,7 +446,7 @@ describe('form-definition-repository', () => {
             title: 'Updated page title'
           }
 
-          await updatePageFields(formId, pageId, pageFields, mockSession)
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -376,7 +463,7 @@ describe('form-definition-repository', () => {
             path: '/updated-page-title'
           }
 
-          await updatePageFields(formId, pageId, pageFields, mockSession)
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -394,7 +481,7 @@ describe('form-definition-repository', () => {
             path: '/updated-page-title'
           }
 
-          await updatePageFields(formId, pageId, pageFields, mockSession)
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -413,7 +500,7 @@ describe('form-definition-repository', () => {
             controller: ControllerType.FileUpload
           }
 
-          await updatePageFields(formId, pageId, pageFields, mockSession)
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -433,7 +520,7 @@ describe('form-definition-repository', () => {
             controller: null
           }
 
-          await updatePageFields(formId, pageId, pageFields, mockSession)
+          await updatePageFields(formId, page1Id, pageFields, mockSession)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -449,10 +536,10 @@ describe('form-definition-repository', () => {
     it('should delete a page from a draft', async () => {
       await helper(
         async () => {
-          await deletePage(formId, pageId, mockSession)
+          await deletePage(formId, page1Id, mockSession)
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(1)
+          expect(definition.pages).toHaveLength(2)
         }
       )
     })
@@ -460,7 +547,7 @@ describe('form-definition-repository', () => {
     it('should fail if definition does not exist', async () => {
       mockCollection.findOneAndUpdate.mockResolvedValueOnce(null)
 
-      await expect(deletePage(formId, pageId, mockSession)).rejects.toThrow(
+      await expect(deletePage(formId, page1Id, mockSession)).rejects.toThrow(
         Boom.notFound("Document not found '1eabd1437567fe1b26708bbb'")
       )
     })
@@ -470,7 +557,7 @@ describe('form-definition-repository', () => {
     it('should delete a component', async () => {
       await helper(
         async () => {
-          await deleteComponent(formId, pageId, componentId, mockSession)
+          await deleteComponent(formId, page1Id, component1Id, mockSession)
         },
         (definition) => {
           const page = definition.pages.at(0)
@@ -557,6 +644,41 @@ describe('form-definition-repository', () => {
       if (!updateFilter.$setOnInsert?.draft) {
         throw new Error('Unexpected empty draft on $setOnInsert')
       }
+    })
+  })
+
+  describe('update', () => {
+    it('should update a V1 draft definition', async () => {
+      const newDefinition = buildDefinition({})
+
+      await helper(
+        async () => {
+          await update(formId, newDefinition, mockSession, formDefinitionSchema)
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(1)
+          expect(definition.lists).toHaveLength(0)
+        }
+      )
+    })
+
+    it('should update a V2 draft definition', async () => {
+      const newV2Definition = emptyV2()
+
+      await helper(
+        async () => {
+          await update(
+            formId,
+            newV2Definition,
+            mockSession,
+            formDefinitionV2Schema
+          )
+        },
+        (definition) => {
+          expect(definition.pages).toHaveLength(1)
+          expect(definition.lists).toHaveLength(0)
+        }
+      )
     })
   })
 })

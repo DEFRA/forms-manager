@@ -62,12 +62,7 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
       await formDefinition.addPage(formId, newPage, session, position)
 
       // Set to V2 if not already
-      await formDefinition.setEngineVersion(
-        formId,
-        Engine.V2,
-        formDraftDefinition,
-        session
-      )
+      await formDefinition.setEngineVersion(formId, Engine.V2, session)
 
       await formMetadata.updateAudit(formId, author, session)
     })
