@@ -303,7 +303,7 @@ export async function reorderPages(formId, order, session) {
  * @param {string} pageId
  * @param {ComponentDef} component
  * @param {ClientSession} session
- * @param {{ position?: number }} [options]
+ * @param {number | undefined} [position]
  * @returns {Promise<void>}
  */
 export async function addComponent(
@@ -311,7 +311,7 @@ export async function addComponent(
   pageId,
   component,
   session,
-  { position } = {}
+  position
 ) {
   logger.info(`Adding a new component to form ID ${formId}`)
 

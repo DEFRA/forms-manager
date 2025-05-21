@@ -154,13 +154,13 @@ describe('Forms service', () => {
       expect(dbDefinitionSpy).toHaveBeenCalled()
       expect(dbMetadataSpy).toHaveBeenCalled()
       const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
-      const [formId, calledPageId, component, , state] =
+      const [formId, calledPageId, component, , position] =
         dbDefinitionSpy.mock.calls[0]
 
       expect(formId).toBe('123')
       expect(calledPageId).toBe(pageId)
       expect(component).toEqual(textFieldComponent)
-      expect(state).toEqual({})
+      expect(position).toBeUndefined()
 
       expect(metaFormId).toBe('123')
 
@@ -182,9 +182,9 @@ describe('Forms service', () => {
       )
       const dbDefinitionSpy = jest.spyOn(formDefinition, 'addComponent')
 
-      const [, , , , options] = dbDefinitionSpy.mock.calls[0]
+      const [, , , , position] = dbDefinitionSpy.mock.calls[0]
 
-      expect(options).toEqual({ position: 0 })
+      expect(position).toBe(0)
     })
 
     it('should fail if page does not exist', async () => {

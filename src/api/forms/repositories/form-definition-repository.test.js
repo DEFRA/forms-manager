@@ -292,9 +292,7 @@ describe('form-definition-repository', () => {
     it('should add a component to a page at position x', async () => {
       await helper(
         async () => {
-          await addComponent(formId, pageId, component, mockSession, {
-            position: 0
-          })
+          await addComponent(formId, pageId, component, mockSession, 0)
         },
         (definition) => {
           const page = definition.pages.at(0)

@@ -66,12 +66,6 @@ export async function createComponentOnDraftDefinition(
 
   const session = client.startSession()
 
-  const positionOptions = /** @satisfies {{ position?: number }} */ {}
-
-  if (prepend) {
-    positionOptions.position = 0
-  }
-
   try {
     await session.withTransaction(async () => {
       await formDefinition.addComponent(
@@ -79,7 +73,7 @@ export async function createComponentOnDraftDefinition(
         pageId,
         component,
         session,
-        positionOptions
+        prepend ? 0 : undefined
       )
 
       await formMetadata.updateAudit(formId, author, session)
