@@ -1,4 +1,4 @@
-import { ApiErrorCode, Engine, FormStatus } from '@defra/forms-model'
+import { ApiErrorCode, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -8,7 +8,6 @@ import {
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
-import { repositionSummaryPipeline } from '~/src/api/forms/service/migration.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
@@ -22,7 +21,7 @@ export const addIdToSummary = (summaryPage) => ({
 })
 
 /**
- * Adds a new page to a draft definition and calls repositionSummaryPipeline if the summary exists
+ * Adds a new page to a draft definition
  * @param {string} formId
  * @param {Page} newPage
  * @param {FormMetadataAuthor} author
@@ -42,27 +41,9 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
     ApiErrorCode.DuplicatePagePathComponent
   )
 
-  const { summaryExists } = await repositionSummaryPipeline(
-    formId,
-    formDraftDefinition,
-    author
-  )
-
-  /**
-   * @type {number|undefined}
-   */
-  let position
-
-  if (summaryExists) {
-    position = -1
-  }
-
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPage(formId, newPage, session, position)
-
-      // Set to V2 if not already
-      await formDefinition.setEngineVersion(formId, Engine.V2, session)
+      await formDefinition.addPage(formId, newPage, session)
 
       await formMetadata.updateAudit(formId, author, session)
     })

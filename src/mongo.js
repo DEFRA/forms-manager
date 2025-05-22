@@ -29,7 +29,6 @@ export async function prepareDb(logger) {
   // Create the mongodb client
   client = await MongoClient.connect(mongoUrl, {
     retryWrites: false,
-    readPreference: 'secondary',
     secureContext
   })
 

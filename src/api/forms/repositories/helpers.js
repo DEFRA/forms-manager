@@ -1,5 +1,6 @@
 import {
   ApiErrorCode,
+  ControllerType,
   formDefinitionV2Schema,
   hasComponentsEvenIfNoNext,
   hasRepeater
@@ -35,6 +36,19 @@ export async function removeById(session, collectionName, id) {
  */
 export function findPage(definition, pageId) {
   return definition.pages.find((page) => page.id === pageId)
+}
+
+/**
+ * Gets the position a new page should be inserted
+ * @param {FormDefinition} definition
+ */
+export function getPageInsertPosition(definition) {
+  const pages = definition.pages
+
+  return pages.length &&
+    pages[pages.length - 1].controller === ControllerType.Summary
+    ? -1
+    : undefined
 }
 
 /**
