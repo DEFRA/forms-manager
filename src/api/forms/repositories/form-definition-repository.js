@@ -1,9 +1,4 @@
-import {
-  Engine,
-  FormStatus,
-  formDefinitionSchema,
-  formDefinitionV2Schema
-} from '@defra/forms-model'
+import { FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -388,15 +383,10 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
     `Updating page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
   )
 
-  const form = await get(formId, FormStatus.Draft, session)
-
-  const schema =
-    form.engine === Engine.V2 ? formDefinitionV2Schema : formDefinitionSchema
-
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyUpdatePageFields(draft, pageId, pageFields)
 
-  await modifyDraft(formId, callback, session, schema)
+  await modifyDraft(formId, callback, session)
 
   logger.info(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
@@ -480,7 +470,7 @@ export async function deleteList(formId, listId, session) {
 }
 
 /**
- * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'
