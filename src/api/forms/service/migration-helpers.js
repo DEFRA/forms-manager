@@ -4,6 +4,7 @@ import {
   ComponentType,
   ControllerType,
   Engine,
+  SchemaVersion,
   formDefinitionV2Schema,
   getComponentDefaults,
   hasComponents,
@@ -212,6 +213,7 @@ export function migrateToV2(definition) {
   const migratedDefinition = applyMigrationSteps(definition)
 
   migratedDefinition.engine = Engine.V2
+  migratedDefinition.schema = SchemaVersion.V2
 
   const value = validate(migratedDefinition, formDefinitionV2Schema)
 

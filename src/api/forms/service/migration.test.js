@@ -1,13 +1,13 @@
-import { Engine } from '@defra/forms-model'
-import Boom from '@hapi/boom'
-import { pino } from 'pino'
-
+import { Engine, SchemaVersion } from '@defra/forms-model'
 import {
   buildDefinition,
   buildQuestionPage,
   buildSummaryPage,
   buildTextFieldComponent
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { pino } from 'pino'
+
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as migrationHelperStubs from '~/src/api/forms/service/migration-helpers.js'
@@ -65,6 +65,7 @@ describe('migration', () => {
   })
   const versionTwo = buildDefinition({
     pages: [questionPageWithIdAndComponentIds, summaryWithId],
+    schema: SchemaVersion.V2,
     engine: Engine.V2
   })
 
@@ -92,7 +93,7 @@ describe('migration', () => {
       const formMetadataUpdateSpy = jest.spyOn(formMetadata, 'updateAudit')
 
       const formDefinition1 = buildDefinition({
-        pages: [initialSummary, buildQuestionPage()]
+        pages: [initialSummary, buildQuestionPage({})]
       })
 
       const returnedSummary = await repositionSummaryPipeline(
@@ -134,7 +135,7 @@ describe('migration', () => {
 
     it('should not reposition the summary if summary is at the end', async () => {
       const formDefinition1 = buildDefinition({
-        pages: [buildQuestionPage(), summaryPage]
+        pages: [buildQuestionPage({}), summaryPage]
       })
       const deletePagesSpy = jest.spyOn(formDefinition, 'deletePages')
       const addPageSpy = jest.spyOn(formDefinition, 'addPage')
@@ -148,7 +149,7 @@ describe('migration', () => {
 
     it('should not reposition the summary if pages do not contain a summary', async () => {
       const formDefinition1 = buildDefinition({
-        pages: [buildQuestionPage()]
+        pages: [buildQuestionPage({})]
       })
 
       const deletePagesSpy = jest.spyOn(formDefinition, 'deletePages')
@@ -167,7 +168,7 @@ describe('migration', () => {
         .mockRejectedValueOnce(Boom.badRequest('Error'))
 
       const formDefinition1 = buildDefinition({
-        pages: [summary, buildQuestionPage()]
+        pages: [summary, buildQuestionPage({})]
       })
       await expect(
         repositionSummaryPipeline('123', formDefinition1, author)
