@@ -8,6 +8,7 @@ import {
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
+import { validateConditionExists } from '~/src/api/forms/service/helpers/condition-validator.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
@@ -99,14 +100,17 @@ export async function patchFieldsOnDraftDefinitionPage(
   author
 ) {
   const session = client.startSession()
-
   const fields = Object.entries(pageFieldsToUpdate)
-
   let page
 
   try {
     // Check that page exists
     await getFormDefinitionPage(formId, pageId, session)
+
+    if (pageFieldsToUpdate.condition !== undefined) {
+      const formDefinition = await getFormDefinition(formId, FormStatus.Draft)
+      validateConditionExists(formDefinition, pageFieldsToUpdate.condition)
+    }
 
     if (pageFieldsToUpdate.path) {
       /** @type {FormDefinition} */

@@ -484,7 +484,7 @@ export function modifyDeleteComponent(definition, pageId, componentId) {
 export function modifyUpdatePageFields(definition, pageId, pageFields) {
   const page = getPage(definition, pageId)
 
-  const { title, path, controller, repeat } = pageFields
+  const { title, path, controller, repeat, condition } = pageFields
 
   if (title || title === '') {
     page.title = title
@@ -502,6 +502,15 @@ export function modifyUpdatePageFields(definition, pageId, pageFields) {
   // Repeater
   if (repeat && hasRepeater(page)) {
     page.repeat = repeat
+  }
+
+  // Condition
+  if (condition !== undefined) {
+    if (condition === null) {
+      delete page.condition
+    } else {
+      page.condition = condition
+    }
   }
 
   return definition
