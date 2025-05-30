@@ -108,8 +108,14 @@ export async function patchFieldsOnDraftDefinitionPage(
     await getFormDefinitionPage(formId, pageId, session)
 
     if (pageFieldsToUpdate.condition !== undefined) {
-      const formDefinition = await getFormDefinition(formId, FormStatus.Draft)
-      validateConditionExists(formDefinition, pageFieldsToUpdate.condition)
+      const currentFormDefinition = await getFormDefinition(
+        formId,
+        FormStatus.Draft
+      )
+      validateConditionExists(
+        currentFormDefinition,
+        pageFieldsToUpdate.condition
+      )
     }
 
     if (pageFieldsToUpdate.path) {
