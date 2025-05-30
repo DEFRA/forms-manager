@@ -741,6 +741,57 @@ describe('repository helpers', () => {
       expect(page?.controller).toBe(ControllerType.Repeat)
       expect(hasRepeater(page) && page.repeat).toBe(repeat)
     })
+
+    it('should update the page condition by id', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        condition: 'd5e9f931-e151-4dd6-a2b9-68a03f3537e2'
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.condition).toBe('d5e9f931-e151-4dd6-a2b9-68a03f3537e2')
+    })
+
+    it('should clear the page condition by id when set to null', () => {
+      const pageWithCondition = {
+        ...questionPageWithComponent,
+        condition: 'existing-condition'
+      }
+
+      const definition = buildDefinition({
+        pages: [pageWithCondition]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        condition: null
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.condition).toBeUndefined()
+    })
+
+    it('should not modify condition when undefined', () => {
+      const pageWithCondition = {
+        ...questionPageWithComponent,
+        condition: 'existing-condition'
+      }
+
+      const definition = buildDefinition({
+        pages: [pageWithCondition]
+      })
+
+      const modified = modifyUpdatePageFields(definition, pageId, {
+        title: 'New title'
+        // condition intentionally not provided (undefined)
+      })
+
+      const page = modified.pages.at(0)
+      expect(page?.condition).toBe('existing-condition')
+      expect(page?.title).toBe('New title')
+    })
   })
 
   describe('modifyDeletePage', () => {
