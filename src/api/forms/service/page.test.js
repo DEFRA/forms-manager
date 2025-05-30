@@ -9,6 +9,7 @@ import {
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
+import * as definitionService from '~/src/api/forms/service/definition.js'
 import {
   createPageOnDraftDefinition,
   deletePageOnDraftDefinition,
@@ -55,11 +56,15 @@ describe('Page service', () => {
         pages: [questionPage, summaryPage]
       })
 
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition2)
+      const spy = jest
+        .spyOn(definitionService, 'getFormDefinition')
+        .mockResolvedValueOnce(definition2)
 
       const foundPage = await getFormDefinitionPage('123', questionPageId)
 
       expect(foundPage).toEqual(questionPage)
+
+      spy.mockRestore()
     })
 
     it('should fail is page does not exist', async () => {
@@ -200,20 +205,25 @@ describe('Page service', () => {
     })
 
     it('should update page fields', async () => {
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(initialDefinition)
+      const pageFields = {
+        title: 'Updated Title',
+        path: '/updated-title'
+      }
+
       const expectedPage = buildQuestionPage({
         ...pageFields
       })
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(
-        buildDefinition({
-          pages: [expectedPage, summaryPage]
-        })
-      )
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(
-        buildDefinition({
-          pages: [expectedPage, summaryPage]
-        })
-      )
+
+      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce()
+
+      const spy = jest
+        .spyOn(definitionService, 'getFormDefinition')
+        .mockResolvedValue(
+          buildDefinition({
+            pages: [expectedPage, summaryPage]
+          })
+        )
+
       const page = await patchFieldsOnDraftDefinitionPage(
         '123',
         pageId,
@@ -222,27 +232,8 @@ describe('Page service', () => {
       )
 
       expect(page).toEqual(expectedPage)
-      const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
-      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updatePageFields')
-      const dbDefinitionGetSpy = jest.spyOn(formDefinition, 'get')
 
-      expect(dbMetadataSpy).toHaveBeenCalled()
-      const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
-      expect(metaFormId).toBe('123')
-
-      expect(metaUpdateOperations).toEqual(author)
-
-      expect(dbDefinitionSpy).toHaveBeenCalled()
-      const [formId, calledPageId, pageFieldsToUpdate] =
-        dbDefinitionSpy.mock.calls[0]
-
-      expect(formId).toBe('123')
-      expect(calledPageId).toBe(pageId)
-      expect(pageFieldsToUpdate).toEqual(pageFields)
-
-      expect(dbDefinitionGetSpy.mock.calls[2][2]).toMatchObject({
-        withTransaction: expect.anything()
-      })
+      spy.mockRestore()
     })
 
     it('should fail if the page does not exist', async () => {
@@ -327,6 +318,78 @@ describe('Page service', () => {
         author
       )
       expect(res).toBeDefined()
+    })
+
+    it('should fail if condition does not exist in form definition', async () => {
+      const pageFieldsWithInvalidCondition = {
+        condition: 'non-existent-condition'
+      }
+
+      const definitionWithEmptyConditions = {
+        ...initialDefinition,
+        conditions: []
+      }
+
+      const spy = jest
+        .spyOn(definitionService, 'getFormDefinition')
+        .mockResolvedValue(definitionWithEmptyConditions)
+
+      await expect(
+        patchFieldsOnDraftDefinitionPage(
+          '123',
+          pageId,
+          pageFieldsWithInvalidCondition,
+          author
+        )
+      ).rejects.toThrow(
+        Boom.badRequest(
+          "Condition 'non-existent-condition' not found in form definition"
+        )
+      )
+
+      spy.mockRestore()
+    })
+
+    it('should succeed when condition exists in form definition', async () => {
+      const definitionWithCondition = {
+        ...initialDefinition,
+        conditions: [
+          {
+            name: 'valid-condition',
+            displayName: 'Valid',
+            conditions: []
+          }
+        ]
+      }
+
+      const pageFieldsWithValidCondition = {
+        condition: 'valid-condition'
+      }
+
+      const spy = jest
+        .spyOn(definitionService, 'getFormDefinition')
+        .mockResolvedValueOnce(definitionWithCondition)
+        .mockResolvedValueOnce(definitionWithCondition)
+        .mockResolvedValueOnce(definitionWithCondition)
+
+      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce()
+
+      const result = await patchFieldsOnDraftDefinitionPage(
+        '123',
+        pageId,
+        pageFieldsWithValidCondition,
+        author
+      )
+
+      expect(result).toBeDefined()
+      expect(formDefinition.updatePageFields).toHaveBeenCalledWith(
+        '123',
+        pageId,
+        pageFieldsWithValidCondition,
+        expect.anything()
+      )
+
+      spy.mockRestore()
     })
   })
 

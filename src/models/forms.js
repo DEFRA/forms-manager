@@ -57,7 +57,8 @@ export const patchPageSchema = Joi.object()
     title: pageSchemaV2.extract('title').optional(),
     path: pageSchemaV2.extract('path').optional(),
     controller: pageSchemaV2.extract('controller').optional().allow(null),
-    repeat: pageRepeatSchema.optional().allow(null)
+    repeat: pageRepeatSchema.optional().allow(null),
+    condition: Joi.string().trim().optional().allow(null) // using simple validation here - pageSchemaV2.extract('condition') requires full form context which isn't available during payload validation
   })
   .required()
   .min(1)
