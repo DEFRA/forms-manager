@@ -6,17 +6,18 @@ import {
   formDefinitionV2Schema,
   hasComponentsEvenIfNoNext
 } from '@defra/forms-model'
-import Boom from '@hapi/boom'
-import { ObjectId } from 'mongodb'
-
 import {
   buildDefinition,
+  buildFileUploadComponent,
   buildList,
   buildListItem,
   buildQuestionPage,
   buildSummaryPage,
   buildTextFieldComponent
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { ObjectId } from 'mongodb'
+
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponent,
@@ -37,7 +38,7 @@ import {
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
-import { emptyV2 } from '~/src/api/forms/templates.js'
+import { empty, emptyV2 } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
@@ -483,6 +484,18 @@ describe('form-definition-repository', () => {
     })
 
     it('should set controller', async () => {
+      draft = buildDefinition({
+        pages: [
+          buildQuestionPage({
+            ...page1,
+            components: [buildFileUploadComponent()],
+            controller: undefined
+          }),
+          page2,
+          summaryPage
+        ],
+        lists
+      })
       await helper(
         async () => {
           const pageFields = {
@@ -639,7 +652,9 @@ describe('form-definition-repository', () => {
 
   describe('update', () => {
     it('should update a V1 draft definition', async () => {
-      const newDefinition = buildDefinition({})
+      const newDefinition = buildDefinition({
+        ...empty()
+      })
 
       await helper(
         async () => {
