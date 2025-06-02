@@ -6,6 +6,7 @@ describe('validateConditionExists', () => {
   const mockFormDefinition = {
     conditions: [
       {
+        id: 'existing-condition-id',
         name: 'existing-condition',
         displayName: 'Test',
         conditions: []
@@ -41,7 +42,7 @@ describe('validateConditionExists', () => {
   describe('when condition exists', () => {
     it('passes validation', () => {
       expect(() => {
-        validateConditionExists(mockFormDefinition, 'existing-condition')
+        validateConditionExists(mockFormDefinition, 'existing-condition-id')
       }).not.toThrow()
     })
   })
