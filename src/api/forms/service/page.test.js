@@ -355,6 +355,7 @@ describe('Page service', () => {
         ...initialDefinition,
         conditions: [
           {
+            id: 'valid-condition-id',
             name: 'valid-condition',
             displayName: 'Valid',
             conditions: []

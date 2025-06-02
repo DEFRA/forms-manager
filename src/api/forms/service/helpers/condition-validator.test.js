@@ -6,6 +6,7 @@ describe('validateConditionExists', () => {
   const mockFormDefinition = {
     conditions: [
       {
+        id: 'existing-condition-id',
         name: 'existing-condition',
         displayName: 'Test',
         conditions: []

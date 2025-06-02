@@ -16,7 +16,9 @@ export function validateConditionExists(formDefinition, conditionName) {
   }
 
   const conditionExists = formDefinition.conditions.some(
-    (condition) => condition.name === conditionName
+    (condition) =>
+      ('id' in condition && condition.id === conditionName) ||
+      ('name' in condition && condition.name === conditionName)
   )
 
   if (!conditionExists) {
