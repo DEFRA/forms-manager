@@ -364,7 +364,7 @@ describe('Page service', () => {
       }
 
       const pageFieldsWithValidCondition = {
-        condition: 'valid-condition'
+        condition: 'valid-condition-id'
       }
 
       const spy = jest
