@@ -3,11 +3,11 @@ import Boom from '@hapi/boom'
 /**
  * Validates that a condition exists in the form definition
  * @param {FormDefinition | undefined} formDefinition
- * @param {string | null | undefined} conditionName
+ * @param {string | null | undefined} conditionId
  * @throws {Boom} If condition doesn't exist
  */
-export function validateConditionExists(formDefinition, conditionName) {
-  if (conditionName === undefined || conditionName === null) {
+export function validateConditionExists(formDefinition, conditionId) {
+  if (conditionId === undefined || conditionId === null) {
     return
   }
 
@@ -16,12 +16,12 @@ export function validateConditionExists(formDefinition, conditionName) {
   }
 
   const conditionExists = formDefinition.conditions.some(
-    (condition) => 'id' in condition && condition.id === conditionName
+    (condition) => 'id' in condition && condition.id === conditionId
   )
 
   if (!conditionExists) {
     throw Boom.badRequest(
-      `Condition '${conditionName}' not found in form definition`
+      `Condition '${conditionId}' not found in form definition`
     )
   }
 }
