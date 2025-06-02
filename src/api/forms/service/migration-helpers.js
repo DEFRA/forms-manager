@@ -9,7 +9,8 @@ import {
   getComponentDefaults,
   hasComponents,
   hasComponentsEvenIfNoNext,
-  hasFormField
+  hasFormField,
+  hasListField
 } from '@defra/forms-model'
 
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
@@ -108,7 +109,7 @@ export function mapComponent(definition, component) {
   let listDef = {}
 
   if (hasFormField(component)) {
-    if ('list' in component) {
+    if (hasListField(component)) {
       const list = definition.lists.find((x) => x.name === component.list)
       if (list) {
         listDef = { list: list.id }
