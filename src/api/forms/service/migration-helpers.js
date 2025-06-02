@@ -101,6 +101,31 @@ export function applyPageTitles(definition) {
 }
 
 /**
+ * @param {FormDefinition} definition
+ * @param {ComponentDef} component
+ */
+export function mapComponent(definition, component) {
+  let listDef = {}
+
+  if (hasFormField(component)) {
+    if ('list' in component) {
+      const list = definition.lists.find((x) => x.name === component.list)
+      if (list) {
+        listDef = { list: list.id }
+      }
+    }
+
+    return {
+      ...component,
+      ...listDef,
+      shortDescription: component.title
+    }
+  }
+
+  return component
+}
+
+/**
  * Migrates component fields
  * @param {FormDefinition} definition
  */
@@ -111,13 +136,7 @@ export function migrateComponentFields(definition) {
     }
 
     const changeComponents = page.components.map((comp) => {
-      if (hasFormField(comp)) {
-        return {
-          ...comp,
-          shortDescription: comp.title
-        }
-      }
-      return comp
+      return mapComponent(definition, comp)
     })
 
     return {
@@ -221,5 +240,5 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
  */
