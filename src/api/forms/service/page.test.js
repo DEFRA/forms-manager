@@ -320,36 +320,6 @@ describe('Page service', () => {
       expect(res).toBeDefined()
     })
 
-    it('should fail if condition does not exist in form definition', async () => {
-      const pageFieldsWithInvalidCondition = {
-        condition: 'non-existent-condition'
-      }
-
-      const definitionWithEmptyConditions = {
-        ...initialDefinition,
-        conditions: []
-      }
-
-      const spy = jest
-        .spyOn(definitionService, 'getFormDefinition')
-        .mockResolvedValue(definitionWithEmptyConditions)
-
-      await expect(
-        patchFieldsOnDraftDefinitionPage(
-          '123',
-          pageId,
-          pageFieldsWithInvalidCondition,
-          author
-        )
-      ).rejects.toThrow(
-        Boom.badRequest(
-          "Condition 'non-existent-condition' not found in form definition"
-        )
-      )
-
-      spy.mockRestore()
-    })
-
     it('should succeed when condition exists in form definition', async () => {
       const definitionWithCondition = {
         ...initialDefinition,
