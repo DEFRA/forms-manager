@@ -109,7 +109,7 @@ export function mapComponent(definition, component) {
   let updatedComponent = component
   if (hasFormField(component)) {
     if (hasListField(component)) {
-      const list = definition.lists.find((x) => x.name === component.list)
+      const list = definition.lists.find((x) => x.id === component.list)
       if (list?.id) {
         updatedComponent = {
           ...component,
