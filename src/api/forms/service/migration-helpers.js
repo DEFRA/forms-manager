@@ -9,7 +9,8 @@ import {
   getComponentDefaults,
   hasComponents,
   hasComponentsEvenIfNoNext,
-  hasFormField
+  hasFormField,
+  hasListField
 } from '@defra/forms-model'
 
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
@@ -101,6 +102,32 @@ export function applyPageTitles(definition) {
 }
 
 /**
+ * @param {FormDefinition} definition
+ * @param {ComponentDef} component - ** fn may mutate component **
+ */
+export function mapComponent(definition, component) {
+  let updatedComponent = component
+  if (hasFormField(component)) {
+    if (hasListField(component)) {
+      const list = definition.lists.find((x) => x.id === component.list)
+      if (list?.id) {
+        updatedComponent = {
+          ...component,
+          list: list.id
+        }
+      }
+    }
+
+    return {
+      ...updatedComponent,
+      shortDescription: component.title
+    }
+  }
+
+  return component
+}
+
+/**
  * Migrates component fields
  * @param {FormDefinition} definition
  */
@@ -111,13 +138,7 @@ export function migrateComponentFields(definition) {
     }
 
     const changeComponents = page.components.map((comp) => {
-      if (hasFormField(comp)) {
-        return {
-          ...comp,
-          shortDescription: comp.title
-        }
-      }
-      return comp
+      return mapComponent(definition, comp)
     })
 
     return {
@@ -221,5 +242,5 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
  */

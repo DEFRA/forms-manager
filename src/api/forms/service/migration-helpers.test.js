@@ -1,4 +1,5 @@
 import { ControllerType, Engine } from '@defra/forms-model'
+import { buildRadioComponent } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
 import {
@@ -14,6 +15,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
   applyPageTitles,
   convertDeclaration,
+  mapComponent,
   migrateComponentFields,
   migrateToV2,
   populateComponentIds,
@@ -165,6 +167,67 @@ describe('migration helpers', () => {
       expect(repositionSummary(definition1)).toEqual(expectedDefinition)
       expect(repositionSummary(definition2)).toEqual(definition2)
       expect(repositionSummary(definition3)).toEqual(definition3)
+    })
+  })
+
+  describe('mapComponent', () => {
+    it('should add short description if a form component', () => {
+      const definition = buildDefinition({
+        pages: [pageTwo]
+      })
+      const component = buildTextFieldComponent({
+        id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
+        name: 'Ghcbmb'
+      })
+
+      expect(mapComponent(definition, component)).toEqual({
+        id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
+        name: 'Ghcbmb',
+        hint: '',
+        options: {},
+        schema: {},
+        type: 'TextField',
+        title: 'Text field',
+        shortDescription: 'Text field'
+      })
+    })
+
+    it('should add short description and list if a form component and has a list', () => {
+      const definition = buildDefinition({
+        pages: [pageTwo],
+        lists: [/** @type {List} */ ({ id: 'list-guid' })]
+      })
+      const component = buildRadioComponent({
+        id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
+        name: 'Ghcbmb',
+        list: 'list-guid'
+      })
+
+      expect(mapComponent(definition, component)).toEqual({
+        id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
+        name: 'Ghcbmb',
+        list: 'list-guid',
+        options: {},
+        type: 'RadiosField',
+        title: 'Which country do you live in?',
+        shortDescription: 'Which country do you live in?'
+      })
+    })
+
+    it('should leave component unchanged if not a form component', () => {
+      const definition = buildDefinition({
+        pages: [pageTwo],
+        lists: [/** @type {List} */ ({ id: 'list-guid' })]
+      })
+      const component = /** @type {ComponentDef} */ ({
+        id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
+        name: 'Ghcbmb'
+      })
+
+      expect(mapComponent(definition, component)).toEqual({
+        id: '380429e0-2d2d-4fbf-90fb-34364f488af1',
+        name: 'Ghcbmb'
+      })
     })
   })
 
@@ -544,5 +607,5 @@ describe('migration helpers', () => {
 })
 
 /**
- * @import { PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
+ * @import { List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
  */
