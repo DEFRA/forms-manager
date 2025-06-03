@@ -103,7 +103,7 @@ export function applyPageTitles(definition) {
 
 /**
  * @param {FormDefinition} definition
- * @param {ComponentDef} component
+ * @param {ComponentDef} component - ** fn may mutate component **
  */
 export function mapComponent(definition, component) {
   let updatedComponent = component
