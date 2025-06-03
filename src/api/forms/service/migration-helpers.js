@@ -106,19 +106,20 @@ export function applyPageTitles(definition) {
  * @param {ComponentDef} component
  */
 export function mapComponent(definition, component) {
-  let listDef = {}
-
+  let updatedComponent = component
   if (hasFormField(component)) {
     if (hasListField(component)) {
       const list = definition.lists.find((x) => x.name === component.list)
-      if (list) {
-        listDef = { list: list.id }
+      if (list?.id) {
+        updatedComponent = {
+          ...component,
+          list: list.id
+        }
       }
     }
 
     return {
-      ...component,
-      ...listDef,
+      ...updatedComponent,
       shortDescription: component.title
     }
   }
