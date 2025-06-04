@@ -1,30 +1,15 @@
 import {
   FormStatus,
-  componentPayloadSchemaV2,
-  conditionWrapperSchemaV2,
   formMetadataInputKeys,
   formMetadataInputSchema,
-  listSchemaV2,
-  pagePayloadSchemaV2,
   queryOptionsSchema
 } from '@defra/forms-model'
 
-import {
-  createComponentOnDraftDefinition,
-  deleteComponentOnDraftDefinition,
-  updateComponentOnDraftDefinition
-} from '~/src/api/forms/service/component.js'
-import {
-  addConditionToDraftFormDefinition,
-  removeConditionOnDraftFormDefinition,
-  updateConditionOnDraftFormDefinition
-} from '~/src/api/forms/service/conditions.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
   listForms,
-  reorderDraftFormDefinitionPages,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
 import {
@@ -34,42 +19,17 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
-import {
-  addListToDraftFormDefinition,
-  removeListOnDraftFormDefinition,
-  updateListOnDraftFormDefinition
-} from '~/src/api/forms/service/lists.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
-import {
-  createPageOnDraftDefinition,
-  deletePageOnDraftDefinition,
-  patchFieldsOnDraftDefinitionPage
-} from '~/src/api/forms/service/page.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import {
-  componentByIdSchema,
-  componentPayloadWithRequiredIdSchema,
-  conditionByIdSchema,
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
-  listByIdSchema,
-  listSchemaWithRequiredIdSchema,
   migrateDefinitionParamSchema,
-  pageByIdSchema,
-  patchPageSchema,
-  prependQuerySchema,
-  sortIdsSchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
 export const ROUTE_FORMS = '/forms/{id}'
-export const ROUTE_PAGES = '/forms/{id}/definition/draft/pages/{pageId}'
-export const ROUTE_COMPONENTS =
-  '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}'
-export const ROUTE_LISTS = '/forms/{id}/definition/draft/lists/{listId}'
-export const ROUTE_CONDITIONS =
-  '/forms/{id}/definition/draft/conditions/{conditionId}'
 
 /**
  * @type {ServerRoute[]}
@@ -271,147 +231,6 @@ export default [
     }
   },
   {
-    method: 'POST',
-    path: '/forms/{id}/definition/draft/pages',
-    /**
-     * @param {RequestPage} request
-     */
-    handler(request) {
-      const { auth, params, payload } = request
-      const author = getAuthor(auth.credentials.user)
-
-      return createPageOnDraftDefinition(params.id, payload, author)
-    },
-    options: {
-      validate: {
-        params: formByIdSchema,
-        payload: pagePayloadSchemaV2
-      }
-    }
-  },
-  {
-    method: 'POST',
-    path: '/forms/{id}/definition/draft/pages/order',
-    /**
-     * @param {SortDraftFormPagesRequest} request
-     */
-    handler(request) {
-      const { auth, params, payload } = request
-      const author = getAuthor(auth.credentials.user)
-
-      return reorderDraftFormDefinitionPages(params.id, payload, author)
-    },
-    options: {
-      validate: {
-        params: formByIdSchema,
-        payload: sortIdsSchema
-      }
-    }
-  },
-  {
-    method: 'PATCH',
-    path: ROUTE_PAGES,
-    /**
-     * @param {PatchPageRequest} request
-     */
-    handler(request) {
-      const { auth, params, payload } = request
-      const author = getAuthor(auth.credentials.user)
-      return patchFieldsOnDraftDefinitionPage(
-        params.id,
-        params.pageId,
-        payload,
-        author
-      )
-    },
-    options: {
-      validate: {
-        params: pageByIdSchema,
-        payload: patchPageSchema
-      }
-    }
-  },
-  {
-    method: 'POST',
-    path: '/forms/{id}/definition/draft/pages/{pageId}/components',
-    /**
-     * @param {RequestComponent} request
-     */
-    async handler(request) {
-      const { auth, params, payload, query } = request
-      const { id, pageId } = params
-      const { prepend } = query
-
-      const author = getAuthor(auth.credentials.user)
-      const component = await createComponentOnDraftDefinition(
-        id,
-        pageId,
-        payload,
-        author,
-        prepend
-      )
-
-      return component
-    },
-    options: {
-      validate: {
-        params: pageByIdSchema,
-        payload: componentPayloadSchemaV2,
-        query: prependQuerySchema
-      }
-    }
-  },
-  {
-    method: 'PUT',
-    path: ROUTE_COMPONENTS,
-    /**
-     * @param {RequestUpdateComponent} request
-     */
-    handler(request) {
-      const { auth, params, payload } = request
-      const { id, pageId, componentId } = params
-
-      const author = getAuthor(auth.credentials.user)
-      return updateComponentOnDraftDefinition(
-        id,
-        pageId,
-        componentId,
-        payload,
-        author
-      )
-    },
-    options: {
-      validate: {
-        params: componentByIdSchema,
-        payload: componentPayloadWithRequiredIdSchema
-      }
-    }
-  },
-  {
-    method: 'DELETE',
-    path: ROUTE_COMPONENTS,
-    /**
-     * @param {RequestUpdateComponent} request
-     */
-    async handler(request) {
-      const { auth, params } = request
-      const { id, pageId, componentId } = params
-
-      const author = getAuthor(auth.credentials.user)
-      await deleteComponentOnDraftDefinition(id, pageId, componentId, author)
-
-      return {
-        componentId,
-        status: 'deleted'
-      }
-    },
-    options: {
-      validate: {
-        params: componentByIdSchema
-      }
-    }
-  },
-  {
     method: 'GET',
     path: '/forms/{id}/definition',
     /**
@@ -479,205 +298,12 @@ export default [
         params: formByIdSchema
       }
     }
-  },
-  {
-    method: 'POST',
-    path: '/forms/{id}/definition/draft/lists',
-    /**
-     * @param {CreateListDraftFormPagesRequest} request
-     */
-    async handler(request) {
-      const { auth, params, payload } = request
-      const { id } = params
-      const author = getAuthor(auth.credentials.user)
-
-      const list = await addListToDraftFormDefinition(id, payload, author)
-
-      return {
-        id: list.id,
-        list,
-        status: 'created'
-      }
-    },
-    options: {
-      validate: {
-        params: formByIdSchema,
-        payload: listSchemaV2
-      }
-    }
-  },
-  {
-    method: 'PUT',
-    path: ROUTE_LISTS,
-    /**
-     * @param {UpdateListDraftFormPagesRequest} request
-     */
-    async handler(request) {
-      const { auth, params, payload } = request
-      const { id, listId } = params
-      const author = getAuthor(auth.credentials.user)
-
-      // Recreate the draft state from live using the author in the credentials
-      const updatedList = await updateListOnDraftFormDefinition(
-        id,
-        listId,
-        payload,
-        author
-      )
-
-      return {
-        id: updatedList.id,
-        list: updatedList,
-        status: 'updated'
-      }
-    },
-    options: {
-      validate: {
-        params: listByIdSchema,
-        payload: listSchemaWithRequiredIdSchema
-      }
-    }
-  },
-  {
-    method: 'DELETE',
-    path: ROUTE_LISTS,
-    /**
-     * @param {DeleteListDraftFormPagesRequest} request
-     */
-    async handler(request) {
-      const { auth, params } = request
-      const { id, listId } = params
-      const author = getAuthor(auth.credentials.user)
-
-      // Recreate the draft state from live using the author in the credentials
-      await removeListOnDraftFormDefinition(id, listId, author)
-
-      return {
-        id: listId,
-        status: 'deleted'
-      }
-    },
-    options: {
-      validate: {
-        params: listByIdSchema
-      }
-    }
-  },
-  {
-    method: 'DELETE',
-    path: ROUTE_PAGES,
-    /**
-     * @param {DeletePageDraftFormRequest} request
-     */
-    async handler(request) {
-      const { auth, params } = request
-      const { id, pageId } = params
-      const author = getAuthor(auth.credentials.user)
-
-      // Recreate the draft state from live using the author in the credentials
-      await deletePageOnDraftDefinition(id, pageId, author)
-
-      return {
-        id: pageId,
-        status: 'deleted'
-      }
-    },
-    options: {
-      validate: {
-        params: pageByIdSchema
-      }
-    }
-  },
-  {
-    method: 'POST',
-    path: '/forms/{id}/definition/draft/conditions',
-    /**
-     * @param {CreateConditionDraftFormPagesRequest} request
-     */
-    async handler(request) {
-      const { auth, params, payload } = request
-      const { id } = params
-      const author = getAuthor(auth.credentials.user)
-
-      const condition = await addConditionToDraftFormDefinition(
-        id,
-        payload,
-        author
-      )
-
-      return {
-        id: condition.id,
-        condition,
-        status: 'created'
-      }
-    },
-    options: {
-      validate: {
-        params: formByIdSchema,
-        payload: conditionWrapperSchemaV2
-      }
-    }
-  },
-  {
-    method: 'PUT',
-    path: ROUTE_CONDITIONS,
-    /**
-     * @param {UpdateConditionDraftFormPagesRequest} request
-     */
-    async handler(request) {
-      const { auth, params, payload } = request
-      const { id, conditionId } = params
-      const author = getAuthor(auth.credentials.user)
-
-      const updatedCondition = await updateConditionOnDraftFormDefinition(
-        id,
-        conditionId,
-        payload,
-        author
-      )
-
-      return {
-        id: updatedCondition.id,
-        condition: updatedCondition,
-        status: 'updated'
-      }
-    },
-    options: {
-      validate: {
-        params: conditionByIdSchema,
-        payload: conditionWrapperSchemaV2
-      }
-    }
-  },
-  {
-    method: 'DELETE',
-    path: ROUTE_CONDITIONS,
-    /**
-     * @param {DeleteConditionDraftFormPagesRequest} request
-     */
-    async handler(request) {
-      const { auth, params } = request
-      const { id, conditionId } = params
-      const author = getAuthor(auth.credentials.user)
-
-      await removeConditionOnDraftFormDefinition(id, conditionId, author)
-
-      return {
-        id: conditionId,
-        status: 'deleted'
-      }
-    },
-    options: {
-      validate: {
-        params: conditionByIdSchema
-      }
-    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest, DeleteListDraftFormPagesRequest, DeletePageDraftFormRequest, CreateConditionDraftFormPagesRequest, UpdateConditionDraftFormPagesRequest, DeleteConditionDraftFormPagesRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, MigrateDraftFormRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
