@@ -939,9 +939,9 @@ describe('Forms route', () => {
     })
 
     test('Testing PUT /forms/{id}/definition/draft/conditions/{conditionId}', async () => {
-      const conditionId = '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      const conditionId = '6e4c2f74-5bd9-48b4-b991-f2a021dcde59'
       const condition = buildCondition({
-        id: '6e4c2f74-5bd9-48b4-b991-f2a021dcde59',
+        id: conditionId,
         coordinator: Coordinator.AND,
         items: [
           {

@@ -323,7 +323,7 @@ describe('Page service', () => {
     it('should succeed when condition exists in form definition', async () => {
       const definitionWithCondition = {
         ...initialDefinition,
-        conditions: [
+        items: [
           {
             id: 'valid-condition-id',
             name: 'valid-condition',
