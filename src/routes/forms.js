@@ -638,7 +638,7 @@ export default [
 
       return {
         id: updatedCondition.id,
-        list: updatedCondition,
+        condition: updatedCondition,
         status: 'updated'
       }
     },
