@@ -45,6 +45,13 @@ export const listSchemaWithRequiredIdSchema = listSchemaV2
   })
   .required()
 
+export const conditionByIdSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    conditionId: Joi.string().uuid().required()
+  })
+  .required()
+
 export const componentPayloadWithRequiredIdSchema = componentSchema.keys({
   id: Joi.string().uuid().required()
 })

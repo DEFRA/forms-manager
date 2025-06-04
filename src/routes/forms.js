@@ -1,6 +1,7 @@
 import {
   FormStatus,
   componentPayloadSchemaV2,
+  conditionWrapperSchemaV2,
   formMetadataInputKeys,
   formMetadataInputSchema,
   listSchemaV2,
@@ -13,6 +14,11 @@ import {
   deleteComponentOnDraftDefinition,
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
+import {
+  addConditionToDraftFormDefinition,
+  removeConditionOnDraftFormDefinition,
+  updateConditionOnDraftFormDefinition
+} from '~/src/api/forms/service/conditions.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,
@@ -43,6 +49,7 @@ import { getAuthor } from '~/src/helpers/get-author.js'
 import {
   componentByIdSchema,
   componentPayloadWithRequiredIdSchema,
+  conditionByIdSchema,
   createFormSchema,
   formByIdSchema,
   formBySlugSchema,
@@ -61,6 +68,9 @@ export const ROUTE_PAGES = '/forms/{id}/definition/draft/pages/{pageId}'
 export const ROUTE_COMPONENTS =
   '/forms/{id}/definition/draft/pages/{pageId}/components/{componentId}'
 export const ROUTE_LISTS = '/forms/{id}/definition/draft/lists/{listId}'
+export const ROUTE_CONDITIONS =
+  '/forms/{id}/definition/draft/conditions/{conditionId}'
+
 /**
  * @type {ServerRoute[]}
  */
@@ -577,12 +587,97 @@ export default [
         params: pageByIdSchema
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/conditions',
+    /**
+     * @param {CreateConditionDraftFormPagesRequest} request
+     */
+    async handler(request) {
+      const { auth, params, payload } = request
+      const { id } = params
+      const author = getAuthor(auth.credentials.user)
+
+      const condition = await addConditionToDraftFormDefinition(
+        id,
+        payload,
+        author
+      )
+
+      return {
+        id: condition.id,
+        condition,
+        status: 'created'
+      }
+    },
+    options: {
+      validate: {
+        params: formByIdSchema,
+        payload: conditionWrapperSchemaV2
+      }
+    }
+  },
+  {
+    method: 'PUT',
+    path: ROUTE_CONDITIONS,
+    /**
+     * @param {UpdateConditionDraftFormPagesRequest} request
+     */
+    async handler(request) {
+      const { auth, params, payload } = request
+      const { id, conditionId } = params
+      const author = getAuthor(auth.credentials.user)
+
+      const updatedCondition = await updateConditionOnDraftFormDefinition(
+        id,
+        conditionId,
+        payload,
+        author
+      )
+
+      return {
+        id: updatedCondition.id,
+        list: updatedCondition,
+        status: 'updated'
+      }
+    },
+    options: {
+      validate: {
+        params: conditionByIdSchema,
+        payload: conditionWrapperSchemaV2
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: ROUTE_CONDITIONS,
+    /**
+     * @param {DeleteConditionDraftFormPagesRequest} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, conditionId } = params
+      const author = getAuthor(auth.credentials.user)
+
+      await removeConditionOnDraftFormDefinition(id, conditionId, author)
+
+      return {
+        id: conditionId,
+        status: 'deleted'
+      }
+    },
+    options: {
+      validate: {
+        params: conditionByIdSchema
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest, DeleteListDraftFormPagesRequest, DeletePageDraftFormRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestPage, RequestComponent, PatchPageRequest, RequestUpdateComponent, MigrateDraftFormRequest, SortDraftFormPagesRequest, CreateListDraftFormPagesRequest, UpdateListDraftFormPagesRequest, DeleteListDraftFormPagesRequest, DeletePageDraftFormRequest, CreateConditionDraftFormPagesRequest, UpdateConditionDraftFormPagesRequest, DeleteConditionDraftFormPagesRequest } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
