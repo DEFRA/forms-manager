@@ -10,11 +10,15 @@ import {
   hasComponents,
   hasComponentsEvenIfNoNext,
   hasFormField,
-  hasListField
+  hasListField,
+  isConditionWrapper
 } from '@defra/forms-model'
 
+import {
+  convertConditionDataToV2,
+  isConditionData
+} from '~/src/api/forms/service/condition-migration-helpers.js'
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
-
 /**
  * @param {FormDefinition} definition
  * @returns {{
@@ -297,13 +301,72 @@ export function convertListNamesToIds(definition) {
   }
 }
 
+/**
+ *
+ * @param {FormDefinition} definition
+ * @returns {Map<string, string>}
+ */
+function getComponentNameToIdMap(definition) {
+  // Build a map from field name to component id for all components in all pages
+  const fieldNameToComponentId = new Map()
+  for (const page of definition.pages) {
+    if ('components' in page && Array.isArray(page.components)) {
+      for (const component of page.components) {
+        if (
+          typeof component.name === 'string' &&
+          typeof component.id === 'string'
+        ) {
+          fieldNameToComponentId.set(component.name, component.id)
+        }
+      }
+    }
+  }
+  return fieldNameToComponentId
+}
+
+/**
+ * Converts conditions in the condition from schema v1 to v2.
+ * @param {FormDefinition} definition
+ */
+export function convertConditions(definition) {
+  const fieldNameToComponentId = getComponentNameToIdMap(definition)
+
+  /**
+   * @type {FormDefinition['conditions']}
+   */
+  const newConditions = definition.conditions.map((oldCond) => {
+    if (isConditionWrapper(oldCond)) {
+      const items = oldCond.value.conditions.map((oldItem) => {
+        if (!isConditionData(oldItem)) {
+          throw new Error(`Unsupported condition type found`)
+        }
+
+        return convertConditionDataToV2(oldItem, fieldNameToComponentId)
+      })
+      return {
+        id: randomUUID(),
+        displayName: oldCond.displayName,
+        items
+      }
+    }
+    // Already in new format, return as is
+    return oldCond
+  })
+
+  return {
+    ...definition,
+    conditions: newConditions
+  }
+}
+
 const migrationSteps = [
   repositionSummary,
   applyPageTitles,
   migrateComponentFields,
   convertDeclaration,
   convertListNamesToIds,
-  addComponentIdsToDefinition
+  addComponentIdsToDefinition,
+  convertConditions
 ]
 
 /**
