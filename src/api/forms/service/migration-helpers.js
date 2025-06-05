@@ -11,6 +11,7 @@ import {
   hasComponentsEvenIfNoNext,
   hasFormField,
   hasListField,
+  hasNext,
   isConditionWrapper
 } from '@defra/forms-model'
 
@@ -331,18 +332,36 @@ function getComponentNameToIdMap(definition) {
 export function convertConditions(definition) {
   const fieldNameToComponentId = getComponentNameToIdMap(definition)
 
+  const conditionsInUse = new Set(
+    definition.pages.flatMap((page) => {
+      if (hasNext(page)) {
+        return page.next
+          .map((next) => next.condition)
+          .filter((condition) => condition !== undefined)
+      }
+      return []
+    })
+  )
+
   /**
    * @type {FormDefinition['conditions']}
    */
   const newConditions = definition.conditions.map((oldCond) => {
     if (isConditionWrapper(oldCond)) {
-      const items = oldCond.value.conditions.map((oldItem) => {
-        if (!isConditionData(oldItem)) {
-          throw new Error(`Unsupported condition type found`)
-        }
+      const items = oldCond.value.conditions
+        .map((oldItem) => {
+          if (!isConditionData(oldItem)) {
+            throw new Error(`Unsupported condition type found`)
+          }
 
-        return convertConditionDataToV2(oldItem, fieldNameToComponentId)
-      })
+          return convertConditionDataToV2(
+            oldItem,
+            fieldNameToComponentId,
+            conditionsInUse
+          )
+        })
+        .filter((condition) => condition !== null)
+
       return {
         id: randomUUID(),
         displayName: oldCond.displayName,

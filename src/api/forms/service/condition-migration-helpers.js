@@ -32,11 +32,13 @@ export function isConditionValueData(conditionValue) {
  *
  * @param {ConditionData} conditionData
  * @param {Map<string, string>} fieldNameToComponentId
- * @returns {ConditionDataV2}
+ * @param {Set<string>} usedConditions
+ * @returns {ConditionDataV2 | null}
  */
 export function convertConditionDataToV2(
   conditionData,
-  fieldNameToComponentId
+  fieldNameToComponentId,
+  usedConditions
 ) {
   if (!isConditionValueData(conditionData.value)) {
     throw new Error(
@@ -46,23 +48,25 @@ export function convertConditionDataToV2(
 
   const componentId = fieldNameToComponentId.get(conditionData.field.name)
 
-  if (!componentId || typeof componentId !== 'string') {
-    throw new Error(
-      `Cannot migrate condition: field name '${conditionData.field.name}' not found in components.`
-    )
-  }
-
-  return {
-    id: randomUUID().toString(),
-    componentId,
-    operator: conditionData.operator,
-    value: {
-      type: ConditionType.StringValue,
-      value: conditionData.value.value
+  // if a condition can't be migrated and is in use, throw an error, else we discard the orphaned condition
+  if (componentId) {
+    return {
+      id: randomUUID().toString(),
+      componentId,
+      operator: conditionData.operator,
+      value: {
+        type: ConditionType.StringValue,
+        value: conditionData.value.value
+      }
     }
+  } else if (usedConditions.has(conditionData.field.name)) {
+    throw new Error(
+      `Cannot migrate condition: field name '${conditionData.field.name}' not found in components but is in use.`
+    )
+  } else {
+    return null // This condition is not used and can be discarded
   }
 }
-// @ts-check
 
 /**
  * @import { ConditionGroupData, ConditionData, ConditionDataV2, ConditionRefData, ConditionValueData, RelativeDateValueData } from '@defra/forms-model'
