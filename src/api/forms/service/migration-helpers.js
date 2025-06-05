@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import {
   ComponentType,
   ControllerType,
+  ControllerTypes,
   Engine,
   SchemaVersion,
   formDefinitionV2Schema,
@@ -397,7 +398,44 @@ export function convertConditions(definition) {
   }
 }
 
+/**
+ * Converts any controller paths to names
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+function convertControllerPathsToNames(definition) {
+  const pages = definition.pages.map((page) => {
+    let newController
+
+    if (page.controller?.endsWith('.js')) {
+      const name = ControllerTypes.find(
+        (n) => n.path === page.controller?.toString()
+      )?.name
+
+      if (!name) {
+        throw new Error(
+          `Unrecognised controller name found for ${page.controller}. Cannot migrate.`
+        )
+      }
+
+      newController = name
+    }
+
+    if (newController) {
+      page.controller = newController
+    }
+
+    return page
+  })
+
+  return {
+    ...definition,
+    pages
+  }
+}
+
 const migrationSteps = [
+  convertControllerPathsToNames,
   repositionSummary,
   applyPageTitles,
   migrateComponentFields,
