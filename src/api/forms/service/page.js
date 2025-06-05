@@ -122,21 +122,18 @@ export async function patchFieldsOnDraftDefinitionPage(
       )
     }
 
-    await session.withTransaction(
-      async () => {
-        await formDefinition.updatePageFields(
-          formId,
-          pageId,
-          pageFieldsToUpdate,
-          session
-        )
+    await session.withTransaction(async () => {
+      await formDefinition.updatePageFields(
+        formId,
+        pageId,
+        pageFieldsToUpdate,
+        session
+      )
 
-        page = await getFormDefinitionPage(formId, pageId, session)
+      page = await getFormDefinitionPage(formId, pageId, session)
 
-        await formMetadata.updateAudit(formId, author, session)
-      },
-      { readPreference: 'primary' }
-    )
+      await formMetadata.updateAudit(formId, author, session)
+    })
   } catch (err) {
     logger.error(
       err,

@@ -1,7 +1,9 @@
 import {
   ApiErrorCode,
+  ConditionType,
   ControllerType,
   Engine,
+  OperatorName,
   hasComponentsEvenIfNoNext,
   hasRepeater
 } from '@defra/forms-model'
@@ -9,6 +11,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
+  buildCondition,
   buildDefinition,
   buildList,
   buildQuestionPage,
@@ -19,10 +22,13 @@ import {
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   findComponent,
+  findConditionIndex,
   findListIndex,
   findPage,
   findPageIndex,
   getComponent,
+  getCondition,
+  getConditionIndex,
   getList,
   getListIndex,
   getPage,
@@ -102,6 +108,7 @@ describe('repository helpers', () => {
   const statusPageId = '38a2946b-78d9-4b94-9a31-4aa979ce2a89'
   const componentId = '62559680-e45e-4178-acdc-68f6b65d42bb'
   const listId = 'eb68b22f-b6ba-4358-8cba-b61282fecdb1'
+  const conditionId = '6e4c2f74-5bd9-48b4-b991-f2a021dcde59'
 
   const component = buildTextFieldComponent({
     id: componentId
@@ -131,6 +138,24 @@ describe('repository helpers', () => {
   })
 
   const lists = [list]
+
+  const condition = buildCondition({
+    id: conditionId,
+    displayName: 'isEnriqueChase',
+    items: [
+      {
+        id: '6746b15f-69f9-454c-a324-c62420069618',
+        componentId,
+        operator: OperatorName.Is,
+        value: {
+          type: ConditionType.StringValue,
+          value: 'Enrique Chase'
+        }
+      }
+    ]
+  })
+
+  const conditions = [condition]
 
   describe('findPage', () => {
     it('should find page if page exists in definition', () => {
@@ -331,7 +356,7 @@ describe('repository helpers', () => {
   })
 
   describe('getList', () => {
-    it('should find list index if list exists in definition', () => {
+    it('should find list if list exists in definition', () => {
       const definition = buildDefinition({
         pages: [],
         lists
@@ -347,6 +372,63 @@ describe('repository helpers', () => {
       expect(() => {
         getList(definition, 'incorrect-id')
       }).toThrow(Boom.notFound("List not found with id 'incorrect-id'"))
+    })
+  })
+
+  describe('findConditionIndex', () => {
+    it('should find condition index if condition exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [],
+        conditions
+      })
+      expect(findConditionIndex(definition, conditionId)).toBe(0)
+    })
+
+    it('should return -1 if condition is not found', () => {
+      const definition = buildDefinition({
+        pages: [summaryPageWithoutComponents]
+      })
+      expect(findConditionIndex(definition, 'incorrect-id')).toBe(-1)
+    })
+  })
+
+  describe('getConditionIndex', () => {
+    it('should find condition index if condition exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [],
+        conditions
+      })
+      expect(getConditionIndex(definition, conditionId)).toBe(0)
+    })
+
+    it('should throw Boom.notFound if condition is not found', () => {
+      const definition = buildDefinition({
+        pages: [],
+        conditions
+      })
+      expect(() => {
+        getConditionIndex(definition, 'incorrect-id')
+      }).toThrow(Boom.notFound("Condition not found with id 'incorrect-id'"))
+    })
+  })
+
+  describe('getCondition', () => {
+    it('should find condition if condition exists in definition', () => {
+      const definition = buildDefinition({
+        pages: [],
+        conditions
+      })
+      expect(getCondition(definition, conditionId)).toEqual(condition)
+    })
+
+    it('should throw Boom.notFound if condition is not found', () => {
+      const definition = buildDefinition({
+        pages: [],
+        conditions
+      })
+      expect(() => {
+        getCondition(definition, 'incorrect-id')
+      }).toThrow(Boom.notFound("Condition not found with id 'incorrect-id'"))
     })
   })
 

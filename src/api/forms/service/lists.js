@@ -38,19 +38,16 @@ export async function addListToDraftFormDefinition(formId, list, author) {
   const session = client.startSession()
 
   try {
-    const newForm = await session.withTransaction(
-      async () => {
-        // Add the lists to the form definition
-        const returnedList = await formDefinition.addList(formId, list, session)
+    const newForm = await session.withTransaction(async () => {
+      // Add the lists to the form definition
+      const returnedList = await formDefinition.addList(formId, list, session)
 
-        await duplicateListGuard(formId, session)
+      await duplicateListGuard(formId, session)
 
-        await formMetadata.updateAudit(formId, author, session)
+      await formMetadata.updateAudit(formId, author, session)
 
-        return returnedList
-      },
-      { readPreference: 'primary' }
-    )
+      return returnedList
+    })
 
     logger.info(`Added list ${list.name} to form ID ${formId}`)
 
@@ -82,24 +79,21 @@ export async function updateListOnDraftFormDefinition(
   const session = client.startSession()
 
   try {
-    const updatedList = await session.withTransaction(
-      async () => {
-        // Update the list on the form definition
-        const returnedList = await formDefinition.updateList(
-          formId,
-          listId,
-          list,
-          session
-        )
+    const updatedList = await session.withTransaction(async () => {
+      // Update the list on the form definition
+      const returnedList = await formDefinition.updateList(
+        formId,
+        listId,
+        list,
+        session
+      )
 
-        await duplicateListGuard(formId, session)
+      await duplicateListGuard(formId, session)
 
-        await formMetadata.updateAudit(formId, author, session)
+      await formMetadata.updateAudit(formId, author, session)
 
-        return returnedList
-      },
-      { readPreference: 'primary' }
-    )
+      return returnedList
+    })
 
     logger.info(`Updated list ${listId} for form ID ${formId}`)
 
