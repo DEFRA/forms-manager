@@ -206,11 +206,71 @@ export function populateComponentIds(pageWithoutComponentIds) {
   }
 }
 
+/**
+ * Converts a form from using list names to using list ids.
+ * For each component on each page, if the component has a "list" property referencing a list by name,
+ * it replaces it with the corresponding list's id.
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+export function convertListNamesToIds(definition) {
+  // Ensure all lists have an id
+  const lists = definition.lists.map((list) => {
+    if (list.id) {
+      return list
+    }
+
+    return {
+      ...list,
+      id: randomUUID()
+    }
+  })
+
+  // Build a map from list name to id
+  const nameToId = new Map(lists.map((list) => [list.name, list.id]))
+
+  // Update components on each page to use list id instead of name
+  const pages = definition.pages.map((page) => {
+    if (!('components' in page) || !Array.isArray(page.components)) {
+      return page
+    }
+
+    const components = page.components.map((component) => {
+      if ('list' in component && component.list) {
+        const newListReference = nameToId.get(component.list)
+
+        if (!newListReference) {
+          throw new Error(
+            `List name "${component.list}" not found in definition lists - cannot migrate`
+          )
+        }
+
+        return {
+          ...component,
+          list: newListReference
+        }
+      }
+      return component
+    })
+    return {
+      ...page,
+      components
+    }
+  })
+
+  return {
+    ...definition,
+    pages,
+    lists
+  }
+}
+
 const migrationSteps = [
   repositionSummary,
   applyPageTitles,
   migrateComponentFields,
-  convertDeclaration
+  convertDeclaration,
+  convertListNamesToIds
 ]
 
 /**

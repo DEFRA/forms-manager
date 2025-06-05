@@ -1,5 +1,6 @@
 import { ControllerType, Engine } from '@defra/forms-model'
 import { buildRadioComponent } from '@defra/forms-model/stubs'
+import { clone } from '@hapi/hoek'
 import { ValidationError } from 'joi'
 
 import {
@@ -15,6 +16,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
   applyPageTitles,
   convertDeclaration,
+  convertListNamesToIds,
   mapComponent,
   migrateComponentFields,
   migrateToV2,
@@ -541,6 +543,13 @@ describe('migration helpers', () => {
       expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
     })
 
+    it('migration is an idempotent operation', () => {
+      const migration1 = migrateToV2(definitionV1)
+      const migration2 = migrateToV2(clone(migration1))
+
+      expect(migration1).toMatchObject(migration2)
+    })
+
     it('should throw if there is some error in validation', () => {
       const partialDefinition = /** @type {Partial<FormDefinition>} */ {
         unknownProperty: true
@@ -603,9 +612,68 @@ describe('migration helpers', () => {
         ]
       })
     })
+
+    describe('convertListNamesToIds', () => {
+      it('should convert component list names to ids', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries' }],
+          pages: [
+            {
+              components: [{ type: 'RadiosField', list: 'countries' }]
+            }
+          ]
+        })
+
+        const result = convertListNamesToIds(definition)
+
+        const newListReference = result.pages[0].components[0].list
+
+        expect(newListReference).not.toBe('countries')
+        expect(result.lists[0].id).toBe(newListReference)
+      })
+
+      it('should leave components unchanged if no list property', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [
+            {
+              components: [{ type: 'TextField' }]
+            }
+          ]
+        })
+
+        const result = convertListNamesToIds(definition)
+        expect(result.pages[0].components[0]).toEqual({ type: 'TextField' })
+      })
+
+      it('should throw if component list name does not exist in lists', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [
+            {
+              components: [{ type: 'RadiosField', list: 'notfound' }]
+            }
+          ]
+        })
+
+        expect(() => convertListNamesToIds(definition)).toThrow(
+          'List name "notfound" not found in definition lists - cannot migrate'
+        )
+      })
+
+      it('should leave pages unchanged if no components', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [{ title: 'No components' }]
+        })
+
+        const result = convertListNamesToIds(definition)
+        expect(result.pages[0]).toEqual({ title: 'No components' })
+      })
+    })
   })
 })
 
 /**
- * @import { List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
+ * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
  */
