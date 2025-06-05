@@ -431,7 +431,7 @@ describe('migration helpers', () => {
 
       const summaryPageRes = /** @type {PageQuestion} */ (res.pages[0])
       expect(summaryPageRes.components).toHaveLength(0)
-      expect(res.declaration).toBe('')
+      expect(res.declaration).toBeUndefined()
     })
 
     it('should not create guidance component if declaration missing', () => {
@@ -458,7 +458,7 @@ describe('migration helpers', () => {
       expect(res.declaration).toBeUndefined()
     })
 
-    it('should throw if no summary page but a declaration', () => {
+    it('should create summary page if missing and move declaration to it', () => {
       const testDefinition3 = buildDefinition({
         pages: [],
         sections: [
@@ -468,9 +468,24 @@ describe('migration helpers', () => {
         declaration: 'Some declaration'
       })
 
-      expect(() => convertDeclaration(testDefinition3)).toThrow(
-        'Cannot migrate declaration as unable to find Summary Page'
+      const res = convertDeclaration(testDefinition3)
+
+      // Should remove declaration from root
+      expect(res.declaration).toBeUndefined()
+
+      // Should have a summary page created
+      const summaryPage = res.pages.find(
+        (page) => page.controller === ControllerType.Summary
       )
+      expect(summaryPage).toBeDefined()
+      expect(summaryPage?.components).toHaveLength(1)
+      expect(summaryPage?.components?.[0]).toEqual({
+        content: 'Some declaration',
+        title: 'Markdown',
+        name: 'Markdown',
+        type: 'Markdown',
+        options: {}
+      })
     })
   })
 

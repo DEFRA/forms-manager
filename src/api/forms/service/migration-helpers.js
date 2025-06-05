@@ -164,22 +164,37 @@ export function convertDeclaration(originalDefinition) {
     (p) => p.controller === ControllerType.Summary
   )
 
-  if (!summaryPage && definition.declaration) {
-    throw new Error('Cannot migrate declaration as unable to find Summary Page')
+  let declarationComponent
+
+  if (definition.declaration) {
+    declarationComponent = /** @type {MarkdownComponent} */ (
+      getComponentDefaults({ type: ComponentType.Markdown })
+    )
+    declarationComponent.content = definition.declaration
   }
 
-  if (summaryPage) {
+  if (summaryPage && declarationComponent) {
     summaryPage.components = summaryPage.components ?? []
-
-    if (definition.declaration) {
-      const declaration = /** @type {MarkdownComponent} */ (
-        getComponentDefaults({ type: ComponentType.Markdown })
-      )
-      declaration.content = definition.declaration
-      summaryPage.components.unshift(declaration)
-      delete definition.declaration
-    }
+    summaryPage.components.unshift(declarationComponent)
+  } else if (!summaryPage && declarationComponent) {
+    definition.pages.push({
+      title: 'Check your answers',
+      controller: ControllerType.Summary,
+      path: '/summary',
+      components: [declarationComponent]
+    })
+  } else if (summaryPage && !declarationComponent) {
+    summaryPage.components = summaryPage.components ?? []
+  } else {
+    definition.pages.push({
+      title: 'Check your answers',
+      controller: ControllerType.Summary,
+      path: '/summary',
+      components: []
+    })
   }
+
+  delete definition.declaration
 
   return definition
 }
@@ -203,6 +218,23 @@ export function populateComponentIds(pageWithoutComponentIds) {
         id: randomUUID()
       }
     })
+  }
+}
+
+/**
+ * Populates component ids for all pages in the form definition.
+ * If a component does not have an id, it generates a new one.
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+export function addComponentIdsToDefinition(definition) {
+  const pagesWithIds = definition.pages.map((page) =>
+    populateComponentIds(page)
+  )
+
+  return {
+    ...definition,
+    pages: pagesWithIds
   }
 }
 
@@ -270,7 +302,8 @@ const migrationSteps = [
   applyPageTitles,
   migrateComponentFields,
   convertDeclaration,
-  convertListNamesToIds
+  convertListNamesToIds,
+  addComponentIdsToDefinition
 ]
 
 /**
@@ -279,10 +312,9 @@ const migrationSteps = [
  * @returns {FormDefinition} definition
  */
 function applyMigrationSteps(definition) {
-  return migrationSteps.reduce(
-    (acc, transformation) => transformation(acc),
-    definition
-  )
+  return migrationSteps.reduce((acc, transformation) => {
+    return transformation(acc)
+  }, definition)
 }
 
 /**
@@ -302,5 +334,5 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, ConditionGroupData, ConditionData, ConditionRefData } from '@defra/forms-model'
  */
