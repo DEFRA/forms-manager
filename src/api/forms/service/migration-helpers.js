@@ -348,10 +348,16 @@ export function convertConditions(definition) {
    */
   const newConditions = definition.conditions.map((oldCond) => {
     if (isConditionWrapper(oldCond)) {
+      const coordinators = new Set()
+
       const items = oldCond.value.conditions
         .map((oldItem) => {
           if (!isConditionData(oldItem)) {
             throw new Error(`Unsupported condition type found`)
+          }
+
+          if (oldItem.coordinator) {
+            coordinators.add(oldItem.coordinator)
           }
 
           return convertConditionDataToV2(
@@ -362,11 +368,24 @@ export function convertConditions(definition) {
         })
         .filter((condition) => condition !== null)
 
-      return {
+      /**
+       * @type {import('@defra/forms-model').ConditionWrapperV2}
+       */
+      const condition = {
         id: randomUUID(),
         displayName: oldCond.displayName,
         items
       }
+
+      if (items.length > 1 && coordinators.size > 1) {
+        throw new Error(
+          'Different unique coordinators found in condition items. Manual intervention is required.'
+        )
+      } else if (coordinators.size === 1) {
+        condition.coordinator = coordinators.values().next().value
+      }
+
+      return condition
     }
     // Already in new format, return as is
     return oldCond
