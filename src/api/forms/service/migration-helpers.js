@@ -344,6 +344,8 @@ export function convertConditions(definition) {
     })
   )
 
+  const conditionNamesToIds = new Map()
+
   /**
    * @type {FormDefinition['conditions']}
    */
@@ -386,14 +388,25 @@ export function convertConditions(definition) {
         condition.coordinator = coordinators.values().next().value
       }
 
+      conditionNamesToIds.set(oldCond.name, condition.id)
+
       return condition
     }
+
     // Already in new format, return as is
     return oldCond
   })
 
+  const pages = definition.pages.map((page) => {
+    if (page.condition) {
+      page.condition = conditionNamesToIds.get(page.condition)
+    }
+    return page
+  })
+
   return {
     ...definition,
+    pages,
     conditions: newConditions
   }
 }
