@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import {
   ComponentType,
   ControllerType,
+  ControllerTypes,
   Engine,
   SchemaVersion,
   formDefinitionV2Schema,
@@ -10,11 +11,16 @@ import {
   hasComponents,
   hasComponentsEvenIfNoNext,
   hasFormField,
-  hasListField
+  hasListField,
+  hasNext,
+  isConditionWrapper
 } from '@defra/forms-model'
 
+import {
+  convertConditionDataToV2,
+  isConditionData
+} from '~/src/api/forms/service/condition-migration-helpers.js'
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
-
 /**
  * @param {FormDefinition} definition
  * @returns {{
@@ -164,22 +170,37 @@ export function convertDeclaration(originalDefinition) {
     (p) => p.controller === ControllerType.Summary
   )
 
-  if (!summaryPage && definition.declaration) {
-    throw new Error('Cannot migrate declaration as unable to find Summary Page')
+  let declarationComponent
+
+  if (definition.declaration) {
+    declarationComponent = /** @type {MarkdownComponent} */ (
+      getComponentDefaults({ type: ComponentType.Markdown })
+    )
+    declarationComponent.content = definition.declaration
   }
 
-  if (summaryPage) {
+  if (summaryPage && declarationComponent) {
     summaryPage.components = summaryPage.components ?? []
-
-    if (definition.declaration) {
-      const declaration = /** @type {MarkdownComponent} */ (
-        getComponentDefaults({ type: ComponentType.Markdown })
-      )
-      declaration.content = definition.declaration
-      summaryPage.components.unshift(declaration)
-      delete definition.declaration
-    }
+    summaryPage.components.unshift(declarationComponent)
+  } else if (!summaryPage && declarationComponent) {
+    definition.pages.push({
+      title: 'Check your answers',
+      controller: ControllerType.Summary,
+      path: '/summary',
+      components: [declarationComponent]
+    })
+  } else if (summaryPage && !declarationComponent) {
+    summaryPage.components = summaryPage.components ?? []
+  } else {
+    definition.pages.push({
+      title: 'Check your answers',
+      controller: ControllerType.Summary,
+      path: '/summary',
+      components: []
+    })
   }
+
+  delete definition.declaration
 
   return definition
 }
@@ -206,11 +227,235 @@ export function populateComponentIds(pageWithoutComponentIds) {
   }
 }
 
+/**
+ * Populates component ids for all pages in the form definition.
+ * If a component does not have an id, it generates a new one.
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+export function addComponentIdsToDefinition(definition) {
+  const pagesWithIds = definition.pages.map((page) =>
+    populateComponentIds(page)
+  )
+
+  return {
+    ...definition,
+    pages: pagesWithIds
+  }
+}
+
+/**
+ * Converts a form from using list names to using list ids.
+ * For each component on each page, if the component has a "list" property referencing a list by name,
+ * it replaces it with the corresponding list's id.
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+export function convertListNamesToIds(definition) {
+  // Ensure all lists have an id
+  const lists = definition.lists.map((list) => {
+    if (list.id) {
+      return list
+    }
+
+    return {
+      ...list,
+      id: randomUUID()
+    }
+  })
+
+  // Build a map from list name to id
+  const nameToId = new Map(lists.map((list) => [list.name, list.id]))
+
+  // Update components on each page to use list id instead of name
+  const pages = definition.pages.map((page) => {
+    if (!('components' in page) || !Array.isArray(page.components)) {
+      return page
+    }
+
+    const components = page.components.map((component) => {
+      if ('list' in component && component.list) {
+        const newListReference = nameToId.get(component.list)
+
+        if (!newListReference) {
+          throw new Error(
+            `List name "${component.list}" not found in definition lists - cannot migrate`
+          )
+        }
+
+        return {
+          ...component,
+          list: newListReference
+        }
+      }
+      return component
+    })
+    return {
+      ...page,
+      components
+    }
+  })
+
+  return {
+    ...definition,
+    pages,
+    lists
+  }
+}
+
+/**
+ *
+ * @param {FormDefinition} definition
+ * @returns {Map<string, string>}
+ */
+function getComponentNameToIdMap(definition) {
+  // Build a map from field name to component id for all components in all pages
+  const fieldNameToComponentId = new Map()
+  for (const page of definition.pages) {
+    if ('components' in page && Array.isArray(page.components)) {
+      for (const component of page.components) {
+        if (
+          typeof component.name === 'string' &&
+          typeof component.id === 'string'
+        ) {
+          fieldNameToComponentId.set(component.name, component.id)
+        }
+      }
+    }
+  }
+  return fieldNameToComponentId
+}
+
+/**
+ * Converts conditions in the condition from schema v1 to v2.
+ * @param {FormDefinition} definition
+ */
+export function convertConditions(definition) {
+  const fieldNameToComponentId = getComponentNameToIdMap(definition)
+
+  const conditionsInUse = new Set(
+    definition.pages.flatMap((page) => {
+      if (hasNext(page)) {
+        return page.next
+          .map((next) => next.condition)
+          .filter((condition) => condition !== undefined)
+      }
+      return []
+    })
+  )
+
+  const conditionNamesToIds = new Map()
+
+  /**
+   * @type {FormDefinition['conditions']}
+   */
+  const newConditions = definition.conditions.map((oldCond) => {
+    if (isConditionWrapper(oldCond)) {
+      const coordinators = new Set()
+
+      const items = oldCond.value.conditions
+        .map((oldItem) => {
+          if (!isConditionData(oldItem)) {
+            throw new Error(`Unsupported condition type found`)
+          }
+
+          if (oldItem.coordinator) {
+            coordinators.add(oldItem.coordinator)
+          }
+
+          return convertConditionDataToV2(
+            oldItem,
+            fieldNameToComponentId,
+            conditionsInUse
+          )
+        })
+        .filter((condition) => condition !== null)
+
+      /**
+       * @type {import('@defra/forms-model').ConditionWrapperV2}
+       */
+      const condition = {
+        id: randomUUID(),
+        displayName: oldCond.displayName,
+        items
+      }
+
+      if (items.length > 1 && coordinators.size > 1) {
+        throw new Error(
+          'Different unique coordinators found in condition items. Manual intervention is required.'
+        )
+      } else if (coordinators.size === 1) {
+        condition.coordinator = coordinators.values().next().value
+      }
+
+      conditionNamesToIds.set(oldCond.name, condition.id)
+
+      return condition
+    }
+
+    // Already in new format, return as is
+    return oldCond
+  })
+
+  const pages = definition.pages.map((page) => {
+    if (page.condition) {
+      page.condition = conditionNamesToIds.get(page.condition)
+    }
+    return page
+  })
+
+  return {
+    ...definition,
+    pages,
+    conditions: newConditions
+  }
+}
+
+/**
+ * Converts any controller paths to names
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+function convertControllerPathsToNames(definition) {
+  const pages = definition.pages.map((page) => {
+    let newController
+
+    if (page.controller?.endsWith('.js')) {
+      const name = ControllerTypes.find(
+        (n) => n.path === page.controller?.toString()
+      )?.name
+
+      if (!name) {
+        throw new Error(
+          `Unrecognised controller name found for ${page.controller}. Cannot migrate.`
+        )
+      }
+
+      newController = name
+    }
+
+    if (newController) {
+      page.controller = newController
+    }
+
+    return page
+  })
+
+  return {
+    ...definition,
+    pages
+  }
+}
+
 const migrationSteps = [
+  convertControllerPathsToNames,
   repositionSummary,
   applyPageTitles,
   migrateComponentFields,
-  convertDeclaration
+  convertDeclaration,
+  convertListNamesToIds,
+  addComponentIdsToDefinition,
+  convertConditions
 ]
 
 /**
@@ -219,10 +464,9 @@ const migrationSteps = [
  * @returns {FormDefinition} definition
  */
 function applyMigrationSteps(definition) {
-  return migrationSteps.reduce(
-    (acc, transformation) => transformation(acc),
-    definition
-  )
+  return migrationSteps.reduce((acc, transformation) => {
+    return transformation(acc)
+  }, definition)
 }
 
 /**
@@ -242,5 +486,5 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, ConditionGroupData, ConditionData, ConditionRefData } from '@defra/forms-model'
  */

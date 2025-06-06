@@ -1,5 +1,6 @@
 import { ControllerType, Engine } from '@defra/forms-model'
 import { buildRadioComponent } from '@defra/forms-model/stubs'
+import { clone } from '@hapi/hoek'
 import { ValidationError } from 'joi'
 
 import {
@@ -15,6 +16,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
   applyPageTitles,
   convertDeclaration,
+  convertListNamesToIds,
   mapComponent,
   migrateComponentFields,
   migrateToV2,
@@ -429,7 +431,7 @@ describe('migration helpers', () => {
 
       const summaryPageRes = /** @type {PageQuestion} */ (res.pages[0])
       expect(summaryPageRes.components).toHaveLength(0)
-      expect(res.declaration).toBe('')
+      expect(res.declaration).toBeUndefined()
     })
 
     it('should not create guidance component if declaration missing', () => {
@@ -456,7 +458,7 @@ describe('migration helpers', () => {
       expect(res.declaration).toBeUndefined()
     })
 
-    it('should throw if no summary page but a declaration', () => {
+    it('should create summary page if missing and move declaration to it', () => {
       const testDefinition3 = buildDefinition({
         pages: [],
         sections: [
@@ -466,9 +468,24 @@ describe('migration helpers', () => {
         declaration: 'Some declaration'
       })
 
-      expect(() => convertDeclaration(testDefinition3)).toThrow(
-        'Cannot migrate declaration as unable to find Summary Page'
+      const res = convertDeclaration(testDefinition3)
+
+      // Should remove declaration from root
+      expect(res.declaration).toBeUndefined()
+
+      // Should have a summary page created
+      const summaryPage = res.pages.find(
+        (page) => page.controller === ControllerType.Summary
       )
+      expect(summaryPage).toBeDefined()
+      expect(summaryPage?.components).toHaveLength(1)
+      expect(summaryPage?.components?.[0]).toEqual({
+        content: 'Some declaration',
+        title: 'Markdown',
+        name: 'Markdown',
+        type: 'Markdown',
+        options: {}
+      })
     })
   })
 
@@ -541,6 +558,13 @@ describe('migration helpers', () => {
       expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
     })
 
+    it('migration is an idempotent operation', () => {
+      const migration1 = migrateToV2(definitionV1)
+      const migration2 = migrateToV2(clone(migration1))
+
+      expect(migration1).toMatchObject(migration2)
+    })
+
     it('should throw if there is some error in validation', () => {
       const partialDefinition = /** @type {Partial<FormDefinition>} */ {
         unknownProperty: true
@@ -603,9 +627,68 @@ describe('migration helpers', () => {
         ]
       })
     })
+
+    describe('convertListNamesToIds', () => {
+      it('should convert component list names to ids', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries' }],
+          pages: [
+            {
+              components: [{ type: 'RadiosField', list: 'countries' }]
+            }
+          ]
+        })
+
+        const result = convertListNamesToIds(definition)
+
+        const newListReference = result.pages[0].components[0].list
+
+        expect(newListReference).not.toBe('countries')
+        expect(result.lists[0].id).toBe(newListReference)
+      })
+
+      it('should leave components unchanged if no list property', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [
+            {
+              components: [{ type: 'TextField' }]
+            }
+          ]
+        })
+
+        const result = convertListNamesToIds(definition)
+        expect(result.pages[0].components[0]).toEqual({ type: 'TextField' })
+      })
+
+      it('should throw if component list name does not exist in lists', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [
+            {
+              components: [{ type: 'RadiosField', list: 'notfound' }]
+            }
+          ]
+        })
+
+        expect(() => convertListNamesToIds(definition)).toThrow(
+          'List name "notfound" not found in definition lists - cannot migrate'
+        )
+      })
+
+      it('should leave pages unchanged if no components', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [{ title: 'No components' }]
+        })
+
+        const result = convertListNamesToIds(definition)
+        expect(result.pages[0]).toEqual({ title: 'No components' })
+      })
+    })
   })
 })
 
 /**
- * @import { List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
+ * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
  */
