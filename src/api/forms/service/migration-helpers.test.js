@@ -1,7 +1,15 @@
-import { ControllerType, Engine } from '@defra/forms-model'
+import {
+  ConditionType,
+  ControllerType,
+  Coordinator,
+  Engine,
+  OperatorName,
+  hasNext,
+  isConditionWrapper
+} from '@defra/forms-model'
 import { buildRadioComponent } from '@defra/forms-model/stubs'
 import { clone } from '@hapi/hoek'
-import { ValidationError } from 'joi'
+import Joi, { ValidationError } from 'joi'
 
 import {
   buildDefinition,
@@ -14,6 +22,10 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
+  convertConditionDataToV2,
+  isConditionData
+} from '~/src/api/forms/service/condition-migration-helpers.js'
+import {
   applyPageTitles,
   convertDeclaration,
   convertListNamesToIds,
@@ -24,6 +36,20 @@ import {
   repositionSummary,
   summaryHelper
 } from '~/src/api/forms/service/migration-helpers.js'
+import * as migrationHelpers from '~/src/api/forms/service/migration-helpers.js'
+
+jest.mock('@defra/forms-model', () => ({
+  ...jest.requireActual('@defra/forms-model'),
+  hasNext: jest.fn(() => true),
+  isConditionWrapper: jest.fn(() => false)
+}))
+jest.mock('~/src/api/forms/service/condition-migration-helpers.js', () => ({
+  ...jest.requireActual(
+    '~/src/api/forms/service/condition-migration-helpers.js'
+  ),
+  convertConditionDataToV2: jest.fn((x) => x),
+  isConditionData: jest.fn(() => true)
+}))
 
 describe('migration helpers', () => {
   const summaryPageId = '449a45f6-4541-4a46-91bd-8b8931b07b50'
@@ -686,6 +712,249 @@ describe('migration helpers', () => {
         expect(result.pages[0]).toEqual({ title: 'No components' })
       })
     })
+  })
+})
+
+describe('convertConditions', () => {
+  /**
+   * Build a minimal form definition for testing.
+   * @param {object} [overrides]
+   * @returns {import('@defra/forms-model').FormDefinition}
+   */
+  function buildMinimalDefinition(overrides = {}) {
+    return buildDefinition({
+      pages: [buildQuestionPage({})],
+      lists: [],
+      sections: [],
+      conditions: [],
+      ...overrides
+    })
+  }
+
+  beforeAll(() => {
+    jest.spyOn(global.Math, 'random').mockReturnValue(0.12345)
+    Object.defineProperty(global, 'crypto', {
+      value: { randomUUID: () => 'mock-uuid' },
+      configurable: true
+    })
+  })
+
+  afterAll(() => {
+    jest.restoreAllMocks()
+  })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('converts v1 condition wrappers to v2 and updates page condition references', () => {
+    /**
+     * @type {import('@defra/forms-model').ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest.mocked(hasNext).mockReturnValue(true)
+    jest.mocked(convertConditionDataToV2).mockReturnValue(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      pages: [
+        buildQuestionPage({
+          condition: 'cond1'
+        })
+      ],
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+
+    const result = migrationHelpers.convertConditions(definition)
+
+    // @ts-expect-error this is a V2 object, we do have an ID
+    const uuidValidation = Joi.string().uuid().validate(result.conditions[0].id)
+
+    expect(uuidValidation.error).toBeUndefined()
+
+    expect(result.conditions[0]).toMatchObject({
+      id: uuidValidation.value,
+      displayName: 'Condition 1',
+      items: expect.arrayContaining([dummyConditionItem])
+    })
+  })
+
+  it('keeps already v2 conditions unchanged', () => {
+    const dummyCondition = {
+      id: 'already-v2',
+      displayName: 'V2',
+      items: []
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(false)
+    const definition = buildMinimalDefinition({
+      conditions: [dummyCondition]
+    })
+    const result = migrationHelpers.convertConditions(definition)
+
+    expect(result.conditions).toHaveLength(1)
+    expect(result.conditions[0]).toEqual(dummyCondition)
+  })
+
+  it('throws if unsupported condition type found', () => {
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(false)
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+    expect(() => migrationHelpers.convertConditions(definition)).toThrow(
+      'Unsupported condition type found'
+    )
+  })
+
+  it('throws if multiple unique coordinators found', () => {
+    /**
+     * @type {import('@defra/forms-model').ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest
+      .mocked(convertConditionDataToV2)
+      .mockReturnValueOnce(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [
+              { name: 'item1' },
+              { name: 'item2', coordinator: Coordinator.AND },
+              { name: 'item3', coordinator: Coordinator.OR }
+            ]
+          }
+        }
+      ]
+    })
+
+    expect(() => migrationHelpers.convertConditions(definition)).toThrow(
+      'Different unique coordinators found in condition items. Manual intervention is required.'
+    )
+  })
+
+  it('sets coordinator if only one unique coordinator is present', () => {
+    /**
+     * @type {import('@defra/forms-model').ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest
+      .mocked(convertConditionDataToV2)
+      .mockReturnValueOnce(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [
+              { name: 'item1' },
+              { name: 'item2', coordinator: Coordinator.AND },
+              { name: 'item3', coordinator: Coordinator.AND }
+            ]
+          }
+        }
+      ]
+    })
+    const result = migrationHelpers.convertConditions(definition)
+
+    // @ts-expect-error: coordinator is only present on ConditionWrapperV2, not ConditionWrapper
+    expect(result.conditions[0].coordinator).toBe(Coordinator.AND)
+  })
+
+  it('does not set coordinator if no coordinator present', () => {
+    /**
+     * @type {import('@defra/forms-model').ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest
+      .mocked(convertConditionDataToV2)
+      .mockReturnValueOnce(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+    const result = migrationHelpers.convertConditions(definition)
+
+    // @ts-expect-error: coordinator is only present on ConditionWrapperV2, not ConditionWrapper
+    expect(result.conditions[0].coordinator).toBeUndefined()
   })
 })
 
