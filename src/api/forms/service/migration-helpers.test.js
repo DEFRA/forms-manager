@@ -945,6 +945,28 @@ describe('convertConditions', () => {
     // @ts-expect-error: coordinator is only present on ConditionWrapperV2, not ConditionWrapper
     expect(result.conditions[0].coordinator).toBeUndefined()
   })
+
+  it('drops unused conditions that fail migration', () => {
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest.mocked(convertConditionDataToV2).mockReturnValueOnce(null)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+    const result = convertConditions(definition)
+
+    expect(result.conditions).toHaveLength(0)
+  })
 })
 
 describe('convertListNamesToIds', () => {

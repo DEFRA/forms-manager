@@ -327,13 +327,11 @@ function getComponentNameToIdMap(definition) {
 }
 
 /**
- * Converts conditions in the condition from schema v1 to v2.
+ * Gets a set of condition names that are in use across all pages.
  * @param {FormDefinition} definition
  */
-export function convertConditions(definition) {
-  const fieldNameToComponentId = getComponentNameToIdMap(definition)
-
-  const conditionsInUse = new Set(
+function getConditionNamesInUse(definition) {
+  return new Set(
     definition.pages.flatMap((page) => {
       if (hasNext(page)) {
         return page.next
@@ -343,60 +341,88 @@ export function convertConditions(definition) {
       return []
     })
   )
+}
+
+/**
+ *
+ * @param {import('@defra/forms-model').ConditionWrapper} conditionWrapper
+ * @param {Map<string, string>} fieldNameToComponentId
+ * @param {Set<string>} conditionsInUse
+ */
+function convertConditionWrapperToV2(
+  conditionWrapper,
+  fieldNameToComponentId,
+  conditionsInUse
+) {
+  const coordinators = new Set()
+
+  const items = conditionWrapper.value.conditions
+    .map((conditionData) => {
+      if (!isConditionData(conditionData)) {
+        throw new Error(`Unsupported condition type found`)
+      }
+
+      if (conditionData.coordinator) {
+        coordinators.add(conditionData.coordinator)
+      }
+
+      return convertConditionDataToV2(
+        conditionData,
+        fieldNameToComponentId,
+        conditionsInUse
+      )
+    })
+    .filter((item) => item !== null)
+
+  /**
+   * @type {import('@defra/forms-model').ConditionWrapperV2}
+   */
+  const condition = {
+    id: randomUUID(),
+    displayName: conditionWrapper.displayName,
+    items
+  }
+
+  if (items.length > 1 && coordinators.size > 1) {
+    throw new Error(
+      'Different unique coordinators found in condition items. Manual intervention is required.'
+    )
+  } else if (coordinators.size === 1) {
+    condition.coordinator = coordinators.values().next().value
+  } else {
+    // keep Sonar happy - nothing we need to do here.
+  }
+
+  return condition
+}
+
+/**
+ * Converts conditions in the condition from schema v1 to v2.
+ * @param {FormDefinition} definition
+ */
+export function convertConditions(definition) {
+  const fieldNameToComponentId = getComponentNameToIdMap(definition)
+
+  const conditionsInUse = getConditionNamesInUse(definition)
 
   const conditionNamesToIds = new Map()
 
   /**
    * @type {FormDefinition['conditions']}
    */
-  const newConditions = definition.conditions.map((oldCond) => {
-    if (isConditionWrapper(oldCond)) {
-      const coordinators = new Set()
+  const newConditions = definition.conditions.map((oldConditionWrapper) => {
+    if (isConditionWrapper(oldConditionWrapper)) {
+      const newConditionWrapper = convertConditionWrapperToV2(
+        oldConditionWrapper,
+        fieldNameToComponentId,
+        conditionsInUse
+      )
 
-      const items = oldCond.value.conditions
-        .map((oldCondition) => {
-          if (!isConditionData(oldCondition)) {
-            throw new Error(`Unsupported condition type found`)
-          }
-
-          if (oldCondition.coordinator) {
-            coordinators.add(oldCondition.coordinator)
-          }
-
-          return convertConditionDataToV2(
-            oldCondition,
-            fieldNameToComponentId,
-            conditionsInUse
-          )
-        })
-        .filter((item) => item !== null)
-
-      /**
-       * @type {import('@defra/forms-model').ConditionWrapperV2}
-       */
-      const condition = {
-        id: randomUUID(),
-        displayName: oldCond.displayName,
-        items
-      }
-
-      if (items.length > 1 && coordinators.size > 1) {
-        throw new Error(
-          'Different unique coordinators found in condition items. Manual intervention is required.'
-        )
-      } else if (coordinators.size === 1) {
-        condition.coordinator = coordinators.values().next().value
-      } else {
-        // keep Sonar happy - nothing we need to do here.
-      }
-
-      conditionNamesToIds.set(oldCond.name, condition.id)
-
-      return condition
+      conditionNamesToIds.set(oldConditionWrapper.name, newConditionWrapper.id)
     }
 
     // Already in new format, return as is
-    return oldCond
+    return oldConditionWrapper
   })
 
   const pages = definition.pages.map((page) => {
