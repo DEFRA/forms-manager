@@ -304,22 +304,22 @@ export function convertListNamesToIds(definition) {
 }
 
 /**
- *
+ * Build a map from component name (old) to component id (new) for all components in all pages
  * @param {FormDefinition} definition
  * @returns {Map<string, string>}
  */
 function getComponentNameToIdMap(definition) {
-  // Build a map from field name to component id for all components in all pages
   const fieldNameToComponentId = new Map()
-  for (const page of definition.pages) {
-    if ('components' in page && Array.isArray(page.components)) {
-      for (const component of page.components) {
-        if (
-          typeof component.name === 'string' &&
-          typeof component.id === 'string'
-        ) {
-          fieldNameToComponentId.set(component.name, component.id)
-        }
+
+  const componentPages = definition.pages.filter(hasComponentsEvenIfNoNext)
+
+  for (const page of componentPages) {
+    for (const component of page.components) {
+      if (
+        typeof component.name === 'string' &&
+        typeof component.id === 'string'
+      ) {
+        fieldNameToComponentId.set(component.name, component.id)
       }
     }
   }
