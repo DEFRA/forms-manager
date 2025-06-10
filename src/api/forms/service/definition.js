@@ -66,6 +66,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
     try {
       await session.withTransaction(async () => {
+        logger.info(`Updating form definition (draft) for form ID ${formId}`)
+
         await formDefinition.update(formId, definition, session, schema)
         await formMetadata.updateAudit(formId, author, session)
       })

@@ -1,5 +1,4 @@
 import {
-  Engine,
   SchemaVersion,
   formDefinitionSchema,
   formDefinitionV2Schema
@@ -9,15 +8,20 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 
 /**
- * Determines the correct validation schema based on the form definition
+ * Determines the correct validation schema based on the form definition's schema property
  * @param {FormDefinition} definition
  * @returns {ObjectSchema<FormDefinition>}
  */
 export function getValidationSchema(definition) {
-  return definition.engine === Engine.V2 ||
-    definition.schema === SchemaVersion.V2
-    ? formDefinitionV2Schema
-    : formDefinitionSchema
+  const { schema } = definition
+
+  // If schema is explicitly V2, use V2 validation
+  if (schema === SchemaVersion.V2) {
+    return formDefinitionV2Schema
+  }
+
+  // Default to V1 validation (for schema V1 or undefined)
+  return formDefinitionSchema
 }
 
 /**

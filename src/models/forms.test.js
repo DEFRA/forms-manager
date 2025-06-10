@@ -1,6 +1,7 @@
-import { Engine, SchemaVersion } from '@defra/forms-model'
+import { ControllerType, Engine, SchemaVersion } from '@defra/forms-model'
 import { ValidationError } from 'joi'
 
+import { buildDefinition } from '~/src/api/forms/__stubs__/definition.js'
 import {
   sortIdsSchema,
   updateFormDefinitionSchema
@@ -41,26 +42,11 @@ describe('forms model', () => {
   describe('updateFormDefinitionSchema', () => {
     describe('V1 form definitions', () => {
       it('should accept valid V1 form definition with schema 1', () => {
-        const v1FormDefinition = {
+        const v1FormDefinition = buildDefinition({
           name: 'Test Form V1',
           schema: 1,
-          startPage: '/summary',
-          pages: [
-            {
-              title: 'Summary',
-              path: '/summary',
-              controller: 'SummaryPageController'
-            }
-          ],
-          conditions: [],
-          sections: [
-            {
-              name: 'section',
-              title: 'Section title'
-            }
-          ],
-          lists: []
-        }
+          startPage: '/summary'
+        })
 
         const result = updateFormDefinitionSchema.validate(v1FormDefinition)
         expect(result.error).toBeUndefined()
@@ -70,25 +56,10 @@ describe('forms model', () => {
       })
 
       it('should accept valid V1 form definition without schema property', () => {
-        const v1FormDefinition = {
+        const v1FormDefinition = buildDefinition({
           name: 'Test Form V1',
-          startPage: '/summary',
-          pages: [
-            {
-              title: 'Summary',
-              path: '/summary',
-              controller: 'SummaryPageController'
-            }
-          ],
-          conditions: [],
-          sections: [
-            {
-              name: 'section',
-              title: 'Section title'
-            }
-          ],
-          lists: []
-        }
+          startPage: '/summary'
+        })
 
         const result = updateFormDefinitionSchema.validate(v1FormDefinition)
         expect(result.error).toBeUndefined()
@@ -97,26 +68,11 @@ describe('forms model', () => {
       })
 
       it('should accept valid V1 form definition without engine property', () => {
-        const v1FormDefinition = {
+        const v1FormDefinition = buildDefinition({
           name: 'Test Form V1',
           schema: 1,
-          startPage: '/summary',
-          pages: [
-            {
-              title: 'Summary',
-              path: '/summary',
-              controller: 'SummaryPageController'
-            }
-          ],
-          conditions: [],
-          sections: [
-            {
-              name: 'section',
-              title: 'Section title'
-            }
-          ],
-          lists: []
-        }
+          startPage: '/summary'
+        })
 
         const result = updateFormDefinitionSchema.validate(v1FormDefinition)
         expect(result.error).toBeUndefined()
@@ -127,7 +83,7 @@ describe('forms model', () => {
 
     describe('V2 form definitions', () => {
       it('should accept valid V2 form definition with schema 2', () => {
-        const v2FormDefinition = {
+        const v2FormDefinition = buildDefinition({
           name: 'Test Form V2',
           schema: 2,
           engine: Engine.V2,
@@ -137,18 +93,10 @@ describe('forms model', () => {
               id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
               title: 'Summary',
               path: '/summary',
-              controller: 'SummaryPageController'
+              controller: ControllerType.Summary
             }
-          ],
-          conditions: [],
-          sections: [
-            {
-              name: 'section',
-              title: 'Section title'
-            }
-          ],
-          lists: []
-        }
+          ]
+        })
 
         const result = updateFormDefinitionSchema.validate(v2FormDefinition)
         expect(result.error).toBeUndefined()
@@ -158,7 +106,7 @@ describe('forms model', () => {
       })
 
       it('should accept valid V2 form definition with SchemaVersion.V2', () => {
-        const v2FormDefinition = {
+        const v2FormDefinition = buildDefinition({
           name: 'Test Form V2',
           schema: SchemaVersion.V2,
           engine: Engine.V2,
@@ -168,18 +116,10 @@ describe('forms model', () => {
               id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
               title: 'Summary',
               path: '/summary',
-              controller: 'SummaryPageController'
+              controller: ControllerType.Summary
             }
-          ],
-          conditions: [],
-          sections: [
-            {
-              name: 'section',
-              title: 'Section title'
-            }
-          ],
-          lists: []
-        }
+          ]
+        })
 
         const result = updateFormDefinitionSchema.validate(v2FormDefinition)
         expect(result.error).toBeUndefined()
@@ -189,7 +129,7 @@ describe('forms model', () => {
       })
 
       it('should accept V2 form definition with engine V2 but no schema property', () => {
-        const v2FormDefinition = {
+        const v2FormDefinition = buildDefinition({
           name: 'Test Form V2',
           engine: Engine.V2,
           startPage: '/summary',
@@ -198,18 +138,10 @@ describe('forms model', () => {
               id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
               title: 'Summary',
               path: '/summary',
-              controller: 'SummaryPageController'
+              controller: ControllerType.Summary
             }
-          ],
-          conditions: [],
-          sections: [
-            {
-              name: 'section',
-              title: 'Section title'
-            }
-          ],
-          lists: []
-        }
+          ]
+        })
 
         const result = updateFormDefinitionSchema.validate(v2FormDefinition)
         expect(result.error).toBeUndefined()
@@ -221,14 +153,13 @@ describe('forms model', () => {
 
     describe('Mixed and edge cases', () => {
       it('should reject form definition with invalid schema version', () => {
+        /** @type {any} */
         const invalidFormDefinition = {
-          name: 'Test Form',
-          schema: 999, // Invalid schema version
-          startPage: '/summary',
-          pages: [],
-          conditions: [],
-          sections: [],
-          lists: []
+          ...buildDefinition({
+            name: 'Test Form',
+            startPage: '/summary'
+          }),
+          schema: 999 // Invalid schema version
         }
 
         const result = updateFormDefinitionSchema.validate(
@@ -242,14 +173,12 @@ describe('forms model', () => {
 
       it('should reject form definition with invalid properties', () => {
         const invalidFormDefinition = {
-          name: 'Test Form',
-          schema: 1,
-          invalidProperty: 'should not be allowed',
-          startPage: '/summary',
-          pages: [],
-          conditions: [],
-          sections: [],
-          lists: []
+          ...buildDefinition({
+            name: 'Test Form',
+            schema: 1,
+            startPage: '/summary'
+          }),
+          invalidProperty: 'should not be allowed'
         }
 
         const result = updateFormDefinitionSchema.validate(
@@ -273,23 +202,13 @@ describe('forms model', () => {
     describe('Joi.alternatives() behavior', () => {
       it('should try V1 schema first and fall back to V2 schema', () => {
         // This test verifies that the alternatives schema works as expected
-        const v1Form = {
+        const v1Form = buildDefinition({
           name: 'V1 Form',
           schema: 1,
-          startPage: '/summary',
-          pages: [
-            {
-              title: 'Summary',
-              path: '/summary',
-              controller: 'SummaryPageController'
-            }
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
+          startPage: '/summary'
+        })
 
-        const v2Form = {
+        const v2Form = buildDefinition({
           name: 'V2 Form',
           schema: 2,
           engine: Engine.V2,
@@ -299,13 +218,10 @@ describe('forms model', () => {
               id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
               title: 'Summary',
               path: '/summary',
-              controller: 'SummaryPageController'
+              controller: ControllerType.Summary
             }
-          ],
-          conditions: [],
-          sections: [],
-          lists: []
-        }
+          ]
+        })
 
         const v1Result = updateFormDefinitionSchema.validate(v1Form)
         const v2Result = updateFormDefinitionSchema.validate(v2Form)

@@ -1,5 +1,4 @@
 import {
-  Engine,
   SchemaVersion,
   formDefinitionSchema,
   formDefinitionV2Schema
@@ -14,13 +13,10 @@ import {
 
 describe('definition helpers', () => {
   describe('getValidationSchema', () => {
-    it('should return V2 schema when engine is V2', () => {
-      const definition = buildDefinition({
-        engine: Engine.V2,
-        schema: SchemaVersion.V1
-      })
+    it('should return V1 schema when schema is V1', () => {
+      const definition = buildDefinition({ schema: SchemaVersion.V1 })
       const result = getValidationSchema(definition)
-      expect(result).toBe(formDefinitionV2Schema)
+      expect(result).toBe(formDefinitionSchema)
     })
 
     it('should return V2 schema when schema is V2', () => {
@@ -29,38 +25,14 @@ describe('definition helpers', () => {
       expect(result).toBe(formDefinitionV2Schema)
     })
 
-    it('should return V2 schema when both engine is V2 and schema is V2', () => {
-      const definition = buildDefinition({
-        engine: Engine.V2,
-        schema: SchemaVersion.V2
-      })
-      const result = getValidationSchema(definition)
-      expect(result).toBe(formDefinitionV2Schema)
-    })
-
-    it('should return V1 schema when schema is V1', () => {
-      const definition = buildDefinition({ schema: SchemaVersion.V1 })
-      const result = getValidationSchema(definition)
-      expect(result).toBe(formDefinitionSchema)
-    })
-
-    it('should return V1 schema when engine is V1', () => {
-      const definition = buildDefinition({ engine: Engine.V1 })
-      const result = getValidationSchema(definition)
-      expect(result).toBe(formDefinitionSchema)
-    })
-
-    it('should return V1 schema by default when no engine or schema specified', () => {
+    it('should return V1 schema by default when no schema specified', () => {
       const definition = buildDefinition({})
       const result = getValidationSchema(definition)
       expect(result).toBe(formDefinitionSchema)
     })
 
-    it('should return V1 schema when engine is V1 and schema is V1', () => {
-      const definition = buildDefinition({
-        engine: Engine.V1,
-        schema: SchemaVersion.V1
-      })
+    it('should return V1 schema when schema is undefined', () => {
+      const definition = buildDefinition({ schema: undefined })
       const result = getValidationSchema(definition)
       expect(result).toBe(formDefinitionSchema)
     })
