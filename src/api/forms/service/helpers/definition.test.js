@@ -1,0 +1,152 @@
+import {
+  Engine,
+  SchemaVersion,
+  formDefinitionSchema,
+  formDefinitionV2Schema
+} from '@defra/forms-model'
+
+import { buildDefinition } from '~/src/api/forms/__stubs__/definition.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
+import {
+  getValidationSchema,
+  validate
+} from '~/src/api/forms/service/helpers/definition.js'
+
+describe('definition helpers', () => {
+  describe('getValidationSchema', () => {
+    it('should return V2 schema when engine is V2', () => {
+      const definition = buildDefinition({
+        engine: Engine.V2,
+        schema: SchemaVersion.V1
+      })
+      const result = getValidationSchema(definition)
+      expect(result).toBe(formDefinitionV2Schema)
+    })
+
+    it('should return V2 schema when schema is V2', () => {
+      const definition = buildDefinition({ schema: SchemaVersion.V2 })
+      const result = getValidationSchema(definition)
+      expect(result).toBe(formDefinitionV2Schema)
+    })
+
+    it('should return V2 schema when both engine is V2 and schema is V2', () => {
+      const definition = buildDefinition({
+        engine: Engine.V2,
+        schema: SchemaVersion.V2
+      })
+      const result = getValidationSchema(definition)
+      expect(result).toBe(formDefinitionV2Schema)
+    })
+
+    it('should return V1 schema when schema is V1', () => {
+      const definition = buildDefinition({ schema: SchemaVersion.V1 })
+      const result = getValidationSchema(definition)
+      expect(result).toBe(formDefinitionSchema)
+    })
+
+    it('should return V1 schema when engine is V1', () => {
+      const definition = buildDefinition({ engine: Engine.V1 })
+      const result = getValidationSchema(definition)
+      expect(result).toBe(formDefinitionSchema)
+    })
+
+    it('should return V1 schema by default when no engine or schema specified', () => {
+      const definition = buildDefinition({})
+      const result = getValidationSchema(definition)
+      expect(result).toBe(formDefinitionSchema)
+    })
+
+    it('should return V1 schema when engine is V1 and schema is V1', () => {
+      const definition = buildDefinition({
+        engine: Engine.V1,
+        schema: SchemaVersion.V1
+      })
+      const result = getValidationSchema(definition)
+      expect(result).toBe(formDefinitionSchema)
+    })
+  })
+
+  describe('validate', () => {
+    const mockSchema = {
+      validate: jest.fn()
+    }
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('should return validated value when validation succeeds', () => {
+      /** @type {any} */
+      const definition = { name: 'Test Form' }
+      const expectedValue = { name: 'Test Form', validated: true }
+
+      mockSchema.validate.mockReturnValue({
+        error: undefined,
+        value: expectedValue
+      })
+
+      const result = validate(definition, /** @type {any} */ (mockSchema))
+
+      expect(mockSchema.validate).toHaveBeenCalledWith(definition)
+      expect(result).toBe(expectedValue)
+    })
+
+    it('should throw InvalidFormDefinitionError when validation fails', () => {
+      /** @type {any} */
+      const definition = { name: 'Test Form' }
+      const validationError = new Error('Validation failed')
+
+      mockSchema.validate.mockReturnValue({
+        error: validationError,
+        value: undefined
+      })
+
+      expect(() =>
+        validate(definition, /** @type {any} */ (mockSchema))
+      ).toThrow(InvalidFormDefinitionError)
+      expect(mockSchema.validate).toHaveBeenCalledWith(definition)
+    })
+
+    it('should use form name in error when validation fails', () => {
+      /** @type {any} */
+      const definition = { name: 'My Test Form' }
+      const validationError = new Error('Validation failed')
+
+      mockSchema.validate.mockReturnValue({
+        error: validationError,
+        value: undefined
+      })
+
+      expect(() => {
+        validate(definition, /** @type {any} */ (mockSchema))
+      }).toThrow(
+        expect.objectContaining({
+          message: expect.stringContaining('My Test Form')
+        })
+      )
+    })
+
+    it('should use "No name" when form has no name and validation fails', () => {
+      /** @type {any} */
+      const definition = {}
+      const validationError = new Error('Validation failed')
+
+      mockSchema.validate.mockReturnValue({
+        error: validationError,
+        value: undefined
+      })
+
+      expect(() => {
+        validate(definition, /** @type {any} */ (mockSchema))
+      }).toThrow(
+        expect.objectContaining({
+          message: expect.stringContaining('No name')
+        })
+      )
+    })
+  })
+})
+
+/**
+ * @import { FormDefinition } from '@defra/forms-model'
+ */

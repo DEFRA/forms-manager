@@ -1,6 +1,7 @@
 import {
   componentSchema,
   formDefinitionSchema,
+  formDefinitionV2Schema,
   formMetadataInputSchema,
   idSchema,
   listSchemaV2,
@@ -85,8 +86,10 @@ export const createFormSchema = Joi.object().keys({
   teamEmail: formMetadataInputSchema.extract('teamEmail')
 })
 
-// Update form definition schema
-export const updateFormDefinitionSchema = formDefinitionSchema
+export const updateFormDefinitionSchema = Joi.alternatives().try(
+  formDefinitionSchema, // V1 forms (schema: 1)
+  formDefinitionV2Schema // V2 forms (schema: 2)
+)
 
 export const migrateDefinitionParamSchema = Joi.object()
   .keys({

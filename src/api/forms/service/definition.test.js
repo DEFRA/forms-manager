@@ -1,4 +1,9 @@
-import { Engine, FormStatus, formDefinitionSchema } from '@defra/forms-model'
+import {
+  Engine,
+  FormStatus,
+  formDefinitionSchema,
+  formDefinitionV2Schema
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 import { pino } from 'pino'
@@ -956,6 +961,88 @@ describe('Forms service', () => {
 
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
+      )
+    })
+
+    it('should use V2 schema when form definition has engine V2', async () => {
+      const v2FormDefinition = {
+        ...emptyFormWithSummary(),
+        engine: Engine.V2,
+        schema: 2
+      }
+
+      const updateSpy = jest.spyOn(formDefinition, 'update')
+
+      await updateDraftFormDefinition('123', v2FormDefinition, author)
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        '123',
+        {
+          ...v2FormDefinition,
+          name: formMetadataDocument.title
+        },
+        expect.anything(),
+        formDefinitionV2Schema
+      )
+    })
+
+    it('should use V2 schema when form definition has schema version 2', async () => {
+      const v2FormDefinition = {
+        ...emptyFormWithSummary(),
+        schema: 2
+      }
+
+      const updateSpy = jest.spyOn(formDefinition, 'update')
+
+      await updateDraftFormDefinition('123', v2FormDefinition, author)
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        '123',
+        {
+          ...v2FormDefinition,
+          name: formMetadataDocument.title
+        },
+        expect.anything(),
+        formDefinitionV2Schema
+      )
+    })
+
+    it('should use V1 schema when form definition has schema version 1', async () => {
+      const v1FormDefinition = {
+        ...emptyFormWithSummary(),
+        schema: 1
+      }
+
+      const updateSpy = jest.spyOn(formDefinition, 'update')
+
+      await updateDraftFormDefinition('123', v1FormDefinition, author)
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        '123',
+        {
+          ...v1FormDefinition,
+          name: formMetadataDocument.title
+        },
+        expect.anything(),
+        formDefinitionSchema
+      )
+    })
+
+    it('should use V1 schema by default when no engine or schema specified', async () => {
+      const defaultFormDefinition = emptyFormWithSummary()
+
+      const updateSpy = jest.spyOn(formDefinition, 'update')
+
+      await updateDraftFormDefinition('123', defaultFormDefinition, author)
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        '123',
+        {
+          ...defaultFormDefinition,
+          name: formMetadataDocument.title
+        },
+        expect.anything(),
+        formDefinitionSchema
       )
     })
 

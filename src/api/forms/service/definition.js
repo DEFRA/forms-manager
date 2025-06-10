@@ -1,9 +1,10 @@
-import { Engine, FormStatus, formDefinitionSchema } from '@defra/forms-model'
+import { Engine, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
   logger,
@@ -59,20 +60,13 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     // them on every write to prevent imported forms drifting (e.g. JSON upload)
     definition.name = form.title
 
+    const schema = getValidationSchema(definition)
+
     const session = client.startSession()
 
     try {
       await session.withTransaction(async () => {
-        // Update the form definition
-        await formDefinition.update(
-          formId,
-          definition,
-          session,
-          formDefinitionSchema
-        )
-
-        logger.info(`Updating form metadata (draft) for form ID ${formId}`)
-
+        await formDefinition.update(formId, definition, session, schema)
         await formMetadata.updateAudit(formId, author, session)
       })
     } finally {

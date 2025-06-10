@@ -6,7 +6,8 @@ import {
   createDraftFromLive,
   createLiveFromDraft,
   getFormDefinition,
-  listForms
+  listForms,
+  updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
 import {
   createForm,
@@ -556,6 +557,112 @@ describe('Forms route', () => {
         id: stubFormMetadataOutput.id,
         status: 'created-draft'
       })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft with V1 form definition should update successfully', async () => {
+      const v1FormDefinition = {
+        name: 'Test Form V1',
+        schema: 1,
+        engine: undefined, // V1 forms don't have engine property
+        startPage: '/summary',
+        pages: [
+          {
+            title: 'Summary',
+            path: '/summary',
+            controller: 'SummaryPageController'
+          }
+        ],
+        conditions: [],
+        sections: [
+          {
+            name: 'section',
+            title: 'Section title'
+          }
+        ],
+        lists: []
+      }
+
+      jest.mocked(updateDraftFormDefinition).mockResolvedValue(undefined)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft`,
+        payload: v1FormDefinition,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id,
+        status: 'updated'
+      })
+
+      expect(updateDraftFormDefinition).toHaveBeenCalledWith(
+        id,
+        expect.objectContaining({
+          name: 'Test Form V1',
+          schema: 1,
+          startPage: '/summary'
+        }),
+        expect.objectContaining({
+          displayName: 'Enrique Chase'
+        })
+      )
+    })
+
+    test('Testing POST /forms/{id}/definition/draft with V2 form definition should update successfully', async () => {
+      const v2FormDefinition = {
+        name: 'Test Form V2',
+        schema: 2,
+        engine: 'V2',
+        startPage: '/summary',
+        pages: [
+          {
+            id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
+            title: 'Summary',
+            path: '/summary',
+            controller: 'SummaryPageController'
+          }
+        ],
+        conditions: [],
+        sections: [
+          {
+            name: 'section',
+            title: 'Section title'
+          }
+        ],
+        lists: []
+      }
+
+      jest.mocked(updateDraftFormDefinition).mockResolvedValue(undefined)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft`,
+        payload: v2FormDefinition,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id,
+        status: 'updated'
+      })
+
+      expect(updateDraftFormDefinition).toHaveBeenCalledWith(
+        id,
+        expect.objectContaining({
+          name: 'Test Form V2',
+          schema: 2,
+          engine: 'V2',
+          startPage: '/summary'
+        }),
+        expect.objectContaining({
+          displayName: 'Enrique Chase'
+        })
+      )
     })
   })
 
@@ -1116,6 +1223,140 @@ describe('Forms route', () => {
           keys: ['organisations', 'status'],
           source: 'query'
         }
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft with invalid form definition returns validation errors', async () => {
+      const invalidFormDefinition = {
+        invalidProperty: 'should not be allowed',
+        name: 'Test Form',
+        schema: 3,
+        pages: 'invalid pages format'
+      }
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft`,
+        payload: invalidFormDefinition,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: expect.stringContaining(
+          'does not match any of the allowed types'
+        ),
+        validation: {
+          source: 'payload'
+        }
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft with missing required fields returns validation errors', async () => {
+      const incompleteFormDefinition = {
+        // Missing required fields like name, pages, etc.
+      }
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft`,
+        payload: incompleteFormDefinition,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        validation: {
+          source: 'payload'
+        }
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft with V2 form having invalid schema value is rejected', async () => {
+      const v2FormWithInvalidSchema = {
+        name: 'Test Form V2',
+        schema: 999,
+        engine: 'V2',
+        startPage: '/summary',
+        pages: [
+          {
+            id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
+            title: 'Summary',
+            path: '/summary',
+            controller: 'SummaryPageController'
+          }
+        ],
+        conditions: [],
+        sections: [
+          {
+            name: 'section',
+            title: 'Section title'
+          }
+        ],
+        lists: []
+      }
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft`,
+        payload: v2FormWithInvalidSchema,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        validation: {
+          source: 'payload'
+        }
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft endpoint service error handling', async () => {
+      const validFormDefinition = {
+        name: 'Test Form',
+        schema: 1,
+        startPage: '/summary',
+        pages: [
+          {
+            title: 'Summary',
+            path: '/summary',
+            controller: 'SummaryPageController'
+          }
+        ],
+        conditions: [],
+        sections: [
+          {
+            name: 'section',
+            title: 'Section title'
+          }
+        ],
+        lists: []
+      }
+
+      jest
+        .mocked(updateDraftFormDefinition)
+        .mockRejectedValue(
+          Boom.badRequest("Form with ID '123' has no draft state")
+        )
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft`,
+        payload: validFormDefinition,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: "Form with ID '123' has no draft state"
       })
     })
   })
