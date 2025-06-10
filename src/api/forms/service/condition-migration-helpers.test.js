@@ -1,30 +1,39 @@
-import { ComponentType, ConditionType, OperatorName } from '@defra/forms-model'
+import {
+  ComponentType,
+  ConditionType,
+  Coordinator,
+  OperatorName
+} from '@defra/forms-model'
 
-import { convertConditionDataToV2 } from '~/src/api/forms/service/condition-migration-helpers.js'
+import {
+  convertConditionDataToV2,
+  isConditionData,
+  isConditionValueData
+} from '~/src/api/forms/service/condition-migration-helpers.js'
+
+/**
+ * @type {import('@defra/forms-model').ConditionData}
+ */
+const conditionData = {
+  field: {
+    name: 'field1',
+    type: ComponentType.TextField,
+    display: 'dummy'
+  },
+  operator: OperatorName.Is,
+  value: {
+    type: ConditionType.Value,
+    value: 'test-value',
+    display: 'foobar'
+  }
+}
 
 describe('convertConditionDataToV2', () => {
-  /**
-   * @type {import('@defra/forms-model').ConditionData}
-   */
-  const baseConditionData = {
-    field: {
-      name: 'field1',
-      type: ComponentType.TextField,
-      display: 'dummy'
-    },
-    operator: OperatorName.Is,
-    value: {
-      type: ConditionType.Value,
-      value: 'test-value',
-      display: 'foobar'
-    }
-  }
-
   it('converts a valid conditionData when componentId exists', () => {
     const fieldNameToComponentId = new Map([['field1', 'component-123']])
     const usedConditions = new Set()
     const result = convertConditionDataToV2(
-      baseConditionData,
+      conditionData,
       fieldNameToComponentId,
       usedConditions
     )
@@ -47,7 +56,7 @@ describe('convertConditionDataToV2', () => {
      * @type {import('@defra/forms-model').ConditionData}
      */
     const invalidConditionData = {
-      ...baseConditionData,
+      ...conditionData,
       // @ts-expect-error -- we're deliberately testing the type guard
       value: { type: 'OtherType', value: 'abc' }
     }
@@ -65,7 +74,7 @@ describe('convertConditionDataToV2', () => {
     const usedConditions = new Set(['field1'])
     expect(() =>
       convertConditionDataToV2(
-        baseConditionData,
+        conditionData,
         fieldNameToComponentId,
         usedConditions
       )
@@ -78,10 +87,50 @@ describe('convertConditionDataToV2', () => {
     const fieldNameToComponentId = new Map()
     const usedConditions = new Set()
     const result = convertConditionDataToV2(
-      baseConditionData,
+      conditionData,
       fieldNameToComponentId,
       usedConditions
     )
     expect(result).toBeNull()
+  })
+})
+
+describe('isConditionValueData', () => {
+  it('returns true for a valid ConditionValueData object', () => {
+    const value = { type: ConditionType.Value, value: 'abc' }
+    expect(isConditionValueData(value)).toBe(true)
+  })
+
+  it('returns false if type is not ConditionType.Value', () => {
+    const value = { type: 'OtherType', value: 'abc' }
+    expect(isConditionValueData(value)).toBe(false)
+  })
+
+  it('returns false if type property is missing', () => {
+    const value = { value: 'abc' }
+    expect(isConditionValueData(value)).toBe(false)
+  })
+
+  it('returns false if object is empty', () => {
+    expect(isConditionValueData({})).toBe(false)
+  })
+})
+
+describe('isConditionData', () => {
+  it('returns true for a valid ConditionData object', () => {
+    expect(isConditionData(conditionData)).toBe(true)
+  })
+
+  it('returns false for a valid ConditionGroupData object', () => {
+    /**
+     * @type {import('@defra/forms-model').ConditionRefData}
+     */
+    const conditionGroupData = {
+      conditionDisplayName: 'Group Condition',
+      conditionName: 'group-condition',
+      coordinator: Coordinator.AND
+    }
+
+    expect(isConditionData(conditionGroupData)).toBe(false)
   })
 })
