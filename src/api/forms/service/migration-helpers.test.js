@@ -1032,6 +1032,46 @@ describe('convertListNamesToIds', () => {
   })
 })
 
+describe('addComponentIdsToDefinition', () => {
+  it('should add ids to components in pages', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          components: [
+            {
+              id: '123-456-789'
+            }
+          ]
+        }
+      ]
+    })
+
+    const result = migrationHelpers.addComponentIdsToDefinition(definition)
+
+    // @ts-expect-error we know there will be a component
+    expect(result.pages[0].components[0].id).toBe('123-456-789')
+  })
+
+  it('should not change pages without components', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          components: [
+            {
+              name: 'alPzmd'
+            }
+          ]
+        }
+      ]
+    })
+
+    const result = migrationHelpers.addComponentIdsToDefinition(definition)
+
+    // @ts-expect-error we know there will be a component
+    expect(result.pages[0].components[0].id).toBeDefined()
+  })
+})
+
 /**
  * Build a minimal form definition for testing.
  * @param {object} [overrides]

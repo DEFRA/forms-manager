@@ -209,7 +209,7 @@ export function convertDeclaration(originalDefinition) {
  * @param {Page} pageWithoutComponentIds
  */
 export function populateComponentIds(pageWithoutComponentIds) {
-  if (!hasComponents(pageWithoutComponentIds)) {
+  if (!hasComponentsEvenIfNoNext(pageWithoutComponentIds)) {
     return pageWithoutComponentIds
   }
 
