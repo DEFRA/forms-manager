@@ -416,10 +416,8 @@ export function convertConditions(definition) {
  * @param {FormDefinition} definition
  * @returns {FormDefinition}
  */
-function convertControllerPathsToNames(definition) {
+export function convertControllerPathsToNames(definition) {
   const pages = definition.pages.map((page) => {
-    let newController
-
     if (page.controller?.endsWith('.js')) {
       const name = ControllerTypes.find(
         (n) => n.path === page.controller?.toString()
@@ -431,11 +429,7 @@ function convertControllerPathsToNames(definition) {
         )
       }
 
-      newController = name
-    }
-
-    if (newController) {
-      page.controller = newController
+      page.controller = name
     }
 
     return page

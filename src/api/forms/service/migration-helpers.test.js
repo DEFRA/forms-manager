@@ -26,7 +26,10 @@ import {
   isConditionData
 } from '~/src/api/forms/service/condition-migration-helpers.js'
 import {
+  addComponentIdsToDefinition,
   applyPageTitles,
+  convertConditions,
+  convertControllerPathsToNames,
   convertDeclaration,
   convertListNamesToIds,
   mapComponent,
@@ -36,7 +39,6 @@ import {
   repositionSummary,
   summaryHelper
 } from '~/src/api/forms/service/migration-helpers.js'
-import * as migrationHelpers from '~/src/api/forms/service/migration-helpers.js'
 
 jest.mock('@defra/forms-model', () => ({
   ...jest.requireActual('@defra/forms-model'),
@@ -771,7 +773,7 @@ describe('convertConditions', () => {
       ]
     })
 
-    const result = migrationHelpers.convertConditions(definition)
+    const result = convertConditions(definition)
 
     // @ts-expect-error this is a V2 object, we do have an ID
     const uuidValidation = Joi.string().uuid().validate(result.conditions[0].id)
@@ -796,7 +798,7 @@ describe('convertConditions', () => {
     const definition = buildMinimalDefinition({
       conditions: [dummyCondition]
     })
-    const result = migrationHelpers.convertConditions(definition)
+    const result = convertConditions(definition)
 
     expect(result.conditions).toHaveLength(1)
     expect(result.conditions[0]).toEqual(dummyCondition)
@@ -817,7 +819,7 @@ describe('convertConditions', () => {
         }
       ]
     })
-    expect(() => migrationHelpers.convertConditions(definition)).toThrow(
+    expect(() => convertConditions(definition)).toThrow(
       'Unsupported condition type found'
     )
   })
@@ -859,7 +861,7 @@ describe('convertConditions', () => {
       ]
     })
 
-    expect(() => migrationHelpers.convertConditions(definition)).toThrow(
+    expect(() => convertConditions(definition)).toThrow(
       'Different unique coordinators found in condition items. Manual intervention is required.'
     )
   })
@@ -900,7 +902,7 @@ describe('convertConditions', () => {
         }
       ]
     })
-    const result = migrationHelpers.convertConditions(definition)
+    const result = convertConditions(definition)
 
     // @ts-expect-error: coordinator is only present on ConditionWrapperV2, not ConditionWrapper
     expect(result.conditions[0].coordinator).toBe(Coordinator.AND)
@@ -938,7 +940,7 @@ describe('convertConditions', () => {
         }
       ]
     })
-    const result = migrationHelpers.convertConditions(definition)
+    const result = convertConditions(definition)
 
     // @ts-expect-error: coordinator is only present on ConditionWrapperV2, not ConditionWrapper
     expect(result.conditions[0].coordinator).toBeUndefined()
@@ -962,7 +964,7 @@ describe('convertListNamesToIds', () => {
       lists: [{ name: 'List 1' }]
     })
 
-    const result = migrationHelpers.convertListNamesToIds(definition)
+    const result = convertListNamesToIds(definition)
 
     // @ts-expect-error: list is only present on RadiosField, not PageQuestion
     expect(result.pages[0].components[0].list).toEqual(result.lists[0].id)
@@ -989,7 +991,7 @@ describe('convertListNamesToIds', () => {
       lists: [{ name: 'List 1' }]
     })
 
-    const result = migrationHelpers.convertListNamesToIds(definition)
+    const result = convertListNamesToIds(definition)
 
     // @ts-expect-error: list is only present on RadiosField, not PageQuestion
     expect(result.pages[0].components[0].list).toBeUndefined()
@@ -1005,7 +1007,7 @@ describe('convertListNamesToIds', () => {
       ]
     })
 
-    const result = migrationHelpers.convertListNamesToIds(definition)
+    const result = convertListNamesToIds(definition)
 
     expect(result.pages).toEqual(definition.pages)
   })
@@ -1026,7 +1028,7 @@ describe('convertListNamesToIds', () => {
       lists: [{ name: 'validList' }]
     })
 
-    expect(() => migrationHelpers.convertListNamesToIds(definition)).toThrow(
+    expect(() => convertListNamesToIds(definition)).toThrow(
       'List name "invalidList" not found in definition lists - cannot migrate'
     )
   })
@@ -1046,7 +1048,7 @@ describe('addComponentIdsToDefinition', () => {
       ]
     })
 
-    const result = migrationHelpers.addComponentIdsToDefinition(definition)
+    const result = addComponentIdsToDefinition(definition)
 
     // @ts-expect-error we know there will be a component
     expect(result.pages[0].components[0].id).toBe('123-456-789')
@@ -1065,10 +1067,45 @@ describe('addComponentIdsToDefinition', () => {
       ]
     })
 
-    const result = migrationHelpers.addComponentIdsToDefinition(definition)
+    const result = addComponentIdsToDefinition(definition)
 
     // @ts-expect-error we know there will be a component
     expect(result.pages[0].components[0].id).toBeDefined()
+  })
+})
+
+describe('convertControllerPathsToNames', () => {
+  it('should convert controller paths to names in page definitions', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          title: 'Question page'
+        },
+        {
+          title: 'Status page',
+          controller: 'StatusPageController'
+        }
+      ]
+    })
+
+    const result = convertControllerPathsToNames(definition)
+
+    expect(result.pages[0].controller).toBeUndefined()
+    expect(result.pages[1].controller).toBe('StatusPageController')
+  })
+
+  it('should handle JS-based controller paths', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          title: 'Status page',
+          controller: './pages/summary.js'
+        }
+      ]
+    })
+
+    const result = convertControllerPathsToNames(definition)
+    expect(result.pages[0].controller).toBe('SummaryPageController')
   })
 })
 
