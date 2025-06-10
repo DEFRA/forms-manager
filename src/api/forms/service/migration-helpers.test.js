@@ -791,7 +791,17 @@ describe('convertConditions', () => {
     const dummyCondition = {
       id: 'already-v2',
       displayName: 'V2',
-      items: []
+      items: [
+        {
+          id: 'newConditionUuid',
+          componentId: 'myNewUuid',
+          operator: OperatorName.Is,
+          value: {
+            type: ConditionType.StringValue,
+            value: 'foobar'
+          }
+        }
+      ]
     }
 
     jest.mocked(isConditionWrapper).mockReturnValue(false)
@@ -965,7 +975,7 @@ describe('convertConditions', () => {
     })
     const result = convertConditions(definition)
 
-    expect(result.conditions).toHaveLength(0)
+    expect(result.conditions).toHaveLength(0) // if the condition item fails migration and the overall condition is now empty, it should be dropped
   })
 })
 

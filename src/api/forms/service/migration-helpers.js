@@ -410,20 +410,24 @@ export function convertConditions(definition) {
   /**
    * @type {FormDefinition['conditions']}
    */
-  const newConditions = definition.conditions.map((oldConditionWrapper) => {
-    if (isConditionWrapper(oldConditionWrapper)) {
-      const newConditionWrapper = convertConditionWrapperToV2(
-        oldConditionWrapper,
-        fieldNameToComponentId,
-        conditionsInUse
-      )
+  const newConditions = definition.conditions
+    .map((conditionWrapper) => {
+      if (isConditionWrapper(conditionWrapper)) {
+        const newConditionWrapper = convertConditionWrapperToV2(
+          conditionWrapper,
+          fieldNameToComponentId,
+          conditionsInUse
+        )
 
-      conditionNamesToIds.set(oldConditionWrapper.name, newConditionWrapper.id)
-    }
+        conditionNamesToIds.set(conditionWrapper.name, newConditionWrapper.id)
 
-    // Already in new format, return as is
-    return oldConditionWrapper
-  })
+        return newConditionWrapper
+      } else {
+        // Already in new format, return as is
+        return conditionWrapper
+      }
+    })
+    .filter((newConditionWrapper) => newConditionWrapper.items.length) // filter out conditions that have no items
 
   const pages = definition.pages.map((page) => {
     if (page.condition) {
