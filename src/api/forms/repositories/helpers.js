@@ -3,7 +3,8 @@ import {
   ControllerType,
   formDefinitionV2Schema,
   hasComponentsEvenIfNoNext,
-  hasRepeater
+  hasRepeater,
+  isConditionWrapperV2
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
@@ -201,6 +202,53 @@ export function getList(definition, listId) {
   const idx = getListIndex(definition, listId)
 
   return definition.lists[idx]
+}
+
+/**
+ * Find condition index by id
+ * @param {FormDefinition} definition
+ * @param {string} conditionId
+ * @returns {number}
+ */
+export function findConditionIndex(definition, conditionId) {
+  return definition.conditions
+    .filter(isConditionWrapperV2)
+    .findIndex((condition) => condition.id === conditionId)
+}
+
+/**
+ * Get condition index by id
+ * @param {FormDefinition} definition
+ * @param {string} conditionId
+ * @returns {number}
+ * @throws {Boom}
+ */
+export function getConditionIndex(definition, conditionId) {
+  const idx = findConditionIndex(definition, conditionId)
+
+  if (idx === -1) {
+    throw Boom.notFound(`Condition not found with id '${conditionId}'`)
+  }
+
+  return idx
+}
+
+/**
+ * Get condition index by id
+ * @param {FormDefinition} definition
+ * @param {string} conditionId
+ * @returns {ConditionWrapperV2}
+ * @throws {Boom}
+ */
+export function getCondition(definition, conditionId) {
+  const idx = getConditionIndex(definition, conditionId)
+  const condition = definition.conditions[idx]
+
+  if (!isConditionWrapperV2(condition)) {
+    throw Boom.notFound(`Condition not found with id '${conditionId}'`)
+  }
+
+  return condition
 }
 
 /**
@@ -572,6 +620,47 @@ export function modifyDeleteList(definition, listId) {
 }
 
 /**
+ * Adds a new condition
+ * @param {FormDefinition} definition
+ * @param {ConditionWrapperV2} condition
+ * @returns {FormDefinition}
+ */
+export function modifyAddCondition(definition, condition) {
+  definition.conditions.push(condition)
+
+  return definition
+}
+
+/**
+ * Updates a condition by id
+ * @param {FormDefinition} definition
+ * @param {string} conditionId
+ * @param {ConditionWrapperV2} condition
+ * @returns {FormDefinition}
+ */
+export function modifyUpdateCondition(definition, conditionId, condition) {
+  const idx = getConditionIndex(definition, conditionId)
+
+  definition.conditions[idx] = condition
+
+  return definition
+}
+
+/**
+ * Removes a condition by id
+ * @param {FormDefinition} definition
+ * @param {string} conditionId
+ * @returns {FormDefinition}
+ */
+export function modifyDeleteCondition(definition, conditionId) {
+  const idx = getConditionIndex(definition, conditionId)
+
+  definition.conditions.splice(idx, 1)
+
+  return definition
+}
+
+/**
  * The update callback method
  * @callback UpdateCallback
  * @param {FormDefinition} definition
@@ -586,7 +675,7 @@ export function modifyDeleteList(definition, listId) {
  */
 
 /**
- * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2 } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */

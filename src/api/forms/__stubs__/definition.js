@@ -113,6 +113,22 @@ export function buildList(partialList = {}) {
 }
 
 /**
+ * @param {Partial<ConditionWrapperV2>} partialCondition
+ * @returns {ConditionWrapperV2}
+ */
+export function buildCondition(partialCondition = {}) {
+  return /** @type {ConditionWrapperV2} */ (
+    structuredClone({
+      id: '00000000-0000-0000-0000-000000000000',
+      displayName: 'Condition wrapper',
+      coordinator: undefined,
+      items: [],
+      ...partialCondition
+    })
+  )
+}
+
+/**
  * @param {Partial<TextFieldComponent>} partialTextField
  * @returns {TextFieldComponent}
  */
@@ -132,5 +148,5 @@ export function buildTextFieldComponent(partialTextField = {}) {
   )
 }
 /**
- * @import { FormDefinition, PageSummary, PageQuestion, PageStatus, TextFieldComponent, Item, List } from '@defra/forms-model'
+ * @import { FormDefinition, PageSummary, PageQuestion, PageStatus, TextFieldComponent, Item, List, ConditionWrapperV2 } from '@defra/forms-model'
  */

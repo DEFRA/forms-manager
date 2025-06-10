@@ -4,13 +4,16 @@ import { ObjectId } from 'mongodb'
 
 import {
   getComponent,
+  getCondition,
   getList,
   getPageInsertPosition,
   insertDraft,
   modifyAddComponent,
+  modifyAddCondition,
   modifyAddList,
   modifyAddPage,
   modifyDeleteComponent,
+  modifyDeleteCondition,
   modifyDeleteList,
   modifyDeletePage,
   modifyDeletePages,
@@ -19,6 +22,7 @@ import {
   modifyName,
   modifyReorderPages,
   modifyUpdateComponent,
+  modifyUpdateCondition,
   modifyUpdateList,
   modifyUpdatePage,
   modifyUpdatePageFields,
@@ -470,7 +474,65 @@ export async function deleteList(formId, listId, session) {
 }
 
 /**
- * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine } from '@defra/forms-model'
+ * Adds a new condition
+ * @param {string} formId
+ * @param {ConditionWrapperV2} condition
+ * @param {ClientSession} session
+ */
+export async function addCondition(formId, condition, session) {
+  logger.info(`Adding new condition to form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyAddCondition(draft, condition)
+
+  const result = await modifyDraft(formId, callback, session)
+
+  logger.info(`Added new condition to form ID ${formId}`)
+
+  return getCondition(result.draft, condition.id)
+}
+
+/**
+ * Updates a condition by id
+ * @param {string} formId
+ * @param {string} conditionId
+ * @param {ConditionWrapperV2} condition
+ * @param {ClientSession} session
+ * @returns {Promise<ConditionWrapperV2>}
+ */
+export async function updateCondition(formId, conditionId, condition, session) {
+  logger.info(`Updating condition with ID ${conditionId} on form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) =>
+    modifyUpdateCondition(draft, conditionId, condition)
+
+  const result = await modifyDraft(formId, callback, session)
+
+  logger.info(`Updated condition with ID ${conditionId} on form ID ${formId}`)
+
+  return getCondition(result.draft, conditionId)
+}
+
+/**
+ * Removes a condition by id
+ * @param {string} formId
+ * @param {string} conditionId
+ * @param {ClientSession} session
+ */
+export async function deleteCondition(formId, conditionId, session) {
+  logger.info(`Deleting condition ID ${conditionId} on form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyDeleteCondition(draft, conditionId)
+
+  await modifyDraft(formId, callback, session)
+
+  logger.info(`Deleted condition ID ${conditionId} on form ID ${formId}`)
+}
+
+/**
+ * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2 } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'

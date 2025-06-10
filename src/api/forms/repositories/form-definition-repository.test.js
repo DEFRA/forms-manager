@@ -1,7 +1,10 @@
 import {
+  ConditionType,
   ControllerType,
+  Coordinator,
   Engine,
   FormStatus,
+  OperatorName,
   formDefinitionSchema,
   formDefinitionV2Schema,
   hasComponentsEvenIfNoNext
@@ -18,12 +21,15 @@ import {
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
+import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
   addComponent,
+  addCondition,
   addList,
   addPage,
   deleteComponent,
+  deleteCondition,
   deleteList,
   deletePage,
   deletePages,
@@ -33,6 +39,7 @@ import {
   setEngineVersion,
   update,
   updateComponent,
+  updateCondition,
   updateList,
   updateName,
   updatePage,
@@ -54,9 +61,15 @@ const mockSession = author
 const formId = '1eabd1437567fe1b26708bbb'
 const page1Id = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
 const page2Id = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+const page3Id = 'e789b259-ca15-4766-a8ef-a6fea5f7cbaa'
+const page4Id = '8bb39623-0f81-4084-8de8-18ee3ad0021f'
 const component1Id = 'e296d931-2364-4b17-9049-1aa1afea29d3'
 const component2Id = '81f513ba-210f-4532-976c-82f8fc7ec2b6'
+const component3Id = '6eab6ef1-7a37-486c-9929-1cedd01df40f'
+const component4Id = 'a1bd1053-7100-497e-943c-0616358ca302'
 const listId = 'eb68b22f-b6ba-4358-8cba-b61282fecdb1'
+const condition1Id = '6e4c2f74-5bd9-48b4-b991-f2a021dcde59'
+const condition2Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -108,10 +121,19 @@ describe('form-definition-repository', () => {
   let page2
 
   /** @type {Page} */
+  let page3
+
+  /** @type {Page} */
+  let page4
+
+  /** @type {Page} */
   let summaryPage
 
   /** @type {List[]} */
   let lists
+
+  /** @type {ConditionWrapperV2[]} */
+  let conditions
 
   beforeEach(() => {
     jest.mocked(db.collection).mockReturnValue(mockCollection)
@@ -135,6 +157,24 @@ describe('form-definition-repository', () => {
       path: '/page-two',
       components: [component2]
     })
+    const component3 = buildTextFieldComponent({
+      id: component3Id
+    })
+    page3 = buildQuestionPage({
+      id: page3Id,
+      title: 'Page Three',
+      path: '/page-three',
+      components: [component3]
+    })
+    const component4 = buildTextFieldComponent({
+      id: component4Id
+    })
+    page4 = buildQuestionPage({
+      id: page4Id,
+      title: 'Page Four',
+      path: '/page-four',
+      components: [component4]
+    })
     summaryPage = buildSummaryPage()
 
     const list = buildList({
@@ -144,9 +184,44 @@ describe('form-definition-repository', () => {
 
     lists = [list]
 
+    const condition1 = buildCondition({
+      id: condition1Id,
+      displayName: 'isEnriqueChase',
+      items: [
+        {
+          id: '6746b15f-69f9-454c-a324-c62420069618',
+          componentId: component3Id,
+          operator: OperatorName.Is,
+          value: {
+            type: ConditionType.StringValue,
+            value: 'Enrique Chase'
+          }
+        }
+      ]
+    })
+
+    const condition2 = buildCondition({
+      id: condition2Id,
+      displayName: 'isJoanneBloggs',
+      items: [
+        {
+          id: 'c73645b4-3ecf-4b00-bbee-de3bc465384d',
+          componentId: component4Id,
+          operator: OperatorName.Is,
+          value: {
+            type: ConditionType.StringValue,
+            value: 'Joanne Bloggs'
+          }
+        }
+      ]
+    })
+
+    conditions = [condition1, condition2]
+
     draft = buildDefinition({
-      pages: [page1, page2, summaryPage],
-      lists
+      pages: [page1, page2, page3, page4, summaryPage],
+      lists,
+      conditions
     })
   })
 
@@ -235,7 +310,7 @@ describe('form-definition-repository', () => {
           )
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(2)
+          expect(definition.pages).toHaveLength(4)
         }
       )
     })
@@ -253,8 +328,8 @@ describe('form-definition-repository', () => {
           await addPage(formId, page, mockSession)
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(4)
-          expect(definition.pages.at(2)).toEqual(page)
+          expect(definition.pages).toHaveLength(6)
+          expect(definition.pages.at(4)).toEqual(page)
         }
       )
     })
@@ -542,7 +617,7 @@ describe('form-definition-repository', () => {
           await deletePage(formId, page1Id, mockSession)
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(2)
+          expect(definition.pages).toHaveLength(4)
         }
       )
     })
@@ -574,7 +649,7 @@ describe('form-definition-repository', () => {
   })
 
   describe('addList', () => {
-    it('should add an array of lists', async () => {
+    it('should add a list', async () => {
       const list = buildList({
         id: '05a1f94e-17ff-4407-b20e-bbc76b346b3c',
         title: 'New list',
@@ -625,11 +700,110 @@ describe('form-definition-repository', () => {
     })
   })
 
+  describe('addCondition', () => {
+    it('should add a condition', async () => {
+      const condition = buildCondition({
+        id: 'a9fdbd20-df6c-42ef-b6ce-e72f7b76b069',
+        displayName: 'isJoanneBloggsChase',
+        items: [
+          {
+            id: '6746b15f-69f9-454c-a324-c62420069618',
+            componentId: component1Id,
+            operator: OperatorName.Is,
+            value: {
+              type: ConditionType.StringValue,
+              value: 'Joanne Bloggs-Chase'
+            }
+          }
+        ]
+      })
+
+      await helper(
+        async () => {
+          await addCondition(formId, condition, mockSession)
+        },
+        (definition) => {
+          expect(definition.conditions).toHaveLength(3)
+        }
+      )
+    })
+
+    it('should add a condition with reference', async () => {
+      const condition = buildCondition({
+        id: 'a9fdbd20-df6c-42ef-b6ce-e72f7b76b069',
+        displayName: 'isEnriqueChaseOrJoanneBloggsChase',
+        coordinator: Coordinator.OR,
+        items: [
+          {
+            id: '38bc27cc-01b8-4bc7-8f4f-6fb7d70897d6',
+            conditionId: condition1Id
+          },
+          {
+            id: 'c84adc88-3f4e-4390-b22b-bdf60faf52be',
+            conditionId: condition2Id
+          }
+        ]
+      })
+
+      await helper(
+        async () => {
+          await addCondition(formId, condition, mockSession)
+        },
+        (definition) => {
+          expect(definition.conditions).toHaveLength(3)
+        }
+      )
+    })
+  })
+
+  describe('updateCondition', () => {
+    const condition = buildCondition({
+      id: condition1Id,
+      displayName: 'isNotEnriqueChase',
+      items: [
+        {
+          id: '6746b15f-69f9-454c-a324-c62420069618',
+          componentId: component3Id,
+          operator: OperatorName.IsNot,
+          value: {
+            type: ConditionType.StringValue,
+            value: 'Enrique Chase'
+          }
+        }
+      ]
+    })
+
+    it('should update a condition', async () => {
+      await helper(
+        async () => {
+          await updateCondition(formId, condition1Id, condition, mockSession)
+        },
+        (definition) => {
+          expect(definition.conditions).toHaveLength(2)
+        }
+      )
+    })
+  })
+
+  describe('deleteCondition', () => {
+    it('should delete a condition', async () => {
+      await helper(
+        async () => {
+          await deleteCondition(formId, condition1Id, mockSession)
+        },
+        (definition) => {
+          expect(definition.conditions).toHaveLength(1)
+        }
+      )
+    })
+  })
+
   describe('insert', () => {
     it('should insert a new draft definition', async () => {
-      mockCollection.findOneAndUpdate.mockResolvedValue({ draft })
+      const definitionV1 = { ...draft, conditions: [] }
+      mockCollection.findOneAndUpdate.mockResolvedValue({ definitionV1 })
 
-      await insert(formId, draft, mockSession, formDefinitionSchema)
+      await insert(formId, definitionV1, mockSession, formDefinitionSchema)
 
       const [filter, update] = mockCollection.findOneAndUpdate.mock.calls[0]
       expect(filter).toMatchObject({
@@ -689,6 +863,6 @@ describe('form-definition-repository', () => {
 })
 
 /**
- * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List } from '@defra/forms-model'
+ * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List, ConditionWrapperV2 } from '@defra/forms-model'
  * @import { UpdateFilter } from 'mongodb'
  */

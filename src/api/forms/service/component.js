@@ -167,19 +167,11 @@ export async function deleteComponentOnDraftDefinition(
   const session = client.startSession()
 
   try {
-    await session.withTransaction(
-      async () => {
-        await formDefinition.deleteComponent(
-          formId,
-          pageId,
-          componentId,
-          session
-        )
+    await session.withTransaction(async () => {
+      await formDefinition.deleteComponent(formId, pageId, componentId, session)
 
-        await formMetadata.updateAudit(formId, author, session)
-      },
-      { readPreference: 'primary' }
-    )
+      await formMetadata.updateAudit(formId, author, session)
+    })
   } catch (err) {
     logger.error(
       err,
