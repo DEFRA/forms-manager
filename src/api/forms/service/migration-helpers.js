@@ -354,22 +354,22 @@ export function convertConditions(definition) {
       const coordinators = new Set()
 
       const items = oldCond.value.conditions
-        .map((oldItem) => {
-          if (!isConditionData(oldItem)) {
+        .map((oldCondition) => {
+          if (!isConditionData(oldCondition)) {
             throw new Error(`Unsupported condition type found`)
           }
 
-          if (oldItem.coordinator) {
-            coordinators.add(oldItem.coordinator)
+          if (oldCondition.coordinator) {
+            coordinators.add(oldCondition.coordinator)
           }
 
           return convertConditionDataToV2(
-            oldItem,
+            oldCondition,
             fieldNameToComponentId,
             conditionsInUse
           )
         })
-        .filter((condition) => condition !== null)
+        .filter((item) => item !== null)
 
       /**
        * @type {import('@defra/forms-model').ConditionWrapperV2}
@@ -386,6 +386,8 @@ export function convertConditions(definition) {
         )
       } else if (coordinators.size === 1) {
         condition.coordinator = coordinators.values().next().value
+      } else {
+        // keep Sonar happy - nothing we need to do here.
       }
 
       conditionNamesToIds.set(oldCond.name, condition.id)
