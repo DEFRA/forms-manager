@@ -387,10 +387,10 @@ function convertConditionWrapperToV2(
     throw new Error(
       'Different unique coordinators found in condition items. Manual intervention is required.'
     )
-  } else if (coordinators.size === 1) {
+  } else if (items.length > 1 && coordinators.size === 1) {
     condition.coordinator = coordinators.values().next().value
   } else {
-    // keep Sonar happy - nothing we need to do here.
+    // keep Sonar happy - nothing we need to do here, we don't need a coordinator
   }
 
   return condition
