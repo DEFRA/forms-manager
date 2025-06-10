@@ -274,7 +274,7 @@ export function convertListNamesToIds(definition) {
     }
 
     const components = page.components.map((component) => {
-      if ('list' in component && component.list) {
+      if (hasListField(component)) {
         const newListReference = nameToId.get(component.list)
 
         if (!newListReference) {
