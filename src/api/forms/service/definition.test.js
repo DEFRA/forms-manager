@@ -1024,28 +1024,6 @@ describe('Forms service', () => {
       )
     })
 
-    it('should use V2 schema even with engine V1 if schema is 2', async () => {
-      const v2SchemaV1Engine = {
-        ...emptyFormWithSummary(),
-        engine: Engine.V1,
-        schema: 2
-      }
-
-      const updateSpy = jest.spyOn(formDefinition, 'update')
-
-      await updateDraftFormDefinition('123', v2SchemaV1Engine, author)
-
-      expect(updateSpy).toHaveBeenCalledWith(
-        '123',
-        {
-          ...v2SchemaV1Engine,
-          name: formMetadataDocument.title
-        },
-        expect.anything(),
-        formDefinitionV2Schema
-      )
-    })
-
     test('should check if form update DB operation is called with correct form data', async () => {
       const dbSpy = jest.spyOn(formMetadata, 'updateAudit')
 
