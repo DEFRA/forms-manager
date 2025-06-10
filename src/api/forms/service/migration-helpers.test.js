@@ -738,7 +738,7 @@ describe('convertConditions', () => {
 
   it('converts v1 condition wrappers to v2 and updates page condition references', () => {
     /**
-     * @type {import('@defra/forms-model').ConditionDataV2}
+     * @type {ConditionDataV2}
      */
     const dummyConditionItem = {
       id: 'newConditionUuid',
@@ -836,7 +836,7 @@ describe('convertConditions', () => {
 
   it('throws if multiple unique coordinators found', () => {
     /**
-     * @type {import('@defra/forms-model').ConditionDataV2}
+     * @type {ConditionDataV2}
      */
     const dummyConditionItem = {
       id: 'newConditionUuid',
@@ -878,7 +878,7 @@ describe('convertConditions', () => {
 
   it('sets coordinator if only one unique coordinator is present', () => {
     /**
-     * @type {import('@defra/forms-model').ConditionDataV2}
+     * @type {ConditionDataV2}
      */
     const dummyConditionItem = {
       id: 'newConditionUuid',
@@ -920,7 +920,7 @@ describe('convertConditions', () => {
 
   it('does not set coordinator if no coordinator present', () => {
     /**
-     * @type {import('@defra/forms-model').ConditionDataV2}
+     * @type {ConditionDataV2}
      */
     const dummyConditionItem = {
       id: 'newConditionUuid',
@@ -1144,7 +1144,7 @@ describe('convertControllerPathsToNames', () => {
 /**
  * Build a minimal form definition for testing.
  * @param {object} [overrides]
- * @returns {import('@defra/forms-model').FormDefinition}
+ * @returns {FormDefinition}
  */
 function buildMinimalDefinition(overrides = {}) {
   return buildDefinition({
@@ -1157,5 +1157,5 @@ function buildMinimalDefinition(overrides = {}) {
 }
 
 /**
- * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
+ * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef, ConditionDataV2 } from '@defra/forms-model'
  */

@@ -345,7 +345,7 @@ function getConditionNamesInUse(definition) {
 
 /**
  *
- * @param {import('@defra/forms-model').ConditionWrapper} conditionWrapper
+ * @param {ConditionWrapper} conditionWrapper
  * @param {Map<string, string>} fieldNameToComponentId
  * @param {Set<string>} conditionsInUse
  */
@@ -375,7 +375,7 @@ function convertConditionWrapperToV2(
     .filter((item) => item !== null)
 
   /**
-   * @type {import('@defra/forms-model').ConditionWrapperV2}
+   * @type {ConditionWrapperV2}
    */
   const condition = {
     id: randomUUID(),
@@ -512,5 +512,5 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, ConditionGroupData, ConditionData, ConditionRefData } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
  */

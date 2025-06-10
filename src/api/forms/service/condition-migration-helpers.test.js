@@ -12,7 +12,7 @@ import {
 } from '~/src/api/forms/service/condition-migration-helpers.js'
 
 /**
- * @type {import('@defra/forms-model').ConditionData}
+ * @type {ConditionData}
  */
 const conditionData = {
   field: {
@@ -53,7 +53,7 @@ describe('convertConditionDataToV2', () => {
     const usedConditions = new Set()
 
     /**
-     * @type {import('@defra/forms-model').ConditionData}
+     * @type {ConditionData}
      */
     const invalidConditionData = {
       ...conditionData,
@@ -123,7 +123,7 @@ describe('isConditionData', () => {
 
   it('returns false for a valid ConditionGroupData object', () => {
     /**
-     * @type {import('@defra/forms-model').ConditionRefData}
+     * @type {ConditionRefData}
      */
     const conditionGroupData = {
       conditionDisplayName: 'Group Condition',
@@ -134,3 +134,7 @@ describe('isConditionData', () => {
     expect(isConditionData(conditionGroupData)).toBe(false)
   })
 })
+
+/**
+ * @import { ConditionData, ConditionRefData } from '@defra/forms-model'
+ */
