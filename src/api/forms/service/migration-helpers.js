@@ -269,7 +269,7 @@ export function convertListNamesToIds(definition) {
 
   // Update components on each page to use list id instead of name
   const pages = definition.pages.map((page) => {
-    if (!('components' in page) || !Array.isArray(page.components)) {
+    if (!hasComponentsEvenIfNoNext(page)) {
       return page
     }
 

@@ -667,6 +667,7 @@ describe('migration helpers', () => {
 
         const result = convertListNamesToIds(definition)
 
+        // @ts-expect-error type doesn't really matter when we have the below checks
         const newListReference = result.pages[0].components[0].list
 
         expect(newListReference).not.toBe('countries')
@@ -684,6 +685,7 @@ describe('migration helpers', () => {
         })
 
         const result = convertListNamesToIds(definition)
+        // @ts-expect-error we know this is a TextField in a test
         expect(result.pages[0].components[0]).toEqual({ type: 'TextField' })
       })
 
@@ -716,21 +718,6 @@ describe('migration helpers', () => {
 })
 
 describe('convertConditions', () => {
-  /**
-   * Build a minimal form definition for testing.
-   * @param {object} [overrides]
-   * @returns {import('@defra/forms-model').FormDefinition}
-   */
-  function buildMinimalDefinition(overrides = {}) {
-    return buildDefinition({
-      pages: [buildQuestionPage({})],
-      lists: [],
-      sections: [],
-      conditions: [],
-      ...overrides
-    })
-  }
-
   beforeAll(() => {
     jest.spyOn(global.Math, 'random').mockReturnValue(0.12345)
     Object.defineProperty(global, 'crypto', {
@@ -957,6 +944,108 @@ describe('convertConditions', () => {
     expect(result.conditions[0].coordinator).toBeUndefined()
   })
 })
+
+describe('convertListNamesToIds', () => {
+  it('maps list names to their IDs', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: [
+            {
+              type: 'RadiosField',
+              list: 'List 1'
+            }
+          ]
+        }
+      ],
+      lists: [{ name: 'List 1' }]
+    })
+
+    const result = migrationHelpers.convertListNamesToIds(definition)
+
+    // @ts-expect-error: list is only present on RadiosField, not PageQuestion
+    expect(result.pages[0].components[0].list).toEqual(result.lists[0].id)
+    expect(result.lists).toEqual([
+      {
+        id: expect.any(String),
+        name: 'List 1'
+      }
+    ])
+  })
+
+  it('ignores non-list components', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: [
+            {
+              type: 'TextField'
+            }
+          ]
+        }
+      ],
+      lists: [{ name: 'List 1' }]
+    })
+
+    const result = migrationHelpers.convertListNamesToIds(definition)
+
+    // @ts-expect-error: list is only present on RadiosField, not PageQuestion
+    expect(result.pages[0].components[0].list).toBeUndefined()
+  })
+
+  it('handles pages without components', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: []
+        }
+      ]
+    })
+
+    const result = migrationHelpers.convertListNamesToIds(definition)
+
+    expect(result.pages).toEqual(definition.pages)
+  })
+
+  it("throws an error if the list referenced by a component doesn't exist", () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: [
+            {
+              type: 'RadiosField',
+              list: 'invalidList'
+            }
+          ]
+        }
+      ],
+      lists: [{ name: 'validList' }]
+    })
+
+    expect(() => migrationHelpers.convertListNamesToIds(definition)).toThrow(
+      'List name "invalidList" not found in definition lists - cannot migrate'
+    )
+  })
+})
+
+/**
+ * Build a minimal form definition for testing.
+ * @param {object} [overrides]
+ * @returns {import('@defra/forms-model').FormDefinition}
+ */
+function buildMinimalDefinition(overrides = {}) {
+  return buildDefinition({
+    pages: [buildQuestionPage({})],
+    lists: [],
+    sections: [],
+    conditions: [],
+    ...overrides
+  })
+}
 
 /**
  * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
