@@ -1,7 +1,7 @@
 import {
   ControllerType,
-  Engine,
   FormStatus,
+  SchemaVersion,
   formDefinitionV2Schema
 } from '@defra/forms-model'
 
@@ -75,11 +75,11 @@ export async function repositionSummaryPipeline(formId, definition, author) {
 export async function migrateDefinitionToV2(formId, author) {
   const formDraftDefinition = await formDefinition.get(formId, FormStatus.Draft)
 
-  if (formDraftDefinition.engine === Engine.V2) {
+  if (formDraftDefinition.schema === SchemaVersion.V2) {
     return formDraftDefinition
   }
 
-  logger.info(`Migrating form with ID ${formId} to engine version 2`)
+  logger.info(`Migrating form with ID ${formId} to schema version 2`)
 
   const session = client.startSession()
 

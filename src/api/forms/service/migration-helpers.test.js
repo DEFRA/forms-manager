@@ -1,6 +1,15 @@
-import { ControllerType, Engine } from '@defra/forms-model'
+import {
+  ConditionType,
+  ControllerType,
+  Coordinator,
+  Engine,
+  OperatorName,
+  hasNext,
+  isConditionWrapper
+} from '@defra/forms-model'
 import { buildRadioComponent } from '@defra/forms-model/stubs'
-import { ValidationError } from 'joi'
+import { clone } from '@hapi/hoek'
+import Joi, { ValidationError } from 'joi'
 
 import {
   buildDefinition,
@@ -13,8 +22,16 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
+  convertConditionDataToV2,
+  isConditionData
+} from '~/src/api/forms/service/condition-migration-helpers.js'
+import {
+  addComponentIdsToDefinition,
   applyPageTitles,
+  convertConditions,
+  convertControllerPathsToNames,
   convertDeclaration,
+  convertListNamesToIds,
   mapComponent,
   migrateComponentFields,
   migrateToV2,
@@ -22,6 +39,19 @@ import {
   repositionSummary,
   summaryHelper
 } from '~/src/api/forms/service/migration-helpers.js'
+
+jest.mock('@defra/forms-model', () => ({
+  ...jest.requireActual('@defra/forms-model'),
+  hasNext: jest.fn(() => true),
+  isConditionWrapper: jest.fn(() => false)
+}))
+jest.mock('~/src/api/forms/service/condition-migration-helpers.js', () => ({
+  ...jest.requireActual(
+    '~/src/api/forms/service/condition-migration-helpers.js'
+  ),
+  convertConditionDataToV2: jest.fn((x) => x),
+  isConditionData: jest.fn(() => true)
+}))
 
 describe('migration helpers', () => {
   const summaryPageId = '449a45f6-4541-4a46-91bd-8b8931b07b50'
@@ -429,7 +459,7 @@ describe('migration helpers', () => {
 
       const summaryPageRes = /** @type {PageQuestion} */ (res.pages[0])
       expect(summaryPageRes.components).toHaveLength(0)
-      expect(res.declaration).toBe('')
+      expect(res.declaration).toBeUndefined()
     })
 
     it('should not create guidance component if declaration missing', () => {
@@ -456,7 +486,7 @@ describe('migration helpers', () => {
       expect(res.declaration).toBeUndefined()
     })
 
-    it('should throw if no summary page but a declaration', () => {
+    it('should create summary page if missing and move declaration to it', () => {
       const testDefinition3 = buildDefinition({
         pages: [],
         sections: [
@@ -466,9 +496,24 @@ describe('migration helpers', () => {
         declaration: 'Some declaration'
       })
 
-      expect(() => convertDeclaration(testDefinition3)).toThrow(
-        'Cannot migrate declaration as unable to find Summary Page'
+      const res = convertDeclaration(testDefinition3)
+
+      // Should remove declaration from root
+      expect(res.declaration).toBeUndefined()
+
+      // Should have a summary page created
+      const summaryPage = res.pages.find(
+        (page) => page.controller === ControllerType.Summary
       )
+      expect(summaryPage).toBeDefined()
+      expect(summaryPage?.components).toHaveLength(1)
+      expect(summaryPage?.components?.[0]).toEqual({
+        content: 'Some declaration',
+        title: 'Markdown',
+        name: 'Markdown',
+        type: 'Markdown',
+        options: {}
+      })
     })
   })
 
@@ -541,6 +586,13 @@ describe('migration helpers', () => {
       expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
     })
 
+    it('migration is an idempotent operation', () => {
+      const migration1 = migrateToV2(definitionV1)
+      const migration2 = migrateToV2(clone(migration1))
+
+      expect(migration1).toMatchObject(migration2)
+    })
+
     it('should throw if there is some error in validation', () => {
       const partialDefinition = /** @type {Partial<FormDefinition>} */ {
         unknownProperty: true
@@ -603,9 +655,507 @@ describe('migration helpers', () => {
         ]
       })
     })
+
+    describe('convertListNamesToIds', () => {
+      it('should convert component list names to ids', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries' }],
+          pages: [
+            {
+              components: [{ type: 'RadiosField', list: 'countries' }]
+            }
+          ]
+        })
+
+        const result = convertListNamesToIds(definition)
+
+        // @ts-expect-error type doesn't really matter when we have the below checks
+        const newListReference = result.pages[0].components[0].list
+
+        expect(newListReference).not.toBe('countries')
+        expect(result.lists[0].id).toBe(newListReference)
+      })
+
+      it('should leave components unchanged if no list property', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [
+            {
+              components: [{ type: 'TextField' }]
+            }
+          ]
+        })
+
+        const result = convertListNamesToIds(definition)
+        // @ts-expect-error we know this is a TextField in a test
+        expect(result.pages[0].components[0]).toEqual({ type: 'TextField' })
+      })
+
+      it('should throw if component list name does not exist in lists', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [
+            {
+              components: [{ type: 'RadiosField', list: 'notfound' }]
+            }
+          ]
+        })
+
+        expect(() => convertListNamesToIds(definition)).toThrow(
+          'List name "notfound" not found in definition lists - cannot migrate'
+        )
+      })
+
+      it('should leave pages unchanged if no components', () => {
+        const definition = /** @type {FormDefinition} */ ({
+          lists: [{ name: 'countries', id: 'id1' }],
+          pages: [{ title: 'No components' }]
+        })
+
+        const result = convertListNamesToIds(definition)
+        expect(result.pages[0]).toEqual({ title: 'No components' })
+      })
+    })
+  })
+})
+
+describe('convertConditions', () => {
+  beforeAll(() => {
+    jest.spyOn(global.Math, 'random').mockReturnValue(0.12345)
+    Object.defineProperty(global, 'crypto', {
+      value: { randomUUID: () => 'mock-uuid' },
+      configurable: true
+    })
+  })
+
+  afterAll(() => {
+    jest.restoreAllMocks()
+  })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('converts v1 condition wrappers to v2 and updates page condition references', () => {
+    /**
+     * @type {ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest.mocked(hasNext).mockReturnValue(true)
+    jest.mocked(convertConditionDataToV2).mockReturnValue(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      pages: [
+        buildQuestionPage({
+          condition: 'cond1'
+        })
+      ],
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+
+    const result = convertConditions(definition)
+
+    // @ts-expect-error this is a V2 object, we do have an ID
+    const uuidValidation = Joi.string().uuid().validate(result.conditions[0].id)
+
+    expect(uuidValidation.error).toBeUndefined()
+
+    expect(result.conditions[0]).toMatchObject({
+      id: uuidValidation.value,
+      displayName: 'Condition 1',
+      items: expect.arrayContaining([dummyConditionItem])
+    })
+  })
+
+  it('keeps already v2 conditions unchanged', () => {
+    const dummyCondition = {
+      id: 'already-v2',
+      displayName: 'V2',
+      items: [
+        {
+          id: 'newConditionUuid',
+          componentId: 'myNewUuid',
+          operator: OperatorName.Is,
+          value: {
+            type: ConditionType.StringValue,
+            value: 'foobar'
+          }
+        }
+      ]
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(false)
+    const definition = buildMinimalDefinition({
+      conditions: [dummyCondition]
+    })
+    const result = convertConditions(definition)
+
+    expect(result.conditions).toHaveLength(1)
+    expect(result.conditions[0]).toEqual(dummyCondition)
+  })
+
+  it('throws if unsupported condition type found', () => {
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(false)
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+    expect(() => convertConditions(definition)).toThrow(
+      'Unsupported condition type found'
+    )
+  })
+
+  it('throws if multiple unique coordinators found', () => {
+    /**
+     * @type {ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest
+      .mocked(convertConditionDataToV2)
+      .mockReturnValueOnce(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [
+              { name: 'item1' },
+              { name: 'item2', coordinator: Coordinator.AND },
+              { name: 'item3', coordinator: Coordinator.OR }
+            ]
+          }
+        }
+      ]
+    })
+
+    expect(() => convertConditions(definition)).toThrow(
+      'Different unique coordinators found in condition items. Manual intervention is required.'
+    )
+  })
+
+  it('sets coordinator if only one unique coordinator is present', () => {
+    /**
+     * @type {ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest
+      .mocked(convertConditionDataToV2)
+      .mockReturnValueOnce(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [
+              { name: 'item1' },
+              { name: 'item2', coordinator: Coordinator.AND },
+              { name: 'item3', coordinator: Coordinator.AND }
+            ]
+          }
+        }
+      ]
+    })
+    const result = convertConditions(definition)
+
+    // @ts-expect-error: coordinator is only present on ConditionWrapperV2, not ConditionWrapper
+    expect(result.conditions[0].coordinator).toBe(Coordinator.AND)
+  })
+
+  it('does not set coordinator if no coordinator present', () => {
+    /**
+     * @type {ConditionDataV2}
+     */
+    const dummyConditionItem = {
+      id: 'newConditionUuid',
+      componentId: 'myNewUuid',
+      operator: OperatorName.Is,
+      value: {
+        type: ConditionType.StringValue,
+        value: 'foobar'
+      }
+    }
+
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest
+      .mocked(convertConditionDataToV2)
+      .mockReturnValueOnce(dummyConditionItem)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+    const result = convertConditions(definition)
+
+    // @ts-expect-error: coordinator is only present on ConditionWrapperV2, not ConditionWrapper
+    expect(result.conditions[0].coordinator).toBeUndefined()
+  })
+
+  it('drops unused conditions that fail migration', () => {
+    jest.mocked(isConditionWrapper).mockReturnValue(true)
+    jest.mocked(isConditionData).mockReturnValue(true)
+    jest.mocked(convertConditionDataToV2).mockReturnValueOnce(null)
+
+    const definition = buildMinimalDefinition({
+      conditions: [
+        {
+          type: 'ConditionWrapper',
+          name: 'cond1',
+          displayName: 'Condition 1',
+          value: {
+            conditions: [{ name: 'item1' }]
+          }
+        }
+      ]
+    })
+    const result = convertConditions(definition)
+
+    expect(result.conditions).toHaveLength(0) // if the condition item fails migration and the overall condition is now empty, it should be dropped
+  })
+})
+
+describe('convertListNamesToIds', () => {
+  it('maps list names to their IDs', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: [
+            {
+              type: 'RadiosField',
+              list: 'List 1'
+            }
+          ]
+        }
+      ],
+      lists: [{ name: 'List 1' }]
+    })
+
+    const result = convertListNamesToIds(definition)
+
+    // @ts-expect-error: list is only present on RadiosField, not PageQuestion
+    expect(result.pages[0].components[0].list).toEqual(result.lists[0].id)
+    expect(result.lists).toEqual([
+      {
+        id: expect.any(String),
+        name: 'List 1'
+      }
+    ])
+  })
+
+  it('ignores non-list components', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: [
+            {
+              type: 'TextField'
+            }
+          ]
+        }
+      ],
+      lists: [{ name: 'List 1' }]
+    })
+
+    const result = convertListNamesToIds(definition)
+
+    // @ts-expect-error: list is only present on RadiosField, not PageQuestion
+    expect(result.pages[0].components[0].list).toBeUndefined()
+  })
+
+  it('handles pages without components', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: []
+        }
+      ]
+    })
+
+    const result = convertListNamesToIds(definition)
+
+    expect(result.pages).toEqual(definition.pages)
+  })
+
+  it("throws an error if the list referenced by a component doesn't exist", () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          id: 'page1',
+          components: [
+            {
+              type: 'RadiosField',
+              list: 'invalidList'
+            }
+          ]
+        }
+      ],
+      lists: [{ name: 'validList' }]
+    })
+
+    expect(() => convertListNamesToIds(definition)).toThrow(
+      'List name "invalidList" not found in definition lists - cannot migrate'
+    )
+  })
+})
+
+describe('addComponentIdsToDefinition', () => {
+  it('should add ids to components in pages', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          components: [
+            {
+              id: '123-456-789'
+            }
+          ]
+        }
+      ]
+    })
+
+    const result = addComponentIdsToDefinition(definition)
+
+    // @ts-expect-error we know there will be a component
+    expect(result.pages[0].components[0].id).toBe('123-456-789')
+  })
+
+  it('should not change pages without components', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          components: [
+            {
+              name: 'alPzmd'
+            }
+          ]
+        }
+      ]
+    })
+
+    const result = addComponentIdsToDefinition(definition)
+
+    // @ts-expect-error we know there will be a component
+    expect(result.pages[0].components[0].id).toBeDefined()
+  })
+})
+
+describe('convertControllerPathsToNames', () => {
+  it('should convert controller paths to names in page definitions', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          title: 'Question page'
+        },
+        {
+          title: 'Status page',
+          controller: 'StatusPageController'
+        }
+      ]
+    })
+
+    const result = convertControllerPathsToNames(definition)
+
+    expect(result.pages[0].controller).toBeUndefined()
+    expect(result.pages[1].controller).toBe('StatusPageController')
+  })
+
+  it('should handle JS-based controller paths', () => {
+    const definition = buildMinimalDefinition({
+      pages: [
+        {
+          title: 'Status page',
+          controller: './pages/summary.js'
+        }
+      ]
+    })
+
+    const result = convertControllerPathsToNames(definition)
+    expect(result.pages[0].controller).toBe('SummaryPageController')
   })
 })
 
 /**
- * @import { List, PageQuestion, Page, PageSummary, ComponentDef } from '@defra/forms-model'
+ * Build a minimal form definition for testing.
+ * @param {object} [overrides]
+ * @returns {FormDefinition}
+ */
+function buildMinimalDefinition(overrides = {}) {
+  return buildDefinition({
+    pages: [buildQuestionPage({})],
+    lists: [],
+    sections: [],
+    conditions: [],
+    ...overrides
+  })
+}
+
+/**
+ * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef, ConditionDataV2 } from '@defra/forms-model'
  */
