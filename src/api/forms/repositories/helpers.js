@@ -288,7 +288,7 @@ export async function insertDraft(
   schema = formDefinitionV2Schema
 ) {
   // Validate form definition
-  const draft = validate(definition, schema)
+  const { value: draft } = validate(definition, schema, true)
 
   const id = { _id: new ObjectId(formId) }
 
@@ -346,7 +346,7 @@ export async function modifyDraft(
   const updated = updateCallback(document.draft)
 
   // Validate form definition
-  const draft = validate(updated, schema)
+  const { value: draft } = validate(updated, schema)
 
   // Persist the updated draft
   const coll2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (

@@ -506,7 +506,7 @@ export function migrateToV2(definition) {
   migratedDefinition.engine = Engine.V2
   migratedDefinition.schema = SchemaVersion.V2
 
-  const value = validate(migratedDefinition, formDefinitionV2Schema)
+  const { value } = validate(migratedDefinition, formDefinitionV2Schema)
 
   return value
 }

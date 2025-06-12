@@ -28,14 +28,15 @@ export function getValidationSchema(definition) {
  * Validates the form definition
  * @param {FormDefinition} definition
  * @param {ObjectSchema<FormDefinition>} schema
+ * @param {boolean} [allowFailure] - If true, does not throw on validation failure
  */
-export function validate(definition, schema) {
+export function validate(definition, schema, allowFailure = false) {
   /** @type {{ error?: ValidationError; value: FormDefinition }} */
   const result = schema.validate(definition)
 
-  const { error, value } = result
+  const { error } = result
 
-  if (error) {
+  if (error && !allowFailure) {
     const name = definition.name ?? 'No name'
 
     logger.warn(
@@ -47,7 +48,7 @@ export function validate(definition, schema) {
     })
   }
 
-  return value
+  return result
 }
 
 /**
