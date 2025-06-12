@@ -207,14 +207,15 @@ export async function setEngineVersion(formId, engineVersion, session) {
  * @param {string} formId - the ID of the form
  * @param {string} name - new name for the form
  * @param {ClientSession} session
+ * @param {ObjectSchema<FormDefinition>} schema - the schema to use
  */
-export async function updateName(formId, name, session) {
+export async function updateName(formId, name, session, schema) {
   logger.info(`Updating form name for form ID ${formId}`)
 
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyName(draft, name)
 
-  await modifyDraft(formId, callback, session)
+  await modifyDraft(formId, callback, session, schema)
 
   logger.info(`Updated form name for form ID ${formId}`)
 }
