@@ -380,24 +380,18 @@ describe('form-definition-repository', () => {
   })
 
   describe('updateName', () => {
-    it('should update engine version to V1', async () => {
+    it('should update name', async () => {
       await helper(
         async () => {
-          await updateName(formId, 'New Name', mockSession)
+          await updateName(
+            formId,
+            'New Name',
+            mockSession,
+            formDefinitionV2Schema
+          )
         },
         (definition) => {
           expect(definition.name).toBe('New Name')
-        }
-      )
-    })
-
-    it('should update engine version to V2', async () => {
-      await helper(
-        async () => {
-          await setEngineVersion(formId, Engine.V2, mockSession)
-        },
-        (definition) => {
-          expect(definition.engine).toEqual(Engine.V2)
         }
       )
     })
