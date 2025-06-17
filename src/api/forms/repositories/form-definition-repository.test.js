@@ -192,10 +192,8 @@ describe('form-definition-repository', () => {
           id: '6746b15f-69f9-454c-a324-c62420069618',
           componentId: component3Id,
           operator: OperatorName.Is,
-          value: {
-            type: ConditionType.StringValue,
-            value: 'Enrique Chase'
-          }
+          type: ConditionType.StringValue,
+          value: 'Enrique Chase'
         }
       ]
     })
@@ -208,10 +206,8 @@ describe('form-definition-repository', () => {
           id: 'c73645b4-3ecf-4b00-bbee-de3bc465384d',
           componentId: component4Id,
           operator: OperatorName.Is,
-          value: {
-            type: ConditionType.StringValue,
-            value: 'Joanne Bloggs'
-          }
+          type: ConditionType.StringValue,
+          value: 'Joanne Bloggs'
         }
       ]
     })
@@ -704,10 +700,8 @@ describe('form-definition-repository', () => {
             id: '6746b15f-69f9-454c-a324-c62420069618',
             componentId: component1Id,
             operator: OperatorName.Is,
-            value: {
-              type: ConditionType.StringValue,
-              value: 'Joanne Bloggs-Chase'
-            }
+            type: ConditionType.StringValue,
+            value: 'Joanne Bloggs-Chase'
           }
         ]
       })
@@ -759,10 +753,8 @@ describe('form-definition-repository', () => {
           id: '6746b15f-69f9-454c-a324-c62420069618',
           componentId: component3Id,
           operator: OperatorName.IsNot,
-          value: {
-            type: ConditionType.StringValue,
-            value: 'Enrique Chase'
-          }
+          type: ConditionType.StringValue,
+          value: 'Enrique Chase'
         }
       ]
     })

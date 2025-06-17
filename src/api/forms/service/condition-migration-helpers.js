@@ -54,10 +54,8 @@ export function convertConditionDataToV2(
       id: randomUUID().toString(),
       componentId,
       operator: conditionData.operator,
-      value: {
-        type: ConditionType.StringValue,
-        value: conditionData.value.value
-      }
+      type: ConditionType.StringValue,
+      value: conditionData.value.value
     }
   } else if (usedConditions.has(conditionData.field.name)) {
     throw new Error(

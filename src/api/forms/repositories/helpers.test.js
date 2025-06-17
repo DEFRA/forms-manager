@@ -147,10 +147,8 @@ describe('repository helpers', () => {
         id: '6746b15f-69f9-454c-a324-c62420069618',
         componentId,
         operator: OperatorName.Is,
-        value: {
-          type: ConditionType.StringValue,
-          value: 'Enrique Chase'
-        }
+        type: ConditionType.StringValue,
+        value: 'Enrique Chase'
       }
     ]
   })

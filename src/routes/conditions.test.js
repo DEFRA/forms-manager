@@ -39,10 +39,8 @@ describe('Conditions route', () => {
             id: '6746b15f-69f9-454c-a324-c62420069618',
             componentId: '99cfccef-6292-4e7f-895f-4404751beb3c',
             operator: OperatorName.Is,
-            value: {
-              type: ConditionType.StringValue,
-              value: 'Enrique Chase'
-            }
+            type: ConditionType.StringValue,
+            value: 'Enrique Chase'
           },
           {
             id: '018a7d26-d1f1-4bc6-bf48-b882b69bfbaa',
@@ -93,10 +91,8 @@ describe('Conditions route', () => {
             id: '6746b15f-69f9-454c-a324-c62420069618',
             componentId: '99cfccef-6292-4e7f-895f-4404751beb3c',
             operator: OperatorName.Is,
-            value: {
-              type: ConditionType.StringValue,
-              value: 'Enrique Chase'
-            }
+            type: ConditionType.StringValue,
+            value: 'Enrique Chase'
           },
           {
             id: '018a7d26-d1f1-4bc6-bf48-b882b69bfbaa',

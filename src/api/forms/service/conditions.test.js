@@ -73,10 +73,8 @@ describe('conditions', () => {
         id: '6746b15f-69f9-454c-a324-c62420069618',
         componentId: component1Id,
         operator: OperatorName.Is,
-        value: {
-          type: ConditionType.StringValue,
-          value: 'Enrique Chase'
-        }
+        type: ConditionType.StringValue,
+        value: 'Enrique Chase'
       }
     ]
   })
@@ -89,10 +87,8 @@ describe('conditions', () => {
         id: 'c73645b4-3ecf-4b00-bbee-de3bc465384d',
         componentId: component2Id,
         operator: OperatorName.Is,
-        value: {
-          type: ConditionType.StringValue,
-          value: 'Joanne Bloggs'
-        }
+        type: ConditionType.StringValue,
+        value: 'Joanne Bloggs'
       }
     ]
   })
@@ -126,10 +122,8 @@ describe('conditions', () => {
             id: '6746b15f-69f9-454c-a324-c62420069618',
             componentId: component1Id,
             operator: OperatorName.Is,
-            value: {
-              type: ConditionType.StringValue,
-              value: 'Joanne Bloggs-Chase'
-            }
+            type: ConditionType.StringValue,
+            value: 'Joanne Bloggs-Chase'
           }
         ]
       })
@@ -161,10 +155,8 @@ describe('conditions', () => {
             id: '6746b15f-69f9-454c-a324-c62420069618',
             componentId: component1Id,
             operator: OperatorName.IsNot,
-            value: {
-              type: ConditionType.StringValue,
-              value: 'Enrique Chase'
-            }
+            type: ConditionType.StringValue,
+            value: 'Enrique Chase'
           }
         ]
       })
