@@ -36,6 +36,10 @@ jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
+const { emptyV2: emptyFormWithSummaryV2 } =
+  /** @type {typeof formTemplates} */ (
+    jest.requireActual('~/src/api/forms/templates.js')
+  )
 const author = getAuthor()
 
 describe('Forms service', () => {
@@ -44,6 +48,7 @@ describe('Forms service', () => {
   const dateUsedInFakeTime = new Date('2020-01-01')
 
   let definition = emptyFormWithSummary()
+  const definitionV2 = emptyFormWithSummaryV2()
 
   beforeAll(async () => {
     await prepareDb(pino())
@@ -223,6 +228,150 @@ describe('Forms service', () => {
         upsertedCount: 0,
         upsertedId: null
       })
+      jest.mocked(formDefinition.get).mockResolvedValue(definition)
+    })
+
+    it.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
+      const input = {
+        ...formMetadataInput,
+        title: slugIn.input
+      }
+
+      await expect(updateFormMetadata(id, input, author)).resolves.toEqual(
+        slugIn.output
+      )
+    })
+
+    it('should update slug and draft.updatedAt/draft.updatedBy when title is updated', async () => {
+      const input = {
+        title: 'new title'
+      }
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateName')
+
+      const updatedSlug = await updateFormMetadata(id, input, author)
+      expect(updatedSlug).toBe('new-title')
+
+      const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
+      const dbDefinitionOperationArgs = dbDefinitionSpy.mock.calls[0]
+
+      // Check metadata was updated
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      expect(dbMetadataOperationArgs[0]).toBe(id)
+      expect(dbMetadataOperationArgs[1]).toMatchObject({
+        $set: {
+          slug: 'new-title',
+          title: input.title,
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author,
+          'draft.updatedAt': dateUsedInFakeTime,
+          'draft.updatedBy': author
+        }
+      })
+
+      // Check definition was updated
+      expect(dbDefinitionSpy).toHaveBeenCalled()
+      expect(dbDefinitionOperationArgs[0]).toBe(id)
+      expect(dbDefinitionOperationArgs[1]).toBe(input.title)
+    })
+
+    it('should not update draft.updatedAt and draft.updatedBy when title is not updated', async () => {
+      const input = {
+        organisation: 'new organisation'
+      }
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
+
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+      const dbDefinitionSpy = jest.spyOn(formDefinition, 'updateName')
+
+      const slugAfterUpdate = await updateFormMetadata(id, input, author)
+      expect(slugAfterUpdate).toBe('test-form')
+
+      const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
+
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      expect(dbMetadataOperationArgs[0]).toBe(id)
+      expect(dbMetadataOperationArgs[1]).toMatchObject({
+        $set: {
+          organisation: 'new organisation',
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author
+        }
+      })
+
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedAt']
+      ).toBeUndefined()
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedBy']
+      ).toBeUndefined()
+
+      expect(dbDefinitionSpy).not.toHaveBeenCalled()
+    })
+
+    it('should throw an error when writing for metadata fails', async () => {
+      jest.mocked(formMetadata.update).mockRejectedValue(new Error('error'))
+
+      await expect(
+        updateFormMetadata(id, formMetadataInput, author)
+      ).rejects.toThrow('error')
+    })
+
+    it('should throw an error if form does not exist', async () => {
+      const error = Boom.notFound("Form with ID '123' not found")
+
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(
+        updateFormMetadata('123', formMetadataInput, author)
+      ).rejects.toThrow(error)
+    })
+
+    it('should throw an error if form is live and trying to update title', async () => {
+      const error = Boom.badRequest(
+        `Form with ID '123' is live so 'title' cannot be updated`
+      )
+
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+
+      await expect(
+        updateFormMetadata('123', { title: 'new title' }, author)
+      ).rejects.toThrow(error)
+    })
+
+    it('should throw an error when title already exists', async () => {
+      const duplicateError = new MongoServerError({
+        message: 'duplicate key error',
+        code: 11000
+      })
+      jest.mocked(formMetadata.update).mockRejectedValue(duplicateError)
+
+      const input = {
+        title: 'duplicate title'
+      }
+
+      await expect(updateFormMetadata(id, input, author)).rejects.toThrow(
+        Boom.badRequest('Form title duplicate title already exists')
+      )
+    })
+  })
+
+  describe('updateFormMetadataV2', () => {
+    beforeEach(() => {
+      jest.mocked(formMetadata.update).mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null
+      })
+      jest.mocked(formDefinition.get).mockResolvedValue(definitionV2)
     })
 
     it.each(slugExamples)(`should return slug '$output'`, async (slugIn) => {
@@ -356,8 +505,3 @@ describe('Forms service', () => {
     })
   })
 })
-
-/**
- * @import { FormDefinition, FormMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FilterOptions, QueryOptions, PatchPageFields } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
- */

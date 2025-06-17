@@ -1,11 +1,14 @@
-import { formDefinitionSchema, slugify } from '@defra/forms-model'
+import { FormStatus, formDefinitionSchema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
 import { removeFormErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { validate } from '~/src/api/forms/service/helpers/definition.js'
+import {
+  getValidationSchema,
+  validate
+} from '~/src/api/forms/service/helpers/definition.js'
 import {
   MongoError,
   logger,
@@ -151,8 +154,20 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       await formMetadata.update(formId, { $set: updatedForm }, session)
 
       if (formUpdate.title) {
+        const definition = await formDefinition.get(
+          formId,
+          FormStatus.Draft,
+          session
+        )
+        const schema = getValidationSchema(definition)
+
         // Also update the form definition's name to keep them in sync
-        await formDefinition.updateName(formId, formUpdate.title, session)
+        await formDefinition.updateName(
+          formId,
+          formUpdate.title,
+          session,
+          schema
+        )
       }
     })
 
