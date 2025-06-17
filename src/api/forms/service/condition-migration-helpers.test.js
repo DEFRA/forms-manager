@@ -41,10 +41,8 @@ describe('convertConditionDataToV2', () => {
       id: expect.any(String),
       componentId: 'component-123',
       operator: 'is',
-      value: {
-        type: ConditionType.StringValue,
-        value: 'test-value'
-      }
+      type: ConditionType.StringValue,
+      value: 'test-value'
     })
   })
 

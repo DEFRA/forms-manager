@@ -744,10 +744,8 @@ describe('convertConditions', () => {
       id: 'newConditionUuid',
       componentId: 'myNewUuid',
       operator: OperatorName.Is,
-      value: {
-        type: ConditionType.StringValue,
-        value: 'foobar'
-      }
+      type: ConditionType.StringValue,
+      value: 'foobar'
     }
 
     jest.mocked(isConditionWrapper).mockReturnValue(true)
@@ -842,10 +840,8 @@ describe('convertConditions', () => {
       id: 'newConditionUuid',
       componentId: 'myNewUuid',
       operator: OperatorName.Is,
-      value: {
-        type: ConditionType.StringValue,
-        value: 'foobar'
-      }
+      type: ConditionType.StringValue,
+      value: 'foobar'
     }
 
     jest.mocked(isConditionWrapper).mockReturnValue(true)
@@ -884,10 +880,8 @@ describe('convertConditions', () => {
       id: 'newConditionUuid',
       componentId: 'myNewUuid',
       operator: OperatorName.Is,
-      value: {
-        type: ConditionType.StringValue,
-        value: 'foobar'
-      }
+      type: ConditionType.StringValue,
+      value: 'foobar'
     }
 
     jest.mocked(isConditionWrapper).mockReturnValue(true)
@@ -926,10 +920,8 @@ describe('convertConditions', () => {
       id: 'newConditionUuid',
       componentId: 'myNewUuid',
       operator: OperatorName.Is,
-      value: {
-        type: ConditionType.StringValue,
-        value: 'foobar'
-      }
+      type: ConditionType.StringValue,
+      value: 'foobar'
     }
 
     jest.mocked(isConditionWrapper).mockReturnValue(true)
