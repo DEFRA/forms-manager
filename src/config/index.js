@@ -14,6 +14,12 @@ export const config = convict({
     default: 'development',
     env: 'NODE_ENV'
   },
+  host: {
+    doc: 'The IP address to bind',
+    format: String,
+    default: '0.0.0.0',
+    env: 'HOST'
+  },
   port: {
     doc: 'The port to bind.',
     format: 'port',
@@ -25,13 +31,19 @@ export const config = convict({
     format: String,
     default: 'forms-manager'
   },
-  serviceVersion: /** @satisfies {SchemaObj<string>} */ ({
+  serviceVersion: /** @satisfies {SchemaObj<string | null>} */ ({
     doc: 'The service version, this variable is injected into your docker container in CDP environments',
     format: String,
     nullable: true,
     default: null,
     env: 'SERVICE_VERSION'
   }),
+  cdpEnvironment: {
+    doc: 'The CDP environment the app is running in. With the addition of "local" for local development',
+    format: ['local', 'dev', 'test', 'perf-test', 'prod'],
+    default: 'local',
+    env: 'ENVIRONMENT'
+  },
   root: {
     doc: 'Project root',
     format: String,
@@ -79,29 +91,44 @@ export const config = convict({
         : ['req', 'res', 'responseTime']
     }
   },
-  mongoUri: {
-    doc: 'URI for mongodb',
-    format: '*',
-    default: 'mongodb://127.0.0.1:27017/',
-    env: 'MONGO_URI'
-  },
-  mongoDatabase: {
-    doc: 'database for mongodb',
-    format: String,
-    default: 'forms-manager',
-    env: 'MONGO_DATABASE'
+  mongo: {
+    uri: {
+      doc: 'URI for mongodb',
+      format: String,
+      default: 'mongodb://127.0.0.1:27017/',
+      env: 'MONGO_URI'
+    },
+    databaseName: {
+      doc: 'Database name for mongodb',
+      format: String,
+      default: 'forms-manager',
+      env: 'MONGO_DATABASE'
+    }
   },
   httpProxy: {
     doc: 'HTTP Proxy',
     format: String,
-    default: '',
-    env: 'CDP_HTTP_PROXY'
+    nullable: true,
+    default: null,
+    env: 'HTTP_PROXY'
   },
   httpsProxy: {
     doc: 'HTTPS Proxy',
     format: String,
     default: '',
     env: 'CDP_HTTPS_PROXY'
+  },
+  isSecureContextEnabled: {
+    doc: 'Enable Secure Context',
+    format: Boolean,
+    default: isProduction,
+    env: 'ENABLE_SECURE_CONTEXT'
+  },
+  isMetricsEnabled: {
+    doc: 'Enable metrics reporting',
+    format: Boolean,
+    default: isProduction,
+    env: 'ENABLE_METRICS'
   },
   /**
    * @todo We plan to replace `node-convict` with `joi` and remove all defaults.
@@ -135,7 +162,7 @@ export const config = convict({
   },
   tracing: {
     header: {
-      doc: 'Which header to track',
+      doc: 'CDP tracing header name',
       format: String,
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'

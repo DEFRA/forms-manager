@@ -37,7 +37,9 @@ export const auth = {
           const user = artifacts.decoded.payload
 
           if (!user) {
-            logger.error('Auth: Missing user from token payload.')
+            logger.info(
+              '[authMissingUser] Auth: Missing user from token payload.'
+            )
             return {
               isValid: false
             }
@@ -47,7 +49,9 @@ export const auth = {
           const groupsClaim = user.groups
 
           if (!oid) {
-            logger.error('Auth: User OID is missing in token payload.')
+            logger.info(
+              '[authMissingOID] Auth: User OID is missing in token payload.'
+            )
             return {
               isValid: false
             }
@@ -70,10 +74,13 @@ export const auth = {
                 )
               }
             } catch (error) {
-              const errorMessage =
-                error instanceof Error ? error.message : 'Unknown parsing error'
+              const err =
+                error instanceof Error
+                  ? error
+                  : new Error('Unknown parsing error')
               logger.error(
-                `Auth: User ${oid}: Failed to parse 'groups' claim: ${errorMessage}`
+                err,
+                `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${err.message}`
               )
             }
           } else if (Array.isArray(groupsClaim)) {

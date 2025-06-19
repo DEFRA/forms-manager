@@ -77,9 +77,10 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
     logger.info(`Updated form metadata (draft) for form ID ${formId}`)
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Updating form definition (draft) for form ID ${formId} failed`
+      error,
+      `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${error.message}`
     )
 
     throw err
@@ -99,8 +100,8 @@ export async function createLiveFromDraft(formId, author) {
     const form = await getForm(formId)
 
     if (!form.draft) {
-      logger.error(
-        `Form with ID '${formId}' has no draft state so failed deployment to live`
+      logger.info(
+        `[noDraftState] Form with ID '${formId}' has no draft state so failed deployment to live - validation failed`
       )
 
       throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
@@ -115,6 +116,9 @@ export async function createLiveFromDraft(formId, author) {
     }
 
     if (!form.privacyNoticeUrl) {
+      logger.info(
+        `[missingPrivacyNotice] Form ${formId} missing privacy notice URL - validation failed, cannot publish`
+      )
       throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
     }
 
@@ -177,7 +181,11 @@ export async function createLiveFromDraft(formId, author) {
     logger.info(`Removed form metadata (draft) for form ID ${formId}`)
     logger.info(`Made draft live for form ID ${formId}`)
   } catch (err) {
-    logger.error(err, `Make draft live for form ID ${formId} failed`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[makeDraftLive] Make draft live for form ID ${formId} failed - ${error.message}`
+    )
 
     throw err
   }
@@ -231,7 +239,11 @@ export async function createDraftFromLive(formId, author) {
     logger.info(`Added form metadata (draft) for form ID ${formId}`)
     logger.info(`Created draft to edit for form ID ${formId}`)
   } catch (err) {
-    logger.error(err, `Create draft to edit for form ID ${formId} failed`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${error.message}`
+    )
 
     throw err
   }
@@ -275,9 +287,10 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
 
     return newForm
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Reordering pages on form definition (draft) for form ID ${formId} failed`
+      error,
+      `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${error.message}`
     )
 
     throw err

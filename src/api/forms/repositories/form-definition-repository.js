@@ -102,10 +102,11 @@ export async function createDraftFromLive(id, session) {
       [{ $set: { draft: '$live' } }],
       { session }
     )
-  } catch (error) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
       error,
-      `Copying form definition (live to draft) for form ID ${id} failed`
+      `[createDraftFromLive] Failed to copy form definition (live to draft) for form ID ${id} - ${error.message}`
     )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
@@ -155,9 +156,10 @@ export async function get(
 
     return definition
   } catch (error) {
+    const err = error instanceof Error ? error : new Error('Unknown error')
     logger.error(
-      error,
-      `Getting form definition (${state}) for form ID ${formId} failed`
+      err,
+      `[get] Failed to get form definition (${state}) for form ID ${formId} - ${err.message}`
     )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
