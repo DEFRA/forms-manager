@@ -13,6 +13,7 @@ import {
   buildQuestionPage,
   buildSummaryPage
 } from '~/src/api/forms/__stubs__/definition.js'
+import * as formTemplates from '~/src/api/forms/__stubs__/templates.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -39,20 +40,19 @@ import {
   getFormBySlug,
   removeForm
 } from '~/src/api/forms/service/index.js'
-import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
-jest.mock('~/src/api/forms/templates.js')
+jest.mock('~/src/api/forms/__stubs__/templates.js')
 jest.mock('~/src/mongo.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
-  jest.requireActual('~/src/api/forms/templates.js')
+  jest.requireActual('~/src/api/forms/__stubs__/templates.js')
 )
 const author = getAuthor()
 

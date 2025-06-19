@@ -2,6 +2,7 @@ import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
+import * as formTemplates from '~/src/api/forms/__stubs__/templates.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -11,7 +12,6 @@ import {
   formMetadataOutput,
   formMetadataWithLiveDocument
 } from '~/src/api/forms/service/__stubs__/service.js'
-import * as formTemplates from '~/src/api/forms/service/__stubs__/templates.js'
 import {
   getFormDefinition,
   updateDraftFormDefinition
@@ -28,17 +28,17 @@ import { prepareDb } from '~/src/mongo.js'
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
-jest.mock('~/src/api/forms/service/__stubs__/templates.js')
+jest.mock('~/src/api/forms/__stubs__/templates.js')
 jest.mock('~/src/mongo.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
-  jest.requireActual('~/src/api/forms/service/__stubs__/templates.js')
+  jest.requireActual('~/src/api/forms/__stubs__/templates.js')
 )
 const { emptyV2: emptyFormWithSummaryV2 } =
   /** @type {typeof formTemplates} */ (
-    jest.requireActual('~/src/api/forms/service/__stubs__/templates.js')
+    jest.requireActual('~/src/api/forms/__stubs__/templates.js')
   )
 const author = getAuthor()
 

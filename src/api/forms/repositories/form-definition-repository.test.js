@@ -23,6 +23,7 @@ import { ObjectId } from 'mongodb'
 
 import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
+import { empty, emptyV2 } from '~/src/api/forms/__stubs__/templates.js'
 import {
   addComponent,
   addCondition,
@@ -45,7 +46,6 @@ import {
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
-import { empty, emptyV2 } from '~/src/api/forms/service/__stubs__/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
 
