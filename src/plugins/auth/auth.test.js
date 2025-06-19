@@ -99,7 +99,7 @@ describe('auth plugin', () => {
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestInfoFn).toHaveBeenCalledWith(
-        'Auth: Missing user from token payload.'
+        '[authMissingUser] Auth: Missing user from token payload.'
       )
     })
 
@@ -114,7 +114,7 @@ describe('auth plugin', () => {
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestInfoFn).toHaveBeenCalledWith(
-        'Auth: User OID is missing in token payload.'
+        '[authMissingOID] Auth: User OID is missing in token payload.'
       )
     })
 
@@ -209,7 +209,7 @@ describe('auth plugin', () => {
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
-          'Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
+          '[authGroupNotFound] Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
         )
       )
     })
@@ -227,7 +227,7 @@ describe('auth plugin', () => {
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
-          'Authorisation failed. Required group "editor-group-id" not found'
+          '[authGroupNotFound] Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
         )
       )
     })
