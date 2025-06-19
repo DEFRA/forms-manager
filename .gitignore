@@ -10,3 +10,4 @@ coverage
 .cache
 .env
 newman-reports
+*.tsbuildinfo

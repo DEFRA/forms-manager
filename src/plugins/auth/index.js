@@ -1,6 +1,7 @@
 import Jwt from '@hapi/jwt'
 
 import { config } from '~/src/config/index.js'
+import { normaliseError } from '~/src/helpers/error-utils.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const oidcJwksUri = config.get('oidcJwksUri')
@@ -9,6 +10,92 @@ const oidcVerifyIss = config.get('oidcVerifyIss')
 const roleEditorGroupId = config.get('roleEditorGroupId')
 
 const logger = createLogger()
+
+/**
+ * Processes the groups claim from the token payload
+ * @param {unknown} groupsClaim - The groups claim from the token
+ * @param {string} oid - User OID for logging purposes
+ * @returns {string[]} Processed groups array
+ */
+function processGroupsClaim(groupsClaim, oid) {
+  let processedGroups = []
+
+  // For the integration tests, the OIDC mock server sends the 'groups' claim as a stringified JSON array which
+  // requires parsing, while a real Azure AD would typically provide 'groups' as a proper array.
+  // We handle both formats for flexibility between test and production environments.
+  if (typeof groupsClaim === 'string') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- we know this is a stringified JSON array
+      const parsed = JSON.parse(groupsClaim)
+      if (Array.isArray(parsed)) {
+        processedGroups = parsed
+      } else {
+        logger.warn(
+          `Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'`
+        )
+      }
+    } catch (error) {
+      const err = normaliseError(error, 'Unknown parsing error')
+      logger.error(
+        err,
+        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${err.message}`
+      )
+    }
+  } else if (Array.isArray(groupsClaim)) {
+    processedGroups = groupsClaim
+  } else {
+    processedGroups = []
+  }
+
+  return processedGroups
+}
+
+/**
+ * Validates user credentials from JWT token
+ * @param {Artifacts<UserCredentials>} artifacts - JWT artifacts
+ * @returns {{ isValid: boolean, credentials?: any }} Validation result
+ */
+function validateUserCredentials(artifacts) {
+  const user = artifacts.decoded.payload
+
+  if (!user) {
+    logger.info('[authMissingUser] Auth: Missing user from token payload.')
+    return {
+      isValid: false
+    }
+  }
+
+  const { oid } = user
+  const groupsClaim = user.groups
+
+  if (!oid) {
+    logger.info('[authMissingOID] Auth: User OID is missing in token payload.')
+    return {
+      isValid: false
+    }
+  }
+
+  const processedGroups = processGroupsClaim(groupsClaim, oid)
+
+  if (!processedGroups.includes(roleEditorGroupId)) {
+    logger.warn(
+      `[authGroupNotFound] Auth: User ${oid}: Authorisation failed. Required group "${roleEditorGroupId}" not found`
+    )
+    return {
+      isValid: false
+    }
+  }
+
+  return {
+    isValid: true,
+    credentials: {
+      user: {
+        ...user,
+        groups: processedGroups
+      }
+    }
+  }
+}
 
 /**
  * @satisfies {ServerRegisterPluginObject<void>}
@@ -30,80 +117,7 @@ export const auth = {
           nbf: true,
           exp: true
         },
-        /**
-         * @param {Artifacts<UserCredentials>} artifacts
-         */
-        validate(artifacts) {
-          const user = artifacts.decoded.payload
-
-          if (!user) {
-            logger.info('Auth: Missing user from token payload.')
-            return {
-              isValid: false
-            }
-          }
-
-          const { oid } = user
-          const groupsClaim = user.groups
-
-          if (!oid) {
-            logger.info('Auth: User OID is missing in token payload.')
-            return {
-              isValid: false
-            }
-          }
-
-          let processedGroups = []
-
-          // For the integration tests, the OIDC mock server sends the 'groups' claim as a stringified JSON array which
-          // requires parsing, while a real Azure AD would typically provide 'groups' as a proper array.
-          // We handle both formats for flexibility between test and production environments.
-          if (typeof groupsClaim === 'string') {
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- we know this is a stringified JSON array
-              const parsed = JSON.parse(groupsClaim)
-              if (Array.isArray(parsed)) {
-                processedGroups = parsed
-              } else {
-                logger.warn(
-                  `Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'`
-                )
-              }
-            } catch (error) {
-              const err =
-                error instanceof Error
-                  ? error
-                  : new Error('Unknown parsing error')
-              logger.error(
-                err,
-                `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${err.message}`
-              )
-            }
-          } else if (Array.isArray(groupsClaim)) {
-            processedGroups = groupsClaim
-          } else {
-            processedGroups = []
-          }
-
-          if (!processedGroups.includes(roleEditorGroupId)) {
-            logger.warn(
-              `Auth: User ${oid}: Authorisation failed. Required group "${roleEditorGroupId}" not found`
-            )
-            return {
-              isValid: false
-            }
-          }
-
-          return {
-            isValid: true,
-            credentials: {
-              user: {
-                ...user,
-                groups: processedGroups
-              }
-            }
-          }
-        }
+        validate: validateUserCredentials
       })
 
       // Set as the default strategy
