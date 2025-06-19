@@ -67,10 +67,11 @@ export default [
     handler(request) {
       const { auth, params, payload } = request
       const author = getAuthor(auth.credentials.user)
+
       return patchFieldsOnDraftDefinitionPage(
         params.id,
         params.pageId,
-        payload,
+        /** @type {Partial<Page>} */ (payload),
         author
       )
     },
@@ -110,4 +111,5 @@ export default [
 /**
  * @import { ServerRoute } from '@hapi/hapi'
  * @import { RequestPage, PatchPageRequest, SortDraftFormPagesRequest, DeletePageDraftFormRequest } from '~/src/api/types.js'
+ * @import { Page } from '@defra/forms-model'
  */

@@ -99,7 +99,7 @@ describe('auth plugin', () => {
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestInfoFn).toHaveBeenCalledWith(
-        '[authMissingUser] Auth: Missing user from token payload.'
+        'Auth: Missing user from token payload.'
       )
     })
 
@@ -114,7 +114,7 @@ describe('auth plugin', () => {
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestInfoFn).toHaveBeenCalledWith(
-        '[authMissingOID] Auth: User OID is missing in token payload.'
+        'Auth: User OID is missing in token payload.'
       )
     })
 

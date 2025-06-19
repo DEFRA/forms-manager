@@ -76,7 +76,7 @@ describe('Page service', () => {
         getFormDefinitionPage('123', 'bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d')
       ).rejects.toThrow(
         Boom.notFound(
-          'Page ID bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d not found on Form ID 123'
+          "Page not found with id 'bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d'"
         )
       )
     })
@@ -253,7 +253,7 @@ describe('Page service', () => {
         patchFieldsOnDraftDefinitionPage('123', pageId, pageFields, author)
       ).rejects.toThrow(
         Boom.notFound(
-          'Page ID ffefd409-f3f4-49fe-882e-6e89f44631b1 not found on Form ID 123'
+          "Page not found with id 'ffefd409-f3f4-49fe-882e-6e89f44631b1'"
         )
       )
     })
