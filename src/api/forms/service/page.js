@@ -48,7 +48,12 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    logger.error(err, `Failed to add page on ${formId}`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[addPage] Failed to add page on form ID ${formId} - ${error.message}`
+    )
+
     throw err
   } finally {
     await session.endSession()
@@ -99,7 +104,6 @@ export async function patchFieldsOnDraftDefinitionPage(
   author
 ) {
   const session = client.startSession()
-  const fields = Object.entries(pageFieldsToUpdate)
   let page
 
   try {
@@ -135,10 +139,12 @@ export async function patchFieldsOnDraftDefinitionPage(
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Failed to patch fields ${fields.map(([key]) => key).toString()} on Page ID ${pageId} Form ID ${formId}`
+      error,
+      `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${error.message}`
     )
+
     throw err
   } finally {
     await session.endSession()
@@ -165,7 +171,12 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    logger.error(err, `Failed to delete Page ID ${pageId} on Form ID ${formId}`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${error.message}`
+    )
+
     throw err
   } finally {
     await session.endSession()

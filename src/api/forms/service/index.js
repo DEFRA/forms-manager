@@ -179,10 +179,16 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       err instanceof MongoServerError &&
       err.code === MongoError.DuplicateKey
     ) {
-      logger.error(err, `Form title ${formUpdate.title} already exists`)
+      logger.info(
+        `[duplicateFormTitle] Form title ${formUpdate.title} already exists - validation failed`
+      )
       throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
     }
-    logger.error(err, `Updating form metadata for form ID ${formId} failed`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[updateFormMetadata] Updating form metadata for form ID ${formId} failed - ${error.message}`
+    )
     throw err
   }
 }

@@ -36,9 +36,10 @@ export async function addConditionToDraftFormDefinition(
 
     return newForm
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Failed to add condition ${condition.displayName} to form ID ${formId}`
+      error,
+      `[addCondition] Failed to add condition on Form ID ${formId} - ${error.message}`
     )
 
     throw err
@@ -83,9 +84,10 @@ export async function updateConditionOnDraftFormDefinition(
 
     return updatedList
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Failed to update condition ${conditionId} for form ID ${formId}`
+      error,
+      `[updateCondition] Failed to update condition ${conditionId} on Form ID ${formId} - ${error.message}`
     )
 
     throw err
@@ -119,9 +121,10 @@ export async function removeConditionOnDraftFormDefinition(
 
     logger.info(`Removed condition ${conditionId} for form ID ${formId}`)
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Failed to remove condition ${conditionId} for form ID ${formId}`
+      error,
+      `[removeCondition] Failed to remove condition ${conditionId} on Form ID ${formId} - ${error.message}`
     )
 
     throw err

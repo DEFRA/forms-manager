@@ -79,10 +79,12 @@ export async function createComponentOnDraftDefinition(
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Failed to add component on Page ID ${pageId} Form ID ${formId}`
+      error,
+      `[addComponent] Failed to add component to page ${pageId} on form ID ${formId} - ${error.message}`
     )
+
     throw err
   } finally {
     await session.endSession()
@@ -137,10 +139,12 @@ export async function updateComponentOnDraftDefinition(
 
     return updatedFormDefinitionPageComponent
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Failed to update Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+      error,
+      `[updateComponent] Failed to update component ${componentId} on page ${pageId} for form ID ${formId} - ${error.message}`
     )
+
     throw err
   } finally {
     await session.endSession()
@@ -173,10 +177,12 @@ export async function deleteComponentOnDraftDefinition(
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      err,
-      `Failed to delete Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+      error,
+      `[removeComponent] Failed to remove component ${componentId} from page ${pageId} on form ID ${formId} - ${error.message}`
     )
+
     throw err
   } finally {
     await session.endSession()

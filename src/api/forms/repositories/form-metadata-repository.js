@@ -92,7 +92,11 @@ export async function list(options) {
 
     return { documents, totalItems, filters }
   } catch (error) {
-    logger.error(error, 'Error fetching documents')
+    const err = error instanceof Error ? error : new Error('Unknown error')
+    logger.error(
+      err,
+      `[fetchDocuments] Error fetching documents - ${err.message}`
+    )
     throw error
   }
 }
@@ -119,7 +123,11 @@ export async function get(formId) {
 
     return document
   } catch (error) {
-    logger.error(error, `Getting form with ID ${formId} failed`)
+    const err = error instanceof Error ? error : new Error('Unknown error')
+    logger.error(
+      err,
+      `[getFormById] Getting form with ID ${formId} failed - ${err.message}`
+    )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.badRequest(error)
@@ -151,7 +159,11 @@ export async function getBySlug(slug) {
 
     return document
   } catch (error) {
-    logger.error(error, `Getting form with slug ${slug} failed`)
+    const err = error instanceof Error ? error : new Error('Unknown error')
+    logger.error(
+      err,
+      `[getFormBySlug] Getting form with slug ${slug} failed - ${err.message}`
+    )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.internal(error)
@@ -186,11 +198,22 @@ export async function create(document, session) {
     if (cause instanceof MongoServerError && cause.code === 11000) {
       const error = new FormAlreadyExistsError(document.slug, { cause })
 
-      logger.error(error, message)
+      logger.info(
+        `[duplicateFormSlug] Creating form with slug ${document.slug} failed - form already exists`
+      )
       throw Boom.badRequest(error)
     }
 
-    logger.error(cause, message)
+    if (cause instanceof MongoServerError) {
+      const error = cause instanceof Error ? cause : new Error('Unknown error')
+      logger.error(
+        error,
+        `[mongoError] ${message} - MongoDB error code: ${cause.code} - ${error.message}`
+      )
+    } else {
+      const error = cause instanceof Error ? cause : new Error('Unknown error')
+      logger.error(error, `[updateError] ${message} - ${error.message}`)
+    }
     throw cause
   }
 }
@@ -224,7 +247,11 @@ export async function update(formId, update, session) {
 
     return result
   } catch (error) {
-    logger.error(error, `Updating form with ID ${formId} failed`)
+    const err = error instanceof Error ? error : new Error('Unknown error')
+    logger.error(
+      err,
+      `[updateFormMetadata] Updating form with ID ${formId} failed - ${err.message}`
+    )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.internal(error)

@@ -53,7 +53,11 @@ export async function addListToDraftFormDefinition(formId, list, author) {
 
     return newForm
   } catch (err) {
-    logger.error(err, `Failed to add list ${list.name} to form ID ${formId}`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[addList] Failed to add list ${list.name} to form ID ${formId} - ${error.message}`
+    )
 
     throw err
   } finally {
@@ -99,7 +103,11 @@ export async function updateListOnDraftFormDefinition(
 
     return updatedList
   } catch (err) {
-    logger.error(err, `Failed to update list ${listId} for form ID ${formId}`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[updateList] Failed to update list ${listId} for form ID ${formId} - ${error.message}`
+    )
 
     throw err
   } finally {
@@ -128,7 +136,11 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
 
     logger.info(`Removed list ${listId} for form ID ${formId}`)
   } catch (err) {
-    logger.error(err, `Failed to remove list ${listId} for form ID ${formId}`)
+    const error = err instanceof Error ? err : new Error('Unknown error')
+    logger.error(
+      error,
+      `[removeList] Failed to remove list ${listId} for form ID ${formId} - ${error.message}`
+    )
 
     throw err
   } finally {

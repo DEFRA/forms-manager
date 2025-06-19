@@ -8,27 +8,17 @@ const serviceName = config.get('serviceName')
 const serviceVersion = config.get('serviceVersion')
 
 const formatters = {
-  ecs: /** @type {Omit<LoggerOptions, 'mixin' | 'transport'>} */ ({
-    ...ecsFormat(),
-    base: {
-      service: {
-        name: serviceName,
-        type: 'nodeJs',
-        version: serviceVersion
-      }
-    }
-  }),
-  'pino-pretty': /** @type {{ transport: TransportSingleOptions }} */ ({
-    transport: {
-      target: 'pino-pretty'
-    }
-  })
+  ecs: {
+    ...ecsFormat({
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- serviceVersion can be null from config
+      serviceVersion: serviceVersion ?? '1.0.0',
+      serviceName
+    })
+  },
+  'pino-pretty': { transport: { target: 'pino-pretty' } }
 }
 
-/**
- * @satisfies {Options}
- */
-export const loggerOptions = {
+export const loggerOptions = /** @type {any} */ ({
   enabled: logConfig.enabled,
   ignorePaths: ['/health'],
   redact: {
@@ -36,7 +26,8 @@ export const loggerOptions = {
     remove: true
   },
   level: logConfig.level,
-  ...formatters[logConfig.format],
+  ...formatters[/** @type {'ecs' | 'pino-pretty'} */ (logConfig.format)],
+  nesting: true,
   mixin() {
     const mixinValues = {}
     const traceId = getTraceId()
@@ -45,7 +36,7 @@ export const loggerOptions = {
     }
     return mixinValues
   }
-}
+})
 
 /**
  * @import { Options } from 'hapi-pino'
