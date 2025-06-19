@@ -1,12 +1,17 @@
+import { normaliseError } from '~/src/helpers/error-utils.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
+
+const logger = createLogger()
+
 /**
  * Log and throw and error
  * @type {Lifecycle.Method}
  */
-export function failAction(request, h, error) {
-  const err = error instanceof Error ? error : new Error('Unknown error')
-  request.logger.error(
+export const failAction = (_request, _h, error) => {
+  const err = normaliseError(error)
+  logger.error(
     err,
-    `[validationFailed] Request validation failed for ${request.method} ${request.url.pathname} - ${err.message}`
+    `[validationFailed] Request validation failed - ${err.message}`
   )
 
   throw error ?? new Error('Unknown error')

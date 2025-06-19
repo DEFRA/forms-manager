@@ -10,6 +10,7 @@ import {
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { partialAuditFields } from '~/src/api/forms/service/shared.js'
+import { normaliseError } from '~/src/helpers/error-utils.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -92,7 +93,7 @@ export async function list(options) {
 
     return { documents, totalItems, filters }
   } catch (error) {
-    const err = error instanceof Error ? error : new Error('Unknown error')
+    const err = normaliseError(error)
     logger.error(
       err,
       `[fetchDocuments] Error fetching documents - ${err.message}`
@@ -123,7 +124,7 @@ export async function get(formId) {
 
     return document
   } catch (error) {
-    const err = error instanceof Error ? error : new Error('Unknown error')
+    const err = normaliseError(error)
     logger.error(
       err,
       `[getFormById] Getting form with ID ${formId} failed - ${err.message}`
@@ -159,7 +160,7 @@ export async function getBySlug(slug) {
 
     return document
   } catch (error) {
-    const err = error instanceof Error ? error : new Error('Unknown error')
+    const err = normaliseError(error)
     logger.error(
       err,
       `[getFormBySlug] Getting form with slug ${slug} failed - ${err.message}`
@@ -205,13 +206,13 @@ export async function create(document, session) {
     }
 
     if (cause instanceof MongoServerError) {
-      const error = cause instanceof Error ? cause : new Error('Unknown error')
+      const error = normaliseError(cause)
       logger.error(
         error,
         `[mongoError] ${message} - MongoDB error code: ${cause.code} - ${error.message}`
       )
     } else {
-      const error = cause instanceof Error ? cause : new Error('Unknown error')
+      const error = normaliseError(cause)
       logger.error(error, `[updateError] ${message} - ${error.message}`)
     }
     throw cause
@@ -247,7 +248,7 @@ export async function update(formId, update, session) {
 
     return result
   } catch (error) {
-    const err = error instanceof Error ? error : new Error('Unknown error')
+    const err = normaliseError(error)
     logger.error(
       err,
       `[updateFormMetadata] Updating form with ID ${formId} failed - ${err.message}`

@@ -37,9 +37,7 @@ export const auth = {
           const user = artifacts.decoded.payload
 
           if (!user) {
-            logger.info(
-              '[authMissingUser] Auth: Missing user from token payload.'
-            )
+            logger.info('Auth: Missing user from token payload.')
             return {
               isValid: false
             }
@@ -49,9 +47,7 @@ export const auth = {
           const groupsClaim = user.groups
 
           if (!oid) {
-            logger.info(
-              '[authMissingOID] Auth: User OID is missing in token payload.'
-            )
+            logger.info('Auth: User OID is missing in token payload.')
             return {
               isValid: false
             }

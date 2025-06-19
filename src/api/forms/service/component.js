@@ -7,6 +7,7 @@ import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { normaliseError } from '~/src/helpers/error-utils.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -79,7 +80,7 @@ export async function createComponentOnDraftDefinition(
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    const error = err instanceof Error ? err : new Error('Unknown error')
+    const error = normaliseError(err)
     logger.error(
       error,
       `[addComponent] Failed to add component to page ${pageId} on form ID ${formId} - ${error.message}`
@@ -133,13 +134,14 @@ export async function updateComponentOnDraftDefinition(
         return formDefinitionPageComponent
       }
     )
+
     logger.info(
       `Updated Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
     )
 
     return updatedFormDefinitionPageComponent
   } catch (err) {
-    const error = err instanceof Error ? err : new Error('Unknown error')
+    const error = normaliseError(err)
     logger.error(
       error,
       `[updateComponent] Failed to update component ${componentId} on page ${pageId} for form ID ${formId} - ${error.message}`
@@ -177,7 +179,7 @@ export async function deleteComponentOnDraftDefinition(
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    const error = err instanceof Error ? err : new Error('Unknown error')
+    const error = normaliseError(err)
     logger.error(
       error,
       `[removeComponent] Failed to remove component ${componentId} from page ${pageId} on form ID ${formId} - ${error.message}`
@@ -194,6 +196,6 @@ export async function deleteComponentOnDraftDefinition(
 }
 
 /**
- * @import { FormMetadataAuthor, ComponentDef } from '@defra/forms-model'
+ * @import { FormDefinition, ComponentDef, FormMetadataAuthor } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */
