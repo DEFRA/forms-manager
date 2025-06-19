@@ -73,7 +73,7 @@ describe('Forms service', () => {
   describe('createForm', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.update).mockResolvedValue()
-      jest.mocked(formTemplates.empty).mockReturnValue(definition)
+      jest.mocked(formTemplates.emptyV2).mockReturnValue(definitionV2)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
         insertedId: new ObjectId(id)
@@ -111,7 +111,7 @@ describe('Forms service', () => {
 
     it('should throw an error when schema validation fails', async () => {
       // @ts-expect-error - Allow invalid form definition for test
-      jest.mocked(formTemplates.empty).mockReturnValueOnce({})
+      jest.mocked(formTemplates.emptyV2).mockReturnValueOnce({})
 
       const input = {
         ...formMetadataInput,

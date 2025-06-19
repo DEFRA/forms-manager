@@ -54,6 +54,10 @@ jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
   jest.requireActual('~/src/api/forms/templates.js')
 )
+const { emptyV2: emptyFormWithSummaryV2 } =
+  /** @type {typeof formTemplates} */ (
+    jest.requireActual('~/src/api/forms/templates.js')
+  )
 const author = getAuthor()
 
 describe('Forms service', () => {
@@ -62,6 +66,7 @@ describe('Forms service', () => {
   const dateUsedInFakeTime = new Date('2020-01-01')
 
   let definition = emptyFormWithSummary()
+  const definitionV2 = emptyFormWithSummaryV2()
 
   const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
 
@@ -141,9 +146,17 @@ describe('Forms service', () => {
       })
     })
 
-    it('should create a live state from existing draft form', async () => {
+    it('should create a live state from existing draft form V1', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce({
         ...definition,
+        outputEmail: 'test@defra.gov.uk'
+      })
+      await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
+    })
+
+    it('should create a live state from existing draft form V2', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...definitionV2,
         outputEmail: 'test@defra.gov.uk'
       })
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
@@ -312,7 +325,7 @@ describe('Forms service', () => {
   describe('createForm', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.update).mockResolvedValue()
-      jest.mocked(formTemplates.empty).mockReturnValue(definition)
+      jest.mocked(formTemplates.emptyV2).mockReturnValue(definitionV2)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
         insertedId: new ObjectId(id)
@@ -350,7 +363,7 @@ describe('Forms service', () => {
 
     it('should throw an error when schema validation fails', async () => {
       // @ts-expect-error - Allow invalid form definition for test
-      jest.mocked(formTemplates.empty).mockReturnValueOnce({})
+      jest.mocked(formTemplates.emptyV2).mockReturnValueOnce({})
 
       const input = {
         ...formMetadataInput,
