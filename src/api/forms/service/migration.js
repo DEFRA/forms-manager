@@ -53,10 +53,8 @@ export async function repositionSummaryPipeline(formId, definition, author) {
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      error,
-      `Failed to update position of summary on Form ID ${formId} - ${error.message}`
+      `[repositionSummary] Failed to update position of summary on Form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
     )
     throw err
   } finally {
@@ -99,10 +97,8 @@ export async function migrateDefinitionToV2(formId, author) {
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      error,
-      `Failed to migrate form with ID ${formId} to engine version 2 - ${error.message}`
+      `[migrateToV2] Failed to migrate form with ID ${formId} to engine version 2 - ${err instanceof Error ? err.message : String(err)}`
     )
     throw err
   }

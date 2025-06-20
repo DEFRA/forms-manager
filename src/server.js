@@ -1,14 +1,14 @@
 import { createServer } from '~/src/api/server.js'
 import { config } from '~/src/config/index.js'
-import { normaliseError } from '~/src/helpers/error-utils.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const logger = createLogger()
 
 process.on('unhandledRejection', (error) => {
-  const err = normaliseError(error)
-  logger.error(err, `[unhandledRejection] ${err.message}`)
-  throw err
+  logger.error(
+    `[unhandledRejection] Unhandled rejection - ${error instanceof Error ? error.message : String(error)}`
+  )
+  throw error
 })
 
 /**

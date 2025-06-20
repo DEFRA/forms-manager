@@ -1,7 +1,6 @@
 import Jwt from '@hapi/jwt'
 
 import { config } from '~/src/config/index.js'
-import { normaliseError } from '~/src/helpers/error-utils.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const oidcJwksUri = config.get('oidcJwksUri')
@@ -31,14 +30,12 @@ function processGroupsClaim(groupsClaim, oid) {
         processedGroups = parsed
       } else {
         logger.warn(
-          `Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'`
+          `[authGroupsInvalid] Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'`
         )
       }
     } catch (error) {
-      const err = normaliseError(error, 'Unknown parsing error')
       logger.error(
-        err,
-        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${err.message}`
+        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${error instanceof Error ? error.message : String(error)}`
       )
     }
   } else if (Array.isArray(groupsClaim)) {
