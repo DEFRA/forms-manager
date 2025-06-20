@@ -124,6 +124,8 @@ export function getCauses(validationError) {
         message: detail.message,
         detail: detail.context
       })
+    } else {
+      // Sonar
     }
   }
 
