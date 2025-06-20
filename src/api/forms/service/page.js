@@ -1,14 +1,14 @@
 import { ApiErrorCode, FormStatus } from '@defra/forms-model'
-import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
-  findPage,
+  getPage,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -21,12 +21,33 @@ export const addIdToSummary = (summaryPage) => ({
 })
 
 /**
+ * Gets a page from a form definition if it exists, throws a Boom.notFound if not
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {ClientSession} [session]
+ */
+export async function getFormDefinitionPage(formId, pageId, session) {
+  logger.info(`Getting Page ID ${pageId} for Form ID ${formId}`)
+
+  const definition = /** @type {FormDefinition} */ await getFormDefinition(
+    formId,
+    FormStatus.Draft,
+    session
+  )
+  const page = getPage(definition, pageId)
+
+  logger.info(`Got Page ID ${pageId} for Form ID ${formId}`)
+
+  return page
+}
+
+/**
  * Adds a new page to a draft definition
  * @param {string} formId
- * @param {Page} newPage
+ * @param {Page} page
  * @param {FormMetadataAuthor} author
  */
-export async function createPageOnDraftDefinition(formId, newPage, author) {
+export async function createPageOnDraftDefinition(formId, page, author) {
   logger.info(`Creating new page for form with ID ${formId}`)
 
   const session = client.startSession()
@@ -36,19 +57,22 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   uniquePathGate(
     formDraftDefinition,
-    newPage.path,
+    page.path,
     `Duplicate page path on Form ID ${formId}`,
     ApiErrorCode.DuplicatePagePathComponent
   )
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPage(formId, newPage, session)
+      await formDefinition.addPage(formId, page, session)
 
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    logger.error(err, `Failed to add page on ${formId}`)
+    logger.error(
+      `[addPage] Failed to add page on form ID ${formId} - ${getErrorMessage(err)}`
+    )
+
     throw err
   } finally {
     await session.endSession()
@@ -56,40 +80,14 @@ export async function createPageOnDraftDefinition(formId, newPage, author) {
 
   logger.info(`Created new page for form with ID ${formId}`)
 
-  return newPage
-}
-
-/**
- * Gets a page from a form definition and fails if the page is not found
- * @param {string} formId
- * @param {string} pageId
- * @param {ClientSession} [session]
- */
-export async function getFormDefinitionPage(formId, pageId, session) {
-  logger.info(`Getting Page ID ${pageId} on Form ID ${formId}`)
-
-  const definition = /** @type {FormDefinition} */ await getFormDefinition(
-    formId,
-    FormStatus.Draft,
-    session
-  )
-
-  const page = findPage(definition, pageId)
-
-  if (page === undefined) {
-    throw Boom.notFound(`Page ID ${pageId} not found on Form ID ${formId}`)
-  }
-
-  logger.info(`Got Page ID ${pageId} on Form ID ${formId}`)
-
   return page
 }
 
 /**
- * Updates specific fields on a page, allowing concurrent changes should components be updated
+ * Updates a page on a draft definition
  * @param {string} formId
  * @param {string} pageId
- * @param {PatchPageFields} pageFieldsToUpdate
+ * @param {Partial<Page>} pageFieldsToUpdate
  * @param {FormMetadataAuthor} author
  */
 export async function patchFieldsOnDraftDefinitionPage(
@@ -99,7 +97,6 @@ export async function patchFieldsOnDraftDefinitionPage(
   author
 ) {
   const session = client.startSession()
-  const fields = Object.entries(pageFieldsToUpdate)
   let page
 
   try {
@@ -136,9 +133,9 @@ export async function patchFieldsOnDraftDefinitionPage(
     })
   } catch (err) {
     logger.error(
-      err,
-      `Failed to patch fields ${fields.map(([key]) => key).toString()} on Page ID ${pageId} Form ID ${formId}`
+      `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
+
     throw err
   } finally {
     await session.endSession()
@@ -148,7 +145,7 @@ export async function patchFieldsOnDraftDefinitionPage(
 }
 
 /**
- * Updates a component and throws a Boom.notFound if page or component is not found
+ * Delete a page on a draft definition
  * @param {string} formId
  * @param {string} pageId
  * @param {FormMetadataAuthor} author
@@ -165,7 +162,10 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    logger.error(err, `Failed to delete Page ID ${pageId} on Form ID ${formId}`)
+    logger.error(
+      `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${getErrorMessage(err)}`
+    )
+
     throw err
   } finally {
     await session.endSession()
@@ -175,6 +175,6 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, Page, PageSummary, PatchPageFields } from '@defra/forms-model'
+ * @import { FormDefinition, Page, FormMetadataAuthor, PageSummary } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */

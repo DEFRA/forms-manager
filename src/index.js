@@ -1,5 +1,6 @@
 import { chdir } from 'node:process'
 
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -11,6 +12,8 @@ import('~/src/server.js')
   .then((server) => server.listen())
   .catch((/** @type {unknown} */ error) => {
     logger.info('Server failed to start :(')
-    logger.error(error)
+    logger.error(
+      `[serverStartup] Server failed to start - ${getErrorMessage(error)}`
+    )
     throw error
   })

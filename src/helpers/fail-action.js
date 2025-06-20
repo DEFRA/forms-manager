@@ -1,11 +1,18 @@
+import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
+
+const logger = createLogger()
+
 /**
- * Log and throw and error
+ * Log and throw an error
  * @type {Lifecycle.Method}
  */
-export function failAction(request, h, error) {
-  request.logger.error(error, error?.message)
+export const failAction = (_request, _h, error) => {
+  logger.error(
+    `[validationFailed] Request validation failed - ${getErrorMessage(error)}`
+  )
 
-  throw error ?? new Error('Unknown error')
+  throw error instanceof Error ? error : new Error(String(error))
 }
 
 /**

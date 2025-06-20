@@ -11,6 +11,7 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -78,11 +79,52 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     logger.info(`Updated form metadata (draft) for form ID ${formId}`)
   } catch (err) {
     logger.error(
-      err,
-      `Updating form definition (draft) for form ID ${formId} failed`
+      `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
     throw err
+  }
+}
+
+/**
+ * Validates form and form definition for publishing to live
+ * @param {string} formId - ID of the form
+ * @param {FormMetadata} form - Form metadata
+ * @param {FormDefinition} draftFormDefinition - Draft form definition
+ */
+function validateFormForPublishing(formId, form, draftFormDefinition) {
+  if (!form.draft) {
+    logger.info(
+      `[noDraftState] Form with ID '${formId}' has no draft state so failed deployment to live - validation failed`
+    )
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
+  }
+
+  if (!form.contact) {
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingContact)
+  }
+
+  if (!form.submissionGuidance) {
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingSubmissionGuidance)
+  }
+
+  if (!form.privacyNoticeUrl) {
+    logger.info(
+      `[missingPrivacyNotice] Form ${formId} missing privacy notice URL - validation failed, cannot publish`
+    )
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
+  }
+
+  if (
+    draftFormDefinition.engine !== Engine.V2 &&
+    !draftFormDefinition.startPage
+  ) {
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
+  }
+
+  if (!draftFormDefinition.outputEmail && !form.notificationEmail) {
+    // TODO: remove the form def check once all forms have a notification email
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
   }
 }
 
@@ -95,45 +137,15 @@ export async function createLiveFromDraft(formId, author) {
   logger.info(`Make draft live for form ID ${formId}`)
 
   try {
-    // Get the form metadata from the db
+    // Get the form metadata and draft definition
     const form = await getForm(formId)
-
-    if (!form.draft) {
-      logger.error(
-        `Form with ID '${formId}' has no draft state so failed deployment to live`
-      )
-
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingDraft)
-    }
-
-    if (!form.contact) {
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingContact)
-    }
-
-    if (!form.submissionGuidance) {
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingSubmissionGuidance)
-    }
-
-    if (!form.privacyNoticeUrl) {
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
-    }
-
     const draftFormDefinition = await formDefinition.get(
       formId,
       FormStatus.Draft
     )
 
-    if (
-      draftFormDefinition.engine !== Engine.V2 &&
-      !draftFormDefinition.startPage
-    ) {
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
-    }
-
-    if (!draftFormDefinition.outputEmail && !form.notificationEmail) {
-      // TODO: remove the form def check once all forms have a notification email
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
-    }
+    // Validate form can be published
+    validateFormForPublishing(formId, form, draftFormDefinition)
 
     // Build the live state
     const now = new Date()
@@ -177,7 +189,9 @@ export async function createLiveFromDraft(formId, author) {
     logger.info(`Removed form metadata (draft) for form ID ${formId}`)
     logger.info(`Made draft live for form ID ${formId}`)
   } catch (err) {
-    logger.error(err, `Make draft live for form ID ${formId} failed`)
+    logger.error(
+      `[makeDraftLive] Make draft live for form ID ${formId} failed - ${getErrorMessage(err)}`
+    )
 
     throw err
   }
@@ -231,7 +245,9 @@ export async function createDraftFromLive(formId, author) {
     logger.info(`Added form metadata (draft) for form ID ${formId}`)
     logger.info(`Created draft to edit for form ID ${formId}`)
   } catch (err) {
-    logger.error(err, `Create draft to edit for form ID ${formId} failed`)
+    logger.error(
+      `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${getErrorMessage(err)}`
+    )
 
     throw err
   }
@@ -276,8 +292,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
     return newForm
   } catch (err) {
     logger.error(
-      err,
-      `Reordering pages on form definition (draft) for form ID ${formId} failed`
+      `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
     throw err
