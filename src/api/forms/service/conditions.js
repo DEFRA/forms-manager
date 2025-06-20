@@ -1,6 +1,7 @@
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -37,7 +38,7 @@ export async function addConditionToDraftFormDefinition(
     return newForm
   } catch (err) {
     logger.error(
-      `[addCondition] Failed to add condition on Form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[addCondition] Failed to add condition on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -83,7 +84,7 @@ export async function updateConditionOnDraftFormDefinition(
     return updatedList
   } catch (err) {
     logger.error(
-      `[updateCondition] Failed to update condition ${conditionId} on Form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[updateCondition] Failed to update condition ${conditionId} on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -118,7 +119,7 @@ export async function removeConditionOnDraftFormDefinition(
     logger.info(`Removed condition ${conditionId} for form ID ${formId}`)
   } catch (err) {
     logger.error(
-      `[removeCondition] Failed to remove condition ${conditionId} on Form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[removeCondition] Failed to remove condition ${conditionId} on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err

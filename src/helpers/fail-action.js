@@ -1,3 +1,4 @@
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -7,14 +8,11 @@ const logger = createLogger()
  * @type {Lifecycle.Method}
  */
 export const failAction = (_request, _h, error) => {
-  const normalisedError =
-    error instanceof Error ? error : new Error(String(error))
-
   logger.error(
-    `[validationFailed] Request validation failed - ${normalisedError.message}`
+    `[validationFailed] Request validation failed - ${getErrorMessage(error)}`
   )
 
-  throw normalisedError
+  throw error instanceof Error ? error : new Error(String(error))
 }
 
 /**

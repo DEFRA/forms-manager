@@ -13,6 +13,7 @@ import {
 } from '~/src/api/forms/service/migration-helpers.js'
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -54,7 +55,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
     })
   } catch (err) {
     logger.error(
-      `[repositionSummary] Failed to update position of summary on Form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[repositionSummary] Failed to update position of summary on Form ID ${formId} - ${getErrorMessage(err)}`
     )
     throw err
   } finally {
@@ -98,7 +99,7 @@ export async function migrateDefinitionToV2(formId, author) {
     })
   } catch (err) {
     logger.error(
-      `[migrateToV2] Failed to migrate form with ID ${formId} to engine version 2 - ${err instanceof Error ? err.message : String(err)}`
+      `[migrateToV2] Failed to migrate form with ID ${formId} to engine version 2 - ${getErrorMessage(err)}`
     )
     throw err
   }

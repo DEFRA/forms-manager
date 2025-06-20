@@ -7,6 +7,7 @@ import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -80,7 +81,7 @@ export async function createComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
-      `[addComponent] Failed to add component to page ${pageId} on form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[addComponent] Failed to add component to page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -139,7 +140,7 @@ export async function updateComponentOnDraftDefinition(
     return updatedFormDefinitionPageComponent
   } catch (err) {
     logger.error(
-      `[updateComponent] Failed to update component ${componentId} on page ${pageId} for form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[updateComponent] Failed to update component ${componentId} on page ${pageId} for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -175,7 +176,7 @@ export async function deleteComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
-      `[removeComponent] Failed to remove component ${componentId} from page ${pageId} on form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[removeComponent] Failed to remove component ${componentId} from page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err
