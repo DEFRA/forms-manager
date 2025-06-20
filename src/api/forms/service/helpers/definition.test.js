@@ -59,7 +59,9 @@ describe('definition helpers', () => {
 
       const result = validate(definition, /** @type {any} */ (mockSchema))
 
-      expect(mockSchema.validate).toHaveBeenCalledWith(definition)
+      expect(mockSchema.validate).toHaveBeenCalledWith(definition, {
+        abortEarly: false
+      })
       expect(result).toBe(expectedValue)
     })
 
@@ -76,7 +78,9 @@ describe('definition helpers', () => {
       expect(() =>
         validate(definition, /** @type {any} */ (mockSchema))
       ).toThrow(InvalidFormDefinitionError)
-      expect(mockSchema.validate).toHaveBeenCalledWith(definition)
+      expect(mockSchema.validate).toHaveBeenCalledWith(definition, {
+        abortEarly: false
+      })
     })
 
     it('should use form name in error when validation fails', () => {
@@ -118,7 +122,3 @@ describe('definition helpers', () => {
     })
   })
 })
-
-/**
- * @import { FormDefinition } from '@defra/forms-model'
- */

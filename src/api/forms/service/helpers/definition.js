@@ -31,20 +31,21 @@ export function getValidationSchema(definition) {
  */
 export function validate(definition, schema) {
   /** @type {{ error?: ValidationError; value: FormDefinition }} */
-  const result = schema.validate(definition)
+  const result = schema.validate(definition, {
+    abortEarly: false
+  })
 
   const { error, value } = result
 
   if (error) {
-    const name = definition.name ?? 'No name'
+    const name =
+      !definition.name || definition.name === '' ? 'No name' : definition.name
 
     logger.warn(
       `Form failed validation: '${error.message}'. Form name: '${name}'`
     )
 
-    throw new InvalidFormDefinitionError(name, {
-      cause: error
-    })
+    throw new InvalidFormDefinitionError(name, error)
   }
 
   return value
