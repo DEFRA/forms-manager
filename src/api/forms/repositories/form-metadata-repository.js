@@ -10,6 +10,7 @@ import {
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { partialAuditFields } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -93,7 +94,7 @@ export async function list(options) {
     return { documents, totalItems, filters }
   } catch (error) {
     logger.error(
-      `[fetchDocuments] Error fetching documents - ${error instanceof Error ? error.message : String(error)}`
+      `[fetchDocuments] Error fetching documents - ${getErrorMessage(error)}`
     )
     throw error
   }
@@ -122,7 +123,7 @@ export async function get(formId) {
     return document
   } catch (error) {
     logger.error(
-      `[getFormById] Getting form with ID ${formId} failed - ${error instanceof Error ? error.message : String(error)}`
+      `[getFormById] Getting form with ID ${formId} failed - ${getErrorMessage(error)}`
     )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
@@ -156,7 +157,7 @@ export async function getBySlug(slug) {
     return document
   } catch (error) {
     logger.error(
-      `[getFormBySlug] Getting form with slug ${slug} failed - ${error instanceof Error ? error.message : String(error)}`
+      `[getFormBySlug] Getting form with slug ${slug} failed - ${getErrorMessage(error)}`
     )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
@@ -203,9 +204,7 @@ export async function create(document, session) {
         `[mongoError] ${message} - MongoDB error code: ${cause.code} - ${cause.message}`
       )
     } else {
-      logger.error(
-        `[updateError] ${message} - ${cause instanceof Error ? cause.message : String(cause)}`
-      )
+      logger.error(`[updateError] ${message} - ${getErrorMessage(cause)}`)
     }
     throw cause
   }
@@ -241,7 +240,7 @@ export async function update(formId, update, session) {
     return result
   } catch (error) {
     logger.error(
-      `[updateFormMetadata] Updating form with ID ${formId} failed - ${error instanceof Error ? error.message : String(error)}`
+      `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(error)}`
     )
 
     if (error instanceof Error && !Boom.isBoom(error)) {

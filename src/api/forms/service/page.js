@@ -8,6 +8,7 @@ import {
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -69,7 +70,7 @@ export async function createPageOnDraftDefinition(formId, page, author) {
     })
   } catch (err) {
     logger.error(
-      `[addPage] Failed to add page on form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[addPage] Failed to add page on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -132,7 +133,7 @@ export async function patchFieldsOnDraftDefinitionPage(
     })
   } catch (err) {
     logger.error(
-      `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -162,7 +163,7 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
     })
   } catch (err) {
     logger.error(
-      `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
+      `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err

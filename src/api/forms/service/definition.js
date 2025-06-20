@@ -11,6 +11,7 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -78,7 +79,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     logger.info(`Updated form metadata (draft) for form ID ${formId}`)
   } catch (err) {
     logger.error(
-      `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
+      `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -189,7 +190,7 @@ export async function createLiveFromDraft(formId, author) {
     logger.info(`Made draft live for form ID ${formId}`)
   } catch (err) {
     logger.error(
-      `[makeDraftLive] Make draft live for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
+      `[makeDraftLive] Make draft live for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -245,7 +246,7 @@ export async function createDraftFromLive(formId, author) {
     logger.info(`Created draft to edit for form ID ${formId}`)
   } catch (err) {
     logger.error(
-      `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
+      `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -291,7 +292,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
     return newForm
   } catch (err) {
     logger.error(
-      `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
+      `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
     throw err

@@ -1,6 +1,7 @@
 import Jwt from '@hapi/jwt'
 
 import { config } from '~/src/config/index.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const oidcJwksUri = config.get('oidcJwksUri')
@@ -35,7 +36,7 @@ function processGroupsClaim(groupsClaim, oid) {
       }
     } catch (error) {
       logger.error(
-        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${error instanceof Error ? error.message : String(error)}`
+        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${getErrorMessage(error)}`
       )
     }
   } else if (Array.isArray(groupsClaim)) {

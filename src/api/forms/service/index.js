@@ -16,6 +16,7 @@ import {
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -185,7 +186,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
     }
     logger.error(
-      `[updateFormMetadata] Updating form metadata for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
+      `[updateFormMetadata] Updating form metadata for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
     throw err
   }
