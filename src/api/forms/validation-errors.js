@@ -49,10 +49,10 @@ export function matches(error, match) {
       if (typeof errorPath[index] !== 'number') {
         return false
       }
+    } else if (matchItem !== errorPath[index]) {
+      return false
     } else {
-      if (matchItem !== errorPath[index]) {
-        return false
-      }
+      continue
     }
   }
 
