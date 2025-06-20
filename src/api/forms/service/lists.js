@@ -4,7 +4,6 @@ import Boom from '@hapi/boom'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
-import { normaliseError } from '~/src/helpers/error-utils.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -54,10 +53,8 @@ export async function addListToDraftFormDefinition(formId, list, author) {
 
     return newForm
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[addList] Failed to add list ${list.name} to form ID ${formId} - ${error.message}`
+      `[addList] Failed to add list ${list.name} to form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
@@ -104,10 +101,8 @@ export async function updateListOnDraftFormDefinition(
 
     return updatedList
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[updateList] Failed to update list ${listId} for form ID ${formId} - ${error.message}`
+      `[updateList] Failed to update list ${listId} for form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
@@ -137,10 +132,8 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
 
     logger.info(`Removed list ${listId} for form ID ${formId}`)
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[removeList] Failed to remove list ${listId} for form ID ${formId} - ${error.message}`
+      `[removeList] Failed to remove list ${listId} for form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err

@@ -184,10 +184,8 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       )
       throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
     }
-    const error = err instanceof Error ? err : new Error('Unknown error')
     logger.error(
-      error,
-      `[updateFormMetadata] Updating form metadata for form ID ${formId} failed - ${error.message}`
+      `[updateFormMetadata] Updating form metadata for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
     )
     throw err
   }

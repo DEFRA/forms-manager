@@ -152,7 +152,7 @@ describe('auth plugin', () => {
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
-          "'groups' claim was string but not valid JSON array"
+          "[authGroupsInvalid] Auth: User test-oid: 'groups' claim was string but not valid JSON array"
         )
       )
     })
@@ -169,7 +169,6 @@ describe('auth plugin', () => {
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestErrorFn).toHaveBeenCalledWith(
-        expect.any(Error),
         expect.stringContaining(
           "[authGroupsParseError] Auth: User test-oid: Failed to parse 'groups' claim"
         )

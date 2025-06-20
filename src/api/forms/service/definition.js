@@ -11,7 +11,6 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
-import { normaliseError } from '~/src/helpers/error-utils.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -78,10 +77,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
     logger.info(`Updated form metadata (draft) for form ID ${formId}`)
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${error.message}`
+      `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
@@ -191,10 +188,8 @@ export async function createLiveFromDraft(formId, author) {
     logger.info(`Removed form metadata (draft) for form ID ${formId}`)
     logger.info(`Made draft live for form ID ${formId}`)
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[makeDraftLive] Make draft live for form ID ${formId} failed - ${error.message}`
+      `[makeDraftLive] Make draft live for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
@@ -249,10 +244,8 @@ export async function createDraftFromLive(formId, author) {
     logger.info(`Added form metadata (draft) for form ID ${formId}`)
     logger.info(`Created draft to edit for form ID ${formId}`)
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${error.message}`
+      `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
@@ -297,10 +290,8 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
 
     return newForm
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${error.message}`
+      `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err

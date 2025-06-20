@@ -8,7 +8,6 @@ import {
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
-import { normaliseError } from '~/src/helpers/error-utils.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -69,10 +68,8 @@ export async function createPageOnDraftDefinition(formId, page, author) {
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[addPage] Failed to add page on form ID ${formId} - ${error.message}`
+      `[addPage] Failed to add page on form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
@@ -134,10 +131,8 @@ export async function patchFieldsOnDraftDefinitionPage(
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${error.message}`
+      `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
@@ -166,10 +161,8 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
       await formMetadata.updateAudit(formId, author, session)
     })
   } catch (err) {
-    const error = normaliseError(err)
     logger.error(
-      error,
-      `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${error.message}`
+      `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${err instanceof Error ? err.message : String(err)}`
     )
 
     throw err
