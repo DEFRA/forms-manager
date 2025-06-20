@@ -44,13 +44,13 @@ export function matches(error, match) {
   }
 
   for (let index = 0; index < matchPath.length; index++) {
-    const match = matchPath[index]
-    if (match === N) {
+    const matchItem = matchPath[index]
+    if (matchItem === N) {
       if (typeof errorPath[index] !== 'number') {
         return false
       }
     } else {
-      if (match !== errorPath[index]) {
+      if (matchItem !== errorPath[index]) {
         return false
       }
     }
