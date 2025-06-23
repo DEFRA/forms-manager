@@ -70,9 +70,8 @@ export function getCauses(validationError) {
   /**
    * Matches joi validation errror detail
    * @param {ValidationErrorItem} detail
-   * @param {boolean} ignoreGeneralChildErrors
    */
-  function matchDetail(detail, ignoreGeneralChildErrors = false) {
+  function matchDetail(detail) {
     if (detail.type === 'array.unique') {
       const match = uniqueErrorEntries.find(([, value]) => {
         return matches(detail, value)
@@ -109,12 +108,7 @@ export function getCauses(validationError) {
           }
         })
       }
-    } else if (detail.type === 'alternatives.match') {
-      // Because condition items are alternatives we
-      // also need to search into the child context details
-      // todo - consider dropping the joi.alternative in the schema
-      matchDetails(detail.context?.details, true)
-    } else if (!ignoreGeneralChildErrors) {
+    } else {
       // Catch all
       // Unlikely to end here as any other errors should have
       // been screened out in the payload validation of the endpoint
@@ -124,26 +118,11 @@ export function getCauses(validationError) {
         message: detail.message,
         detail: detail.context
       })
-    } else {
-      // Sonar
-    }
-  }
-
-  /**
-   * Matches joi validation errror details
-   * @param {ValidationErrorItem[] | undefined} detail
-   * @param {boolean} ignoreChildErrors
-   */
-  function matchDetails(detail, ignoreChildErrors = false) {
-    if (detail) {
-      detail.forEach((item) => {
-        matchDetail(item, ignoreChildErrors)
-      })
     }
   }
 
   // Search in top level details
-  matchDetails(validationError?.details)
+  validationError?.details.forEach(matchDetail)
 
   return causes
 }

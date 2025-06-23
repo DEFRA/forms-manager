@@ -221,7 +221,7 @@ describe('Conditions route', () => {
       expect(response.result).toEqual({
         error: 'InvalidFormDefinitionError',
         message:
-          'Test form - "conditions[0].items[0]" does not match any of the allowed types',
+          'Test form - "conditions[0].items[0].componentId" must be [ref:root:pages]',
         statusCode: 500,
         cause: err.cause
       })

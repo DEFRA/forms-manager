@@ -3,6 +3,7 @@ import {
   formDefinitionSchema,
   formDefinitionV2Schema
 } from '@defra/forms-model'
+import Joi from 'joi'
 
 import { buildDefinition } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
@@ -68,7 +69,11 @@ describe('definition helpers', () => {
     it('should throw InvalidFormDefinitionError when validation fails', () => {
       /** @type {any} */
       const definition = { name: 'Test Form' }
-      const validationError = new Error('Validation failed')
+      const validationError = new Joi.ValidationError(
+        'Validation failed',
+        [],
+        {}
+      )
 
       mockSchema.validate.mockReturnValue({
         error: validationError,
@@ -86,7 +91,11 @@ describe('definition helpers', () => {
     it('should use form name in error when validation fails', () => {
       /** @type {any} */
       const definition = { name: 'My Test Form' }
-      const validationError = new Error('Validation failed')
+      const validationError = new Joi.ValidationError(
+        'Validation failed',
+        [],
+        {}
+      )
 
       mockSchema.validate.mockReturnValue({
         error: validationError,
@@ -105,7 +114,11 @@ describe('definition helpers', () => {
     it('should use "No name" when form has no name and validation fails', () => {
       /** @type {any} */
       const definition = {}
-      const validationError = new Error('Validation failed')
+      const validationError = new Joi.ValidationError(
+        'Validation failed',
+        [],
+        {}
+      )
 
       mockSchema.validate.mockReturnValue({
         error: validationError,
