@@ -1,3 +1,5 @@
+import { getCauses } from '~/src/api/forms/validation-errors.js'
+
 /**
  * Base class to support all application errors.
  */
@@ -28,6 +30,17 @@ export class ApplicationError extends Error {
  */
 export class InvalidFormDefinitionError extends ApplicationError {
   name = 'InvalidFormDefinitionError'
+
+  /**
+   * Constructs an InvalidFormDefinitionError
+   * @param {string} formName - the form name
+   * @param {ValidationError} validationError - the joi form definition error
+   */
+  constructor(formName, validationError) {
+    super(`${formName} - ${validationError.message}`, {
+      cause: getCauses(validationError)
+    })
+  }
 }
 
 /**
@@ -48,3 +61,7 @@ export class FormAlreadyExistsError extends ApplicationError {
     })
   }
 }
+
+/**
+ * @import { ValidationError } from 'joi'
+ */

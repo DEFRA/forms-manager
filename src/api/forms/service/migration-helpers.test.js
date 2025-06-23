@@ -600,13 +600,10 @@ describe('migration helpers', () => {
       // @ts-expect-error unknownProperty is not a valid property of formDefinition
       const invalidDefinition = buildDefinition(partialDefinition)
       expect(() => migrateToV2(invalidDefinition)).toThrow(
-        new InvalidFormDefinitionError('', {
-          cause: new ValidationError(
-            '"unknownProperty" is not allowed',
-            [],
-            undefined
-          )
-        })
+        new InvalidFormDefinitionError(
+          'No name',
+          new ValidationError('"unknownProperty" is not allowed', [], undefined)
+        )
       )
     })
 
