@@ -10,6 +10,7 @@ import {
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
 import { partialAuditFields } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -92,7 +93,9 @@ export async function list(options) {
 
     return { documents, totalItems, filters }
   } catch (error) {
-    logger.error(error, 'Error fetching documents')
+    logger.error(
+      `[fetchDocuments] Error fetching documents - ${getErrorMessage(error)}`
+    )
     throw error
   }
 }
@@ -119,7 +122,9 @@ export async function get(formId) {
 
     return document
   } catch (error) {
-    logger.error(error, `Getting form with ID ${formId} failed`)
+    logger.error(
+      `[getFormById] Getting form with ID ${formId} failed - ${getErrorMessage(error)}`
+    )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.badRequest(error)
@@ -151,7 +156,9 @@ export async function getBySlug(slug) {
 
     return document
   } catch (error) {
-    logger.error(error, `Getting form with slug ${slug} failed`)
+    logger.error(
+      `[getFormBySlug] Getting form with slug ${slug} failed - ${getErrorMessage(error)}`
+    )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.internal(error)
@@ -186,11 +193,19 @@ export async function create(document, session) {
     if (cause instanceof MongoServerError && cause.code === 11000) {
       const error = new FormAlreadyExistsError(document.slug, { cause })
 
-      logger.error(error, message)
+      logger.info(
+        `[duplicateFormSlug] Creating form with slug ${document.slug} failed - form already exists`
+      )
       throw Boom.badRequest(error)
     }
 
-    logger.error(cause, message)
+    if (cause instanceof MongoServerError) {
+      logger.error(
+        `[mongoError] ${message} - MongoDB error code: ${cause.code} - ${cause.message}`
+      )
+    } else {
+      logger.error(`[updateError] ${message} - ${getErrorMessage(cause)}`)
+    }
     throw cause
   }
 }
@@ -224,7 +239,9 @@ export async function update(formId, update, session) {
 
     return result
   } catch (error) {
-    logger.error(error, `Updating form with ID ${formId} failed`)
+    logger.error(
+      `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(error)}`
+    )
 
     if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.internal(error)
