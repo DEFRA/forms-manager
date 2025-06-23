@@ -28,6 +28,7 @@ import {
   modifyUpdatePageFields,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -102,17 +103,16 @@ export async function createDraftFromLive(id, session) {
       [{ $set: { draft: '$live' } }],
       { session }
     )
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `Copying form definition (live to draft) for form ID ${id} failed`
+      `[createDraftFromLive] Failed to copy form definition (live to draft) for form ID ${id} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (err instanceof Error && !Boom.isBoom(err)) {
+      throw Boom.internal(err)
     }
 
-    throw error
+    throw err
   }
 
   logger.info(`Copied form definition (live to draft) for form ID ${id}`)
@@ -156,8 +156,7 @@ export async function get(
     return definition
   } catch (error) {
     logger.error(
-      error,
-      `Getting form definition (${state}) for form ID ${formId} failed`
+      `[get] Failed to get form definition (${state}) for form ID ${formId} - ${getErrorMessage(error)}`
     )
 
     if (error instanceof Error && !Boom.isBoom(error)) {

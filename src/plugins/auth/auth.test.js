@@ -1,10 +1,12 @@
 const mockActualTestErrorFn = jest.fn()
 const mockActualTestWarnFn = jest.fn()
+const mockActualTestInfoFn = jest.fn()
 
 jest.mock('~/src/helpers/logging/logger.js', () => ({
   createLogger: jest.fn().mockReturnValue({
     error: mockActualTestErrorFn,
-    warn: mockActualTestWarnFn
+    warn: mockActualTestWarnFn,
+    info: mockActualTestInfoFn
   })
 }))
 
@@ -96,8 +98,8 @@ describe('auth plugin', () => {
       })
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
-      expect(mockActualTestErrorFn).toHaveBeenCalledWith(
-        'Auth: Missing user from token payload.'
+      expect(mockActualTestInfoFn).toHaveBeenCalledWith(
+        '[authMissingUser] Auth: Missing user from token payload.'
       )
     })
 
@@ -111,8 +113,8 @@ describe('auth plugin', () => {
       })
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
-      expect(mockActualTestErrorFn).toHaveBeenCalledWith(
-        'Auth: User OID is missing in token payload.'
+      expect(mockActualTestInfoFn).toHaveBeenCalledWith(
+        '[authMissingOID] Auth: User OID is missing in token payload.'
       )
     })
 
@@ -150,7 +152,7 @@ describe('auth plugin', () => {
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
-          "'groups' claim was string but not valid JSON array"
+          "[authGroupsInvalid] Auth: User test-oid: 'groups' claim was string but not valid JSON array"
         )
       )
     })
@@ -167,7 +169,9 @@ describe('auth plugin', () => {
       const result = validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestErrorFn).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to parse 'groups' claim")
+        expect.stringContaining(
+          "[authGroupsParseError] Auth: User test-oid: Failed to parse 'groups' claim"
+        )
       )
     })
 
@@ -204,7 +208,7 @@ describe('auth plugin', () => {
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
-          'Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
+          '[authGroupNotFound] Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
         )
       )
     })
@@ -222,7 +226,7 @@ describe('auth plugin', () => {
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
-          'Authorisation failed. Required group "editor-group-id" not found'
+          '[authGroupNotFound] Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
         )
       )
     })

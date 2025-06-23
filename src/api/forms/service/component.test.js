@@ -202,7 +202,7 @@ describe('Forms service', () => {
         )
       ).rejects.toThrow(
         Boom.notFound(
-          'Page ID bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d not found on Form ID 123'
+          "Page not found with id 'bdadbe9d-3c4d-4ec1-884d-e3576d60fe9d'"
         )
       )
     })

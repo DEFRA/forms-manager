@@ -7,6 +7,7 @@ import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -80,9 +81,9 @@ export async function createComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
-      err,
-      `Failed to add component on Page ID ${pageId} Form ID ${formId}`
+      `[addComponent] Failed to add component to page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
+
     throw err
   } finally {
     await session.endSession()
@@ -131,6 +132,7 @@ export async function updateComponentOnDraftDefinition(
         return formDefinitionPageComponent
       }
     )
+
     logger.info(
       `Updated Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
     )
@@ -138,9 +140,9 @@ export async function updateComponentOnDraftDefinition(
     return updatedFormDefinitionPageComponent
   } catch (err) {
     logger.error(
-      err,
-      `Failed to update Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+      `[updateComponent] Failed to update component ${componentId} on page ${pageId} for form ID ${formId} - ${getErrorMessage(err)}`
     )
+
     throw err
   } finally {
     await session.endSession()
@@ -174,9 +176,9 @@ export async function deleteComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
-      err,
-      `Failed to delete Component ID ${componentId} on Page ID ${pageId} & Form ID ${formId}`
+      `[removeComponent] Failed to remove component ${componentId} from page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
+
     throw err
   } finally {
     await session.endSession()
@@ -188,6 +190,6 @@ export async function deleteComponentOnDraftDefinition(
 }
 
 /**
- * @import { FormMetadataAuthor, ComponentDef } from '@defra/forms-model'
+ * @import { FormDefinition, ComponentDef, FormMetadataAuthor } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */
