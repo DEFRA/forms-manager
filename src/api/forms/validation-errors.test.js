@@ -423,9 +423,7 @@ describe('validation errors', () => {
           {
             id: FormDefinitionError.UniqueListItemId,
             detail: { path: ['lists', 0, 'items', 1], pos: 1, dupePos: 0 },
-            // message: '"lists[0].items[1]" contains a duplicate value',
-            message:
-              'Each item must have a unique identifier - enter a different identifier for this item.', // todo - remove this message from the schema
+            message: '"lists[0].items[1]" contains a duplicate value',
             type: FormDefinitionErrorType.Unique
           }
         ])
@@ -453,9 +451,7 @@ describe('validation errors', () => {
           {
             id: FormDefinitionError.UniqueListItemText,
             detail: { path: ['lists', 0, 'items', 1], pos: 1, dupePos: 0 },
-            // message: '"lists[0].items[1]" contains a duplicate value',
-            message:
-              'Each item must have a unique identifier - enter a different identifier for this item.', // todo - remove this message from the schema
+            message: '"lists[0].items[1]" contains a duplicate value',
             type: FormDefinitionErrorType.Unique
           }
         ])
@@ -483,9 +479,7 @@ describe('validation errors', () => {
           {
             id: FormDefinitionError.UniqueListItemValue,
             detail: { path: ['lists', 0, 'items', 1], pos: 1, dupePos: 0 },
-            // message: '"lists[0].items[1]" contains a duplicate value',
-            message:
-              'Each item must have a unique identifier - enter a different identifier for this item.', // todo - remove this message from the schema
+            message: '"lists[0].items[1]" contains a duplicate value',
             type: FormDefinitionErrorType.Unique
           }
         ])
