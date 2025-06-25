@@ -11,7 +11,7 @@ export const failAction = (errorPathPrefix) => {
   /**
    * @type {Lifecycle.Method}
    */
-  return (request, h, err) => {
+  return (_request, _h, err) => {
     if (Boom.isBoom(err) && Joi.isError(err)) {
       /** @type {{ source?: string } | undefined} */
       // @ts-expect-error - unknown type
