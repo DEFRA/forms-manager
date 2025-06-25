@@ -16,8 +16,7 @@ export const failAction = (errorPathPrefix) => {
       /** @type {{ source?: string } | undefined} */
       // @ts-expect-error - unknown type
       const validation = err.output.payload.validation
-      const source = validation?.source ?? ''
-      if (source === 'payload') {
+      if (validation?.source === 'payload') {
         throw new InvalidFormDefinitionError(err, errorPathPrefix)
       }
     }
