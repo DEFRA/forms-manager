@@ -1,3 +1,8 @@
+import {
+  FormDefinitionError,
+  FormDefinitionErrorType
+} from '@defra/forms-model'
+
 import { buildList } from '~/src/api/forms/__stubs__/definition.js'
 import {
   addListToDraftFormDefinition,
@@ -134,12 +139,54 @@ describe('Lists route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
         message: '"unknown" is not allowed',
         statusCode: 400,
-        validation: {
-          keys: ['unknown']
-        }
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type,
+            message: '"unknown" is not allowed',
+            detail: {
+              child: 'unknown',
+              label: 'unknown',
+              value: 1,
+              key: 'unknown'
+            }
+          }
+        ]
+      })
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/lists with invalid payload returns mapped validation errors', async () => {
+      const invalidListPayload = buildList({
+        items: [
+          { text: 'A', value: 'dupe-value' },
+          { text: 'B', value: 'dupe-value' }
+        ]
+      })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/lists`,
+        payload: invalidListPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'InvalidFormDefinitionError',
+        message: '"items[1]" contains a duplicate value',
+        statusCode: 400,
+        cause: [
+          {
+            id: FormDefinitionError.UniqueListItemValue,
+            type: FormDefinitionErrorType.Unique,
+            message: '"items[1]" contains a duplicate value',
+            detail: { path: ['items', 1], pos: 1, dupePos: 0 }
+          }
+        ]
       })
     })
 
@@ -157,12 +204,76 @@ describe('Lists route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
         message: '"id" is required',
         statusCode: 400,
-        validation: {
-          keys: ['id']
-        }
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type,
+            message: '"id" is required',
+            detail: { label: 'id', key: 'id' }
+          }
+        ]
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/lists with invalid payload returns mapped validation errors', async () => {
+      const invalidListPayload = buildList({
+        id: '8d05e220-2145-40f4-9508-fe946dec6fd9',
+        items: [
+          { text: 'Dupe text', value: 'A' },
+          { text: 'Dupe text', value: 'B' }
+        ]
+      })
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/lists/8d05e220-2145-40f4-9508-fe946dec6fd9`,
+        payload: invalidListPayload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'InvalidFormDefinitionError',
+        message: '"items[1]" contains a duplicate value',
+        statusCode: 400,
+        cause: [
+          {
+            id: FormDefinitionError.UniqueListItemText,
+            type: FormDefinitionErrorType.Unique,
+            message: '"items[1]" contains a duplicate value',
+            detail: { path: ['items', 1], pos: 1, dupePos: 0 }
+          }
+        ]
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/lists/{listId} with invalid params returns validation errors', async () => {
+      const invalidId = 'invalid-uuid'
+      const list = buildList({
+        id: '9719c91f-4341-4dc8-91a5-cab7bbdddb83'
+      })
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/lists/${invalidId}`,
+        payload: list,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+
+      // Params errors should still return Bad Request with a joi error (not an InvalidFormDefinitionError)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: '"listId" must be a valid GUID',
+        statusCode: 400,
+        validation: { source: 'params', keys: ['listId'] },
+        custom: { defaultError: expect.any(Error) }
       })
     })
   })

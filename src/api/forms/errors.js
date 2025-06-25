@@ -30,15 +30,16 @@ export class ApplicationError extends Error {
  */
 export class InvalidFormDefinitionError extends ApplicationError {
   name = 'InvalidFormDefinitionError'
+  statusCode = 400
 
   /**
    * Constructs an InvalidFormDefinitionError
-   * @param {string} formName - the form name
    * @param {ValidationError} validationError - the joi form definition error
+   * @param {ErrorMatchPath} [errorPathPrefix] - the error path prefix to use
    */
-  constructor(formName, validationError) {
-    super(`${formName} - ${validationError.message}`, {
-      cause: getCauses(validationError)
+  constructor(validationError, errorPathPrefix) {
+    super(validationError.message, {
+      cause: getCauses(validationError, errorPathPrefix)
     })
   }
 }
@@ -64,4 +65,5 @@ export class FormAlreadyExistsError extends ApplicationError {
 
 /**
  * @import { ValidationError } from 'joi'
+ * @import { ErrorMatchPath } from '@defra/forms-model'
  */

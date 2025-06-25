@@ -826,6 +826,12 @@ describe('validation errors', () => {
       })
     })
   })
+
+  describe('other', () => {
+    it('should return an empty array if no error is passed', () => {
+      expect(getCauses()).toHaveLength(0)
+    })
+  })
 })
 
 /**

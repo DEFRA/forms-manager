@@ -14,16 +14,29 @@ const refErrorEntries = errorEntries.filter(
 )
 
 /**
+ * Return the matchPath and errorPaths to use in matches
+ * @param {ValidationErrorItem} error
+ * @param {ErrorMatchValue} match
+ * @param {ErrorMatchPath} [errorPathPrefix] - the error path prefix to use for non-root errors
+ * @returns
+ */
+function getPaths(error, match, errorPathPrefix) {
+  return {
+    matchPath: match.path,
+    errorPath: errorPathPrefix
+      ? [...errorPathPrefix, ...error.path]
+      : error.path
+  }
+}
+
+/**
  * Returns true if the joi error matches our FormDefinitionErrors
  * @param {ValidationErrorItem} error
  * @param {ErrorMatchValue} match
+ * @param {ErrorMatchPath} [errorPathPrefix] - the error path prefix to use for non-root errors
  */
-export function matches(error, match) {
-  /** @type {Array<string | number>} */
-  const errorPath = error.path
-
-  /** @type {ErrorMatchPath} */
-  const matchPath = match.path
+function matches(error, match, errorPathPrefix) {
+  const { matchPath, errorPath } = getPaths(error, match, errorPathPrefix)
 
   if (!error.context) {
     return false
@@ -46,7 +59,7 @@ export function matches(error, match) {
   for (let index = 0; index < matchPath.length; index++) {
     const matchItem = matchPath[index]
     if (matchItem === N) {
-      if (typeof errorPath[index] !== 'number') {
+      if (!(errorPath[index] === N || typeof errorPath[index] === 'number')) {
         return false
       }
     } else if (matchItem !== errorPath[index]) {
@@ -62,69 +75,61 @@ export function matches(error, match) {
 /**
  * Get the error causes from a form definition joi validation error
  * @param {ValidationError} [validationError] - the form definition error
+ * @param {ErrorMatchPath} [errorPathPrefix] - the match path prefix to use for non-root errors
+ * @returns {FormDefinitionErrorCause[]}
  */
-export function getCauses(validationError) {
-  /** @type {FormDefinitionErrorCause[]} */
-  const causes = []
-
-  /**
-   * Matches joi validation errror detail
-   * @param {ValidationErrorItem} detail
-   */
-  function matchDetail(detail) {
-    if (detail.type === 'array.unique') {
-      const match = uniqueErrorEntries.find(([, value]) => {
-        return matches(detail, value)
-      })
-
-      if (match) {
-        const [key] = match
-
-        causes.push({
-          id: /** @type {FormDefinitionError} */ (key),
-          type: FormDefinitionErrorType.Unique,
-          message: detail.message,
-          detail: {
-            path: detail.path,
-            pos: detail.context?.pos,
-            dupePos: detail.context?.dupePos
-          }
+export function getCauses(validationError, errorPathPrefix) {
+  return (
+    validationError?.details.map((detail) => {
+      if (detail.type === 'array.unique') {
+        const match = uniqueErrorEntries.find(([, value]) => {
+          return matches(detail, value, errorPathPrefix)
         })
-      }
-    } else if (detail.type === 'any.only') {
-      const match = refErrorEntries.find(([, value]) => {
-        return matches(detail, value)
-      })
 
-      if (match) {
-        const [key] = match
+        if (match) {
+          const [key] = match
 
-        causes.push({
-          id: /** @type {FormDefinitionError} */ (key),
-          type: FormDefinitionErrorType.Ref,
-          message: detail.message,
-          detail: {
-            path: detail.path
+          return {
+            id: /** @type {FormDefinitionError} */ (key),
+            type: FormDefinitionErrorType.Unique,
+            message: detail.message,
+            detail: {
+              path: detail.path,
+              pos: detail.context?.pos,
+              dupePos: detail.context?.dupePos
+            }
           }
-        })
+        }
       }
-    } else {
-      // Catch all
-      // Unlikely to end here as any other errors should have
-      // been screened out in the payload validation of the endpoint
-      causes.push({
+
+      if (detail.type === 'any.only') {
+        const match = refErrorEntries.find(([, value]) => {
+          return matches(detail, value, errorPathPrefix)
+        })
+
+        if (match) {
+          const [key] = match
+
+          return {
+            id: /** @type {FormDefinitionError} */ (key),
+            type: FormDefinitionErrorType.Ref,
+            message: detail.message,
+            detail: {
+              path: detail.path
+            }
+          }
+        }
+      }
+
+      // Catch all others
+      return {
         id: FormDefinitionError.Other,
         type: FormDefinitionErrorType.Type,
         message: detail.message,
         detail: detail.context
-      })
-    }
-  }
-
-  // Search in top level details
-  validationError?.details.forEach(matchDetail)
-
-  return causes
+      }
+    }) ?? []
+  )
 }
 
 /**
