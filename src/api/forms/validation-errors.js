@@ -76,60 +76,58 @@ function matches(error, match, errorPathPrefix) {
  * Get the error causes from a form definition joi validation error
  * @param {ValidationError} [validationError] - the form definition error
  * @param {ErrorMatchPath} [errorPathPrefix] - the match path prefix to use for non-root errors
+ * @returns {FormDefinitionErrorCause[]}
  */
 export function getCauses(validationError, errorPathPrefix) {
-  /** @type {FormDefinitionErrorCause[]} */
-  const causes = []
-
-  validationError?.details.forEach((detail) => {
-    if (detail.type === 'array.unique') {
-      const match = uniqueErrorEntries.find(([, value]) => {
-        return matches(detail, value, errorPathPrefix)
-      })
-
-      if (match) {
-        const [key] = match
-
-        causes.push({
-          id: /** @type {FormDefinitionError} */ (key),
-          type: FormDefinitionErrorType.Unique,
-          message: detail.message,
-          detail: {
-            path: detail.path,
-            pos: detail.context?.pos,
-            dupePos: detail.context?.dupePos
-          }
+  return (
+    validationError?.details.map((detail) => {
+      if (detail.type === 'array.unique') {
+        const match = uniqueErrorEntries.find(([, value]) => {
+          return matches(detail, value, errorPathPrefix)
         })
-      }
-    } else if (detail.type === 'any.only') {
-      const match = refErrorEntries.find(([, value]) => {
-        return matches(detail, value, errorPathPrefix)
-      })
 
-      if (match) {
-        const [key] = match
+        if (match) {
+          const [key] = match
 
-        causes.push({
-          id: /** @type {FormDefinitionError} */ (key),
-          type: FormDefinitionErrorType.Ref,
-          message: detail.message,
-          detail: {
-            path: detail.path
+          return {
+            id: /** @type {FormDefinitionError} */ (key),
+            type: FormDefinitionErrorType.Unique,
+            message: detail.message,
+            detail: {
+              path: detail.path,
+              pos: detail.context?.pos,
+              dupePos: detail.context?.dupePos
+            }
           }
+        }
+      } else if (detail.type === 'any.only') {
+        const match = refErrorEntries.find(([, value]) => {
+          return matches(detail, value, errorPathPrefix)
         })
+
+        if (match) {
+          const [key] = match
+
+          return {
+            id: /** @type {FormDefinitionError} */ (key),
+            type: FormDefinitionErrorType.Ref,
+            message: detail.message,
+            detail: {
+              path: detail.path
+            }
+          }
+        }
       }
-    } else {
+
       // Catch all others
-      causes.push({
+      return {
         id: FormDefinitionError.Other,
         type: FormDefinitionErrorType.Type,
         message: detail.message,
         detail: detail.context
-      })
-    }
-  })
-
-  return causes
+      }
+    }) ?? []
+  )
 }
 
 /**
