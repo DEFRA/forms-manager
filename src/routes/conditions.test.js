@@ -207,7 +207,7 @@ describe('Conditions route', () => {
         throw new Error('Unexpected empty error')
       }
 
-      const err = new InvalidFormDefinitionError('Test form', error)
+      const err = new InvalidFormDefinitionError(error)
       jest.mocked(addConditionToDraftFormDefinition).mockRejectedValueOnce(err)
 
       const response = await server.inject({
@@ -221,8 +221,8 @@ describe('Conditions route', () => {
       expect(response.result).toEqual({
         error: 'InvalidFormDefinitionError',
         message:
-          'Test form - "conditions[0].items[0].componentId" must be [ref:root:pages]',
-        statusCode: 500,
+          '"conditions[0].items[0].componentId" must be [ref:root:pages]',
+        statusCode: 400,
         cause: err.cause
       })
     })
