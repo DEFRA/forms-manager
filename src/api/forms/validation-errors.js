@@ -100,7 +100,9 @@ export function getCauses(validationError, errorPathPrefix) {
             }
           }
         }
-      } else if (detail.type === 'any.only') {
+      }
+
+      if (detail.type === 'any.only') {
         const match = refErrorEntries.find(([, value]) => {
           return matches(detail, value, errorPathPrefix)
         })
