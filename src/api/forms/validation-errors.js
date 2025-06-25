@@ -17,12 +17,12 @@ const refErrorEntries = errorEntries.filter(
  * Returns true if the joi error matches our FormDefinitionErrors
  * @param {ValidationErrorItem} error
  * @param {ErrorMatchValue} match
+ * @param {ErrorMatchPath} [errorPathPrefix] - the error path prefix to use for non-root errors
  */
-export function matches(error, match) {
-  /** @type {Array<string | number>} */
-  const errorPath = error.path
-
-  /** @type {ErrorMatchPath} */
+export function matches(error, match, errorPathPrefix) {
+  const errorPath = errorPathPrefix
+    ? [...errorPathPrefix, ...error.path]
+    : error.path
   const matchPath = match.path
 
   if (!error.context) {
@@ -46,7 +46,7 @@ export function matches(error, match) {
   for (let index = 0; index < matchPath.length; index++) {
     const matchItem = matchPath[index]
     if (matchItem === N) {
-      if (typeof errorPath[index] !== 'number') {
+      if (!(errorPath[index] === N || typeof errorPath[index] === 'number')) {
         return false
       }
     } else if (matchItem !== errorPath[index]) {
@@ -62,8 +62,9 @@ export function matches(error, match) {
 /**
  * Get the error causes from a form definition joi validation error
  * @param {ValidationError} [validationError] - the form definition error
+ * @param {ErrorMatchPath} [errorPathPrefix] - the match path prefix to use for non-root errors
  */
-export function getCauses(validationError) {
+export function getCauses(validationError, errorPathPrefix) {
   /** @type {FormDefinitionErrorCause[]} */
   const causes = []
 
@@ -74,7 +75,7 @@ export function getCauses(validationError) {
   function matchDetail(detail) {
     if (detail.type === 'array.unique') {
       const match = uniqueErrorEntries.find(([, value]) => {
-        return matches(detail, value)
+        return matches(detail, value, errorPathPrefix)
       })
 
       if (match) {
@@ -93,7 +94,7 @@ export function getCauses(validationError) {
       }
     } else if (detail.type === 'any.only') {
       const match = refErrorEntries.find(([, value]) => {
-        return matches(detail, value)
+        return matches(detail, value, errorPathPrefix)
       })
 
       if (match) {
