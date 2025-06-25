@@ -14,16 +14,29 @@ const refErrorEntries = errorEntries.filter(
 )
 
 /**
+ * Return the matchPath and errorPaths to use in matches
+ * @param {ValidationErrorItem} error
+ * @param {ErrorMatchValue} match
+ * @param {ErrorMatchPath} [errorPathPrefix] - the error path prefix to use for non-root errors
+ * @returns
+ */
+function getPaths(error, match, errorPathPrefix) {
+  return {
+    matchPath: match.path,
+    errorPath: errorPathPrefix
+      ? [...errorPathPrefix, ...error.path]
+      : error.path
+  }
+}
+
+/**
  * Returns true if the joi error matches our FormDefinitionErrors
  * @param {ValidationErrorItem} error
  * @param {ErrorMatchValue} match
  * @param {ErrorMatchPath} [errorPathPrefix] - the error path prefix to use for non-root errors
  */
-export function matches(error, match, errorPathPrefix) {
-  const errorPath = errorPathPrefix
-    ? [...errorPathPrefix, ...error.path]
-    : error.path
-  const matchPath = match.path
+function matches(error, match, errorPathPrefix) {
+  const { matchPath, errorPath } = getPaths(error, match, errorPathPrefix)
 
   if (!error.context) {
     return false
@@ -68,11 +81,7 @@ export function getCauses(validationError, errorPathPrefix) {
   /** @type {FormDefinitionErrorCause[]} */
   const causes = []
 
-  /**
-   * Matches joi validation errror detail
-   * @param {ValidationErrorItem} detail
-   */
-  function matchDetail(detail) {
+  validationError?.details.forEach((detail) => {
     if (detail.type === 'array.unique') {
       const match = uniqueErrorEntries.find(([, value]) => {
         return matches(detail, value, errorPathPrefix)
@@ -110,9 +119,7 @@ export function getCauses(validationError, errorPathPrefix) {
         })
       }
     } else {
-      // Catch all
-      // Unlikely to end here as any other errors should have
-      // been screened out in the payload validation of the endpoint
+      // Catch all others
       causes.push({
         id: FormDefinitionError.Other,
         type: FormDefinitionErrorType.Type,
@@ -120,10 +127,7 @@ export function getCauses(validationError, errorPathPrefix) {
         detail: detail.context
       })
     }
-  }
-
-  // Search in top level details
-  validationError?.details.forEach(matchDetail)
+  })
 
   return causes
 }
