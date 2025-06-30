@@ -1,4 +1,4 @@
-import { getCauses } from '~/src/api/forms/validation-errors.js'
+import { getErrors } from '@defra/forms-model'
 
 /**
  * Base class to support all application errors.
@@ -30,15 +30,15 @@ export class ApplicationError extends Error {
  */
 export class InvalidFormDefinitionError extends ApplicationError {
   name = 'InvalidFormDefinitionError'
+  statusCode = 400
 
   /**
    * Constructs an InvalidFormDefinitionError
-   * @param {string} formName - the form name
    * @param {ValidationError} validationError - the joi form definition error
    */
-  constructor(formName, validationError) {
-    super(`${formName} - ${validationError.message}`, {
-      cause: getCauses(validationError)
+  constructor(validationError) {
+    super(validationError.message, {
+      cause: getErrors(validationError)
     })
   }
 }
@@ -64,4 +64,5 @@ export class FormAlreadyExistsError extends ApplicationError {
 
 /**
  * @import { ValidationError } from 'joi'
+ * @import { ErrorMatchPath } from '@defra/forms-model'
  */

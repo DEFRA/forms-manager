@@ -45,7 +45,7 @@ export function validate(definition, schema) {
       `Form failed validation: '${error.message}'. Form name: '${name}'`
     )
 
-    throw new InvalidFormDefinitionError(name, error)
+    throw new InvalidFormDefinitionError(error)
   }
 
   return value

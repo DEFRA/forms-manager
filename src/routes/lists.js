@@ -6,6 +6,7 @@ import {
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import { failAction } from '~/src/helpers/payload-fail-action.js'
 import {
   formByIdSchema,
   listByIdSchema,
@@ -40,7 +41,8 @@ export default [
     options: {
       validate: {
         params: formByIdSchema,
-        payload: listSchemaV2
+        payload: listSchemaV2,
+        failAction
       }
     }
   },
@@ -71,7 +73,8 @@ export default [
     options: {
       validate: {
         params: listByIdSchema,
-        payload: listSchemaWithRequiredIdSchema
+        payload: listSchemaWithRequiredIdSchema,
+        failAction
       }
     }
   },

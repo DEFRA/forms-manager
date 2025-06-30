@@ -601,7 +601,6 @@ describe('migration helpers', () => {
       const invalidDefinition = buildDefinition(partialDefinition)
       expect(() => migrateToV2(invalidDefinition)).toThrow(
         new InvalidFormDefinitionError(
-          'No name',
           new ValidationError('"unknownProperty" is not allowed', [], undefined)
         )
       )

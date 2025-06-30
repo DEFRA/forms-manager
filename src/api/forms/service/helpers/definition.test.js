@@ -87,51 +87,5 @@ describe('definition helpers', () => {
         abortEarly: false
       })
     })
-
-    it('should use form name in error when validation fails', () => {
-      /** @type {any} */
-      const definition = { name: 'My Test Form' }
-      const validationError = new Joi.ValidationError(
-        'Validation failed',
-        [],
-        {}
-      )
-
-      mockSchema.validate.mockReturnValue({
-        error: validationError,
-        value: undefined
-      })
-
-      expect(() => {
-        validate(definition, /** @type {any} */ (mockSchema))
-      }).toThrow(
-        expect.objectContaining({
-          message: expect.stringContaining('My Test Form')
-        })
-      )
-    })
-
-    it('should use "No name" when form has no name and validation fails', () => {
-      /** @type {any} */
-      const definition = {}
-      const validationError = new Joi.ValidationError(
-        'Validation failed',
-        [],
-        {}
-      )
-
-      mockSchema.validate.mockReturnValue({
-        error: validationError,
-        value: undefined
-      })
-
-      expect(() => {
-        validate(definition, /** @type {any} */ (mockSchema))
-      }).toThrow(
-        expect.objectContaining({
-          message: expect.stringContaining('No name')
-        })
-      )
-    })
   })
 })
