@@ -8,13 +8,11 @@ import { createLogger } from '~/src/helpers/logging/logger.js'
 const logger = createLogger()
 
 /**
- * @type {Lifecycle.Method}
+ * Checks for a Boom and Joi error from the
+ * payload and throws an `InvalidFormDefinitionError`
+ * @param {Error | undefined} err
  */
-export const failAction = (_request, _h, err) => {
-  logger.error(
-    `[validationFailed] Request validation failed - ${getErrorMessage(err)}`
-  )
-
+export const checkError = (err) => {
   if (Boom.isBoom(err) && Joi.isError(err)) {
     /** @type {{ source?: string } | undefined} */
     // @ts-expect-error - unknown type
@@ -26,6 +24,17 @@ export const failAction = (_request, _h, err) => {
   }
 
   return err ?? new Error('Unknown error')
+}
+
+/**
+ * @type {Lifecycle.Method}
+ */
+export const failAction = (_request, _h, err) => {
+  logger.error(
+    `[validationFailed] Request validation failed - ${getErrorMessage(err)}`
+  )
+
+  return checkError(err)
 }
 
 /**
