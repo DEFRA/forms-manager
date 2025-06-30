@@ -1,4 +1,4 @@
-import { N, listSchemaV2 } from '@defra/forms-model'
+import { listSchemaV2 } from '@defra/forms-model'
 
 import {
   addListToDraftFormDefinition,
@@ -42,7 +42,7 @@ export default [
       validate: {
         params: formByIdSchema,
         payload: listSchemaV2,
-        failAction: failAction(['lists', N])
+        failAction
       }
     }
   },
@@ -74,7 +74,7 @@ export default [
       validate: {
         params: listByIdSchema,
         payload: listSchemaWithRequiredIdSchema,
-        failAction: failAction(['lists', N])
+        failAction
       }
     }
   },
