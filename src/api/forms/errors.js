@@ -1,4 +1,4 @@
-import { getCauses } from '~/src/api/forms/validation-errors.js'
+import { getErrors } from '@defra/forms-model'
 
 /**
  * Base class to support all application errors.
@@ -35,11 +35,10 @@ export class InvalidFormDefinitionError extends ApplicationError {
   /**
    * Constructs an InvalidFormDefinitionError
    * @param {ValidationError} validationError - the joi form definition error
-   * @param {ErrorMatchPath} [errorPathPrefix] - the error path prefix to use
    */
-  constructor(validationError, errorPathPrefix) {
+  constructor(validationError) {
     super(validationError.message, {
-      cause: getCauses(validationError, errorPathPrefix)
+      cause: getErrors(validationError)
     })
   }
 }
