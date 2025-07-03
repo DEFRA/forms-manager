@@ -5,12 +5,14 @@ import {
   deleteComponentOnDraftDefinition,
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
+import { reorderDraftFormDefinitionComponents } from '~/src/api/forms/service/definition.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import {
   componentByIdSchema,
   componentPayloadWithRequiredIdSchema,
   pageByIdSchema,
-  prependQuerySchema
+  prependQuerySchema,
+  sortIdsSchema
 } from '~/src/models/forms.js'
 
 export const ROUTE_COMPONENTS =
@@ -47,6 +49,30 @@ export default [
         params: pageByIdSchema,
         payload: componentPayloadSchemaV2,
         query: prependQuerySchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/definition/draft/page/{pageId}/components/order',
+    /**
+     * @param {SortDraftFormComponentsRequest} request
+     */
+    handler(request) {
+      const { auth, params, payload } = request
+      const author = getAuthor(auth.credentials.user)
+
+      return reorderDraftFormDefinitionComponents(
+        params.id,
+        params.pageId,
+        payload,
+        author
+      )
+    },
+    options: {
+      validate: {
+        params: pageByIdSchema,
+        payload: sortIdsSchema
       }
     }
   },
@@ -104,5 +130,5 @@ export default [
 
 /**
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestComponent, RequestUpdateComponent } from '~/src/api/types.js'
+ * @import { RequestComponent, RequestUpdateComponent, SortDraftFormComponentsRequest } from '~/src/api/types.js'
  */

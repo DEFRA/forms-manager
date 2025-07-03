@@ -7,6 +7,7 @@ import {
   OperatorName,
   formDefinitionSchema,
   formDefinitionV2Schema,
+  hasComponents,
   hasComponentsEvenIfNoNext
 } from '@defra/forms-model'
 import {
@@ -35,6 +36,7 @@ import {
   deletePages,
   get,
   insert,
+  reorderComponents,
   reorderPages,
   setEngineVersion,
   update,
@@ -63,10 +65,13 @@ const page1Id = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
 const page2Id = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
 const page3Id = 'e789b259-ca15-4766-a8ef-a6fea5f7cbaa'
 const page4Id = '8bb39623-0f81-4084-8de8-18ee3ad0021f'
+const page5Id = '9d244215-6121-4316-bd7c-5abfc5083527'
 const component1Id = 'e296d931-2364-4b17-9049-1aa1afea29d3'
 const component2Id = '81f513ba-210f-4532-976c-82f8fc7ec2b6'
 const component3Id = '6eab6ef1-7a37-486c-9929-1cedd01df40f'
 const component4Id = 'a1bd1053-7100-497e-943c-0616358ca302'
+const component5Id = '937dc5e1-c9dd-4231-8525-6135e9a69f75'
+const component6Id = 'bc8ec4ac-6229-4c97-8553-66f11167b159'
 const listId = 'eb68b22f-b6ba-4358-8cba-b61282fecdb1'
 const condition1Id = '6e4c2f74-5bd9-48b4-b991-f2a021dcde59'
 const condition2Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
@@ -127,6 +132,9 @@ describe('form-definition-repository', () => {
   let page4
 
   /** @type {Page} */
+  let page5
+
+  /** @type {Page} */
   let summaryPage
 
   /** @type {List[]} */
@@ -175,6 +183,20 @@ describe('form-definition-repository', () => {
       path: '/page-four',
       components: [component4]
     })
+    const component5 = buildTextFieldComponent({
+      id: component5Id
+    })
+    const component6 = buildTextFieldComponent({
+      id: component6Id,
+      name: 'TextFieldTwo',
+      title: 'Text field two'
+    })
+    page5 = buildQuestionPage({
+      id: page5Id,
+      title: 'Page Five',
+      path: '/page-five',
+      components: [component5, component6]
+    })
     summaryPage = buildSummaryPage()
 
     const list = buildList({
@@ -215,7 +237,7 @@ describe('form-definition-repository', () => {
     conditions = [condition1, condition2]
 
     draft = buildDefinition({
-      pages: [page1, page2, page3, page4, summaryPage],
+      pages: [page1, page2, page3, page4, page5, summaryPage],
       lists,
       conditions
     })
@@ -306,7 +328,7 @@ describe('form-definition-repository', () => {
           )
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(4)
+          expect(definition.pages).toHaveLength(5)
         }
       )
     })
@@ -324,8 +346,8 @@ describe('form-definition-repository', () => {
           await addPage(formId, page, mockSession)
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(6)
-          expect(definition.pages.at(4)).toEqual(page)
+          expect(definition.pages).toHaveLength(7)
+          expect(definition.pages.at(5)).toEqual(page)
         }
       )
     })
@@ -404,6 +426,24 @@ describe('form-definition-repository', () => {
         (definition) => {
           expect(definition.pages.at(0)).toEqual(page2)
           expect(definition.pages.at(1)).toEqual(page1)
+        }
+      )
+    })
+  })
+
+  describe('reorderComponents', () => {
+    it('should reorder components', async () => {
+      const order = [component6Id, component5Id]
+
+      await helper(
+        async () => {
+          await reorderComponents(formId, page5Id, order, mockSession)
+        },
+        (draftForReorderQuestions) => {
+          const page = draftForReorderQuestions.pages[4]
+          const components = hasComponents(page) ? page.components : []
+          expect(components[0].id).toEqual(component6Id)
+          expect(components[1].id).toEqual(component5Id)
         }
       )
     })
@@ -607,7 +647,7 @@ describe('form-definition-repository', () => {
           await deletePage(formId, page1Id, mockSession)
         },
         (definition) => {
-          expect(definition.pages).toHaveLength(4)
+          expect(definition.pages).toHaveLength(5)
         }
       )
     })
