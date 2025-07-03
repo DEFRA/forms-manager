@@ -780,6 +780,28 @@ describe('repository helpers', () => {
         newComponent
       )
     })
+    it('should add the component if summary page and components property doesnt yet exist', () => {
+      const definition = buildDefinition({
+        pages: [summaryPage]
+      })
+
+      const newComponent = buildTextFieldComponent({
+        name: 'abcdef'
+      })
+      const modified = modifyAddComponent(
+        definition,
+        summaryPage.id ?? '',
+        newComponent,
+        0
+      )
+
+      const page = modified.pages.at(0)
+      expect(hasComponentsEvenIfNoNext(page)).toBe(true)
+      expect(hasComponentsEvenIfNoNext(page) && page.components).toHaveLength(1)
+      expect(hasComponentsEvenIfNoNext(page) && page.components.at(0)).toBe(
+        newComponent
+      )
+    })
   })
 
   describe('modifyUpdateComponent', () => {

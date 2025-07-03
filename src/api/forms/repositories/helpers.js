@@ -493,6 +493,13 @@ export function modifyAddComponent(definition, pageId, component, position) {
   const idx = getPageIndex(definition, pageId)
   const page = definition.pages[idx]
 
+  if (
+    !hasComponentsEvenIfNoNext(page) &&
+    page.controller === ControllerType.Summary
+  ) {
+    page.components = []
+  }
+
   if (hasComponentsEvenIfNoNext(page)) {
     if (position === undefined) {
       page.components.push(component)
