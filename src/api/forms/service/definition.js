@@ -315,7 +315,7 @@ export async function reorderDraftFormDefinitionComponents(
   author
 ) {
   logger.info(
-    `Reordering components on Form Definition (draft) for form ID ${formId}`
+    `Reordering components on Form Definition (draft) for form ID ${formId} pageID ${pageId}`
   )
 
   const form = await getFormDefinition(formId)
@@ -341,13 +341,13 @@ export async function reorderDraftFormDefinitionComponents(
     })
 
     logger.info(
-      `Reordered components on Form Definition (draft) for form ID ${formId}`
+      `Reordered components on Form Definition (draft) for form ID ${formId} pageID ${pageId}`
     )
 
     return newForm
   } catch (err) {
     logger.error(
-      `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
+      `[reorderComponents] Reordering components on form definition (draft) for form ID ${formId} pageID ${pageId} failed - ${getErrorMessage(err)}`
     )
 
     throw err
