@@ -302,6 +302,61 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
 }
 
 /**
+ * Based on a list of component ids will reorder the components on a page
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string[]} order
+ * @param {FormMetadataAuthor} author
+ */
+export async function reorderDraftFormDefinitionComponents(
+  formId,
+  pageId,
+  order,
+  author
+) {
+  logger.info(
+    `Reordering components on Form Definition (draft) for form ID ${formId} pageID ${pageId}`
+  )
+
+  const form = await getFormDefinition(formId)
+
+  if (!order.length) {
+    return form
+  }
+
+  const session = client.startSession()
+
+  try {
+    const newForm = await session.withTransaction(async () => {
+      const reorderedForm = await formDefinition.reorderComponents(
+        formId,
+        pageId,
+        order,
+        session
+      )
+
+      await formMetadata.updateAudit(formId, author, session)
+
+      return reorderedForm
+    })
+
+    logger.info(
+      `Reordered components on Form Definition (draft) for form ID ${formId} pageID ${pageId}`
+    )
+
+    return newForm
+  } catch (err) {
+    logger.error(
+      `[reorderComponents] Reordering components on form definition (draft) for form ID ${formId} pageID ${pageId} failed - ${getErrorMessage(err)}`
+    )
+
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
  * @import { FormDefinition, FormMetadataAuthor, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */

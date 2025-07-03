@@ -11,14 +11,18 @@ import { pino } from 'pino'
 import {
   buildDefinition,
   buildQuestionPage,
-  buildSummaryPage
+  buildSummaryPage,
+  buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { modifyReorderPages } from '~/src/api/forms/repositories/helpers.js'
+import {
+  modifyReorderComponents,
+  modifyReorderPages
+} from '~/src/api/forms/repositories/helpers.js'
 import {
   formMetadataDocument,
   formMetadataInput,
@@ -31,6 +35,7 @@ import {
   createLiveFromDraft,
   getFormDefinition,
   listForms,
+  reorderDraftFormDefinitionComponents,
   reorderDraftFormDefinitionPages,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
@@ -1135,6 +1140,116 @@ describe('Forms service', () => {
         reorderDraftFormDefinitionPages(
           id,
           ['5a1c2ef7-ed4e-4ec7-9119-226fc3063bda'],
+          author
+        )
+      ).rejects.toThrow(boomInternal)
+    })
+  })
+
+  describe('reorderDraftFormDefinitionComponents', () => {
+    const componentOneId = 'e6511b1c-c813-43d7-92c4-d84ba35d5f62'
+    const componentTwoId = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+    const componentThreeId = 'b90e6453-d4c1-46a4-a233-3dbee566c79e'
+    const pageOneId = '0ac3b3e8-422e-4253-a7a9-506d3234e12f'
+    const summaryPageId = 'b90e6453-d4c1-46a4-a233-3dbee566c79e'
+
+    const pageOne = buildQuestionPage({
+      id: pageOneId,
+      title: 'Page One',
+      components: [
+        buildTextFieldComponent({
+          id: componentOneId,
+          title: 'Question 1'
+        }),
+        buildTextFieldComponent({
+          id: componentTwoId,
+          title: 'Question 2'
+        }),
+        buildTextFieldComponent({
+          id: componentThreeId,
+          title: 'Question 3'
+        })
+      ]
+    })
+
+    const summaryPage = buildSummaryPage({
+      id: summaryPageId
+    })
+
+    const definition = buildDefinition({
+      pages: [pageOne, summaryPage]
+    })
+
+    beforeEach(() => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+    })
+
+    it('should reorder the components', async () => {
+      const orderList = [componentTwoId, componentThreeId, componentOneId]
+      jest
+        .mocked(formDefinition.reorderComponents)
+        .mockResolvedValueOnce(
+          modifyReorderComponents(definition, pageOneId, orderList)
+        )
+
+      const expectedPageOne = buildQuestionPage({
+        id: pageOneId,
+        title: 'Page One',
+        components: [
+          buildTextFieldComponent({
+            id: componentTwoId,
+            title: 'Question 2'
+          }),
+          buildTextFieldComponent({
+            id: componentThreeId,
+            title: 'Question 3'
+          }),
+          buildTextFieldComponent({
+            id: componentOneId,
+            title: 'Question 1'
+          })
+        ]
+      })
+
+      const expectedDefinition = buildDefinition({
+        pages: [expectedPageOne, summaryPage]
+      })
+      const result = await reorderDraftFormDefinitionComponents(
+        id,
+        pageOneId,
+        orderList,
+        author
+      )
+
+      const [, , order] = jest.mocked(formDefinition.reorderComponents).mock
+        .calls[0]
+      expect(order).toEqual(orderList)
+      expect(result).toEqual(expectedDefinition)
+      expectMetadataUpdate()
+    })
+
+    it('should not do any updates if no order list is sent', async () => {
+      const returnedDefinition = await reorderDraftFormDefinitionComponents(
+        id,
+        pageOneId,
+        [],
+        author
+      )
+      expect(returnedDefinition).toEqual(definition)
+      expect(formDefinition.update).not.toHaveBeenCalled()
+      expect(formMetadata.update).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors', async () => {
+      const boomInternal = Boom.internal('Something went wrong')
+      jest
+        .mocked(formDefinition.reorderComponents)
+        .mockRejectedValueOnce(boomInternal)
+      await expect(
+        reorderDraftFormDefinitionComponents(
+          id,
+          pageOneId,
+          [componentOneId, componentTwoId, componentThreeId],
           author
         )
       ).rejects.toThrow(boomInternal)

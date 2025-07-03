@@ -2,6 +2,7 @@ import {
   ApiErrorCode,
   ControllerType,
   formDefinitionV2Schema,
+  hasComponents,
   hasComponentsEvenIfNoNext,
   hasRepeater,
   isConditionWrapperV2
@@ -452,6 +453,30 @@ export function modifyReorderPages(definition, order) {
 
     return posA - posB
   })
+
+  return definition
+}
+
+/**
+ * Reorders the pages
+ * @param {FormDefinition} definition
+ * @param {string} pageId
+ * @param {string[]} order
+ * @returns {FormDefinition}
+ */
+export function modifyReorderComponents(definition, pageId, order) {
+  const MAX = Number.MAX_SAFE_INTEGER
+
+  const page = getPage(definition, pageId)
+
+  if (hasComponents(page)) {
+    page.components.sort((a, b) => {
+      const posA = a.id && order.includes(a.id) ? order.indexOf(a.id) : MAX
+      const posB = b.id && order.includes(b.id) ? order.indexOf(b.id) : MAX
+
+      return posA - posB
+    })
+  }
 
   return definition
 }

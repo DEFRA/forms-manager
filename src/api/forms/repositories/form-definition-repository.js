@@ -20,6 +20,7 @@ import {
   modifyDraft,
   modifyEngineVersion,
   modifyName,
+  modifyReorderComponents,
   modifyReorderPages,
   modifyUpdateComponent,
   modifyUpdateCondition,
@@ -288,6 +289,26 @@ export async function reorderPages(formId, order, session) {
   const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Reordered pages on form ID ${formId}`)
+
+  return result.draft
+}
+
+/**
+ * Reorders the components on a page
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string[]} order
+ * @param {ClientSession} session
+ */
+export async function reorderComponents(formId, pageId, order, session) {
+  logger.info(`Reordering components on form ID ${formId} page ID ${pageId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyReorderComponents(draft, pageId, order)
+
+  const result = await modifyDraft(formId, callback, session)
+
+  logger.info(`Reordered components on form ID ${formId} page ID ${pageId}`)
 
   return result.draft
 }
