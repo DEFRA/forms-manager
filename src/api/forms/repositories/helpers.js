@@ -467,11 +467,7 @@ export function modifyReorderPages(definition, order) {
 export function modifyReorderComponents(definition, pageId, order) {
   const MAX = Number.MAX_SAFE_INTEGER
 
-  const page = definition.pages.find((p) => p.id === pageId)
-
-  if (!page) {
-    throw Boom.notFound(`Page not found with id '${pageId}'`)
-  }
+  const page = getPage(definition, pageId)
 
   if (hasComponents(page)) {
     page.components.sort((a, b) => {
