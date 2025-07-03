@@ -661,34 +661,34 @@ describe('repository helpers', () => {
   })
 
   describe('modifyReorderComponentss', () => {
+    const componentId1 = 'fadeb416-2869-48b5-9292-ba45c01da52c'
+    const componentId2 = 'd7981cfe-ea1d-49fe-9303-dc4465d3a776'
+    const componentId3 = '57b5bd21-521d-467e-ab8a-1cd13eec984d'
+    const componentId4 = '559673bc-c105-400d-b417-0e2a6e765e10'
+
+    const component1 = buildTextFieldComponent({
+      id: componentId1
+    })
+    const component2 = buildTextFieldComponent({
+      id: componentId2
+    })
+    const component3 = buildTextFieldComponent({
+      id: componentId3
+    })
+    const component4 = buildTextFieldComponent({
+      id: componentId4
+    })
+
+    const questionPageWithComponents = buildQuestionPage({
+      id: pageId,
+      components: [component1, component2, component3, component4]
+    })
+
+    const definition = buildDefinition({
+      pages: [questionPageWithComponents, summaryPage]
+    })
+
     it('should update the questions order', () => {
-      const componentId1 = 'fadeb416-2869-48b5-9292-ba45c01da52c'
-      const componentId2 = 'd7981cfe-ea1d-49fe-9303-dc4465d3a776'
-      const componentId3 = '57b5bd21-521d-467e-ab8a-1cd13eec984d'
-      const componentId4 = '559673bc-c105-400d-b417-0e2a6e765e10'
-
-      const component1 = buildTextFieldComponent({
-        id: componentId1
-      })
-      const component2 = buildTextFieldComponent({
-        id: componentId2
-      })
-      const component3 = buildTextFieldComponent({
-        id: componentId3
-      })
-      const component4 = buildTextFieldComponent({
-        id: componentId4
-      })
-
-      const questionPageWithComponents = buildQuestionPage({
-        id: pageId,
-        components: [component1, component2, component3, component4]
-      })
-
-      const definition = buildDefinition({
-        pages: [questionPageWithComponents, summaryPage]
-      })
-
       const modified = modifyReorderComponents(definition, pageId, [
         componentId4,
         componentId2,
@@ -708,16 +708,39 @@ describe('repository helpers', () => {
       expect(modifiedComponents[3].id).toEqual(componentId3)
     })
 
-    it('should put unordered pages to the end order', () => {
-      const definition = buildDefinition({
-        pages: [questionPageWithComponent, summaryPage, statusPage]
+    it('should handle no components', () => {
+      const questionPageWithNoComponents = buildQuestionPage({
+        id: pageId,
+        components: undefined
       })
 
-      const modified = modifyReorderPages(definition, [statusPageId, pageId])
+      const definition = buildDefinition({
+        pages: [questionPageWithNoComponents, summaryPage, statusPage]
+      })
 
-      expect(modified.pages.at(0)?.id).toEqual(statusPageId)
-      expect(modified.pages.at(1)?.id).toEqual(pageId)
-      expect(modified.pages.at(2)?.id).toEqual(summaryPageId)
+      const modified = modifyReorderComponents(definition, pageId, [
+        componentId4,
+        componentId2,
+        componentId1,
+        componentId3
+      ])
+
+      expect(modified).toEqual(definition)
+    })
+
+    it('should throw if page no found', () => {
+      const definition = buildDefinition({
+        pages: [summaryPage, statusPage]
+      })
+
+      expect(() => {
+        modifyReorderComponents(definition, pageId, [
+          componentId4,
+          componentId2,
+          componentId1,
+          componentId3
+        ])
+      }).toThrow(Boom.notFound(`Page not found with id '${pageId}'`))
     })
   })
 
