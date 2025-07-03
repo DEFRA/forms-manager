@@ -1,14 +1,21 @@
-import { buildTextFieldComponent } from '~/src/api/forms/__stubs__/definition.js'
+import {
+  buildDefinition,
+  buildQuestionPage,
+  buildSummaryPage,
+  buildTextFieldComponent
+} from '~/src/api/forms/__stubs__/definition.js'
 import {
   createComponentOnDraftDefinition,
   deleteComponentOnDraftDefinition,
   updateComponentOnDraftDefinition
 } from '~/src/api/forms/service/component.js'
+import { reorderDraftFormDefinitionComponents } from '~/src/api/forms/service/definition.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
 
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/api/forms/service/component.js')
+jest.mock('~/src/api/forms/service/definition.js')
 
 describe('Components route', () => {
   /** @type {Server} */
@@ -67,6 +74,56 @@ describe('Components route', () => {
         },
         false
       ])
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/page/{pageId}/components/order reorders the components in the db', async () => {
+      const componentOneId = 'e6511b1c-c813-43d7-92c4-d84ba35d5f62'
+      const componentTwoId = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+      const componentThreeId = 'b90e6453-d4c1-46a4-a233-3dbee566c79e'
+      const pageOneId = '0ac3b3e8-422e-4253-a7a9-506d3234e12f'
+      const summaryPageId = 'b90e6453-d4c1-46a4-a233-3dbee566c79e'
+
+      const expectedPageOne = buildQuestionPage({
+        id: pageOneId,
+        title: 'Page One',
+        components: [
+          buildTextFieldComponent({
+            id: componentTwoId,
+            title: 'Question 2'
+          }),
+          buildTextFieldComponent({
+            id: componentThreeId,
+            title: 'Question 3'
+          }),
+          buildTextFieldComponent({
+            id: componentOneId,
+            title: 'Question 1'
+          })
+        ]
+      })
+
+      const expectedDefinition = buildDefinition({
+        pages: [
+          expectedPageOne,
+          buildSummaryPage({
+            id: summaryPageId
+          })
+        ]
+      })
+      jest
+        .mocked(reorderDraftFormDefinitionComponents)
+        .mockResolvedValue(expectedDefinition)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/page/${pageOneId}/components/order`,
+        payload: [componentTwoId, componentThreeId, componentOneId],
+        auth
+      })
+
+      expect(response.result).toEqual(expectedDefinition)
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
     })
 
     test('Testing PUT /forms/{id}/definition/draft/pages/{pageId}/components/{componentId} updates a component on a page', async () => {
