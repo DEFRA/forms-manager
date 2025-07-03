@@ -515,7 +515,7 @@ export async function updateCondition(formId, conditionId, condition, session) {
 }
 
 /**
- * Removes a condition by id
+ * Removes a condition by id and unassigns it from any pages that use it
  * @param {string} formId
  * @param {string} conditionId
  * @param {ClientSession} session
@@ -524,7 +524,18 @@ export async function deleteCondition(formId, conditionId, session) {
   logger.info(`Deleting condition ID ${conditionId} on form ID ${formId}`)
 
   /** @type {UpdateCallback} */
-  const callback = (draft) => modifyDeleteCondition(draft, conditionId)
+  const callback = (draft) => {
+    draft.pages.forEach((page) => {
+      if (page.condition === conditionId) {
+        logger.info(
+          `Unassigning condition ${conditionId} from page ${page.id ?? 'unknown'}`
+        )
+        delete page.condition
+      }
+    })
+
+    return modifyDeleteCondition(draft, conditionId)
+  }
 
   await modifyDraft(formId, callback, session)
 
