@@ -44,6 +44,7 @@ import {
   modifyEngineVersion,
   modifyName,
   modifyReorderPages,
+  modifyUnassignCondition,
   modifyUpdateComponent,
   modifyUpdateList,
   modifyUpdatePage,
@@ -925,6 +926,65 @@ describe('repository helpers', () => {
       const modified = modifyDeleteList(definition, listId)
 
       expect(modified.lists).toHaveLength(0)
+    })
+  })
+
+  describe('modifyUnassignCondition', () => {
+    it('should unassign condition from pages that reference it', () => {
+      const pageWithCondition = buildQuestionPage({
+        id: 'page-with-condition',
+        condition: conditionId
+      })
+      const pageWithDifferentCondition = buildQuestionPage({
+        id: 'page-with-different-condition',
+        condition: 'different-condition-id'
+      })
+      const pageWithoutCondition = buildQuestionPage({
+        id: 'page-without-condition'
+      })
+
+      const definition = buildDefinition({
+        pages: [
+          pageWithCondition,
+          pageWithDifferentCondition,
+          pageWithoutCondition
+        ],
+        conditions
+      })
+
+      const modified = modifyUnassignCondition(definition, conditionId)
+
+      expect(modified.pages[0].condition).toBeUndefined()
+      expect(modified.pages[1].condition).toBe('different-condition-id')
+      expect(modified.pages[2].condition).toBeUndefined()
+    })
+
+    it('should handle pages without IDs gracefully', () => {
+      const pageWithoutId = buildQuestionPage({
+        title: 'Page without ID',
+        condition: conditionId
+      })
+      delete pageWithoutId.id
+
+      const definition = buildDefinition({
+        pages: [pageWithoutId],
+        conditions
+      })
+
+      const modified = modifyUnassignCondition(definition, conditionId)
+
+      expect(modified.pages[0].condition).toBeUndefined()
+    })
+
+    it('should return the modified definition', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent],
+        conditions
+      })
+
+      const result = modifyUnassignCondition(definition, conditionId)
+
+      expect(result).toBe(definition)
     })
   })
 })

@@ -21,6 +21,7 @@ import {
   modifyEngineVersion,
   modifyName,
   modifyReorderPages,
+  modifyUnassignCondition,
   modifyUpdateComponent,
   modifyUpdateCondition,
   modifyUpdateList,
@@ -525,14 +526,7 @@ export async function deleteCondition(formId, conditionId, session) {
 
   /** @type {UpdateCallback} */
   const callback = (draft) => {
-    draft.pages.forEach((page) => {
-      if (page.condition === conditionId) {
-        logger.info(
-          `Unassigning condition ${conditionId} from page ${page.id ?? 'unknown'}`
-        )
-        delete page.condition
-      }
-    })
+    modifyUnassignCondition(draft, conditionId)
 
     return modifyDeleteCondition(draft, conditionId)
   }
