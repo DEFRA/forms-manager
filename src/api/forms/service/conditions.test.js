@@ -1,4 +1,4 @@
-import { ConditionType, OperatorName } from '@defra/forms-model'
+import { ConditionType, Coordinator, OperatorName } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
@@ -8,6 +8,7 @@ import {
   buildQuestionPage,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
+import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
@@ -25,16 +26,21 @@ jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 
+jest.mocked(formDefinition.updatePageFields).mockResolvedValue()
+jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 describe('conditions', () => {
   const id = '661e4ca5039739ef2902b214'
   const page1Id = '87ffdbd3-9e43-41e2-8db3-98ade26ca0b7'
   const page2Id = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+  const page3Id = 'f5a1cb1e-8c9e-41d7-8ba7-719829bce84b'
   const component1Id = 'e296d931-2364-4b17-9049-1aa1afea29d3'
   const component2Id = '81f513ba-210f-4532-976c-82f8fc7ec2b6'
   const condition1Id = '6e4c2f74-5bd9-48b4-b991-f2a021dcde59'
   const condition2Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
+  const joinedConditionId = 'a9fdbd20-df6c-42ef-b6ce-e72f7b76b069'
   const defaultAuthor = getAuthor()
   const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
 
@@ -98,6 +104,30 @@ describe('conditions', () => {
   const formDefinitionWithConditions = buildDefinition({
     pages: [page1, page2],
     conditions
+  })
+
+  const page3 = buildQuestionPage({
+    id: page3Id,
+    title: 'Page Three',
+    path: '/page-three',
+    components: [component1],
+    condition: condition1Id
+  })
+
+  const joinedCondition = buildCondition({
+    id: joinedConditionId,
+    displayName: 'isEnriqueChaseOrJoanneBloggs',
+    coordinator: Coordinator.OR,
+    items: [
+      {
+        id: '38bc27cc-01b8-4bc7-8f4f-6fb7d70897d6',
+        conditionId: condition1Id
+      },
+      {
+        id: 'c84adc88-3f4e-4390-b22b-bdf60faf52be',
+        conditionId: condition2Id
+      }
+    ]
   })
 
   beforeAll(async () => {
@@ -187,7 +217,17 @@ describe('conditions', () => {
   })
 
   describe('removeConditionOnDraftFormDefinition', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
     it('should remove a condition on the form definition', async () => {
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValue(formDefinitionWithConditions)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+
       await removeConditionOnDraftFormDefinition(
         id,
         condition1Id,
@@ -203,12 +243,207 @@ describe('conditions', () => {
 
     it('should surface errors', async () => {
       const boomInternal = Boom.internal('Something went wrong')
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValue(formDefinitionWithConditions)
+
       jest
         .mocked(formDefinition.deleteCondition)
         .mockRejectedValueOnce(boomInternal)
+
       await expect(
         removeConditionOnDraftFormDefinition(id, condition1Id, defaultAuthor)
       ).rejects.toThrow(boomInternal)
     })
+
+    it('should unassign simple condition from page before deletion', async () => {
+      const formWithPageCondition = buildDefinition({
+        pages: [page1, page2, page3],
+        conditions: [condition1, condition2]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValue(formWithPageCondition)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+
+      await removeConditionOnDraftFormDefinition(
+        id,
+        condition1Id,
+        defaultAuthor
+      )
+
+      expect(formDefinition.deleteCondition).toHaveBeenCalledWith(
+        id,
+        condition1Id,
+        expect.anything()
+      )
+
+      expectMetadataUpdate()
+    })
+
+    it('should unassign simple condition from multiple pages before deletion', async () => {
+      const page4 = buildQuestionPage({
+        id: 'page4Id',
+        title: 'Page Four',
+        path: '/page-four',
+        components: [component2],
+        condition: condition1Id
+      })
+
+      const formWithMultiplePageConditions = buildDefinition({
+        pages: [page1, page2, page3, page4],
+        conditions: [condition1, condition2]
+      })
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValue(formWithMultiplePageConditions)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+
+      await removeConditionOnDraftFormDefinition(
+        id,
+        condition1Id,
+        defaultAuthor
+      )
+
+      expect(formDefinition.deleteCondition).toHaveBeenCalledTimes(1)
+      expect(formDefinition.deleteCondition).toHaveBeenCalledWith(
+        id,
+        condition1Id,
+        expect.anything()
+      )
+    })
+
+    it('should fail when condition is referenced by joined conditions', async () => {
+      const mockValidationError = /** @type {ValidationError} */ ({
+        name: 'ValidationError',
+        message:
+          '"conditions[2].items[0].conditionId" must be [ref:root:conditions]',
+        isJoi: true,
+        annotate: () => '',
+        _original: {},
+        details: [
+          {
+            message:
+              '"conditions[2].items[0].conditionId" must be [ref:root:conditions]',
+            path: ['conditions', 2, 'items', 0, 'conditionId'],
+            type: 'any.ref',
+            context: {
+              ref: 'root:conditions',
+              key: 'conditionId',
+              label: 'conditions[2].items[0].conditionId'
+            }
+          }
+        ]
+      })
+
+      jest
+        .mocked(formDefinition.deleteCondition)
+        .mockRejectedValue(new InvalidFormDefinitionError(mockValidationError))
+
+      await expect(
+        removeConditionOnDraftFormDefinition(id, condition1Id, defaultAuthor)
+      ).rejects.toThrow(InvalidFormDefinitionError)
+
+      expect(formDefinition.deleteCondition).toHaveBeenCalledWith(
+        id,
+        condition1Id,
+        expect.anything()
+      )
+    })
+
+    it('should fail when condition is referenced by joined condition even if also assigned to pages', async () => {
+      const mockValidationError = /** @type {ValidationError} */ ({
+        name: 'ValidationError',
+        message:
+          '"conditions[2].items[0].conditionId" must be [ref:root:conditions]',
+        isJoi: true,
+        annotate: () => '',
+        _original: {},
+        details: [
+          {
+            message:
+              '"conditions[2].items[0].conditionId" must be [ref:root:conditions]',
+            path: ['conditions', 2, 'items', 0, 'conditionId'],
+            type: 'any.ref',
+            context: {
+              ref: 'root:conditions',
+              key: 'conditionId',
+              label: 'conditions[2].items[0].conditionId'
+            }
+          }
+        ]
+      })
+
+      jest
+        .mocked(formDefinition.deleteCondition)
+        .mockRejectedValue(new InvalidFormDefinitionError(mockValidationError))
+
+      await expect(
+        removeConditionOnDraftFormDefinition(id, condition1Id, defaultAuthor)
+      ).rejects.toThrow(InvalidFormDefinitionError)
+
+      expect(formDefinition.deleteCondition).toHaveBeenCalledWith(
+        id,
+        condition1Id,
+        expect.anything()
+      )
+    })
+
+    it('should handle pages without ids gracefully', async () => {
+      const pageWithoutId = buildQuestionPage({
+        title: 'No ID Page',
+        path: '/no-id',
+        components: [component1],
+        condition: condition1Id
+      })
+      delete pageWithoutId.id
+
+      const formWithPageWithoutId = buildDefinition({
+        pages: [page1, pageWithoutId, page3],
+        conditions: [condition1, condition2]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValue(formWithPageWithoutId)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+
+      await removeConditionOnDraftFormDefinition(
+        id,
+        condition1Id,
+        defaultAuthor
+      )
+
+      expect(formDefinition.deleteCondition).toHaveBeenCalledTimes(1)
+    })
+
+    it('should succeed when deleting joined condition (no other conditions reference it)', async () => {
+      const formWithJoinedCondition = buildDefinition({
+        pages: [page1, page2],
+        conditions: [condition1, condition2, joinedCondition]
+      })
+
+      jest.mocked(formDefinition.get).mockResolvedValue(formWithJoinedCondition)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+
+      await removeConditionOnDraftFormDefinition(
+        id,
+        joinedConditionId,
+        defaultAuthor
+      )
+
+      expect(formDefinition.deleteCondition).toHaveBeenCalledWith(
+        id,
+        joinedConditionId,
+        expect.anything()
+      )
+    })
   })
 })
+
+/**
+ * @import { ValidationError } from 'joi'
+ */

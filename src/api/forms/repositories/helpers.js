@@ -11,7 +11,10 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
+import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
+
+const logger = createLogger()
 
 /**
  * Removes a row in a MongoDB collection by its unique ID and fail if not completed.
@@ -688,6 +691,25 @@ export function modifyDeleteCondition(definition, conditionId) {
   const idx = getConditionIndex(definition, conditionId)
 
   definition.conditions.splice(idx, 1)
+
+  return definition
+}
+
+/**
+ * Unassigns a condition from all pages that reference it
+ * @param {FormDefinition} definition
+ * @param {string} conditionId
+ * @returns {FormDefinition}
+ */
+export function modifyUnassignCondition(definition, conditionId) {
+  definition.pages.forEach((page) => {
+    if (page.condition === conditionId) {
+      logger.info(
+        `Unassigning condition ${conditionId} from page ${page.id ?? 'unknown'}`
+      )
+      delete page.condition
+    }
+  })
 
   return definition
 }
