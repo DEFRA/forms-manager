@@ -125,7 +125,7 @@ export function findComponentAcrossPages(definition, componentName) {
       continue
     }
     const component = page.components.find(
-      (component) => component.name === componentName
+      (comp) => comp.name === componentName
     )
     if (component) {
       return component
@@ -147,7 +147,7 @@ export function convertToListRef(conditionData, valueStr, definition) {
     conditionData.field.name
   )
   const listId = hasListField(component) ? component.list : 'unknown'
-  const list = definition.lists.find((list) => list.id === listId)
+  const list = definition.lists.find((l) => l.id === listId)
   const listItem = list?.items.find((item) => item.value === valueStr)
 
   if (!listItem) {
