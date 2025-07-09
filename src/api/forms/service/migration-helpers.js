@@ -348,11 +348,13 @@ function getConditionNamesInUse(definition) {
  * @param {ConditionWrapper} conditionWrapper
  * @param {Map<string, string>} fieldNameToComponentId
  * @param {Set<string>} conditionsInUse
+ * @param {FormDefinition} definition
  */
 function convertConditionWrapperToV2(
   conditionWrapper,
   fieldNameToComponentId,
-  conditionsInUse
+  conditionsInUse,
+  definition
 ) {
   const coordinators = new Set()
 
@@ -369,7 +371,8 @@ function convertConditionWrapperToV2(
       return convertConditionDataToV2(
         conditionData,
         fieldNameToComponentId,
-        conditionsInUse
+        conditionsInUse,
+        definition
       )
     })
     .filter((item) => item !== null)
@@ -416,7 +419,8 @@ export function convertConditions(definition) {
         const newConditionWrapper = convertConditionWrapperToV2(
           conditionWrapper,
           fieldNameToComponentId,
-          conditionsInUse
+          conditionsInUse,
+          definition
         )
 
         conditionNamesToIds.set(conditionWrapper.name, newConditionWrapper.id)
