@@ -36,6 +36,40 @@ const conditionDataString = {
 /**
  * @type {ConditionData}
  */
+const conditionDataStringWithNumericOperator = {
+  field: {
+    name: 'field1',
+    type: ComponentType.TextField,
+    display: 'dummy'
+  },
+  operator: OperatorName.HasLength,
+  value: {
+    type: ConditionType.Value,
+    value: '20',
+    display: 'foobar'
+  }
+}
+
+/**
+ * @type {ConditionData}
+ */
+const conditionDataEmailWithNumericOperator = {
+  field: {
+    name: 'field1',
+    type: ComponentType.EmailAddressField,
+    display: 'dummy'
+  },
+  operator: OperatorName.IsLongerThan,
+  value: {
+    type: ConditionType.Value,
+    value: '15',
+    display: 'foobar'
+  }
+}
+
+/**
+ * @type {ConditionData}
+ */
 const conditionDataNumber = {
   field: {
     name: 'field1',
@@ -260,6 +294,42 @@ describe('convertConditionDataToV2', () => {
         listId: 'listId',
         itemId: 'id2'
       }
+    })
+  })
+
+  it('converts a valid conditionData for string value when operator denotes numeric value - textfield', () => {
+    const fieldNameToComponentId = new Map([['field1', 'component-123']])
+    const usedConditions = new Set()
+    const result = convertConditionDataToV2(
+      conditionDataStringWithNumericOperator,
+      fieldNameToComponentId,
+      usedConditions,
+      dummyDefinition
+    )
+    expect(result).toEqual({
+      id: expect.any(String),
+      componentId: 'component-123',
+      operator: 'has length',
+      type: ConditionType.NumberValue,
+      value: 20
+    })
+  })
+
+  it('converts a valid conditionData for string value when operator denotes numeric value - emailaddressfield', () => {
+    const fieldNameToComponentId = new Map([['field1', 'component-123']])
+    const usedConditions = new Set()
+    const result = convertConditionDataToV2(
+      conditionDataEmailWithNumericOperator,
+      fieldNameToComponentId,
+      usedConditions,
+      dummyDefinition
+    )
+    expect(result).toEqual({
+      id: expect.any(String),
+      componentId: 'component-123',
+      operator: 'is longer than',
+      type: ConditionType.NumberValue,
+      value: 15
     })
   })
 

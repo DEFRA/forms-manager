@@ -3,10 +3,30 @@ import { randomUUID } from 'crypto'
 import {
   ComponentType,
   ConditionType,
+  OperatorName,
   hasComponentsEvenIfNoNext,
   hasListField,
   isListType
 } from '@defra/forms-model'
+
+const numericValueOperators =
+  /** @type { Record <ComponentType, OperatorName[]> } */ ({
+    [ComponentType.TextField]: [
+      OperatorName.IsShorterThan,
+      OperatorName.IsLongerThan,
+      OperatorName.HasLength
+    ],
+    [ComponentType.MultilineTextField]: [
+      OperatorName.IsShorterThan,
+      OperatorName.IsLongerThan,
+      OperatorName.HasLength
+    ],
+    [ComponentType.EmailAddressField]: [
+      OperatorName.IsShorterThan,
+      OperatorName.IsLongerThan,
+      OperatorName.HasLength
+    ]
+  })
 
 /**
  *
@@ -65,8 +85,43 @@ export function determineConditionType(conditionData) {
         ? ConditionType.RelativeDate
         : ConditionType.DateValue
     default:
-      return ConditionType.StringValue
+      return numericTypeOrDefault(conditionData, ConditionType.StringValue)
   }
+}
+
+/**
+ * @param {ConditionData} conditionData
+ * @returns {boolean}
+ */
+export function overrideAsNumericType(conditionData) {
+  const type = /** @type {ComponentType} */ (
+    'value' in conditionData ? conditionData.field.type : ''
+  )
+  const numericOperators = /** @type { OperatorName[] | undefined } */ (
+    numericValueOperators[type]
+  )
+  const found = numericOperators?.find((op) => op === conditionData.operator)
+  return found !== undefined
+}
+
+/**
+ * @param {ConditionData} conditionData
+ * @param {ConditionType} defaultType
+ * @returns {ConditionType}
+ */
+export function numericTypeOrDefault(conditionData, defaultType) {
+  return overrideAsNumericType(conditionData)
+    ? ConditionType.NumberValue
+    : defaultType
+}
+
+/**
+ * @param {ConditionData} conditionData
+ * @param {string} valueStr
+ * @returns { string | number }
+ */
+export function numericValueOrDefault(conditionData, valueStr) {
+  return overrideAsNumericType(conditionData) ? parseInt(valueStr) : valueStr
 }
 
 /**
@@ -185,7 +240,7 @@ export function determineConditionValue(conditionData, definition) {
         ? extractRelativeDateValue(conditionData)
         : valueStr
     default:
-      return valueStr
+      return numericValueOrDefault(conditionData, valueStr)
   }
 }
 
