@@ -17,6 +17,7 @@ import {
 } from '~/src/api/forms/service/shared.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { publishFormCreatedEvent } from '~/src/helpers/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -74,6 +75,8 @@ export async function createForm(metadataInput, author) {
         session,
         formDefinitionV2Schema
       )
+
+      await publishFormCreatedEvent(metadata)
     })
   } finally {
     await session.endSession()
@@ -218,6 +221,7 @@ export async function removeForm(formId) {
 
   logger.info(`Removed form with ID ${formId}`)
 }
+
 /**
  * @import { FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
