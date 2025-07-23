@@ -1,29 +1,10 @@
-import { PublishCommand } from '@aws-sdk/client-sns'
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
   AuditEventMessageType
 } from '@defra/forms-model'
 
-import { config } from '~/src/config/index.js'
-import { getSNSClient } from '~/src/helpers/sns.js'
-
-const snsTopicArn = config.get('snsTopicArn')
-
-const client = getSNSClient()
-
-/**
- * Publish event onto topic
- * @param {Message} message
- */
-export async function publishEvent(message) {
-  const command = new PublishCommand({
-    TopicArn: snsTopicArn,
-    Message: JSON.stringify(message)
-  })
-
-  return client.send(command)
-}
+import { publishEvent } from '~/src/helpers/publish-base.js'
 
 /**
  * Publish form created event
