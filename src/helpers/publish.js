@@ -42,6 +42,7 @@ export async function publishFormCreatedEvent(metadata) {
   if (error) {
     throw error
   }
+
   return publishEvent(value)
 }
 
