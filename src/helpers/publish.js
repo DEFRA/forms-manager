@@ -1,7 +1,8 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
-  AuditEventMessageType
+  AuditEventMessageType,
+  messageSchema
 } from '@defra/forms-model'
 
 import { publishEvent } from '~/src/helpers/publish-base.js'
@@ -34,7 +35,14 @@ export async function publishFormCreatedEvent(metadata) {
     data
   }
 
-  return publishEvent(message)
+  const { value, error } = messageSchema.validate(message, {
+    abortEarly: false
+  })
+
+  if (error) {
+    throw error
+  }
+  return publishEvent(value)
 }
 
 /**
