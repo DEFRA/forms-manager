@@ -1,7 +1,7 @@
 import { PublishCommand } from '@aws-sdk/client-sns'
 
 import { config } from '~/src/config/index.js'
-import { getSNSClient } from '~/src/helpers/sns.js'
+import { getSNSClient } from '~/src/messaging/sns.js'
 
 const snsTopicArn = config.get('snsTopicArn')
 
@@ -9,7 +9,8 @@ const client = getSNSClient()
 
 /**
  * Publish event onto topic
- * @param {Message} message
+ * @param {AuditMessage} message
+ * @returns {Promise<PublishCommandOutput>}
  */
 export function publishEvent(message) {
   const command = new PublishCommand({
@@ -21,5 +22,6 @@ export function publishEvent(message) {
 }
 
 /**
- * @import { FormMetadata, Message, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
+ * @import {PublishCommandOutput} from '@aws-sdk/client-sns'
+ * @import { FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
  */

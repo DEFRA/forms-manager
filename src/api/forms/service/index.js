@@ -17,7 +17,7 @@ import {
 } from '~/src/api/forms/service/shared.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
-import { publishFormCreatedEvent } from '~/src/helpers/publish.js'
+import { publishFormCreatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**

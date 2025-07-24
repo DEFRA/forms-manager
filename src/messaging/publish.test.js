@@ -6,10 +6,10 @@ import {
 import { buildMetaData } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
-import { publishEvent } from '~/src/helpers/publish-base.js'
-import { publishFormCreatedEvent } from '~/src/helpers/publish.js'
+import { publishEvent } from '~/src/messaging/publish-base.js'
+import { publishFormCreatedEvent } from '~/src/messaging/publish.js'
 
-jest.mock('~/src/helpers/publish-base.js')
+jest.mock('~/src/messaging/publish-base.js')
 
 describe('publish', () => {
   describe('publishFormCreatedEvent', () => {
@@ -65,10 +65,12 @@ describe('publish', () => {
         createdBy
       }
 
-      // ts-expect-error - invalid schema
+      // @ts-expect-error - invalid schema
       await expect(publishFormCreatedEvent(invalidMetaData)).rejects.toThrow(
         new ValidationError(
-          '"data.formId" is required. "data.slug" is required'
+          '"data.formId" is required. "data.slug" is required',
+          [],
+          invalidMetaData
         )
       )
     })

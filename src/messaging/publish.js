@@ -5,13 +5,13 @@ import {
   messageSchema
 } from '@defra/forms-model'
 
-import { publishEvent } from '~/src/helpers/publish-base.js'
+import { publishEvent } from '~/src/messaging/publish-base.js'
 
 /**
  * Publish form created event
  * @param {FormMetadata} metadata
  */
-export async function publishFormCreatedEvent(metadata) {
+export function publishFormCreatedEvent(metadata) {
   /** @type {FormCreatedMessageData} */
   const data = {
     formId: metadata.id,

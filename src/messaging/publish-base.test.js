@@ -3,7 +3,7 @@ import { buildFormCreatedMessage } from '@defra/forms-model/stubs'
 import { mockClient } from 'aws-sdk-client-mock'
 
 import 'aws-sdk-client-mock-jest'
-import { publishEvent } from '~/src/helpers/publish-base.js'
+import { publishEvent } from '~/src/messaging/publish-base.js'
 
 describe('publish-base', () => {
   const snsMock = mockClient(SNSClient)
