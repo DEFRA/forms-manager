@@ -23,6 +23,7 @@ import {
 } from '~/src/api/forms/service/index.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import { publishFormCreatedEvent } from '~/src/messaging/publish.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -30,6 +31,7 @@ jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
+jest.mock('~/src/messaging/publish.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -80,10 +82,12 @@ describe('Forms service', () => {
       })
     })
 
-    it('should create a new form', async () => {
+    it('should create a new form and publish audit event', async () => {
       await expect(createForm(formMetadataInput, author)).resolves.toEqual(
         formMetadataOutput
       )
+
+      expect(publishFormCreatedEvent).toHaveBeenCalledWith(formMetadataOutput)
     })
 
     it('should check if form create DB operation is called with correct form data', async () => {

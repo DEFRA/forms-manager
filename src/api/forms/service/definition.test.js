@@ -53,7 +53,7 @@ jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
-
+jest.mock('~/src/messaging/publish.js')
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
