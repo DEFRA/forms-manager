@@ -46,5 +46,5 @@ export function publishFormCreatedEvent(metadata) {
 }
 
 /**
- * @import { FormMetadata, Message, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
+ * @import { FormMetadata, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
  */
