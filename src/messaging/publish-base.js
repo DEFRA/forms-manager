@@ -22,6 +22,8 @@ export function publishEvent(message) {
     })
     return client.send(command)
   }
+
+  return undefined
 }
 
 /**
