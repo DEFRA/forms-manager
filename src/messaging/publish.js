@@ -4,6 +4,7 @@ import {
   AuditEventMessageType,
   messageSchema
 } from '@defra/forms-model'
+import Joi from 'joi'
 
 import { publishEvent } from '~/src/messaging/publish-base.js'
 
@@ -24,6 +25,8 @@ export function publishFormCreatedEvent(metadata) {
 
   /** @type {FormCreatedMessage} */
   const message = {
+    messageCreatedAt: new Date(),
+    entityId: metadata.id,
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
     type: AuditEventMessageType.FORM_CREATED,
@@ -35,13 +38,9 @@ export function publishFormCreatedEvent(metadata) {
     data
   }
 
-  const { value, error } = messageSchema.validate(message, {
+  const value = Joi.attempt(message, messageSchema, {
     abortEarly: false
   })
-
-  if (error) {
-    throw error
-  }
 
   return publishEvent(value)
 }

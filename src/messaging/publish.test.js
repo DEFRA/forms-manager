@@ -39,6 +39,8 @@ describe('publish', () => {
       await publishFormCreatedEvent(metadata)
 
       expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_CREATED,
@@ -55,7 +57,8 @@ describe('publish', () => {
       })
     })
 
-    it('should not publish the event if the schema is incorrect', async () => {
+    it('should not publish the event if the schema is incorrect', () => {
+      jest.mocked(publishEvent).mockRejectedValue(new Error('rejected'))
       const invalidMetaData = {
         title,
         organisation,
@@ -66,9 +69,9 @@ describe('publish', () => {
       }
 
       // @ts-expect-error - invalid schema
-      await expect(publishFormCreatedEvent(invalidMetaData)).rejects.toThrow(
+      expect(() => publishFormCreatedEvent(invalidMetaData)).toThrow(
         new ValidationError(
-          '"data.formId" is required. "data.slug" is required',
+          '"entityId" is required. "data.formId" is required. "data.slug" is required',
           [],
           invalidMetaData
         )
