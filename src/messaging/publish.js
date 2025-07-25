@@ -25,17 +25,17 @@ export function publishFormCreatedEvent(metadata) {
 
   /** @type {FormCreatedMessage} */
   const message = {
-    messageCreatedAt: new Date(),
-    entityId: metadata.id,
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
     type: AuditEventMessageType.FORM_CREATED,
+    entityId: metadata.id,
     createdAt: metadata.createdAt,
     createdBy: {
       id: metadata.createdBy.id,
       displayName: metadata.createdBy.displayName
     },
-    data
+    data,
+    messageCreatedAt: new Date()
   }
 
   const value = Joi.attempt(message, messageSchema, {
