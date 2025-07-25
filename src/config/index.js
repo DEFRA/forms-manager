@@ -179,6 +179,12 @@ export const config = convict({
     format: String,
     default: '',
     env: 'SNS_TOPIC_ARN'
+  },
+  publishAuditEvents: {
+    doc: 'Publish audit events for forms-audit-api',
+    format: Boolean,
+    default: !isProduction,
+    env: 'FEATURE_FLAG_PUBLISH_AUDIT_EVENTS'
   }
 })
 

@@ -10,18 +10,21 @@ const client = getSNSClient()
 /**
  * Publish event onto topic
  * @param {AuditMessage} message
- * @returns {Promise<PublishCommandOutput>}
+ * @returns {Promise<PublishCommandOutput> | void}
  */
 export function publishEvent(message) {
-  const command = new PublishCommand({
-    TopicArn: snsTopicArn,
-    Message: JSON.stringify(message)
-  })
+  const shouldPublish = config.get('publishAuditEvents')
 
-  return client.send(command)
+  if (shouldPublish) {
+    const command = new PublishCommand({
+      TopicArn: snsTopicArn,
+      Message: JSON.stringify(message)
+    })
+    return client.send(command)
+  }
 }
 
 /**
- * @import {PublishCommandOutput} from '@aws-sdk/client-sns'
+ * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
  * @import { FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
  */
