@@ -4,7 +4,6 @@ import { config } from '~/src/config/index.js'
 import { getSNSClient } from '~/src/messaging/sns.js'
 
 const snsTopicArn = config.get('snsTopicArn')
-const shouldPublish = config.get('publishAuditEvents')
 
 const client = getSNSClient()
 
@@ -14,6 +13,8 @@ const client = getSNSClient()
  * @returns {Promise<PublishCommandOutput> | void}
  */
 export function publishEvent(message) {
+  const shouldPublish = config.get('publishAuditEvents')
+
   if (shouldPublish) {
     const command = new PublishCommand({
       TopicArn: snsTopicArn,
