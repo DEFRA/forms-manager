@@ -1,6 +1,5 @@
 import { messageSchema } from '@defra/forms-model'
 import Joi from 'joi'
-import { getDiff } from 'json-difference'
 
 import {
   formCreatedEventMapper,
@@ -40,90 +39,6 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
   const auditMessage = formTitleUpdatedMapper(metadata, oldMetadata)
 
   return publishFormEvent(auditMessage)
-}
-
-/**
- *
- * @type {Record<string, (function(FormMetadata, FormMetadata): AuditMessage)>}
- */
-const metadataFieldKeyMapperLookup = {
-  title: formTitleUpdatedMapper
-}
-
-/**
- * Taking an old metadata object and new metadata object creates all the pp
- * @param {FormMetadata} metadata
- * @param {FormMetadata} oldMetadata
- * @returns {AuditMessage[]}
- */
-export function getFormMetadataAuditMessages(metadata, oldMetadata) {
-  // getDiff returns shape of {"added": [[key, value], "edited": [[key, oldValue, newValue]], "removed": [key, value]}
-  const { edited } = getDiff(oldMetadata, metadata)
-
-  /**
-   * We're going to cycle through each of the edits and if there's a match from metadataFieldKeyPublishLookup
-   * @type {AuditMessage[]}
-   */
-  const auditMessages = edited.reduce((acc, edited) => {
-    // Extract the key
-    const [key] = edited
-
-    // Get the associated change event mapper
-    const mapperFn = metadataFieldKeyMapperLookup[key]
-
-    // Publishes the associated event
-    if (mapperFn instanceof Function) {
-      const value = Joi.attempt(
-        mapperFn(metadata, oldMetadata),
-        messageSchema,
-        {
-          abortEarly: false
-        }
-      )
-      return [...acc, value]
-    }
-    return acc
-  }, /** @type {AuditMessage[]} */ ([]))
-
-  return auditMessages
-}
-/**
- *
- * @type {Record<string, (function(FormMetadata, FormMetadata): Promise<PublishCommandOutput>)>}
- */
-const metadataFieldKeyPublishLookup = {
-  title: publishFormTitleUpdatedEvent
-}
-
-/**
- * Taking an old metadata object and new metadata object publishes all the associated change events
- * @param {FormMetadata} metadata
- * @param {FormMetadata} oldMetadata
- * @returns {Promise<PromiseSettledResult<PublishCommandOutput>[]>}
- */
-export async function publishFormMetadataUpdatedEvent(metadata, oldMetadata) {
-  // getDiff returns shape of {"added": [[key, value], "edited": [[key, oldValue, newValue]], "removed": [key, value]}
-  const { edited } = getDiff(oldMetadata, metadata)
-
-  /**
-   * We're going to cycle through each of the edits and if there's a match from metadataFieldKeyPublishLookup
-   * @type {Promise<PublishCommandOutput>[]}
-   */
-  const editedPromises = edited.reduce((acc, edited) => {
-    // Extract the key
-    const [key] = edited
-
-    // Get the associated change event mapper
-    const publishFn = metadataFieldKeyPublishLookup[key]
-
-    // Publishes the associated event
-    if (publishFn instanceof Function) {
-      return [...acc, publishFn(metadata, oldMetadata)]
-    }
-    return acc
-  }, /** @type {Promise<PublishCommandOutput>[]} */ ([]))
-
-  return Promise.allSettled(editedPromises)
 }
 
 /**
