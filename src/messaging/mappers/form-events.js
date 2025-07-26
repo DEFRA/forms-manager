@@ -1,5 +1,6 @@
 import {
   AuditEventMessageCategory,
+  AuditEventMessageSchemaVersion,
   AuditEventMessageType
 } from '@defra/forms-model'
 
@@ -22,14 +23,18 @@ export function formCreatedEventMapper(metadata) {
     teamName: metadata.teamName,
     teamEmail: metadata.teamEmail
   }
-
-  const auditMessageBase = createV1MessageBase(metadata)
-
   return {
-    ...auditMessageBase,
-    data,
+    schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
-    type: AuditEventMessageType.FORM_CREATED
+    type: AuditEventMessageType.FORM_CREATED,
+    entityId: metadata.id,
+    createdAt: metadata.createdAt,
+    createdBy: {
+      id: metadata.createdBy.id,
+      displayName: metadata.createdBy.displayName
+    },
+    data,
+    messageCreatedAt: new Date()
   }
 }
 
@@ -39,6 +44,41 @@ export function formCreatedEventMapper(metadata) {
  * @returns {FormTitleUpdatedMessage}
  */
 export function formTitleUpdatedMapper(metadata, oldMetadata) {
+  const { title } = metadata
+  const { title: oldTitle } = oldMetadata
+
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormTitleUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        title: oldTitle
+      },
+      new: {
+        title
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_TITLE_UPDATED
+  }
+}
+
+/**
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} oldMetadata
+ * @returns {FormTitleUpdatedMessage}
+ */
+export function formOrganisationUpdatedMapper(metadata, oldMetadata) {
   const { title } = metadata
   const { title: oldTitle } = oldMetadata
 
