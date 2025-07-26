@@ -44,6 +44,51 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
 
 /**
  *
+ * @type {Record<string, (function(FormMetadata, FormMetadata): AuditMessage)>}
+ */
+const metadataFieldKeyMapperLookup = {
+  title: formTitleUpdatedMapper
+}
+
+/**
+ * Taking an old metadata object and new metadata object creates all the pp
+ * @param {FormMetadata} metadata
+ * @param {FormMetadata} oldMetadata
+ * @returns {AuditMessage[]}
+ */
+export function getFormMetadataAuditMessages(metadata, oldMetadata) {
+  // getDiff returns shape of {"added": [[key, value], "edited": [[key, oldValue, newValue]], "removed": [key, value]}
+  const { edited } = getDiff(oldMetadata, metadata)
+
+  /**
+   * We're going to cycle through each of the edits and if there's a match from metadataFieldKeyPublishLookup
+   * @type {AuditMessage[]}
+   */
+  const auditMessages = edited.reduce((acc, edited) => {
+    // Extract the key
+    const [key] = edited
+
+    // Get the associated change event mapper
+    const mapperFn = metadataFieldKeyMapperLookup[key]
+
+    // Publishes the associated event
+    if (mapperFn instanceof Function) {
+      const value = Joi.attempt(
+        mapperFn(metadata, oldMetadata),
+        messageSchema,
+        {
+          abortEarly: false
+        }
+      )
+      return [...acc, value]
+    }
+    return acc
+  }, /** @type {AuditMessage[]} */ ([]))
+
+  return auditMessages
+}
+/**
+ *
  * @type {Record<string, (function(FormMetadata, FormMetadata): Promise<PublishCommandOutput>)>}
  */
 const metadataFieldKeyPublishLookup = {
@@ -68,7 +113,7 @@ export async function publishFormMetadataUpdatedEvent(metadata, oldMetadata) {
     // Extract the key
     const [key] = edited
 
-    // Get the associated change event method
+    // Get the associated change event mapper
     const publishFn = metadataFieldKeyPublishLookup[key]
 
     // Publishes the associated event
@@ -82,6 +127,6 @@ export async function publishFormMetadataUpdatedEvent(metadata, oldMetadata) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormMetadata, AuditMessage, AuditChanges, FormCreatedMessage, FormCreatedMessageData, MessageBase, MessageData } from '@defra/forms-model'
+ * @import { FormTitleUpdatedMessageData, FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData, MessageBase, MessageData } from '@defra/forms-model'
  * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
  */

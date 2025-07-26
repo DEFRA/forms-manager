@@ -8,6 +8,7 @@ import { ValidationError } from 'joi'
 
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
+  getFormMetadataAuditMessages,
   publishFormCreatedEvent,
   publishFormMetadataUpdatedEvent,
   publishFormTitleUpdatedEvent
@@ -124,6 +125,21 @@ describe('publish', () => {
           }
         }
       })
+    })
+  })
+
+  describe('getFormMetadataAuditMessages', () => {
+    it('should get FORM_TITLE_UPDATED audit message', () => {
+      const oldMetadata = buildMetaData({
+        ...metadata,
+        title: 'Old form title'
+      })
+      const messages = getFormMetadataAuditMessages(metadata, oldMetadata)
+      const [formTitleUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formTitleUpdatedMessage.type).toBe(
+        AuditEventMessageType.FORM_TITLE_UPDATED
+      )
     })
   })
 
