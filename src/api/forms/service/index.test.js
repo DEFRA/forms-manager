@@ -246,7 +246,7 @@ describe('Forms service', () => {
       )
     })
 
-    it('should update slug and draft.updatedAt/draft.updatedBy when title is updated', async () => {
+    it('should update slug, draft.updatedAt/draft.updatedBy and publish FormTitleUpdatedMessage when title is updated', async () => {
       const input = {
         title: 'new title'
       }

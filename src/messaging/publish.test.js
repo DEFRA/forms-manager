@@ -9,6 +9,7 @@ import { ValidationError } from 'joi'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
   publishFormCreatedEvent,
+  publishFormMetadataUpdatedEvent,
   publishFormTitleUpdatedEvent
 } from '~/src/messaging/publish.js'
 
@@ -96,16 +97,6 @@ describe('publish', () => {
 
   describe('publishFormTitleUpdatedEvent', () => {
     it('should publish FORM_TITLE_UPDATED event', async () => {
-      const metadata = buildMetaData({
-        id: formId,
-        slug,
-        title,
-        organisation,
-        teamName,
-        teamEmail,
-        createdAt,
-        createdBy
-      })
       const oldMetadata = buildMetaData({
         ...metadata,
         title: 'Old form title'
@@ -133,6 +124,21 @@ describe('publish', () => {
           }
         }
       })
+    })
+  })
+
+  describe('publishFormMetadataUpdatedEvents', () => {
+    it('should publish FormTitleUpdatedEvent', async () => {
+      const oldMetadata = buildMetaData({
+        ...metadata,
+        title: 'Old form title'
+      })
+      await publishFormMetadataUpdatedEvent(metadata, oldMetadata)
+      expect(publishEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: AuditEventMessageType.FORM_TITLE_UPDATED
+        })
+      )
     })
   })
 })
