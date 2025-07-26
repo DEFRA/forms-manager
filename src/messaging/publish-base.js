@@ -10,9 +10,9 @@ const client = getSNSClient()
 /**
  * Publish event onto topic
  * @param {AuditMessage} message
- * @returns {Promise<PublishCommandOutput> | void}
+ * @returns {Promise<PublishCommandOutput>}
  */
-export function publishEvent(message) {
+export async function publishEvent(message) {
   const shouldPublish = config.get('publishAuditEvents')
 
   if (shouldPublish) {
@@ -23,7 +23,11 @@ export function publishEvent(message) {
     return client.send(command)
   }
 
-  return undefined
+  return {
+    MessageId: undefined,
+    SequenceNumber: undefined,
+    $metadata: {}
+  }
 }
 
 /**

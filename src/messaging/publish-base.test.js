@@ -36,11 +36,15 @@ describe('publish-base', () => {
       jest.resetAllMocks()
     })
 
-    it('should not publish if publish audit events feature flag is disabled', () => {
+    it('should not publish if publish audit events feature flag is disabled', async () => {
       jest.mocked(config.get).mockReturnValue(false)
-      const val = publishEvent(message)
-      expect(val).not.toBeInstanceOf(Promise)
-      expect(val).toBeUndefined()
+      const val = await publishEvent(message)
+      expect(val).toEqual({
+        MessageId: undefined,
+        SequenceNumber: undefined,
+        $metadata: {}
+      })
+      expect(snsMock).not.toHaveReceivedCommand(PublishCommand)
     })
 
     it('should publish', async () => {
