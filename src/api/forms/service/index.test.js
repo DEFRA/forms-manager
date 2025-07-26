@@ -1,3 +1,4 @@
+import { AuditEventMessageType } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
@@ -5,6 +6,7 @@ import { pino } from 'pino'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import author from '~/src/api/forms/service/__stubs__/author.js'
 import {
   formMetadataDocument,
   formMetadataInput,
@@ -22,8 +24,7 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
-import { getAuthor } from '~/src/helpers/get-author.js'
-import { publishFormCreatedEvent } from '~/src/messaging/publish.js'
+import { publishEvent } from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -31,7 +32,7 @@ jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
-jest.mock('~/src/messaging/publish.js')
+jest.mock('~/src/messaging/publish-base.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -42,12 +43,12 @@ const { emptyV2: emptyFormWithSummaryV2 } =
   /** @type {typeof formTemplates} */ (
     jest.requireActual('~/src/api/forms/templates.js')
   )
-const author = getAuthor()
 
 describe('Forms service', () => {
   const id = '661e4ca5039739ef2902b214'
   const slug = 'test-form'
   const dateUsedInFakeTime = new Date('2020-01-01')
+  const messageId = 'ed530a3b-7662-4188-9d01-15dc53167101'
 
   let definition = emptyFormWithSummary()
   const definitionV2 = emptyFormWithSummaryV2()
@@ -59,6 +60,11 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest.mocked(publishEvent).mockResolvedValue({
+      MessageId: messageId,
+      SequenceNumber: '1',
+      $metadata: {}
+    })
   })
 
   const slugExamples = [
@@ -86,8 +92,11 @@ describe('Forms service', () => {
       await expect(createForm(formMetadataInput, author)).resolves.toEqual(
         formMetadataOutput
       )
+      const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
 
-      expect(publishFormCreatedEvent).toHaveBeenCalledWith(formMetadataOutput)
+      expect(publishEventCalls[0]).toMatchObject({
+        type: AuditEventMessageType.FORM_CREATED
+      })
     })
 
     it('should check if form create DB operation is called with correct form data', async () => {
@@ -261,6 +270,7 @@ describe('Forms service', () => {
 
       const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
       const dbDefinitionOperationArgs = dbDefinitionSpy.mock.calls[0]
+      const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
 
       // Check metadata was updated
       expect(dbMetadataSpy).toHaveBeenCalled()
@@ -280,6 +290,22 @@ describe('Forms service', () => {
       expect(dbDefinitionSpy).toHaveBeenCalled()
       expect(dbDefinitionOperationArgs[0]).toBe(id)
       expect(dbDefinitionOperationArgs[1]).toBe(input.title)
+
+      // Check that FORM_TITLE_UPDATED event was published
+      expect(publishEvent).toHaveBeenCalledTimes(1)
+      expect(publishEventCalls[0]).toMatchObject({
+        type: AuditEventMessageType.FORM_TITLE_UPDATED,
+        data: {
+          changes: {
+            previous: {
+              title: 'Test form'
+            },
+            new: {
+              title: 'new title'
+            }
+          }
+        }
+      })
     })
 
     it('should not update draft.updatedAt and draft.updatedBy when title is not updated', async () => {
