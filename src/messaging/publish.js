@@ -1,18 +1,34 @@
 import {
   AuditEventMessageCategory,
-  AuditEventMessageSchemaVersion,
   AuditEventMessageType,
   messageSchema
 } from '@defra/forms-model'
 import Joi from 'joi'
 
+import {
+  createFormMessageDataBase,
+  createV1MessageBase
+} from '~/src/messaging/mappers.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
+
+/**
+ * Helper to publish form events
+ * @param {AuditMessage} auditMessage
+ * @returns {Promise<PublishCommandOutput>}
+ */
+async function publishFormEvent(auditMessage) {
+  const value = Joi.attempt(auditMessage, messageSchema, {
+    abortEarly: false
+  })
+
+  return publishEvent(value)
+}
 
 /**
  * Publish form created event
  * @param {FormMetadata} metadata
  */
-export function publishFormCreatedEvent(metadata) {
+export async function publishFormCreatedEvent(metadata) {
   /** @type {FormCreatedMessageData} */
   const data = {
     formId: metadata.id,
@@ -23,28 +39,52 @@ export function publishFormCreatedEvent(metadata) {
     teamEmail: metadata.teamEmail
   }
 
-  /** @type {FormCreatedMessage} */
-  const message = {
-    schemaVersion: AuditEventMessageSchemaVersion.V1,
-    category: AuditEventMessageCategory.FORM,
-    type: AuditEventMessageType.FORM_CREATED,
-    entityId: metadata.id,
-    createdAt: metadata.createdAt,
-    createdBy: {
-      id: metadata.createdBy.id,
-      displayName: metadata.createdBy.displayName
-    },
+  const auditMessageBase = createV1MessageBase(metadata)
+
+  return publishFormEvent({
+    ...auditMessageBase,
     data,
-    messageCreatedAt: new Date()
-  }
-
-  const value = Joi.attempt(message, messageSchema, {
-    abortEarly: false
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_CREATED
   })
-
-  return publishEvent(value)
 }
 
 /**
- * @import { FormMetadata, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {FormMetadata} oldMetadata
+ * @returns {Promise<PublishCommandOutput>}
+ */
+export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
+  const { title } = metadata
+  const { title: oldTitle } = oldMetadata
+
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormTitleUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        title: oldTitle
+      },
+      new: {
+        title
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata)
+
+  return publishFormEvent({
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_TITLE_UPDATED
+  })
+}
+
+/**
+ * @import { FormTitleUpdatedMessageData, FormMetadata, AuditMessage, AuditChanges, FormCreatedMessage, FormCreatedMessageData, MessageBase, MessageData } from '@defra/forms-model'
+ * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
  */
