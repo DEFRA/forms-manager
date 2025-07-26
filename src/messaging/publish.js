@@ -42,6 +42,30 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData, MessageBase, MessageData } from '@defra/forms-model'
+ * @param {AuditMessage[]} messages
+ * @returns {Promise<{ messageId?: string; eventType: AuditEventMessageType }[]>}
+ */
+export async function bulkPublishEvents(messages) {
+  const messagePromises = messages.map((message) => publishFormEvent(message))
+
+  const settledPromises = await Promise.allSettled(messagePromises)
+
+  return settledPromises.map((settledPromise, idx) => {
+    const eventType = messages[idx].type
+
+    if (settledPromise.status === 'rejected') {
+      return {
+        eventType
+      }
+    }
+
+    return {
+      eventType,
+      messageId: settledPromise.value.MessageId
+    }
+  })
+}
+/**
+ * @import { FormTitleUpdatedMessageData, AuditEventMessageType, FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData, MessageBase, MessageData } from '@defra/forms-model'
  * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
  */

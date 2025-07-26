@@ -6,8 +6,10 @@ import {
 import { buildMetaData } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
+import { buildFormOrganisationUpdatedMessage } from '~/src/messaging/__stubs__.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
+  bulkPublishEvents,
   publishFormCreatedEvent,
   publishFormTitleUpdatedEvent
 } from '~/src/messaging/publish.js'
@@ -123,6 +125,20 @@ describe('publish', () => {
           }
         }
       })
+    })
+  })
+
+  describe('bulkPublishEvents', () => {
+    it('should publish FORM_ORGANISATION_UPDATED', async () => {
+      const message = buildFormOrganisationUpdatedMessage()
+      const result = await bulkPublishEvents([message])
+      expect(result).toEqual([
+        {
+          eventType: AuditEventMessageType.FORM_ORGANISATION_UPDATED,
+          messageId: '2888a402-7609-43c5-975f-b1974969cdb6'
+        }
+      ])
+      expect(publishEvent).toHaveBeenCalledWith(message)
     })
   })
 })
