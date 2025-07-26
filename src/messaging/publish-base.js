@@ -32,5 +32,5 @@ export async function publishEvent(message) {
 
 /**
  * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
- * @import { FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
+ * @import { AuditMessage } from '@defra/forms-model'
  */
