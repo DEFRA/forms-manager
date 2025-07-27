@@ -1,6 +1,11 @@
-import { AuditEventMessageType } from '@defra/forms-model'
+import {
+  AuditEventMessageCategory,
+  AuditEventMessageSchemaVersion,
+  AuditEventMessageType
+} from '@defra/forms-model'
 import { buildMetaData } from '@defra/forms-model/stubs'
 
+import { buildPartialFormMetadataDocument } from '~/src/api/forms/service/__stubs__/metadata.js'
 import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
 
 describe('publish', () => {
@@ -31,17 +36,41 @@ describe('publish', () => {
   })
 
   describe('getFormMetadataAuditMessages', () => {
-    it('should get FORM_TITLE_UPDATED audit message', () => {
-      const oldMetadata = buildMetaData({
-        ...metadata,
-        title: 'Old form title'
+    it('should get FORM_ORGANISATION_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        organisation: 'Natural England',
+        updatedBy,
+        updatedAt
       })
-      const messages = getFormMetadataAuditMessages(metadata, oldMetadata)
-      const [formTitleUpdatedMessage] = messages
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formOrgUpdatedMessage] = messages
       expect(messages).toHaveLength(1)
-      expect(formTitleUpdatedMessage.type).toBe(
-        AuditEventMessageType.FORM_TITLE_UPDATED
-      )
+      expect(formOrgUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_ORGANISATION_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              organisation: 'Defra'
+            },
+            new: {
+              organisation: 'Natural England'
+            }
+          }
+        }
+      })
     })
   })
 })
