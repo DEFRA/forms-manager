@@ -3,16 +3,17 @@ import { AuditEventMessageSchemaVersion } from '@defra/forms-model'
 /**
  * Helper to create the base message
  * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
  * @returns {Omit<MessageBase, 'category'|'type'>}
  */
-export function createV1MessageBase(metadata) {
+export function createV1MessageBase(metadata, updatedForm) {
   return {
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     entityId: metadata.id,
-    createdAt: metadata.updatedAt,
+    createdAt: updatedForm.updatedAt,
     createdBy: {
-      id: metadata.updatedBy.id,
-      displayName: metadata.updatedBy.displayName
+      id: updatedForm.updatedBy.id,
+      displayName: updatedForm.updatedBy.displayName
     },
     messageCreatedAt: new Date()
   }
