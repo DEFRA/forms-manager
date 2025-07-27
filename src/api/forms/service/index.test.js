@@ -78,6 +78,15 @@ describe('Forms service', () => {
     }
   ]
 
+  const changeLogs = [
+    {
+      input: {
+        organisation: 'Natural England'
+      },
+      output: AuditEventMessageType.FORM_ORGANISATION_UPDATED
+    }
+  ]
+
   describe('createForm', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.update).mockResolvedValue()
@@ -532,6 +541,16 @@ describe('Forms service', () => {
       await expect(updateFormMetadata(id, input, author)).rejects.toThrow(
         Boom.badRequest('Form title duplicate title already exists')
       )
+    })
+
+    it.each(changeLogs)(`should publish '$output' event`, async (changeLog) => {
+      await updateFormMetadata(id, changeLog.input, author)
+      const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
+
+      expect(publishEvent).toHaveBeenCalledTimes(1)
+      expect(publishEventCalls[0]).toMatchObject({
+        type: changeLog.output
+      })
     })
   })
 })

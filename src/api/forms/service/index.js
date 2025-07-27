@@ -17,7 +17,9 @@ import {
 } from '~/src/api/forms/service/shared.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
 import {
+  bulkPublishEvents,
   publishFormCreatedEvent,
   publishFormTitleUpdatedEvent
 } from '~/src/messaging/publish.js'
@@ -182,6 +184,14 @@ export async function updateFormMetadata(formId, formUpdate, author) {
         )
         logger.info(
           `Published FORM_TITLE_UPDATED event for formId ${formId}.  MessageId: ${MessageId}`
+        )
+      }
+
+      const auditMessages = getFormMetadataAuditMessages(form, updatedForm)
+      const publishedEvents = await bulkPublishEvents(auditMessages)
+      for (const event of publishedEvents) {
+        logger.info(
+          `Published ${event.eventType} event for formId ${formId}.  MessageId: ${event.messageId}`
         )
       }
     })
