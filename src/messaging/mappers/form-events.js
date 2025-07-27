@@ -3,6 +3,7 @@ import {
   AuditEventMessageSchemaVersion,
   AuditEventMessageType
 } from '@defra/forms-model'
+import { ValidationError } from 'joi'
 
 import {
   createFormMessageDataBase,
@@ -76,11 +77,15 @@ export function formTitleUpdatedMapper(metadata, oldMetadata) {
 /**
  * @param {FormMetadata} metadata
  * @param {PartialFormMetadataDocument} updatedForm
- * @returns {FormOrganisationUpdatedMessageData}
+ * @returns {FormOrganisationUpdatedMessage}
  */
 export function formOrganisationUpdatedMapper(metadata, updatedForm) {
   const { organisation: oldOrganisation } = metadata
   const { organisation } = updatedForm
+
+  if (!organisation) {
+    throw new ValidationError('Organisation missing', [], updatedForm)
+  }
 
   const baseData = createFormMessageDataBase(metadata)
 
@@ -109,5 +114,6 @@ export function formOrganisationUpdatedMapper(metadata, updatedForm) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage } from '@defra/forms-model'
+ * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage } from '@defra/forms-model'
+ * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
