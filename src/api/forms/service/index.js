@@ -74,12 +74,8 @@ export async function createForm(metadataInput, author) {
       metadata = mapForm({ ...document, _id })
 
       // Create the draft form definition
-      await formDefinition.insert(
-        metadata.id,
-        definition,
-        session,
-        formDefinitionV2Schema
-      )
+      // prettier-ignore
+      await formDefinition.insert(metadata.id, definition, session, formDefinitionV2Schema)
 
       await publishFormCreatedEvent(metadata)
     })
