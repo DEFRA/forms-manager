@@ -63,7 +63,7 @@ export function formTitleUpdatedMapper(metadata, oldMetadata) {
       }
     }
   }
-  const auditMessageBase = createV1MessageBase(metadata)
+  const auditMessageBase = createV1MessageBase(oldMetadata, metadata)
 
   return {
     ...auditMessageBase,
@@ -75,39 +75,39 @@ export function formTitleUpdatedMapper(metadata, oldMetadata) {
 
 /**
  * @param {FormMetadata} metadata
- * @param {PartialFormMetadataDocument} oldMetadata
- * @returns {FormTitleUpdatedMessage}
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormOrganisationUpdatedMessageData}
  */
-export function formOrganisationUpdatedMapper(metadata, oldMetadata) {
-  const { title } = metadata
-  const { title: oldTitle } = oldMetadata
+export function formOrganisationUpdatedMapper(metadata, updatedForm) {
+  const { organisation: oldOrganisation } = metadata
+  const { organisation } = updatedForm
 
   const baseData = createFormMessageDataBase(metadata)
 
   /**
-   * @type {FormTitleUpdatedMessageData}
+   * @type {FormOrganisationUpdatedMessageData}
    */
   const data = {
     ...baseData,
     changes: {
       previous: {
-        title: oldTitle
+        organisation: oldOrganisation
       },
       new: {
-        title
+        organisation
       }
     }
   }
-  const auditMessageBase = createV1MessageBase(metadata)
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
 
   return {
     ...auditMessageBase,
     data,
     category: AuditEventMessageCategory.FORM,
-    type: AuditEventMessageType.FORM_TITLE_UPDATED
+    type: AuditEventMessageType.FORM_ORGANISATION_UPDATED
   }
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage } from '@defra/forms-model'
+ * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage } from '@defra/forms-model'
  */
