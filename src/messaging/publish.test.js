@@ -26,6 +26,11 @@ describe('publish', () => {
     id: '83f09a7d-c80c-4e15-bcf3-641559c7b8a7',
     displayName: 'Enrique Chase'
   }
+  const updatedAt = new Date('2025-07-24')
+  const updatedBy = {
+    id: 'a53b4360-bdf6-4d13-8975-25032ce76312',
+    displayName: 'Gandalf'
+  }
   const messageId = '2888a402-7609-43c5-975f-b1974969cdb6'
   const metadata = buildMetaData({
     id: formId,
@@ -35,7 +40,9 @@ describe('publish', () => {
     teamName,
     teamEmail,
     createdAt,
-    createdBy
+    createdBy,
+    updatedAt,
+    updatedBy
   })
 
   beforeEach(() => {
@@ -108,8 +115,8 @@ describe('publish', () => {
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_TITLE_UPDATED,
-        createdAt,
-        createdBy,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
         data: {
           formId: '3b1bf4b2-1603-4ca5-b885-c509245567aa',
           slug: 'audit-form',
