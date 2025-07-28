@@ -3,7 +3,6 @@ import {
   AuditEventMessageSchemaVersion,
   AuditEventMessageType
 } from '@defra/forms-model'
-import { ValidationError } from 'joi'
 
 import {
   createFormMessageDataBase,
@@ -84,7 +83,7 @@ export function formOrganisationUpdatedMapper(metadata, updatedForm) {
   const { organisation } = updatedForm
 
   if (!organisation) {
-    throw new ValidationError('Organisation missing', [], updatedForm)
+    throw new Error('Unexpected missing organisation')
   }
 
   const baseData = createFormMessageDataBase(metadata)
