@@ -1,9 +1,9 @@
 import { formOrganisationUpdatedMapper } from '~/src/messaging/mappers/form-events.js'
 
 /**
- * @type {Record<string, (function(FormMetadata, PartialFormMetadataDocument): AuditMessage) | undefined>}
+ * @type {Record<string, (function(FormMetadata, PartialFormMetadataDocument): AuditMessage)>}
  */
-const metadataFieldKeyMapperLookup = {
+const mapperLookup = {
   organisation: formOrganisationUpdatedMapper
 }
 
@@ -28,9 +28,9 @@ export function getFormMetadataAuditMessages(metadata, formUpdated) {
 
   for (const key of validKeys) {
     const hasKey = updatedKeys.includes(key)
-    const mapperFn = hasKey && metadataFieldKeyMapperLookup[key]
 
-    if (mapperFn) {
+    if (hasKey) {
+      const mapperFn = mapperLookup[key]
       messages.push(mapperFn(metadata, formUpdated))
     }
   }
