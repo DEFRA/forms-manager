@@ -29,6 +29,8 @@ export async function publishEvent(message) {
 
     return result
   }
+
+  return undefined
 }
 
 /**
