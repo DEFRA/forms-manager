@@ -24,11 +24,11 @@ export function getFormMetadataAuditMessages(metadata, formUpdated) {
    * @type {AuditMessage[]}
    */
   const messages = []
-  const keys = Object.keys(formUpdated)
+  const updatedKeys = Object.keys(formUpdated)
 
-  for (const key of keys) {
-    const isValidKey = validKeys.includes(key)
-    const mapperFn = isValidKey && metadataFieldKeyMapperLookup[key]
+  for (const key of validKeys) {
+    const hasKey = updatedKeys.includes(key)
+    const mapperFn = hasKey && metadataFieldKeyMapperLookup[key]
 
     if (mapperFn) {
       messages.push(mapperFn(metadata, formUpdated))
