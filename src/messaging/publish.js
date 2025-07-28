@@ -1,44 +1,18 @@
-import {
-  AuditEventMessageCategory,
-  AuditEventMessageSchemaVersion,
-  AuditEventMessageType,
-  messageSchema
-} from '@defra/forms-model'
+import { messageSchema } from '@defra/forms-model'
 import Joi from 'joi'
 
+import {
+  formCreatedEventMapper,
+  formTitleUpdatedMapper
+} from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 
 /**
- * Publish form created event
- * @param {FormMetadata} metadata
+ * Helper to validate and publish an event
+ * @param {AuditMessage} auditMessage
  */
-export function publishFormCreatedEvent(metadata) {
-  /** @type {FormCreatedMessageData} */
-  const data = {
-    formId: metadata.id,
-    slug: metadata.slug,
-    title: metadata.title,
-    organisation: metadata.organisation,
-    teamName: metadata.teamName,
-    teamEmail: metadata.teamEmail
-  }
-
-  /** @type {FormCreatedMessage} */
-  const message = {
-    schemaVersion: AuditEventMessageSchemaVersion.V1,
-    category: AuditEventMessageCategory.FORM,
-    type: AuditEventMessageType.FORM_CREATED,
-    entityId: metadata.id,
-    createdAt: metadata.createdAt,
-    createdBy: {
-      id: metadata.createdBy.id,
-      displayName: metadata.createdBy.displayName
-    },
-    data,
-    messageCreatedAt: new Date()
-  }
-
-  const value = Joi.attempt(message, messageSchema, {
+async function validateAndPublishEvent(auditMessage) {
+  const value = Joi.attempt(auditMessage, messageSchema, {
     abortEarly: false
   })
 
@@ -46,5 +20,26 @@ export function publishFormCreatedEvent(metadata) {
 }
 
 /**
- * @import { FormMetadata, FormCreatedMessage, FormCreatedMessageData } from '@defra/forms-model'
+ * Publish form created event
+ * @param {FormMetadata} metadata
+ */
+export async function publishFormCreatedEvent(metadata) {
+  const auditMessage = formCreatedEventMapper(metadata)
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * Publishes a form title updated event
+ * @param {FormMetadata} metadata
+ * @param {FormMetadata} oldMetadata
+ */
+export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
+  const auditMessage = formTitleUpdatedMapper(metadata, oldMetadata)
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * @import { FormMetadata, AuditMessage } from '@defra/forms-model'
  */

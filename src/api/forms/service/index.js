@@ -17,7 +17,10 @@ import {
 } from '~/src/api/forms/service/shared.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
-import { publishFormCreatedEvent } from '~/src/messaging/publish.js'
+import {
+  publishFormCreatedEvent,
+  publishFormTitleUpdatedEvent
+} from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -172,6 +175,8 @@ export async function updateFormMetadata(formId, formUpdate, author) {
           session,
           schema
         )
+
+        await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
       }
     })
 

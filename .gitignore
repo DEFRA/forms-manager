@@ -11,4 +11,3 @@ coverage
 .env
 newman-reports
 *.tsbuildinfo
-test/add-message.js

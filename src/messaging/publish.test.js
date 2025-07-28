@@ -7,35 +7,57 @@ import { buildMetaData } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
 import { publishEvent } from '~/src/messaging/publish-base.js'
-import { publishFormCreatedEvent } from '~/src/messaging/publish.js'
+import {
+  publishFormCreatedEvent,
+  publishFormTitleUpdatedEvent
+} from '~/src/messaging/publish.js'
 
 jest.mock('~/src/messaging/publish-base.js')
 
 describe('publish', () => {
-  describe('publishFormCreatedEvent', () => {
-    const formId = '3b1bf4b2-1603-4ca5-b885-c509245567aa'
-    const slug = 'audit-form'
-    const title = 'My Audit Event Form'
-    const organisation = 'Defra'
-    const teamName = 'Forms'
-    const teamEmail = 'forms@example.com'
-    const createdAt = new Date('2025-07-23')
-    const createdBy = {
-      id: '83f09a7d-c80c-4e15-bcf3-641559c7b8a7',
-      displayName: 'Enrique Chase'
-    }
+  const formId = '3b1bf4b2-1603-4ca5-b885-c509245567aa'
+  const slug = 'audit-form'
+  const title = 'My Audit Event Form'
+  const organisation = 'Defra'
+  const teamName = 'Forms'
+  const teamEmail = 'forms@example.com'
+  const createdAt = new Date('2025-07-23')
+  const createdBy = {
+    id: '83f09a7d-c80c-4e15-bcf3-641559c7b8a7',
+    displayName: 'Enrique Chase'
+  }
+  const updatedAt = new Date('2025-07-24')
+  const updatedBy = {
+    id: 'a53b4360-bdf6-4d13-8975-25032ce76312',
+    displayName: 'Gandalf'
+  }
+  const messageId = '2888a402-7609-43c5-975f-b1974969cdb6'
+  const metadata = buildMetaData({
+    id: formId,
+    slug,
+    title,
+    organisation,
+    teamName,
+    teamEmail,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy
+  })
 
-    it('should publish the event', async () => {
-      const metadata = buildMetaData({
-        id: formId,
-        slug,
-        title,
-        organisation,
-        teamName,
-        teamEmail,
-        createdAt,
-        createdBy
-      })
+  beforeEach(() => {
+    jest.mocked(publishEvent).mockResolvedValue({
+      MessageId: '2888a402-7609-43c5-975f-b1974969cdb6',
+      SequenceNumber: undefined,
+      $metadata: {}
+    })
+  })
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
+
+  describe('publishFormCreatedEvent', () => {
+    it('should publish FORM_CREATED event', async () => {
       await publishFormCreatedEvent(metadata)
 
       expect(publishEvent).toHaveBeenCalledWith({
@@ -57,7 +79,7 @@ describe('publish', () => {
       })
     })
 
-    it('should not publish the event if the schema is incorrect', () => {
+    it('should not publish the event if the schema is incorrect', async () => {
       jest.mocked(publishEvent).mockRejectedValue(new Error('rejected'))
       const invalidMetaData = {
         title,
@@ -69,13 +91,45 @@ describe('publish', () => {
       }
 
       // @ts-expect-error - invalid schema
-      expect(() => publishFormCreatedEvent(invalidMetaData)).toThrow(
+      await expect(publishFormCreatedEvent(invalidMetaData)).rejects.toThrow(
         new ValidationError(
           '"entityId" is required. "data.formId" is required. "data.slug" is required',
           [],
           invalidMetaData
         )
       )
+    })
+  })
+
+  describe('publishFormTitleUpdatedEvent', () => {
+    it('should publish FORM_TITLE_UPDATED event', async () => {
+      const oldMetadata = buildMetaData({
+        ...metadata,
+        title: 'Old form title'
+      })
+      const response = await publishFormTitleUpdatedEvent(metadata, oldMetadata)
+      expect(response?.MessageId).toBe(messageId)
+      expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_TITLE_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId: '3b1bf4b2-1603-4ca5-b885-c509245567aa',
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              title: 'Old form title'
+            },
+            new: {
+              title
+            }
+          }
+        }
+      })
     })
   })
 })

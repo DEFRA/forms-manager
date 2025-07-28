@@ -23,6 +23,12 @@ jest.mock('~/src/config/index.js', () => {
   }
 })
 
+jest.mock('~/src/api/forms/service/shared.js', () => ({
+  logger: {
+    info: jest.fn()
+  }
+}))
+
 describe('publish-base', () => {
   const snsMock = mockClient(SNSClient)
 
@@ -36,15 +42,19 @@ describe('publish-base', () => {
       jest.resetAllMocks()
     })
 
-    it('should not publish if publish audit events feature flag is disabled', () => {
+    it('should not publish if publish audit events feature flag is disabled', async () => {
       jest.mocked(config.get).mockReturnValue(false)
-      const val = publishEvent(message)
-      expect(val).not.toBeInstanceOf(Promise)
+      const val = await publishEvent(message)
       expect(val).toBeUndefined()
+      expect(snsMock).not.toHaveReceivedCommand(PublishCommand)
     })
 
     it('should publish', async () => {
       jest.mocked(config.get).mockReturnValue(true)
+      snsMock.on(PublishCommand).resolves({
+        MessageId: '00000000-0000-0000-0000-000000000000'
+      })
+
       await publishEvent(message)
       expect(snsMock).toHaveReceivedCommandWith(PublishCommand, {
         TopicArn: 'arn:aws:sns:eu-west-2:000000000000:forms_manager_events',

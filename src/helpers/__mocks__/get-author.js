@@ -1,12 +1,11 @@
+import author from '~/src/api/forms/service/__stubs__/author.js'
+
 /**
  * Get the author from the auth credentials
  * @returns {FormMetadataAuthor}
  */
 export function getAuthor() {
-  return {
-    id: 'f50ceeed-b7a4-47cf-a498-094efc99f8bc',
-    displayName: 'Enrique Chase'
-  }
+  return author
 }
 
 /**
