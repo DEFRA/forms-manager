@@ -176,13 +176,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
           schema
         )
 
-        const { MessageId } = await publishFormTitleUpdatedEvent(
-          { ...form, ...updatedForm },
-          form
-        )
-        logger.info(
-          `Published FORM_TITLE_UPDATED event for formId ${formId}.  MessageId: ${MessageId}`
-        )
+        await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
       }
     })
 

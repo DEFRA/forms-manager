@@ -8,11 +8,10 @@ import {
 import { publishEvent } from '~/src/messaging/publish-base.js'
 
 /**
- * Helper to publish form events
+ * Helper to validate and publish an event
  * @param {AuditMessage} auditMessage
- * @returns {Promise<PublishCommandOutput>}
  */
-async function publishFormEvent(auditMessage) {
+async function validateAndPublishEvent(auditMessage) {
   const value = Joi.attempt(auditMessage, messageSchema, {
     abortEarly: false
   })
@@ -27,7 +26,7 @@ async function publishFormEvent(auditMessage) {
 export async function publishFormCreatedEvent(metadata) {
   const auditMessage = formCreatedEventMapper(metadata)
 
-  return publishFormEvent(auditMessage)
+  return validateAndPublishEvent(auditMessage)
 }
 
 /**
@@ -38,10 +37,9 @@ export async function publishFormCreatedEvent(metadata) {
 export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
   const auditMessage = formTitleUpdatedMapper(metadata, oldMetadata)
 
-  return publishFormEvent(auditMessage)
+  return validateAndPublishEvent(auditMessage)
 }
 
 /**
  * @import { FormMetadata, AuditMessage } from '@defra/forms-model'
- * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
  */
