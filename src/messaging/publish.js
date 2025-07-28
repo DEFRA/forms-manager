@@ -62,7 +62,7 @@ export async function bulkPublishEvents(messages) {
 
     return {
       eventType,
-      messageId: settledPromise.value.MessageId
+      messageId: settledPromise.value?.MessageId
     }
   })
 }
