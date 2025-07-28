@@ -141,7 +141,7 @@ describe('publish', () => {
       const result = await bulkPublishEvents([message])
       expect(result).toEqual([
         {
-          eventType: AuditEventMessageType.FORM_ORGANISATION_UPDATED,
+          type: AuditEventMessageType.FORM_ORGANISATION_UPDATED,
           messageId: '2888a402-7609-43c5-975f-b1974969cdb6'
         }
       ])
@@ -154,7 +154,7 @@ describe('publish', () => {
       const result = await bulkPublishEvents([message])
       expect(result).toEqual([
         {
-          eventType: AuditEventMessageType.FORM_ORGANISATION_UPDATED
+          type: AuditEventMessageType.FORM_ORGANISATION_UPDATED
         }
       ])
     })

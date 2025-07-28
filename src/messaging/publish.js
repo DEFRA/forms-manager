@@ -42,7 +42,7 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
 
 /**
  * @param {AuditMessage[]} messages
- * @returns {Promise<{ messageId?: string; eventType: AuditEventMessageType }[]>}
+ * @returns {Promise<{ messageId?: string; type: AuditEventMessageType }[]>}
  */
 export async function bulkPublishEvents(messages) {
   const messagePromises = messages.map((message) =>
@@ -52,16 +52,16 @@ export async function bulkPublishEvents(messages) {
   const settledPromises = await Promise.allSettled(messagePromises)
 
   return settledPromises.map((settledPromise, idx) => {
-    const eventType = messages[idx].type
+    const type = messages[idx].type
 
     if (settledPromise.status === 'rejected') {
       return {
-        eventType
+        type
       }
     }
 
     return {
-      eventType,
+      type,
       messageId: settledPromise.value?.MessageId
     }
   })
