@@ -42,6 +42,6 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData, MessageBase, MessageData } from '@defra/forms-model'
+ * @import { FormMetadata, AuditMessage } from '@defra/forms-model'
  * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
  */
