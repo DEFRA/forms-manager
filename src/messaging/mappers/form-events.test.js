@@ -2,6 +2,7 @@ import { buildMetaData } from '@defra/forms-model/stubs'
 
 import {
   formOrganisationUpdatedMapper,
+  formTeamEmailUpdatedMapper,
   formTeamNameUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 
@@ -15,6 +16,12 @@ describe('form-events', () => {
   describe('formTeamNameUpdatedMapper', () => {
     it('should fail if teamName is missing', () => {
       expect(() => formTeamNameUpdatedMapper(buildMetaData(), {})).toThrow()
+    })
+  })
+
+  describe('formTeamEmailUpdatedMapper', () => {
+    it('should fail if teamEmail is missing', () => {
+      expect(() => formTeamEmailUpdatedMapper(buildMetaData(), {})).toThrow()
     })
   })
 })

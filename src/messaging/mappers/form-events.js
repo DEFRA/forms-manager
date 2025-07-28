@@ -152,6 +152,45 @@ export function formTeamNameUpdatedMapper(metadata, updatedForm) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormTeamEmailUpdatedMessage}
+ */
+export function formTeamEmailUpdatedMapper(metadata, updatedForm) {
+  const { teamEmail: oldTeamEmail } = metadata
+  const { teamEmail } = updatedForm
+
+  if (!teamEmail) {
+    throw new Error('Unexpected missing teamEmail')
+  }
+
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormTeamEmailUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        teamEmail: oldTeamEmail
+      },
+      new: {
+        teamEmail
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_TEAM_EMAIL_UPDATED
+  }
+}
+
+/**
+ * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
