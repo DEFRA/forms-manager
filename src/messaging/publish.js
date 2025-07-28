@@ -66,6 +66,7 @@ export async function bulkPublishEvents(messages) {
     }
   })
 }
+
 /**
  * @import { AuditEventMessageType, FormMetadata, AuditMessage } from '@defra/forms-model'
  */
