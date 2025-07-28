@@ -85,9 +85,9 @@ describe('publish', () => {
         updatedAt
       })
       const messages = getFormMetadataAuditMessages(metadata, formUpdated)
-      const [formUpdatedMessage] = messages
+      const [formNameUpdatedMessage] = messages
       expect(messages).toHaveLength(1)
-      expect(formUpdatedMessage).toEqual({
+      expect(formNameUpdatedMessage).toEqual({
         entityId: formId,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
@@ -122,9 +122,68 @@ describe('publish', () => {
         updatedAt
       })
       const messages = getFormMetadataAuditMessages(metadata, formUpdated)
-      const [formUpdatedMessage] = messages
+      const [formEmailUpdatedMessage] = messages
       expect(messages).toHaveLength(1)
-      expect(formUpdatedMessage).toEqual({
+      expect(formEmailUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_TEAM_EMAIL_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              teamEmail: 'forms@example.com'
+            },
+            new: {
+              teamEmail: 'newemail@example.com'
+            }
+          }
+        }
+      })
+    })
+
+    it('should get FORM_TEAM_NAME_UPDATED and FORM_TEAM_EMAIL_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        teamName: 'New team name',
+        teamEmail: 'newemail@example.com',
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formNameUpdatedMessage, formEmailUpdatedMessage] = messages
+      expect(messages).toHaveLength(2)
+      expect(formNameUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_TEAM_NAME_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              teamName: 'Forms'
+            },
+            new: {
+              teamName: 'New team name'
+            }
+          }
+        }
+      })
+      expect(formEmailUpdatedMessage).toEqual({
         entityId: formId,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
