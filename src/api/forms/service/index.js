@@ -178,7 +178,11 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       }
 
       const auditMessages = getFormMetadataAuditMessages(form, updatedForm)
-      await bulkPublishEvents(auditMessages)
+
+      // Publish any metadata audit messages
+      if (auditMessages.length) {
+        await bulkPublishEvents(auditMessages)
+      }
     })
 
     logger.info(`Updated form metadata for form ID ${formId}`)
