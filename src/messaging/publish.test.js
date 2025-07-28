@@ -148,15 +148,11 @@ describe('publish', () => {
       expect(publishEvent).toHaveBeenCalledWith(message)
     })
 
-    it('should not fail given rejection', async () => {
+    it('should fail given rejection', async () => {
       jest.mocked(publishEvent).mockRejectedValue(new Error('an error'))
       const message = buildFormOrganisationUpdatedMessage()
-      const result = await bulkPublishEvents([message])
-      expect(result).toEqual([
-        {
-          type: AuditEventMessageType.FORM_ORGANISATION_UPDATED
-        }
-      ])
+
+      await expect(bulkPublishEvents([message])).rejects.toThrow()
     })
   })
 })
