@@ -8,11 +8,10 @@ import {
 import { publishEvent } from '~/src/messaging/publish-base.js'
 
 /**
- * Helper to publish form events
+ * Helper to validate and publish an event
  * @param {AuditMessage} auditMessage
- * @returns {Promise<PublishCommandOutput>}
  */
-async function publishFormEvent(auditMessage) {
+async function validateAndPublishEvent(auditMessage) {
   const value = Joi.attempt(auditMessage, messageSchema, {
     abortEarly: false
   })
@@ -27,7 +26,7 @@ async function publishFormEvent(auditMessage) {
 export async function publishFormCreatedEvent(metadata) {
   const auditMessage = formCreatedEventMapper(metadata)
 
-  return publishFormEvent(auditMessage)
+  return validateAndPublishEvent(auditMessage)
 }
 
 /**
@@ -38,7 +37,7 @@ export async function publishFormCreatedEvent(metadata) {
 export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
   const auditMessage = formTitleUpdatedMapper(metadata, oldMetadata)
 
-  return publishFormEvent(auditMessage)
+  return validateAndPublishEvent(auditMessage)
 }
 
 /**
@@ -46,7 +45,9 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
  * @returns {Promise<{ messageId?: string; eventType: AuditEventMessageType }[]>}
  */
 export async function bulkPublishEvents(messages) {
-  const messagePromises = messages.map((message) => publishFormEvent(message))
+  const messagePromises = messages.map((message) =>
+    validateAndPublishEvent(message)
+  )
 
   const settledPromises = await Promise.allSettled(messagePromises)
 
@@ -66,6 +67,5 @@ export async function bulkPublishEvents(messages) {
   })
 }
 /**
- * @import { FormTitleUpdatedMessageData, AuditEventMessageType, FormMetadata, AuditMessage, FormCreatedMessage, FormCreatedMessageData, MessageBase, MessageData } from '@defra/forms-model'
- * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
+ * @import { AuditEventMessageType, FormMetadata, AuditMessage } from '@defra/forms-model'
  */

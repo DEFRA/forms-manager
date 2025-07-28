@@ -167,16 +167,14 @@ export async function updateFormMetadata(formId, formUpdate, author) {
         const schema = getValidationSchema(definition)
 
         // Also update the form definition's name to keep them in sync
-        // prettier-ignore
-        await formDefinition.updateName(formId, formUpdate.title, session, schema)
+        await formDefinition.updateName(
+          formId,
+          formUpdate.title,
+          session,
+          schema
+        )
 
-        const { MessageId } = await publishFormTitleUpdatedEvent(
-          { ...form, ...updatedForm },
-          form
-        )
-        logger.info(
-          `Published FORM_TITLE_UPDATED event for formId ${formId}.  MessageId: ${MessageId}`
-        )
+        await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
       }
 
       const auditMessages = getFormMetadataAuditMessages(form, updatedForm)

@@ -1,5 +1,6 @@
 import { PublishCommand } from '@aws-sdk/client-sns'
 
+import { logger } from '~/src/api/forms/service/shared.js'
 import { config } from '~/src/config/index.js'
 import { getSNSClient } from '~/src/messaging/sns.js'
 
@@ -10,7 +11,6 @@ const client = getSNSClient()
 /**
  * Publish event onto topic
  * @param {AuditMessage} message
- * @returns {Promise<PublishCommandOutput>}
  */
 export async function publishEvent(message) {
   const shouldPublish = config.get('publishAuditEvents')
@@ -20,17 +20,19 @@ export async function publishEvent(message) {
       TopicArn: snsTopicArn,
       Message: JSON.stringify(message)
     })
-    return client.send(command)
+
+    const result = await client.send(command)
+
+    logger.info(
+      `Published ${message.type} event for formId ${message.entityId}. MessageId: ${result.MessageId}`
+    )
+
+    return result
   }
 
-  return {
-    MessageId: undefined,
-    SequenceNumber: undefined,
-    $metadata: {}
-  }
+  return undefined
 }
 
 /**
- * @import { PublishCommandOutput } from '@aws-sdk/client-sns'
  * @import { AuditMessage } from '@defra/forms-model'
  */
