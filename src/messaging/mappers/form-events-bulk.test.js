@@ -72,5 +72,42 @@ describe('publish', () => {
         }
       })
     })
+
+    it('should get FORM_TEAM_NAME_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        teamName: 'New team name',
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formOrgUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formOrgUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_TEAM_NAME_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              teamName: 'Forms'
+            },
+            new: {
+              teamName: 'New team name'
+            }
+          }
+        }
+      })
+    })
   })
 })
