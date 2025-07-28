@@ -30,5 +30,5 @@ export function createFormMessageDataBase(metadata) {
   }
 }
 /**
- * @import { FormMessageDataBase, ChangesMessageData, AuditEventMessageType, FormMessageChangesData, FormMetadata, MessageBase } from '@defra/forms-model'
+ * @import { FormMessageDataBase, FormMetadata, MessageBase } from '@defra/forms-model'
  */
