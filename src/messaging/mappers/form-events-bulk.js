@@ -1,10 +1,7 @@
-import { messageSchema } from '@defra/forms-model'
-import Joi from 'joi'
-
 import { formOrganisationUpdatedMapper } from '~/src/messaging/mappers/form-events.js'
 
 /**
- * @type {Record<string, (function(FormMetadata, PartialFormMetadataDocument): AuditMessage)>}
+ * @type {Record<string, (function(FormMetadata, PartialFormMetadataDocument): AuditMessage) | undefined>}
  */
 const metadataFieldKeyMapperLookup = {
   organisation: formOrganisationUpdatedMapper
@@ -23,33 +20,22 @@ const validKeys = /** @type {string[]} */ (validFields)
  * @returns {AuditMessage[]}
  */
 export function getFormMetadataAuditMessages(metadata, formUpdated) {
-  const edited = Object.keys(formUpdated).filter((key) =>
-    validKeys.includes(key)
-  )
-
   /**
-   * We're going to cycle through each of the edits and if there's a match from metadataFieldKeyPublishLookup
    * @type {AuditMessage[]}
    */
-  const updatedAuditMessages = edited.reduce((acc, key) => {
-    // Get the associated change event mapper
-    const mapperFn = metadataFieldKeyMapperLookup[key]
+  const messages = []
+  const keys = Object.keys(formUpdated)
 
-    // Publishes the associated event
-    if (mapperFn instanceof Function) {
-      const value = Joi.attempt(
-        mapperFn(metadata, formUpdated),
-        messageSchema,
-        {
-          abortEarly: false
-        }
-      )
-      return [...acc, value]
+  for (const key of keys) {
+    const isValidKey = validKeys.includes(key)
+    const mapperFn = isValidKey && metadataFieldKeyMapperLookup[key]
+
+    if (mapperFn) {
+      messages.push(mapperFn(metadata, formUpdated))
     }
-    return acc
-  }, /** @type {AuditMessage[]} */ ([]))
+  }
 
-  return [updatedAuditMessages].flat()
+  return messages
 }
 
 /**
