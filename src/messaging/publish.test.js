@@ -108,7 +108,7 @@ describe('publish', () => {
         title: 'Old form title'
       })
       const response = await publishFormTitleUpdatedEvent(metadata, oldMetadata)
-      expect(response.MessageId).toBe(messageId)
+      expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
         messageCreatedAt: expect.any(Date),
