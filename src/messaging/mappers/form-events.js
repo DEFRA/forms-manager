@@ -191,6 +191,108 @@ export function formTeamEmailUpdatedMapper(metadata, updatedForm) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormNotificationEmailUpdatedMessage}
+ */
+export function formNotificationEmailUpdatedMapper(metadata, updatedForm) {
+  const { notificationEmail: oldNotificationEmail } = metadata
+  const { notificationEmail } = updatedForm
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormNotificationEmailUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        notificationEmail: oldNotificationEmail
+      },
+      new: {
+        notificationEmail
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_NOTIFICATION_EMAIL_UPDATED
+  }
+}
+
+/**
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormSubmissionGuidanceUpdatedMessage}
+ */
+export function formSubmissionGuidanceUpdatedMapper(metadata, updatedForm) {
+  const { submissionGuidance: oldSubmissionGuidance } = metadata
+  const { submissionGuidance } = updatedForm
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormSubmissionGuidanceUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        submissionGuidance: oldSubmissionGuidance
+      },
+      new: {
+        submissionGuidance
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_SUBMISSION_GUIDANCE_UPDATED
+  }
+}
+
+/**
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormPrivacyNoticeUpdatedMessage}
+ */
+export function formPrivacyNoticeUpdatedMapper(metadata, updatedForm) {
+  const { privacyNoticeUrl: oldPrivacyNoticeUrl } = metadata
+  const { privacyNoticeUrl } = updatedForm
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormPrivacyNoticeUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        privacyNoticeUrl: oldPrivacyNoticeUrl
+      },
+      new: {
+        privacyNoticeUrl
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_PRIVACY_NOTICE_UPDATED
+  }
+}
+
+/**
+ * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

@@ -15,6 +15,9 @@ describe('publish', () => {
   const organisation = 'Defra'
   const teamName = 'Forms'
   const teamEmail = 'forms@example.com'
+  const notificationEmail = 'notifyme@example.com'
+  const submissionGuidance = '# H1 Markdown'
+  const privacyNoticeUrl = 'https://www.gov.uk/help/privacy-notice'
   const createdAt = new Date('2025-07-23')
   const createdBy = {
     id: '83f09a7d-c80c-4e15-bcf3-641559c7b8a7',
@@ -27,6 +30,9 @@ describe('publish', () => {
     organisation,
     teamName,
     teamEmail,
+    notificationEmail,
+    submissionGuidance,
+    privacyNoticeUrl,
     createdAt,
     createdBy
   })
@@ -200,6 +206,117 @@ describe('publish', () => {
             },
             new: {
               teamEmail: 'newemail@example.com'
+            }
+          }
+        }
+      })
+    })
+
+    it('should get FORM_NOTIFICATION_EMAIL_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        notificationEmail: 'newemail@example.com',
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_NOTIFICATION_EMAIL_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              notificationEmail: 'notifyme@example.com'
+            },
+            new: {
+              notificationEmail: 'newemail@example.com'
+            }
+          }
+        }
+      })
+    })
+
+    it('should get FORM_SUBMISSION_GUIDANCE_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        submissionGuidance: '## H2 Markdown',
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_SUBMISSION_GUIDANCE_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              submissionGuidance: '# H1 Markdown'
+            },
+            new: {
+              submissionGuidance: '## H2 Markdown'
+            }
+          }
+        }
+      })
+    })
+
+    it('should get FORM_PRIVACY_NOTICE_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        privacyNoticeUrl: 'https://www.gov.uk/help/new-privacy-notice',
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_PRIVACY_NOTICE_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice'
+            },
+            new: {
+              privacyNoticeUrl: 'https://www.gov.uk/help/new-privacy-notice'
             }
           }
         }
