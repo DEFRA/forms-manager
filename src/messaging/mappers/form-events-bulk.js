@@ -1,5 +1,8 @@
 import {
+  formNotificationEmailUpdatedMapper,
   formOrganisationUpdatedMapper,
+  formPrivacyNoticeUpdatedMapper,
+  formSubmissionGuidanceUpdatedMapper,
   formTeamEmailUpdatedMapper,
   formTeamNameUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
@@ -10,13 +13,19 @@ import {
 const mapperLookup = {
   organisation: formOrganisationUpdatedMapper,
   teamName: formTeamNameUpdatedMapper,
-  teamEmail: formTeamEmailUpdatedMapper
+  teamEmail: formTeamEmailUpdatedMapper,
+  notificationEmail: formNotificationEmailUpdatedMapper,
+  submissionGuidance: formSubmissionGuidanceUpdatedMapper,
+  privacyNoticeUrl: formPrivacyNoticeUpdatedMapper
 }
 
 const validFields = /** @type {(keyof PartialFormMetadataDocument)[]} */ ([
   'organisation',
   'teamName',
-  'teamEmail'
+  'teamEmail',
+  'notificationEmail',
+  'submissionGuidance',
+  'privacyNoticeUrl'
 ])
 
 const validKeys = /** @type {string[]} */ (validFields)
