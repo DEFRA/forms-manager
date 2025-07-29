@@ -49,20 +49,13 @@ export async function bulkPublishEvents(messages) {
     validateAndPublishEvent(message)
   )
 
-  const settledPromises = await Promise.allSettled(messagePromises)
+  const publishResults = await Promise.all(messagePromises)
 
-  return settledPromises.map((settledPromise, idx) => {
+  return publishResults.map((publishResult, idx) => {
     const type = messages[idx].type
-
-    if (settledPromise.status === 'rejected') {
-      return {
-        type
-      }
-    }
-
     return {
       type,
-      messageId: settledPromise.value?.MessageId
+      messageId: publishResult?.MessageId
     }
   })
 }
