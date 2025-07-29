@@ -63,7 +63,7 @@ export function formTitleUpdatedMapper(metadata, oldMetadata) {
       }
     }
   }
-  const auditMessageBase = createV1MessageBase(metadata)
+  const auditMessageBase = createV1MessageBase(oldMetadata, metadata)
 
   return {
     ...auditMessageBase,
@@ -74,5 +74,45 @@ export function formTitleUpdatedMapper(metadata, oldMetadata) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormOrganisationUpdatedMessage}
+ */
+export function formOrganisationUpdatedMapper(metadata, updatedForm) {
+  const { organisation: oldOrganisation } = metadata
+  const { organisation } = updatedForm
+
+  if (!organisation) {
+    throw new Error('Unexpected missing organisation')
+  }
+
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormOrganisationUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        organisation: oldOrganisation
+      },
+      new: {
+        organisation
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_ORGANISATION_UPDATED
+  }
+}
+
+/**
+ * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage } from '@defra/forms-model'
+ * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

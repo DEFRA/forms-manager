@@ -41,5 +41,25 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
 }
 
 /**
- * @import { FormMetadata, AuditMessage } from '@defra/forms-model'
+ * @param {AuditMessage[]} messages
+ * @returns {Promise<{ messageId?: string; type: AuditEventMessageType }[]>}
+ */
+export async function bulkPublishEvents(messages) {
+  const messagePromises = messages.map((message) =>
+    validateAndPublishEvent(message)
+  )
+
+  const publishResults = await Promise.all(messagePromises)
+
+  return publishResults.map((publishResult, idx) => {
+    const type = messages[idx].type
+    return {
+      type,
+      messageId: publishResult?.MessageId
+    }
+  })
+}
+
+/**
+ * @import { AuditEventMessageType, FormMetadata, AuditMessage } from '@defra/forms-model'
  */

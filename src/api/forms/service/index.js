@@ -17,7 +17,9 @@ import {
 } from '~/src/api/forms/service/shared.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
 import {
+  bulkPublishEvents,
   publishFormCreatedEvent,
   publishFormTitleUpdatedEvent
 } from '~/src/messaging/publish.js'
@@ -72,12 +74,8 @@ export async function createForm(metadataInput, author) {
       metadata = mapForm({ ...document, _id })
 
       // Create the draft form definition
-      await formDefinition.insert(
-        metadata.id,
-        definition,
-        session,
-        formDefinitionV2Schema
-      )
+      // prettier-ignore
+      await formDefinition.insert(metadata.id, definition, session, formDefinitionV2Schema)
 
       await publishFormCreatedEvent(metadata)
     })
@@ -177,6 +175,13 @@ export async function updateFormMetadata(formId, formUpdate, author) {
         )
 
         await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
+      }
+
+      const auditMessages = getFormMetadataAuditMessages(form, updatedForm)
+
+      // Publish any metadata audit messages
+      if (auditMessages.length) {
+        await bulkPublishEvents(auditMessages)
       }
     })
 
