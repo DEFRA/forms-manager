@@ -113,6 +113,84 @@ export function formOrganisationUpdatedMapper(metadata, updatedForm) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormTeamNameUpdatedMessage}
+ */
+export function formTeamNameUpdatedMapper(metadata, updatedForm) {
+  const { teamName: oldTeamName } = metadata
+  const { teamName } = updatedForm
+
+  if (!teamName) {
+    throw new Error('Unexpected missing teamName')
+  }
+
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormTeamNameUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        teamName: oldTeamName
+      },
+      new: {
+        teamName
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_TEAM_NAME_UPDATED
+  }
+}
+
+/**
+ * @param {FormMetadata} metadata
+ * @param {PartialFormMetadataDocument} updatedForm
+ * @returns {FormTeamEmailUpdatedMessage}
+ */
+export function formTeamEmailUpdatedMapper(metadata, updatedForm) {
+  const { teamEmail: oldTeamEmail } = metadata
+  const { teamEmail } = updatedForm
+
+  if (!teamEmail) {
+    throw new Error('Unexpected missing teamEmail')
+  }
+
+  const baseData = createFormMessageDataBase(metadata)
+
+  /**
+   * @type {FormTeamEmailUpdatedMessageData}
+   */
+  const data = {
+    ...baseData,
+    changes: {
+      previous: {
+        teamEmail: oldTeamEmail
+      },
+      new: {
+        teamEmail
+      }
+    }
+  }
+  const auditMessageBase = createV1MessageBase(metadata, updatedForm)
+
+  return {
+    ...auditMessageBase,
+    data,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_TEAM_EMAIL_UPDATED
+  }
+}
+
+/**
+ * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

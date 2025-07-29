@@ -1,14 +1,22 @@
-import { formOrganisationUpdatedMapper } from '~/src/messaging/mappers/form-events.js'
+import {
+  formOrganisationUpdatedMapper,
+  formTeamEmailUpdatedMapper,
+  formTeamNameUpdatedMapper
+} from '~/src/messaging/mappers/form-events.js'
 
 /**
  * @type {Record<string, (function(FormMetadata, PartialFormMetadataDocument): AuditMessage)>}
  */
 const mapperLookup = {
-  organisation: formOrganisationUpdatedMapper
+  organisation: formOrganisationUpdatedMapper,
+  teamName: formTeamNameUpdatedMapper,
+  teamEmail: formTeamEmailUpdatedMapper
 }
 
 const validFields = /** @type {(keyof PartialFormMetadataDocument)[]} */ ([
-  'organisation'
+  'organisation',
+  'teamName',
+  'teamEmail'
 ])
 
 const validKeys = /** @type {string[]} */ (validFields)
