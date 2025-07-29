@@ -293,6 +293,27 @@ export function formPrivacyNoticeUpdatedMapper(metadata, updatedForm) {
 }
 
 /**
- * @import { FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {AuditUser} author
+ * @returns {FormDraftDeletedMessage}
+ */
+export function formDraftDeletedMapper(metadata, author) {
+  const auditTime = new Date()
+  return {
+    schemaVersion: AuditEventMessageSchemaVersion.V1,
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_DRAFT_DELETED,
+    createdAt: auditTime,
+    messageCreatedAt: auditTime,
+    createdBy: author,
+    entityId: metadata.id,
+    data: {
+      formId: metadata.id,
+      slug: metadata.slug
+    }
+  }
+}
+/**
+ * @import { FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

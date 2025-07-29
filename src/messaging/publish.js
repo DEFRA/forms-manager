@@ -3,6 +3,7 @@ import Joi from 'joi'
 
 import {
   formCreatedEventMapper,
+  formDraftDeletedMapper,
   formTitleUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
@@ -61,5 +62,15 @@ export async function bulkPublishEvents(messages) {
 }
 
 /**
- * @import { AuditEventMessageType, FormMetadata, AuditMessage } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {AuditUser} author
+ */
+export async function publishFormDraftDeletedEvent(metadata, author) {
+  const auditMessage = formDraftDeletedMapper(metadata, author)
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * @import { AuditEventMessageType, AuditUser, FormDraftDeletedMessage, FormMetadata, AuditMessage } from '@defra/forms-model'
  */
