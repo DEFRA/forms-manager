@@ -35,6 +35,7 @@ export function createFormMessageDataBase(metadata) {
     slug: metadata.slug
   }
 }
+
 /**
  * @import { FormMessageDataBase, FormMetadata, MessageBase } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
