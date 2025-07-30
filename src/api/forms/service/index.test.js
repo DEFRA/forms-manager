@@ -196,8 +196,9 @@ describe('Forms service', () => {
       jest.mocked(formDefinition.remove).mockResolvedValueOnce()
 
       await expect(removeForm(id, author)).resolves.toBeUndefined()
-      const [publishCall] = publishEvent.mock.calls[0]
+      const [publishCall] = jest.mocked(publishEvent).mock.calls[0]
       expect(publishCall.type).toBe(AuditEventMessageType.FORM_DRAFT_DELETED)
+      expect(publishCall.createdBy).toEqual(author)
     })
 
     it('should fail if form metadata remove fails', async () => {
