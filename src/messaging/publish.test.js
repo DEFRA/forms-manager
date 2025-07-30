@@ -3,7 +3,7 @@ import {
   AuditEventMessageSchemaVersion,
   AuditEventMessageType
 } from '@defra/forms-model'
-import { buildMetaData } from '@defra/forms-model/stubs'
+import { buildDefinition, buildMetaData } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
 import author from '~/src/api/forms/service/__stubs__/author.js'
@@ -15,6 +15,7 @@ import {
   publishFormCreatedEvent,
   publishFormDraftDeletedEvent,
   publishFormTitleUpdatedEvent,
+  publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
 
@@ -196,6 +197,38 @@ describe('publish', () => {
         data: {
           formId,
           slug
+        }
+      })
+    })
+  })
+
+  describe('publishFormUpdatedEvent', () => {
+    it('should publish a FORM_UPDATED event', async () => {
+      const response = await publishFormUpdatedEvent(
+        metadata,
+        buildDefinition({ name: 'Old form' }),
+        buildDefinition({ name: 'New form' })
+      )
+      expect(response?.MessageId).toBe(messageId)
+      expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_UPDATED,
+        createdAt: expect.any(Date),
+        createdBy: metadata.updatedBy,
+        data: {
+          formId,
+          slug,
+          changeSet: [
+            {
+              type: 'UPDATE',
+              key: 'name',
+              oldValue: 'Old form',
+              value: 'New form'
+            }
+          ]
         }
       })
     })
