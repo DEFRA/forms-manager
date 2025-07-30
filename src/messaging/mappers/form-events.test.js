@@ -11,6 +11,7 @@ import {
   buildTextFieldComponent
 } from '@defra/forms-model/stubs'
 
+import author from '~/src/api/forms/service/__stubs__/author.js'
 import {
   formOrganisationUpdatedMapper,
   formTeamEmailUpdatedMapper,
@@ -105,8 +106,11 @@ describe('form-events', () => {
     })
 
     it('should map a form updated', () => {
+      const formCreatedAt = new Date('2024-07-30')
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        author,
+        formCreatedAt,
         buildDefinition({ name: 'Old form' }),
         buildDefinition({ name: 'New form' })
       )
@@ -114,8 +118,8 @@ describe('form-events', () => {
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_UPDATED,
-        createdAt: updatedAt,
-        createdBy: updatedBy,
+        createdAt: formCreatedAt,
+        createdBy: author,
         messageCreatedAt: expect.any(Date),
         entityId: formId,
         data: {
@@ -136,6 +140,8 @@ describe('form-events', () => {
     it('should map a page updated', () => {
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        updatedBy,
+        updatedAt,
         buildDefinition({ pages: [oldPageTitleChange] }),
         buildDefinition({ pages: [updatedPageTitleChange] })
       )
@@ -165,6 +171,8 @@ describe('form-events', () => {
     it('should map a component updated', () => {
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        updatedBy,
+        updatedAt,
         buildDefinition({ pages: [oldPageWithComponentChange] }),
         buildDefinition({ pages: [updatedPageWithComponent] })
       )
@@ -207,6 +215,8 @@ describe('form-events', () => {
     it('should map a new page added', () => {
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        updatedBy,
+        updatedAt,
         buildDefinition({ pages: [] }),
         buildDefinition({ pages: [newPage] })
       )
@@ -229,6 +239,8 @@ describe('form-events', () => {
     it('should map a page reorder', () => {
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        updatedBy,
+        updatedAt,
         buildDefinition({
           pages: [updatedPageTitleChange, updatedPageWithComponent, newPage]
         }),

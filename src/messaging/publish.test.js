@@ -204,8 +204,11 @@ describe('publish', () => {
 
   describe('publishFormUpdatedEvent', () => {
     it('should publish a FORM_UPDATED event', async () => {
+      const auditDate = new Date('2025-07-30')
       const response = await publishFormUpdatedEvent(
         metadata,
+        author,
+        auditDate,
         buildDefinition({ name: 'Old form' }),
         buildDefinition({ name: 'New form' })
       )
@@ -216,8 +219,8 @@ describe('publish', () => {
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_UPDATED,
-        createdAt: expect.any(Date),
-        createdBy: metadata.updatedBy,
+        createdAt: auditDate,
+        createdBy: author,
         data: {
           formId,
           slug,

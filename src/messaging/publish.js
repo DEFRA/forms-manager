@@ -116,16 +116,22 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 
 /**
  * @param {FormMetadata} metadata
+ * @param {AuditUser} author
+ * @param {Date} createdAt
  * @param {FormDefinition} formDefinitionOld
  * @param {FormDefinition} formDefinitionNew
  */
 export async function publishFormUpdatedEvent(
   metadata,
+  author,
+  createdAt,
   formDefinitionOld,
   formDefinitionNew
 ) {
   const auditMessage = formUpdatedMapper(
     metadata,
+    author,
+    createdAt,
     formDefinitionOld,
     formDefinitionNew
   )

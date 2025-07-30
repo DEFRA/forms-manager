@@ -385,12 +385,16 @@ export function formDraftDeletedMapper(metadata, author) {
 /**
  *
  * @param {FormMetadata} metadata
+ * @param {AuditUser} createdBy
+ * @param {Date} createdAt
  * @param {FormDefinition} formDefinitionBefore
  * @param {FormDefinition} formDefinitionAfter
  * @returns {FormUpdatedMessage}
  */
 export function formUpdatedMapper(
   metadata,
+  createdBy,
+  createdAt,
   formDefinitionBefore,
   formDefinitionAfter
 ) {
@@ -401,6 +405,8 @@ export function formUpdatedMapper(
     category: AuditEventMessageCategory.FORM,
     type: AuditEventMessageType.FORM_UPDATED,
     ...auditMessageBase,
+    createdBy,
+    createdAt,
     data: {
       ...createFormMessageDataBase(metadata),
       changeSet
