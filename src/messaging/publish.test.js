@@ -6,12 +6,14 @@ import {
 import { buildMetaData } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
+import author from '~/src/api/forms/service/__stubs__/author.js'
 import { buildFormOrganisationUpdatedMessage } from '~/src/messaging/__stubs__/messages.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
   bulkPublishEvents,
   publishDraftCreatedFromLiveEvent,
   publishFormCreatedEvent,
+  publishFormDraftDeletedEvent,
   publishFormTitleUpdatedEvent,
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
@@ -175,6 +177,26 @@ describe('publish', () => {
         type: AuditEventMessageType.FORM_DRAFT_CREATED_FROM_LIVE,
         createdAt: updatedAt,
         createdBy: updatedBy
+      })
+    })
+  })
+
+  describe('publishFormDraftDeletedEvent', () => {
+    it('should publish a FORM_DRAFT_DELETED event', async () => {
+      const response = await publishFormDraftDeletedEvent(metadata, author)
+      expect(response?.MessageId).toBe(messageId)
+      expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_DRAFT_DELETED,
+        createdAt: expect.any(Date),
+        createdBy: author,
+        data: {
+          formId,
+          slug
+        }
       })
     })
   })

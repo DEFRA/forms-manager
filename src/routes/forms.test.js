@@ -37,6 +37,7 @@ jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')
 jest.mock('~/src/api/forms/service/migration.js')
 jest.mock('~/src/api/forms/service/conditions.js')
+jest.mock('~/src/messaging/publish.js')
 
 describe('Forms route', () => {
   /** @type {Server} */
@@ -466,6 +467,10 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         id,
         status: 'deleted'
+      })
+      expect(removeForm).toHaveBeenCalledWith(id, {
+        displayName: 'Enrique Chase',
+        id: '86758ba9-92e7-4287-9751-7705e449688e'
       })
     })
 
