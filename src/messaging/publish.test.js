@@ -10,8 +10,10 @@ import { buildFormOrganisationUpdatedMessage } from '~/src/messaging/__stubs__/m
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
   bulkPublishEvents,
+  publishDraftCreatedFromLiveEvent,
   publishFormCreatedEvent,
-  publishFormTitleUpdatedEvent
+  publishFormTitleUpdatedEvent,
+  publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
 
 jest.mock('~/src/messaging/publish-base.js')
@@ -131,6 +133,48 @@ describe('publish', () => {
             }
           }
         }
+      })
+    })
+  })
+
+  describe('publishLiveCreatedFromDraftEvent', () => {
+    it('should publish FORM_LIVE_CREATED_FROM_DRAFT event', async () => {
+      const response = await publishLiveCreatedFromDraftEvent(
+        formId,
+        updatedAt,
+        updatedBy
+      )
+
+      expect(response?.MessageId).toBe(messageId)
+      expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_LIVE_CREATED_FROM_DRAFT,
+        createdAt: updatedAt,
+        createdBy: updatedBy
+      })
+    })
+  })
+
+  describe('publishDraftCreatedFromLiveEvent', () => {
+    it('should publish FORM_DRAFT_CREATED_FROM_LIVE event', async () => {
+      const response = await publishDraftCreatedFromLiveEvent(
+        formId,
+        updatedAt,
+        updatedBy
+      )
+
+      expect(response?.MessageId).toBe(messageId)
+      expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_DRAFT_CREATED_FROM_LIVE,
+        createdAt: updatedAt,
+        createdBy: updatedBy
       })
     })
   })
