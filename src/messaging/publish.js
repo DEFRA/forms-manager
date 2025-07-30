@@ -3,7 +3,9 @@ import Joi from 'joi'
 
 import {
   formCreatedEventMapper,
+  formDraftCreatedFromLiveMapper,
   formDraftDeletedMapper,
+  formLiveCreatedFromDraftMapper,
   formTitleUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
@@ -42,6 +44,46 @@ export async function publishFormTitleUpdatedEvent(metadata, oldMetadata) {
 }
 
 /**
+ * Publishes a live created from draft event
+ * @param {string} formId
+ * @param {Date} createdAt
+ * @param {AuditUser} createdBy
+ */
+export async function publishLiveCreatedFromDraftEvent(
+  formId,
+  createdAt,
+  createdBy
+) {
+  const auditMessage = formLiveCreatedFromDraftMapper(
+    formId,
+    createdAt,
+    createdBy
+  )
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * Publishes a draft created from live event
+ * @param {string} formId
+ * @param {Date} createdAt
+ * @param {AuditUser} createdBy
+ */
+export async function publishDraftCreatedFromLiveEvent(
+  formId,
+  createdAt,
+  createdBy
+) {
+  const auditMessage = formDraftCreatedFromLiveMapper(
+    formId,
+    createdAt,
+    createdBy
+  )
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
  * @param {AuditMessage[]} messages
  * @returns {Promise<{ messageId?: string; type: AuditEventMessageType }[]>}
  */
@@ -72,5 +114,5 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 }
 
 /**
- * @import { AuditEventMessageType, AuditUser, FormDraftDeletedMessage, FormMetadata, AuditMessage } from '@defra/forms-model'
+ * @import { AuditEventMessageType, FormDraftDeletedMessage, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
  */
