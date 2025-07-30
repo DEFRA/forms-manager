@@ -21,6 +21,7 @@ import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-event
 import {
   bulkPublishEvents,
   publishFormCreatedEvent,
+  publishFormDraftDeletedEvent,
   publishFormTitleUpdatedEvent
 } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -208,8 +209,9 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 /**
  * Removes a form (metadata and definition)
  * @param {string} formId
+ * @param {FormMetadataAuthor} author
  */
-export async function removeForm(formId) {
+export async function removeForm(formId, author) {
   logger.info(`Removing form with ID ${formId}`)
 
   const form = await getForm(formId)
@@ -224,6 +226,7 @@ export async function removeForm(formId) {
     await session.withTransaction(async () => {
       await formMetadata.remove(formId, session)
       await formDefinition.remove(formId, session)
+      await publishFormDraftDeletedEvent(form, author)
     })
   } finally {
     await session.endSession()

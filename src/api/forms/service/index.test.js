@@ -191,25 +191,27 @@ describe('Forms service', () => {
   })
 
   describe('removeForm', () => {
-    it('should succeed if both operations succeed', async () => {
+    it('should succeed if both operations succeed and publish', async () => {
       jest.mocked(formMetadata.remove).mockResolvedValueOnce()
       jest.mocked(formDefinition.remove).mockResolvedValueOnce()
 
-      await expect(removeForm(id)).resolves.toBeUndefined()
+      await expect(removeForm(id, author)).resolves.toBeUndefined()
+      const [publishCall] = publishEvent.mock.calls[0]
+      expect(publishCall.type).toBe(AuditEventMessageType.FORM_DRAFT_DELETED)
     })
 
     it('should fail if form metadata remove fails', async () => {
       jest.mocked(formMetadata.remove).mockRejectedValueOnce('unknown error')
       jest.mocked(formDefinition.remove).mockResolvedValueOnce()
 
-      await expect(removeForm(id)).rejects.toBeDefined()
+      await expect(removeForm(id, author)).rejects.toBeDefined()
     })
 
     it('should fail if form definition remove fails', async () => {
       jest.mocked(formMetadata.remove).mockResolvedValueOnce()
       jest.mocked(formDefinition.remove).mockRejectedValueOnce('unknown error')
 
-      await expect(removeForm(id)).rejects.toBeDefined()
+      await expect(removeForm(id, author)).rejects.toBeDefined()
     })
 
     it('should fail if the form is live', async () => {
@@ -217,7 +219,7 @@ describe('Forms service', () => {
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
-      await expect(removeForm(id)).rejects.toBeDefined()
+      await expect(removeForm(id, author)).rejects.toBeDefined()
     })
   })
 
