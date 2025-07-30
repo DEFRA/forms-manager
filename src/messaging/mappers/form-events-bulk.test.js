@@ -322,5 +322,53 @@ describe('publish', () => {
         }
       })
     })
+
+    it('should get FORM_SUPPORT_CONTACT_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const contact = {
+        phone: 'Telephone: 020 7946 0101\r\nMonday to Friday, 8am to 6pm',
+        email: {
+          address: 'support@defra.gov.uk',
+          responseTime: 'Response time'
+        },
+        online: {
+          url: 'https://www.gov.uk/guidance/contact-defra',
+          text: 'Online contact form'
+        }
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        contact,
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formUpdatedMessage).toEqual({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_SUPPORT_CONTACT_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              contact: undefined
+            },
+            new: {
+              contact
+            }
+          }
+        }
+      })
+    })
   })
 })
