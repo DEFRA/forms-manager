@@ -57,6 +57,10 @@ ROLE_EDITOR_GROUP_ID=""
 HTTP_PROXY=
 HTTPS_PROXY=
 NO_PROXY=
+SNS_TOPIC_ARN=
+SNS_ENDPOINT=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
 ```
 
 For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.
