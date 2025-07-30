@@ -155,9 +155,10 @@ export default [
      * @param {RequestFormById} request
      */
     async handler(request) {
+      const { auth } = request
       const { id } = request.params
-
-      await removeForm(id)
+      const author = getAuthor(auth.credentials.user)
+      await removeForm(id, author)
 
       return {
         id,
