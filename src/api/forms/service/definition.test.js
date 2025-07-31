@@ -15,9 +15,11 @@ import {
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
+import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
+import { update } from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
@@ -47,13 +49,51 @@ import {
 } from '~/src/api/forms/service/index.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
-import { prepareDb } from '~/src/mongo.js'
+import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
+import { db, prepareDb } from '~/src/mongo.js'
+const mockCollection = buildMockCollection()
 
+jest.mock('~/src/messaging/publish.js')
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
-jest.mock('~/src/mongo.js')
+jest.mock('~/src/mongo.js', () => {
+  let isPrepared = false
+  const collection =
+    /** @satisfies {Collection<{draft: FormDefinition}>} */ jest
+      .fn()
+      .mockImplementation(() => mockCollection)
+  return {
+    db: {
+      collection
+    },
+    get client() {
+      if (!isPrepared) {
+        return undefined
+      }
+
+      return {
+        startSession: () => ({
+          endSession: jest.fn().mockResolvedValue(undefined),
+          withTransaction: jest.fn(
+            /**
+             * Mock transaction handler
+             * @param {() => Promise<void>} fn
+             */
+            async (fn) => fn()
+          )
+        })
+      }
+    },
+
+    prepareDb() {
+      isPrepared = true
+      return Promise.resolve()
+    }
+  }
+})
+
 jest.mock('~/src/messaging/publish.js')
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -944,9 +984,19 @@ describe('Forms service', () => {
   })
 
   describe('updateDraftFormDefinition', () => {
+    const emptyForm = emptyFormWithSummary()
     const formDefinitionCustomisedTitle = emptyFormWithSummary()
     formDefinitionCustomisedTitle.name =
       "A custom form name that shouldn't be allowed"
+
+    beforeEach(() => {
+      jest.mocked(db.collection).mockReturnValue(mockCollection)
+      dbMetadataSpy.mockResolvedValue(formMetadataDocument)
+      jest.mocked(update).mockResolvedValue({
+        before: emptyForm,
+        after: formDefinitionCustomisedTitle
+      })
+    })
 
     it('should update the draft form definition with required attributes upon creation', async () => {
       const updateSpy = jest.spyOn(formDefinition, 'update')
@@ -972,6 +1022,13 @@ describe('Forms service', () => {
 
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
+      )
+      expect(publishFormUpdatedEvent).toHaveBeenCalledWith(
+        formMetadataOutput,
+        author,
+        formMetadataOutput.updatedAt,
+        emptyForm,
+        formDefinitionCustomisedTitle
       )
     })
 

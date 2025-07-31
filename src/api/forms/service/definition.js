@@ -4,6 +4,7 @@ import Boom from '@hapi/boom'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { updateAuditAndPublish } from '~/src/api/forms/service/audit.js'
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
@@ -73,8 +74,18 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       await session.withTransaction(async () => {
         logger.info(`Updating form definition (draft) for form ID ${formId}`)
 
-        await formDefinition.update(formId, definition, session, schema)
-        await formMetadata.updateAudit(formId, author, session)
+        const formDefinitionStates = await formDefinition.update(
+          formId,
+          definition,
+          session,
+          schema
+        )
+        await updateAuditAndPublish(
+          formId,
+          author,
+          session,
+          formDefinitionStates
+        )
       })
     } finally {
       await session.endSession()
