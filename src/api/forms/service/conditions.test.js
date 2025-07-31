@@ -1,13 +1,13 @@
 import { ConditionType, Coordinator, OperatorName } from '@defra/forms-model'
-import Boom from '@hapi/boom'
-import { pino } from 'pino'
-
 import {
-  buildCondition,
   buildDefinition,
   buildQuestionPage,
   buildTextFieldComponent
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { pino } from 'pino'
+
+import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -26,7 +26,9 @@ jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 
-jest.mocked(formDefinition.updatePageFields).mockResolvedValue()
+jest
+  .mocked(formDefinition.updatePageFields)
+  .mockResolvedValue({ before: buildDefinition(), after: buildDefinition() })
 jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))

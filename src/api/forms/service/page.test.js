@@ -18,12 +18,14 @@ import {
 } from '~/src/api/forms/service/page.js'
 import { empty as emptyFormWithSummary } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import * as publishBase from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/mongo.js')
+jest.mock('~/src/messaging/publish-base.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -43,6 +45,9 @@ describe('Page service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(formMetadata.updateAudit)
+      .mockResolvedValue(formMetadataDocument)
   })
 
   describe('getFormDefinitionPage', () => {
@@ -92,7 +97,16 @@ describe('Page service', () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
 
       const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
-      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPage')
+      const dbDefinitionSpy = jest
+        .spyOn(formDefinition, 'addPage')
+        .mockResolvedValue({
+          before: definition,
+          after: buildDefinition({
+            ...definition,
+            pages: [...definition.pages, formDefinitionPageCustomisedTitle]
+          })
+        })
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       const page = await createPageOnDraftDefinition(
         id,
@@ -113,6 +127,7 @@ describe('Page service', () => {
         ...formDefinitionPageCustomisedTitle,
         id: expect.any(String)
       })
+      expect(publishEventSpy).toHaveBeenCalled()
     })
 
     it('should create a new page when a summary page does not exist', async () => {
@@ -129,7 +144,15 @@ describe('Page service', () => {
         .mockResolvedValueOnce(definitionWithoutSummary)
 
       const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
-      const dbDefinitionSpy = jest.spyOn(formDefinition, 'addPage')
+      const dbDefinitionSpy = jest
+        .spyOn(formDefinition, 'addPage')
+        .mockResolvedValue({
+          before: definitionWithoutSummary,
+          after: buildDefinition({
+            ...definitionWithoutSummary,
+            pages: [...definition.pages, formDefinitionPageCustomisedTitle]
+          })
+        })
 
       await createPageOnDraftDefinition(
         id,
@@ -213,16 +236,18 @@ describe('Page service', () => {
       const expectedPage = buildQuestionPage({
         ...pageFields
       })
+      const updatedDefinition = buildDefinition({
+        pages: [expectedPage, summaryPage]
+      })
 
-      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce()
+      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce({
+        before: initialDefinition,
+        after: updatedDefinition
+      })
 
       const spy = jest
         .spyOn(definitionService, 'getFormDefinition')
-        .mockResolvedValue(
-          buildDefinition({
-            pages: [expectedPage, summaryPage]
-          })
-        )
+        .mockResolvedValue(updatedDefinition)
 
       const page = await patchFieldsOnDraftDefinitionPage(
         '123',
@@ -333,6 +358,10 @@ describe('Page service', () => {
         ]
       }
 
+      const beforeAfterResponse = {
+        before: initialDefinition,
+        after: definitionWithCondition
+      }
       const pageFieldsWithValidCondition = {
         condition: 'valid-condition-id'
       }
@@ -343,7 +372,9 @@ describe('Page service', () => {
         .mockResolvedValueOnce(definitionWithCondition)
         .mockResolvedValueOnce(definitionWithCondition)
 
-      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce()
+      jest
+        .mocked(formDefinition.updatePageFields)
+        .mockResolvedValueOnce(beforeAfterResponse)
 
       const result = await patchFieldsOnDraftDefinitionPage(
         '123',

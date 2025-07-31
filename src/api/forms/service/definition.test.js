@@ -362,7 +362,10 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.update).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue({
+        before: definitionV2,
+        after: definitionV2
+      })
       jest.mocked(formTemplates.emptyV2).mockReturnValue(definitionV2)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
