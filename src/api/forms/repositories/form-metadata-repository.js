@@ -237,7 +237,16 @@ export async function update(formId, update, session) {
 
     logger.info(`Form with ID ${formId} updated`)
 
-    return result
+    const metadata = await coll.findOne(
+      { _id: new ObjectId(formId) },
+      { session }
+    )
+
+    if (!metadata) {
+      throw Boom.badRequest(`Form with ID ${formId} not found.`)
+    }
+
+    return metadata
   } catch (error) {
     logger.error(
       `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(error)}`
@@ -260,9 +269,15 @@ export async function update(formId, update, session) {
 export async function updateAudit(formId, author, session, date = new Date()) {
   logger.info(`Updating audit fields for form with ID ${formId}`)
 
-  await update(formId, { $set: partialAuditFields(date, author) }, session)
+  const metadata = await update(
+    formId,
+    { $set: partialAuditFields(date, author) },
+    session
+  )
 
   logger.info(`Updated audit fields for form with ID ${formId}`)
+
+  return metadata
 }
 
 /**
@@ -279,7 +294,7 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor } from '@defra/forms-model'
+ * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormDefinition } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  * @import { FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'

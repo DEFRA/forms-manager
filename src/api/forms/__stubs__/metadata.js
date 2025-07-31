@@ -1,11 +1,11 @@
 import { ObjectId } from 'mongodb'
 
-export const metadataId = '661e4ca5039739ef2902b214'
+export const metadataId = '681b184463c68bf6b99e2c62'
 export const _id = new ObjectId(metadataId)
-export const slug = 'application-to-join-the-fellowship'
-export const title = 'Application to join the fellowship'
-export const fakeCreatedAt = new Date('2020-01-01')
-export const fakeUpdatedAt = new Date('2025-07-31')
+export const slug = 'chemistry'
+export const title = 'Chemistry'
+export const fakeCreatedAt = new Date('2025-05-07T08:22:28.035Z')
+export const fakeUpdatedAt = new Date('2025-05-20T13:00:54.794Z')
 
 /**
  * @param {Partial<WithId<Partial<FormMetadataDocument>>>} partialMetadataDocument
@@ -16,28 +16,28 @@ export function buildMetadataDocument(partialMetadataDocument = {}) {
     title,
     slug,
     organisation: 'Defra',
-    teamName: 'Keepers of Rivendell',
-    teamEmail: 'fellowship.applications@middleearth.com',
+    teamName: 'Forms Team',
+    teamEmail: 'name@example.gov.uk',
     createdAt: fakeCreatedAt,
     createdBy: {
-      id: '6268b212-af63-48bc-a996-f1d27a708ac4',
-      displayName: 'Elron'
+      id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
+      displayName: 'Internal User'
     },
     updatedAt: fakeUpdatedAt,
     updatedBy: {
-      id: '85a00f67-847d-4e93-839a-af86a61e725c',
-      displayName: 'Gandalf'
+      id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
+      displayName: 'Internal User'
     },
     draft: {
-      createdAt: fakeCreatedAt,
+      createdAt: new Date('2025-05-07T08:22:28.035Z'),
       createdBy: {
-        id: '6268b212-af63-48bc-a996-f1d27a708ac4',
-        displayName: 'Elron'
+        id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
+        displayName: 'Internal User'
       },
-      updatedAt: fakeUpdatedAt,
+      updatedAt: new Date('2025-05-20T13:00:54.794Z'),
       updatedBy: {
-        id: '85a00f67-847d-4e93-839a-af86a61e725c',
-        displayName: 'Gandalf'
+        id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
+        displayName: 'Internal User'
       }
     },
     ...partialMetadataDocument
