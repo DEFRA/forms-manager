@@ -1,4 +1,5 @@
 import { updateAudit } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { mapForm } from '~/src/api/forms/service/shared.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 
 /**
@@ -25,7 +26,8 @@ export async function updateAuditAndPublish(
   date = new Date(),
   auditDiff = true
 ) {
-  const metadata = await updateAudit(formId, author, session, date)
+  const metadataDocument = await updateAudit(formId, author, session, date)
+  const metadata = mapForm(metadataDocument)
 
   if (auditDiff) {
     await publishFormUpdatedEvent(
@@ -40,6 +42,6 @@ export async function updateAuditAndPublish(
 }
 
 /**
- * @import { ClientSession } from 'mongo'
+ * @import { ClientSession } from 'mongodb'
  * @import { AuditUser, FormDefinition } from '@defra/forms-model'
  */
