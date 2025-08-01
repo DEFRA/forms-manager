@@ -1,8 +1,10 @@
 import { AuditEventMessageType } from '@defra/forms-model'
+import { buildDefinition } from '@defra/forms-model/stubs'
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
 
+import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -89,7 +91,7 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.update).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue(buildDefinition())
       jest.mocked(formTemplates.emptyV2).mockReturnValue(definitionV2)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
@@ -246,13 +248,9 @@ describe('Forms service', () => {
 
   describe('updateFormMetadata', () => {
     beforeEach(() => {
-      jest.mocked(formMetadata.update).mockResolvedValue({
-        acknowledged: true,
-        modifiedCount: 1,
-        matchedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null
-      })
+      jest
+        .mocked(formMetadata.update)
+        .mockResolvedValue(buildMetadataDocument())
       jest.mocked(formDefinition.get).mockResolvedValue(definition)
     })
 
@@ -406,13 +404,9 @@ describe('Forms service', () => {
 
   describe('updateFormMetadataV2', () => {
     beforeEach(() => {
-      jest.mocked(formMetadata.update).mockResolvedValue({
-        acknowledged: true,
-        modifiedCount: 1,
-        matchedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null
-      })
+      jest
+        .mocked(formMetadata.update)
+        .mockResolvedValue(buildMetadataDocument())
       jest.mocked(formDefinition.get).mockResolvedValue(definitionV2)
     })
 
