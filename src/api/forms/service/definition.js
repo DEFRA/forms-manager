@@ -42,7 +42,6 @@ export function getFormDefinition(
   state = FormStatus.Draft,
   session = undefined
 ) {
-  // TODO: if form def is v1 and target v2 - use decorator
   return formDefinition.get(formId, state, session)
 }
 
@@ -80,11 +79,14 @@ export async function updateDraftFormDefinition(formId, definition, author) {
           session,
           schema
         )
+
         await updateAuditAndPublish(
           formId,
           author,
           session,
-          formDefinitionStates
+          formDefinitionStates,
+          new Date(),
+          false // we want to save the whole form into S3 for an update draft form
         )
       })
     } finally {

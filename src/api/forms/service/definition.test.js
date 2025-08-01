@@ -1026,13 +1026,7 @@ describe('Forms service', () => {
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
       )
-      expect(publishFormUpdatedEvent).toHaveBeenCalledWith(
-        formMetadataOutput,
-        author,
-        formMetadataOutput.updatedAt,
-        emptyForm,
-        formDefinitionCustomisedTitle
-      )
+      expect(publishFormUpdatedEvent).not.toHaveBeenCalled()
     })
 
     it('should use V2 schema when form definition has schema version 2 (regardless of engine)', async () => {
