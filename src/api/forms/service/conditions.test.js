@@ -1,13 +1,13 @@
 import { ConditionType, Coordinator, OperatorName } from '@defra/forms-model'
-import Boom from '@hapi/boom'
-import { pino } from 'pino'
-
 import {
-  buildCondition,
   buildDefinition,
   buildQuestionPage,
   buildTextFieldComponent
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { pino } from 'pino'
+
+import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -26,8 +26,12 @@ jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 
-jest.mocked(formDefinition.updatePageFields).mockResolvedValue()
-jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+jest
+  .mocked(formDefinition.updatePageFields)
+  .mockResolvedValue(buildDefinition({}))
+jest
+  .mocked(formDefinition.deleteCondition)
+  .mockResolvedValue(buildDefinition({}))
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -226,7 +230,9 @@ describe('conditions', () => {
         .mocked(formDefinition.get)
         .mockResolvedValue(formDefinitionWithConditions)
 
-      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+      jest
+        .mocked(formDefinition.deleteCondition)
+        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -265,7 +271,9 @@ describe('conditions', () => {
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithPageCondition)
 
-      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+      jest
+        .mocked(formDefinition.deleteCondition)
+        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -300,7 +308,9 @@ describe('conditions', () => {
         .mocked(formDefinition.get)
         .mockResolvedValue(formWithMultiplePageConditions)
 
-      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+      jest
+        .mocked(formDefinition.deleteCondition)
+        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -408,7 +418,9 @@ describe('conditions', () => {
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithPageWithoutId)
 
-      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+      jest
+        .mocked(formDefinition.deleteCondition)
+        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -427,7 +439,9 @@ describe('conditions', () => {
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithJoinedCondition)
 
-      jest.mocked(formDefinition.deleteCondition).mockResolvedValue()
+      jest
+        .mocked(formDefinition.deleteCondition)
+        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,

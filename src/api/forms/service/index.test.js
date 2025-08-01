@@ -1,4 +1,5 @@
 import { AuditEventMessageType } from '@defra/forms-model'
+import { buildDefinition } from '@defra/forms-model/stubs'
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 import { pino } from 'pino'
@@ -89,7 +90,7 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.update).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue(buildDefinition())
       jest.mocked(formTemplates.emptyV2).mockReturnValue(definitionV2)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,

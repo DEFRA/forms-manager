@@ -1,11 +1,11 @@
-import Boom from '@hapi/boom'
-import { pino } from 'pino'
-
 import {
   buildDefinition,
   buildQuestionPage,
   buildSummaryPage
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { pino } from 'pino'
+
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
@@ -195,7 +195,7 @@ describe('Page service', () => {
   })
 
   describe('patchFieldsOnDraftDefinitionPage', () => {
-    const initialPage = buildQuestionPage()
+    const initialPage = buildQuestionPage({})
     const pageFields = /** @satisfies {PatchPageFields} */ {
       title: 'Updated Title',
       path: '/updated-title'
@@ -214,7 +214,9 @@ describe('Page service', () => {
         ...pageFields
       })
 
-      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce()
+      jest
+        .mocked(formDefinition.updatePageFields)
+        .mockResolvedValueOnce(buildDefinition())
 
       const spy = jest
         .spyOn(definitionService, 'getFormDefinition')
@@ -343,7 +345,9 @@ describe('Page service', () => {
         .mockResolvedValueOnce(definitionWithCondition)
         .mockResolvedValueOnce(definitionWithCondition)
 
-      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce()
+      jest
+        .mocked(formDefinition.updatePageFields)
+        .mockResolvedValueOnce(buildDefinition())
 
       const result = await patchFieldsOnDraftDefinitionPage(
         '123',
