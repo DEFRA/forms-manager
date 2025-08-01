@@ -304,6 +304,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
       )
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: add page reorder audit
 
       return reorderedForm
     })
@@ -359,6 +360,7 @@ export async function reorderDraftFormDefinitionComponents(
       )
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: add reorder audit
 
       return reorderedForm
     })
