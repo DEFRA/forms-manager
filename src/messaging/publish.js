@@ -127,5 +127,5 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 }
 
 /**
- * @import { AuditEventMessageType, FormDraftDeletedMessage, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
  */
