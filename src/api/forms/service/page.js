@@ -130,6 +130,7 @@ export async function patchFieldsOnDraftDefinitionPage(
       page = await getFormDefinitionPage(formId, pageId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
     })
   } catch (err) {
     logger.error(
@@ -160,6 +161,7 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
       await formDefinition.deletePage(formId, pageId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
     })
   } catch (err) {
     logger.error(

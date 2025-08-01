@@ -46,6 +46,7 @@ export async function addListToDraftFormDefinition(formId, list, author) {
       await duplicateListGuard(formId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
 
       return returnedList
     })
@@ -94,6 +95,7 @@ export async function updateListOnDraftFormDefinition(
       await duplicateListGuard(formId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
 
       return returnedList
     })
@@ -129,6 +131,7 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
       await formDefinition.deleteList(formId, listId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
     })
 
     logger.info(`Removed list ${listId} for form ID ${formId}`)
