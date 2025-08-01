@@ -410,12 +410,7 @@ export function formMigratedMapper(formId, createdAt, createdBy) {
  * @param {{fileId?: string; filename?: string; s3Key?: string }} s3Meta
  * @returns {FormUpdatedMessage}
  */
-export function formUpdatedMapper(
-  metadata,
-  payload,
-  requestType,
-  { fileId, filename, s3Key } = {}
-) {
+export function formUpdatedMapper(metadata, payload, requestType, s3Meta) {
   const baseData = createFormMessageDataBase(metadata)
   const auditMessageBase = createV1MessageBase(metadata, {})
 
@@ -426,9 +421,7 @@ export function formUpdatedMapper(
     data: {
       ...baseData,
       requestType,
-      fileId,
-      filename,
-      s3Key,
+      s3Meta,
       payload
     }
   }

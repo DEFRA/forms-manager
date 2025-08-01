@@ -72,11 +72,10 @@ describe('form-events', () => {
           createdBy: author,
           messageCreatedAt: expect.any(Date),
           data: {
+            requestType,
+            s3Meta,
             formId,
             slug: 'my-form',
-            fileId: '1111111111',
-            filename: '6883d8667a2a64da10af4312.json',
-            s3Key: formId,
             payload
           }
         }
