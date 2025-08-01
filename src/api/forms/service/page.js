@@ -156,10 +156,13 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.deletePage(formId, pageId, session)
+      const formDefinitionStates = await formDefinition.deletePage(
+        formId,
+        pageId,
+        session
+      )
 
-      await formMetadata.updateAudit(formId, author, session)
-      // TODO: Use updateAuditAndPublish
+      await updateAuditAndPublish(formId, author, session, formDefinitionStates)
     })
   } catch (err) {
     logger.error(

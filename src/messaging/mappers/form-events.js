@@ -399,7 +399,22 @@ export function formUpdatedMapper(
   formDefinitionAfter
 ) {
   const auditMessageBase = createV1MessageBase(metadata, metadata)
-  const changeSet = diff(formDefinitionBefore, formDefinitionAfter)
+
+  /**
+   * This function will create a change set for the before/after forms
+   * Note - it will not show any change set for a change of order - another mapper will
+   * be used for that
+   * @type {IChange[]}
+   */
+  const changeSet = diff(formDefinitionBefore, formDefinitionAfter, {
+    embeddedObjKeys: {
+      pages: 'id',
+      lists: 'id',
+      'lists.item': 'id',
+      'pages.components': 'id',
+      conditions: 'id'
+    }
+  })
 
   return {
     category: AuditEventMessageCategory.FORM,

@@ -412,6 +412,22 @@ describe('Page service', () => {
     it('should delete the page', async () => {
       const dbDefinitionSpy = jest.spyOn(formDefinition, 'deletePage')
       const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+      const definition1 = buildDefinition({
+        pages: [
+          buildQuestionPage({
+            id: pageId
+          })
+        ]
+      })
+      const updatedDefinition = buildDefinition({
+        ...definition1,
+        pages: []
+      })
+      jest.mocked(formDefinition.deletePage).mockResolvedValueOnce({
+        before: formDefinition,
+        after: updatedDefinition
+      })
 
       await deletePageOnDraftDefinition(id, pageId, author)
 
@@ -423,6 +439,7 @@ describe('Page service', () => {
       expect(metaFormId).toBe(id)
 
       expect(metaUpdateOperations).toEqual(author)
+      expect(publishEventSpy).toHaveBeenCalled()
     })
 
     it('should surface any errors', async () => {
