@@ -232,7 +232,7 @@ describe('publish', () => {
   describe('publishFormUpdatedEvent', () => {
     it('should publish a FORM_UPDATED event', async () => {
       const requestType = FormDefinitionRequestType.CREATE_PAGE
-      const payload = buildQuestionPage()
+      const payload = buildQuestionPage({})
       const definition = buildDefinition({
         pages: [payload]
       })

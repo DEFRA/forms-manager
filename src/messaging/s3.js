@@ -1,10 +1,6 @@
 /**
  * @param {FormDefinition} _formDefinition
- * @returns {Promise<{
- *   slug?: string;
- *   fileId?: string;
- *   filename?: string;
- * }>}
+ * @returns {Promise<FormDefinitionS3Meta | undefined>}
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function saveToS3(_formDefinition) {
@@ -13,5 +9,5 @@ export function saveToS3(_formDefinition) {
 }
 
 /**
- * @import { FormDefinition } from '@defra/forms-model'
+ * @import { FormDefinition, FormDefinitionS3Meta } from '@defra/forms-model'
  */

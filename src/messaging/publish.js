@@ -134,7 +134,6 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
  * @param {unknown} payload
  * @param {FormDefinition} definition
  * @param {FormDefinitionRequestType} requestType
- * @returns {Promise<void>}
  */
 export async function publishFormUpdatedEvent(
   metadata,
@@ -149,5 +148,5 @@ export async function publishFormUpdatedEvent(
 }
 
 /**
- * @import { FormDefinitionRequestType, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { FormDefinition, FormDefinitionRequestType, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
  */
