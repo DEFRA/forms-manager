@@ -16,12 +16,14 @@ import {
   repositionSummaryPipeline
 } from '~/src/api/forms/service/migration.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import { publishFormMigratedEvent } from '~/src/messaging/publish.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/mongo.js')
+jest.mock('~/src/messaging/publish.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -183,6 +185,8 @@ describe('migration', () => {
 
     it('should migrate a v1 definition to v2', async () => {
       const updateMock = jest.mocked(formDefinition.update)
+      const auditMock = jest.mocked(publishFormMigratedEvent)
+
       jest
         .spyOn(migrationHelperStubs, 'migrateToV2')
         .mockReturnValueOnce(versionTwo)
@@ -200,6 +204,7 @@ describe('migration', () => {
 
       expectMetadataUpdate()
       expect(updatedDefinition).toEqual(versionTwo)
+      expect(auditMock).toHaveBeenCalledTimes(1)
     })
 
     it('should do nothing if definition is v2 already', async () => {
