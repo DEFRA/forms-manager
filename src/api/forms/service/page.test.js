@@ -248,6 +248,7 @@ describe('Page service', () => {
       const spy = jest
         .spyOn(definitionService, 'getFormDefinition')
         .mockResolvedValue(updatedDefinition)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       const page = await patchFieldsOnDraftDefinitionPage(
         '123',
@@ -257,6 +258,7 @@ describe('Page service', () => {
       )
 
       expect(page).toEqual(expectedPage)
+      expect(publishEventSpy).toHaveBeenCalled()
 
       spy.mockRestore()
     })
@@ -328,6 +330,13 @@ describe('Page service', () => {
         ...definition,
         pages: [pageOne, pageTwo]
       })
+      const definition2 = buildDefinition({
+        ...definition,
+        pages: [
+          pageOne,
+          buildQuestionPage({ ...pageTwo, title: 'Updated Title' })
+        ]
+      })
 
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
@@ -335,6 +344,10 @@ describe('Page service', () => {
       const pageFieldsForConflict = /** @satisfies {PatchPageFields} */ {
         title: 'Updated Title'
       }
+      jest.mocked(formDefinition.updatePageFields).mockResolvedValueOnce({
+        before: definition1,
+        after: definition2
+      })
 
       const res = await patchFieldsOnDraftDefinitionPage(
         '123',

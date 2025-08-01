@@ -120,7 +120,7 @@ export async function patchFieldsOnDraftDefinitionPage(
     }
 
     await session.withTransaction(async () => {
-      await formDefinition.updatePageFields(
+      const formDefinitionStates = await formDefinition.updatePageFields(
         formId,
         pageId,
         pageFieldsToUpdate,
@@ -128,9 +128,7 @@ export async function patchFieldsOnDraftDefinitionPage(
       )
 
       page = await getFormDefinitionPage(formId, pageId, session)
-
-      await formMetadata.updateAudit(formId, author, session)
-      // TODO: Use updateAuditAndPublish
+      await updateAuditAndPublish(formId, author, session, formDefinitionStates)
     })
   } catch (err) {
     logger.error(
