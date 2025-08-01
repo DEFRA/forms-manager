@@ -6,6 +6,7 @@ import {
   formDraftCreatedFromLiveMapper,
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
+  formMigratedMapper,
   formTitleUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
@@ -79,6 +80,18 @@ export async function publishDraftCreatedFromLiveEvent(
     createdAt,
     createdBy
   )
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * Publishes a form migrated event
+ * @param {string} formId
+ * @param {Date} createdAt
+ * @param {AuditUser} createdBy
+ */
+export async function publishFormMigratedEvent(formId, createdAt, createdBy) {
+  const auditMessage = formMigratedMapper(formId, createdAt, createdBy)
 
   return validateAndPublishEvent(auditMessage)
 }
