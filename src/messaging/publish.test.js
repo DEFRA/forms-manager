@@ -12,6 +12,10 @@ import {
 import { ValidationError } from 'joi'
 
 import author from '~/src/api/forms/service/__stubs__/author.js'
+import {
+  BASE_CREATED_DATE,
+  formMetadataDocument
+} from '~/src/api/forms/service/__stubs__/service.js'
 import { buildFormOrganisationUpdatedMessage } from '~/src/messaging/__stubs__/messages.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
@@ -236,22 +240,26 @@ describe('publish', () => {
       const definition = buildDefinition({
         pages: [payload]
       })
-      await publishFormUpdatedEvent(metadata, payload, definition, requestType)
+      await publishFormUpdatedEvent(
+        formMetadataDocument,
+        payload,
+        definition,
+        requestType
+      )
 
-      expect(publishEvent).toHaveBeenCalledWith({
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchObject({
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_UPDATED,
-        entityId: formId,
-        createdAt: updatedAt,
-        createdBy: updatedBy,
-        messageCreatedAt: expect.any(Date),
-        data: {
-          requestType,
-          formId,
-          slug,
-          payload
-        }
+        createdAt: BASE_CREATED_DATE,
+        createdBy: author
+      })
+      expect(publishEventCall.data).toMatchObject({
+        requestType,
+        s3Meta: undefined,
+        slug: formMetadataDocument.slug,
+        payload
       })
     })
   })

@@ -1,6 +1,7 @@
 import { messageSchema } from '@defra/forms-model'
 import Joi from 'joi'
 
+import { mapForm } from '~/src/api/forms/service/shared.js'
 import {
   formCreatedEventMapper,
   formDraftCreatedFromLiveMapper,
@@ -130,23 +131,25 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 
 /**
  *
- * @param {FormMetadata} metadata
+ * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
  * @param {unknown} payload
  * @param {FormDefinition} definition
  * @param {FormDefinitionRequestType} requestType
  */
 export async function publishFormUpdatedEvent(
-  metadata,
+  metadataDocument,
   payload,
   definition,
   requestType
 ) {
   const s3Meta = await saveToS3(definition)
+  const metadata = mapForm(metadataDocument)
   const auditMessage = formUpdatedMapper(metadata, payload, requestType, s3Meta)
 
   return validateAndPublishEvent(auditMessage)
 }
 
 /**
- * @import { FormDefinition, FormDefinitionRequestType, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { FormMetadataAuthor, FormMetadataDocument, FormDefinition, FormDefinitionRequestType, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
  */
