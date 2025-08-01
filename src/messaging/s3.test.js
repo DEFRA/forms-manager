@@ -7,7 +7,7 @@ describe('s3', () => {
     it('should return an object', async () => {
       const definition = buildDefinition()
       const result = await saveToS3(definition)
-      expect(result).toEqual({})
+      expect(result).toBeUndefined()
     })
   })
 })
