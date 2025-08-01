@@ -1,9 +1,21 @@
-import { buildMetaData } from '@defra/forms-model/stubs'
+import {
+  AuditEventMessageCategory,
+  AuditEventMessageSchemaVersion,
+  AuditEventMessageType,
+  FormDefinitionRequestType
+} from '@defra/forms-model'
+import {
+  buildMetaData,
+  buildQuestionPage,
+  buildTextFieldComponent
+} from '@defra/forms-model/stubs'
 
+import author from '~/src/api/forms/service/__stubs__/author.js'
 import {
   formOrganisationUpdatedMapper,
   formTeamEmailUpdatedMapper,
-  formTeamNameUpdatedMapper
+  formTeamNameUpdatedMapper,
+  formUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 
 describe('form-events', () => {
@@ -22,6 +34,53 @@ describe('form-events', () => {
   describe('formTeamEmailUpdatedMapper', () => {
     it('should fail if teamEmail is missing', () => {
       expect(() => formTeamEmailUpdatedMapper(buildMetaData(), {})).toThrow()
+    })
+  })
+
+  describe('formUpdatedMapper', () => {
+    const formId = '6883d8667a2a64da10af4312'
+    const updatedAt = new Date('2025-08-31')
+
+    const metadata = buildMetaData({
+      id: formId,
+      updatedAt,
+      updatedBy: author,
+      slug: 'my-form'
+    })
+    it('should map a payload into a FORM_UPDATED event', () => {
+      const payload = buildQuestionPage({
+        title: 'Question page',
+        components: [
+          buildTextFieldComponent({
+            title: 'What question would you like to ask?'
+          })
+        ]
+      })
+      const requestType = FormDefinitionRequestType.CREATE_PAGE
+      const s3Meta = {
+        fileId: '1111111111',
+        filename: '6883d8667a2a64da10af4312.json',
+        s3Key: formId
+      }
+      expect(formUpdatedMapper(metadata, payload, requestType, s3Meta)).toEqual(
+        {
+          schemaVersion: AuditEventMessageSchemaVersion.V1,
+          category: AuditEventMessageCategory.FORM,
+          type: AuditEventMessageType.FORM_UPDATED,
+          entityId: formId,
+          createdAt: updatedAt,
+          createdBy: author,
+          messageCreatedAt: expect.any(Date),
+          data: {
+            formId,
+            slug: 'my-form',
+            fileId: '1111111111',
+            filename: '6883d8667a2a64da10af4312.json',
+            s3Key: formId,
+            payload
+          }
+        }
+      )
     })
   })
 })
