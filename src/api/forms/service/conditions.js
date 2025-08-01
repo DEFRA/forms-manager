@@ -29,6 +29,7 @@ export async function addConditionToDraftFormDefinition(
       )
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
 
       return returnedList
     })
@@ -75,6 +76,7 @@ export async function updateConditionOnDraftFormDefinition(
       )
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
 
       return returnedCondition
     })
@@ -114,6 +116,7 @@ export async function removeConditionOnDraftFormDefinition(
       await formDefinition.deleteCondition(formId, conditionId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
     })
 
     logger.info(`Removed condition ${conditionId} for form ID ${formId}`)

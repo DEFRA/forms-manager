@@ -6,7 +6,8 @@ import {
   formDraftCreatedFromLiveMapper,
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
-  formTitleUpdatedMapper
+  formTitleUpdatedMapper,
+  formUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 
@@ -114,5 +115,30 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 }
 
 /**
- * @import { AuditEventMessageType, FormDraftDeletedMessage, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {AuditUser} author
+ * @param {Date} createdAt
+ * @param {FormDefinition} formDefinitionOld
+ * @param {FormDefinition} formDefinitionNew
+ */
+export async function publishFormUpdatedEvent(
+  metadata,
+  author,
+  createdAt,
+  formDefinitionOld,
+  formDefinitionNew
+) {
+  const auditMessage = formUpdatedMapper(
+    metadata,
+    author,
+    createdAt,
+    formDefinitionOld,
+    formDefinitionNew
+  )
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * @import { FormDefinition, AuditEventMessageType, FormDraftDeletedMessage, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
  */

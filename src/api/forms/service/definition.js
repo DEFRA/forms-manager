@@ -4,6 +4,7 @@ import Boom from '@hapi/boom'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { updateAuditAndPublish } from '~/src/api/forms/service/audit.js'
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
@@ -41,7 +42,6 @@ export function getFormDefinition(
   state = FormStatus.Draft,
   session = undefined
 ) {
-  // TODO: if form def is v1 and target v2 - use decorator
   return formDefinition.get(formId, state, session)
 }
 
@@ -73,8 +73,21 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       await session.withTransaction(async () => {
         logger.info(`Updating form definition (draft) for form ID ${formId}`)
 
-        await formDefinition.update(formId, definition, session, schema)
-        await formMetadata.updateAudit(formId, author, session)
+        const formDefinitionStates = await formDefinition.update(
+          formId,
+          definition,
+          session,
+          schema
+        )
+
+        await updateAuditAndPublish(
+          formId,
+          author,
+          session,
+          formDefinitionStates,
+          new Date(),
+          false // we want to save the whole form into S3 for an update draft form
+        )
       })
     } finally {
       await session.endSession()
@@ -291,6 +304,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
       )
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: add page reorder audit
 
       return reorderedForm
     })
@@ -346,6 +360,7 @@ export async function reorderDraftFormDefinitionComponents(
       )
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: add reorder audit
 
       return reorderedForm
     })

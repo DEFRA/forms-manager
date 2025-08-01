@@ -3,6 +3,7 @@ import {
   AuditEventMessageSchemaVersion,
   AuditEventMessageType
 } from '@defra/forms-model'
+import { diff } from 'json-diff-ts'
 
 import {
   createFormMessageDataBase,
@@ -377,14 +378,42 @@ export function formDraftDeletedMapper(metadata, author) {
     messageCreatedAt: auditTime,
     createdBy: author,
     entityId: metadata.id,
-    data: {
-      formId: metadata.id,
-      slug: metadata.slug
-    }
+    data: createFormMessageDataBase(metadata)
   }
 }
 
 /**
- * @import { FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage } from '@defra/forms-model'
+ *
+ * @param {FormMetadata} metadata
+ * @param {AuditUser} createdBy
+ * @param {Date} createdAt
+ * @param {FormDefinition} formDefinitionBefore
+ * @param {FormDefinition} formDefinitionAfter
+ * @returns {FormUpdatedMessage}
+ */
+export function formUpdatedMapper(
+  metadata,
+  createdBy,
+  createdAt,
+  formDefinitionBefore,
+  formDefinitionAfter
+) {
+  const auditMessageBase = createV1MessageBase(metadata, metadata)
+  const changeSet = diff(formDefinitionBefore, formDefinitionAfter)
+
+  return {
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_UPDATED,
+    ...auditMessageBase,
+    createdBy,
+    createdAt,
+    data: {
+      ...createFormMessageDataBase(metadata),
+      changeSet
+    }
+  }
+}
+/**
+ * @import { FormDefinition, FormDraftDeletedMessage, FormUpdatedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

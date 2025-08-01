@@ -6,6 +6,7 @@ import {
   getPage,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
+import { updateAuditAndPublish } from '~/src/api/forms/service/audit.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
@@ -64,9 +65,8 @@ export async function createPageOnDraftDefinition(formId, page, author) {
 
   try {
     await session.withTransaction(async () => {
-      await formDefinition.addPage(formId, page, session)
-
-      await formMetadata.updateAudit(formId, author, session)
+      const formStates = await formDefinition.addPage(formId, page, session)
+      await updateAuditAndPublish(formId, author, session, formStates)
     })
   } catch (err) {
     logger.error(
@@ -130,6 +130,7 @@ export async function patchFieldsOnDraftDefinitionPage(
       page = await getFormDefinitionPage(formId, pageId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
     })
   } catch (err) {
     logger.error(
@@ -160,6 +161,7 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
       await formDefinition.deletePage(formId, pageId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: Use updateAuditAndPublish
     })
   } catch (err) {
     logger.error(
