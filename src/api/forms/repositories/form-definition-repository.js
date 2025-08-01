@@ -259,7 +259,6 @@ export async function addPage(formId, page, session) {
     modifyAddPage(draft, page, getPageInsertPosition(draft))
 
   const formStates = await modifyDraft(formId, callback, session)
-  logger.info(JSON.stringify(formStates))
 
   logger.info(`Added page on form ID ${formId}`)
 
