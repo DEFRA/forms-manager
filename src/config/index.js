@@ -196,7 +196,7 @@ export const config = convict({
     doc: 'S3 bucket name',
     format: String,
     default: '',
-    env: 'S3_BUCKET'
+    env: 'FORM_DEF_BUCKET_NAME'
   }
 })
 
