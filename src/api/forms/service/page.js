@@ -1,7 +1,10 @@
-import { ApiErrorCode, FormStatus } from '@defra/forms-model'
+import {
+  ApiErrorCode,
+  FormDefinitionRequestType,
+  FormStatus
+} from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
   getPage,
   uniquePathGate
@@ -66,7 +69,14 @@ export async function createPageOnDraftDefinition(formId, page, author) {
   try {
     await session.withTransaction(async () => {
       const formStates = await formDefinition.addPage(formId, page, session)
-      await updateAuditAndPublish(formId, author, session, formStates)
+      await updateAuditAndPublish(
+        formId,
+        FormDefinitionRequestType.CREATE_PAGE,
+        { page },
+        author,
+        session,
+        formStates
+      )
     })
   } catch (err) {
     logger.error(
@@ -128,7 +138,14 @@ export async function patchFieldsOnDraftDefinitionPage(
       )
 
       page = await getFormDefinitionPage(formId, pageId, session)
-      await updateAuditAndPublish(formId, author, session, formDefinitionStates)
+      await updateAuditAndPublish(
+        formId,
+        FormDefinitionRequestType.UPDATE_PAGE_FIELDS,
+        { pageFieldsToUpdate },
+        author,
+        session,
+        formDefinitionStates
+      )
     })
   } catch (err) {
     logger.error(
@@ -162,7 +179,14 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
         session
       )
 
-      await updateAuditAndPublish(formId, author, session, formDefinitionStates)
+      await updateAuditAndPublish(
+        formId,
+        FormDefinitionRequestType.DELETE_PAGE,
+        { pageId },
+        author,
+        session,
+        formDefinitionStates
+      )
     })
   } catch (err) {
     logger.error(

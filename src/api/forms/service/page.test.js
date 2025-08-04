@@ -1,11 +1,12 @@
-import Boom from '@hapi/boom'
-import { pino } from 'pino'
-
+import { FormDefinitionRequestType } from '@defra/forms-model'
 import {
   buildDefinition,
   buildQuestionPage,
   buildSummaryPage
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { pino } from 'pino'
+
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
@@ -115,6 +116,7 @@ describe('Page service', () => {
       )
       const dbOperationArgs = dbMetadataSpy.mock.calls[0]
       const [formId1, page1] = dbDefinitionSpy.mock.calls[0]
+      const [message] = publishEventSpy.mock.calls[0]
 
       expect(formId1).toBe(id)
       expect(page1).toMatchObject({
@@ -128,6 +130,12 @@ describe('Page service', () => {
         id: expect.any(String)
       })
       expect(publishEventSpy).toHaveBeenCalled()
+      expect(message.data?.payload).toEqual({
+        page: formDefinitionPageCustomisedTitle
+      })
+      expect(message.data?.requestType).toBe(
+        FormDefinitionRequestType.CREATE_PAGE
+      )
     })
 
     it('should create a new page when a summary page does not exist', async () => {
@@ -218,7 +226,7 @@ describe('Page service', () => {
   })
 
   describe('patchFieldsOnDraftDefinitionPage', () => {
-    const initialPage = buildQuestionPage()
+    const initialPage = buildQuestionPage({})
     const pageFields = /** @satisfies {PatchPageFields} */ {
       title: 'Updated Title',
       path: '/updated-title'
@@ -256,9 +264,16 @@ describe('Page service', () => {
         pageFields,
         author
       )
+      const [message] = publishEventSpy.mock.calls[0]
 
       expect(page).toEqual(expectedPage)
       expect(publishEventSpy).toHaveBeenCalled()
+      expect(message.data?.payload).toEqual({
+        pageFieldsToUpdate: pageFields
+      })
+      expect(message.data?.requestType).toBe(
+        FormDefinitionRequestType.UPDATE_PAGE_FIELDS
+      )
 
       spy.mockRestore()
     })
@@ -433,6 +448,7 @@ describe('Page service', () => {
 
       expect(dbDefinitionSpy).toHaveBeenCalled()
       const [calledFormId, calledPageId] = dbDefinitionSpy.mock.calls[0]
+      const [message] = publishEventSpy.mock.calls[0]
 
       expect([calledFormId, calledPageId]).toEqual([id, pageId])
       const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
@@ -440,6 +456,11 @@ describe('Page service', () => {
 
       expect(metaUpdateOperations).toEqual(author)
       expect(publishEventSpy).toHaveBeenCalled()
+
+      expect(message.data?.payload).toEqual({ pageId })
+      expect(message.data?.requestType).toBe(
+        FormDefinitionRequestType.DELETE_PAGE
+      )
     })
 
     it('should surface any errors', async () => {

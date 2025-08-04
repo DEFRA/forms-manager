@@ -1,4 +1,9 @@
-import { buildDefinition, buildMetaData } from '@defra/forms-model/stubs'
+import { FormDefinitionRequestType } from '@defra/forms-model'
+import {
+  buildDefinition,
+  buildMetaData,
+  buildQuestionPage
+} from '@defra/forms-model/stubs'
 
 import {
   _id,
@@ -25,26 +30,29 @@ describe('audit', () => {
     title: 'Form name before',
     slug: 'form-name-before'
   })
+  const newPage = buildQuestionPage({})
+  const before = buildDefinition()
+  const after = buildDefinition({
+    ...before,
+    pages: [newPage]
+  })
+
+  const expectedMeta = buildMetaData({
+    id: metadataId,
+    title: 'Form name before',
+    slug: 'form-name-before'
+  })
   beforeEach(() => {
     jest.mocked(updateAudit).mockResolvedValue(metadataDocument)
   })
   describe('updateAuditAndPublish', () => {
     it('should update audit and publish', async () => {
-      const before = buildDefinition({
-        name: 'Form name before'
-      })
-      const after = buildDefinition({
-        ...before,
-        name: 'Form name after'
-      })
-
-      const expectedMeta = buildMetaData({
-        id: metadataId,
-        title: 'Form name before',
-        slug: 'form-name-before'
-      })
       await updateAuditAndPublish(
         metadataId,
+        FormDefinitionRequestType.CREATE_PAGE,
+        {
+          page: newPage
+        },
         author,
         mockSession,
         { before, after },
@@ -59,6 +67,10 @@ describe('audit', () => {
       )
       expect(publishFormUpdatedEvent).toHaveBeenCalledWith(
         expectedMeta,
+        FormDefinitionRequestType.CREATE_PAGE,
+        {
+          page: newPage
+        },
         author,
         fakeUpdatedAt,
         before,
@@ -67,16 +79,12 @@ describe('audit', () => {
     })
 
     it('should handle auditDiff = true', async () => {
-      const before = buildDefinition({
-        name: 'Form name before'
-      })
-      const after = buildDefinition({
-        ...before,
-        name: 'Form name after'
-      })
-
       await updateAuditAndPublish(
         metadataId,
+        FormDefinitionRequestType.CREATE_PAGE,
+        {
+          page: newPage
+        },
         author,
         mockSession,
         { before, after },

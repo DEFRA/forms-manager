@@ -11,6 +11,8 @@ import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 
 /**
  * @param {string} formId
+ * @param {FormDefinitionRequestType} requestType
+ * @param {unknown} payload
  * @param {AuditUser} author
  * @param {ClientSession} session
  * @param {StateChange<FormDefinition>} formDefinitionStates
@@ -20,6 +22,8 @@ import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
  */
 export async function updateAuditAndPublish(
   formId,
+  requestType,
+  payload,
   author,
   session,
   formDefinitionStates,
@@ -32,6 +36,8 @@ export async function updateAuditAndPublish(
   if (auditDiff) {
     await publishFormUpdatedEvent(
       metadata,
+      requestType,
+      payload,
       author,
       date,
       formDefinitionStates.before,
@@ -43,5 +49,5 @@ export async function updateAuditAndPublish(
 
 /**
  * @import { ClientSession } from 'mongodb'
- * @import { AuditUser, FormDefinition } from '@defra/forms-model'
+ * @import { AuditUser, FormDefinition, FormDefinitionRequestType } from '@defra/forms-model'
  */

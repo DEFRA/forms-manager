@@ -1,4 +1,8 @@
-import { Engine, FormStatus } from '@defra/forms-model'
+import {
+  Engine,
+  FormDefinitionRequestType,
+  FormStatus
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
@@ -82,6 +86,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
         await updateAuditAndPublish(
           formId,
+          FormDefinitionRequestType.UPDATE_DRAFT,
+          {},
           author,
           session,
           formDefinitionStates,
