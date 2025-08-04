@@ -1,7 +1,8 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
-  AuditEventMessageType
+  AuditEventMessageType,
+  FormDefinitionRequestType
 } from '@defra/forms-model'
 import {
   buildDefinition,
@@ -105,14 +106,24 @@ describe('form-events', () => {
       title: 'My new question page'
     })
 
-    it('should map a form updated', () => {
+    it('should map add a page', () => {
       const formCreatedAt = new Date('2024-07-30')
+      const formDefinition = buildDefinition()
+
+      const newFormDefinition = buildDefinition({
+        ...formDefinition,
+        pages: [newPage]
+      })
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        FormDefinitionRequestType.CREATE_PAGE,
+        {
+          page: newPage
+        },
         author,
         formCreatedAt,
-        buildDefinition({ name: 'Old form' }),
-        buildDefinition({ name: 'New form' })
+        formDefinition,
+        newFormDefinition
       )
       expect(formUpdatedEvent).toEqual({
         schemaVersion: AuditEventMessageSchemaVersion.V1,
@@ -125,12 +136,28 @@ describe('form-events', () => {
         data: {
           formId,
           slug,
+          requestType: FormDefinitionRequestType.CREATE_PAGE,
+          payload: {
+            page: newPage
+          },
           changeSet: [
             {
               type: 'UPDATE',
-              key: 'name',
-              oldValue: 'Old form',
-              value: 'New form'
+              key: 'pages',
+              embeddedKey: '$index',
+              changes: [
+                {
+                  key: '0',
+                  type: 'ADD',
+                  value: {
+                    components: [],
+                    id: 'b2a5f4e5-142f-4ae6-b7ce-812968f0785c',
+                    next: [],
+                    path: '/page-one',
+                    title: 'My new question page'
+                  }
+                }
+              ]
             }
           ]
         }
@@ -140,11 +167,22 @@ describe('form-events', () => {
     it('should map a page updated', () => {
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        FormDefinitionRequestType.UPDATE_PAGE_FIELDS,
+        {
+          page: {
+            title: 'My updated question page'
+          }
+        },
         updatedBy,
         updatedAt,
         buildDefinition({ pages: [oldPageTitleChange] }),
         buildDefinition({ pages: [updatedPageTitleChange] })
       )
+      expect(formUpdatedEvent.data.payload).toEqual({
+        page: {
+          title: 'My updated question page'
+        }
+      })
       expect(formUpdatedEvent.data.changeSet).toEqual([
         {
           type: 'UPDATE',
@@ -171,11 +209,18 @@ describe('form-events', () => {
     it('should map a component updated', () => {
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        FormDefinitionRequestType.UPDATE_COMPONENT,
+        {
+          component: updatedPageWithComponent
+        },
         updatedBy,
         updatedAt,
         buildDefinition({ pages: [oldPageWithComponentChange] }),
         buildDefinition({ pages: [updatedPageWithComponent] })
       )
+      expect(formUpdatedEvent.data.payload).toEqual({
+        component: updatedPageWithComponent
+      })
       expect(formUpdatedEvent.data.changeSet).toEqual([
         {
           type: 'UPDATE',
@@ -215,6 +260,10 @@ describe('form-events', () => {
     it('should map a new page added', () => {
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        FormDefinitionRequestType.CREATE_PAGE,
+        {
+          page: newPage
+        },
         updatedBy,
         updatedAt,
         buildDefinition({ pages: [] }),
@@ -237,8 +286,15 @@ describe('form-events', () => {
     })
 
     it('should map a page reorder', () => {
+      const payload = {
+        pages: [updatedPageWithComponent, updatedPageTitleChange, newPage].map(
+          (page) => page.id
+        )
+      }
       const formUpdatedEvent = formUpdatedMapper(
         metadata,
+        FormDefinitionRequestType.REORDER_PAGES,
+        payload,
         updatedBy,
         updatedAt,
         buildDefinition({
@@ -248,6 +304,7 @@ describe('form-events', () => {
           pages: [updatedPageWithComponent, updatedPageTitleChange, newPage]
         })
       )
+      expect(formUpdatedEvent.data.payload).toEqual(payload)
       expect(formUpdatedEvent.data.changeSet).toHaveLength(1)
     })
   })
