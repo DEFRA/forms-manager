@@ -19,6 +19,7 @@ import {
   publishDraftCreatedFromLiveEvent,
   publishFormCreatedEvent,
   publishFormDraftDeletedEvent,
+  publishFormMigratedEvent,
   publishFormTitleUpdatedEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
@@ -203,6 +204,27 @@ describe('publish', () => {
           formId,
           slug
         }
+      })
+    })
+  })
+
+  describe('publishFormMigratedEvent', () => {
+    it('should publish FORM_MIGRATED event', async () => {
+      const response = await publishFormMigratedEvent(
+        formId,
+        updatedAt,
+        updatedBy
+      )
+
+      expect(response?.MessageId).toBe(messageId)
+      expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_MIGRATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy
       })
     })
   })

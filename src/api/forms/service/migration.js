@@ -14,6 +14,7 @@ import {
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { publishFormMigratedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -96,6 +97,8 @@ export async function migrateDefinitionToV2(formId, author) {
       )
 
       await formMetadata.updateAudit(formId, author, session)
+
+      await publishFormMigratedEvent(formId, new Date(), author)
     })
   } catch (err) {
     logger.error(

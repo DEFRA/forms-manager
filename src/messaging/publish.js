@@ -6,6 +6,7 @@ import {
   formDraftCreatedFromLiveMapper,
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
+  formMigratedMapper,
   formTitleUpdatedMapper,
   formUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
@@ -85,6 +86,18 @@ export async function publishDraftCreatedFromLiveEvent(
 }
 
 /**
+ * Publishes a form migrated event
+ * @param {string} formId
+ * @param {Date} createdAt
+ * @param {AuditUser} createdBy
+ */
+export async function publishFormMigratedEvent(formId, createdAt, createdBy) {
+  const auditMessage = formMigratedMapper(formId, createdAt, createdBy)
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
  * @param {AuditMessage[]} messages
  * @returns {Promise<{ messageId?: string; type: AuditEventMessageType }[]>}
  */
@@ -144,7 +157,6 @@ export async function publishFormUpdatedEvent(
 
   return validateAndPublishEvent(auditMessage)
 }
-
 /**
  * @import { FormDefinitionRequestType, FormDefinition, AuditEventMessageType, FormDraftDeletedMessage, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
  */
