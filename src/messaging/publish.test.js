@@ -1,9 +1,14 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
-  AuditEventMessageType
+  AuditEventMessageType,
+  FormDefinitionRequestType
 } from '@defra/forms-model'
-import { buildDefinition, buildMetaData } from '@defra/forms-model/stubs'
+import {
+  buildDefinition,
+  buildMetaData,
+  buildQuestionPage
+} from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
 import author from '~/src/api/forms/service/__stubs__/author.js'
@@ -205,12 +210,26 @@ describe('publish', () => {
   describe('publishFormUpdatedEvent', () => {
     it('should publish a FORM_UPDATED event', async () => {
       const auditDate = new Date('2025-07-30')
+      const formDefinition = buildDefinition()
+      const newPage = buildQuestionPage({
+        id: 'b2a5f4e5-142f-4ae6-b7ce-812968f0785c',
+        title: 'My new question page'
+      })
+      const newFormDefinition = buildDefinition({
+        ...formDefinition,
+        pages: [newPage]
+      })
+
       const response = await publishFormUpdatedEvent(
         metadata,
+        FormDefinitionRequestType.CREATE_PAGE,
+        {
+          page: newPage
+        },
         author,
         auditDate,
-        buildDefinition({ name: 'Old form' }),
-        buildDefinition({ name: 'New form' })
+        formDefinition,
+        newFormDefinition
       )
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
@@ -224,12 +243,28 @@ describe('publish', () => {
         data: {
           formId,
           slug,
+          requestType: FormDefinitionRequestType.CREATE_PAGE,
+          payload: {
+            page: newPage
+          },
           changeSet: [
             {
               type: 'UPDATE',
-              key: 'name',
-              oldValue: 'Old form',
-              value: 'New form'
+              key: 'pages',
+              embeddedKey: '$index',
+              changes: [
+                {
+                  key: '0',
+                  type: 'ADD',
+                  value: {
+                    components: [],
+                    id: 'b2a5f4e5-142f-4ae6-b7ce-812968f0785c',
+                    next: [],
+                    path: '/page-one',
+                    title: 'My new question page'
+                  }
+                }
+              ]
             }
           ]
         }

@@ -116,6 +116,8 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 
 /**
  * @param {FormMetadata} metadata
+ * @param {FormDefinitionRequestType} requestType
+ * @param {unknown} payload
  * @param {AuditUser} author
  * @param {Date} createdAt
  * @param {FormDefinition} formDefinitionOld
@@ -123,6 +125,8 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
  */
 export async function publishFormUpdatedEvent(
   metadata,
+  requestType,
+  payload,
   author,
   createdAt,
   formDefinitionOld,
@@ -130,6 +134,8 @@ export async function publishFormUpdatedEvent(
 ) {
   const auditMessage = formUpdatedMapper(
     metadata,
+    requestType,
+    payload,
     author,
     createdAt,
     formDefinitionOld,
@@ -140,5 +146,5 @@ export async function publishFormUpdatedEvent(
 }
 
 /**
- * @import { FormDefinition, AuditEventMessageType, FormDraftDeletedMessage, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { FormDefinitionRequestType, FormDefinition, AuditEventMessageType, FormDraftDeletedMessage, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
  */
