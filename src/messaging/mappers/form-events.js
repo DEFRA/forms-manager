@@ -3,6 +3,7 @@ import {
   AuditEventMessageSchemaVersion,
   AuditEventMessageType
 } from '@defra/forms-model'
+import { diff } from 'json-diff-ts'
 
 import {
   createFormMessageDataBase,
@@ -377,9 +378,51 @@ export function formDraftDeletedMapper(metadata, author) {
     messageCreatedAt: auditTime,
     createdBy: author,
     entityId: metadata.id,
+    data: createFormMessageDataBase(metadata)
+  }
+}
+
+/**
+ *
+ * @param {FormMetadata} metadata
+ * @param {FormDefinitionRequestType} requestType
+ * @param {unknown} payload
+ * @param {AuditUser} createdBy
+ * @param {Date} createdAt
+ * @param {FormDefinition} formDefinitionBefore
+ * @param {FormDefinition} formDefinitionAfter
+ * @returns {FormUpdatedMessage}
+ */
+export function formUpdatedMapper(
+  metadata,
+  requestType,
+  payload,
+  createdBy,
+  createdAt,
+  formDefinitionBefore,
+  formDefinitionAfter
+) {
+  const auditMessageBase = createV1MessageBase(metadata, metadata)
+
+  /**
+   * This function will create a change set for the before/after forms
+   * Note - it will not show any change set for a change of order - another mapper will
+   * be used for that
+   * @type {IChange[]}
+   */
+  const changeSet = diff(formDefinitionBefore, formDefinitionAfter)
+
+  return {
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_UPDATED,
+    ...auditMessageBase,
+    createdBy,
+    createdAt,
     data: {
-      formId: metadata.id,
-      slug: metadata.slug
+      ...createFormMessageDataBase(metadata),
+      requestType,
+      payload,
+      changeSet
     }
   }
 }
@@ -403,6 +446,7 @@ export function formMigratedMapper(formId, createdAt, createdBy) {
 }
 
 /**
- * @import { FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage } from '@defra/forms-model'
+ * @import { FormDefinitionRequestType, FormDefinition, FormDraftDeletedMessage, FormUpdatedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { IChange } from 'json-diff-ts'
  */

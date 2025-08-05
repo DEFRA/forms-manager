@@ -324,6 +324,7 @@ export async function insertDraft(
  * @param {UpdateCallback} updateCallback - the update callback
  * @param {ClientSession} session - the mongo transaction session
  * @param {ObjectSchema<FormDefinition>} schema - the schema to use (defaults to V2)
+ * @returns {Promise<{ before: FormDefinition; after: FormDefinition }>}
  */
 export async function modifyDraft(
   formId,
@@ -346,7 +347,14 @@ export async function modifyDraft(
     throw Boom.notFound(`Draft not found in document '${formId}'`)
   }
 
-  // Apply the update
+  const originalFormDefinition = /** @type {FormDefinition} */ (
+    structuredClone(document.draft)
+  )
+
+  /**
+   * Mutate document
+   * @type {FormDefinition}
+   */
   const updated = updateCallback(document.draft)
 
   // Validate form definition
@@ -370,7 +378,10 @@ export async function modifyDraft(
     throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
   }
 
-  return updateResult
+  return {
+    before: originalFormDefinition,
+    after: updateResult.draft
+  }
 }
 
 /**
