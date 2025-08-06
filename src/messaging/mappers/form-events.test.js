@@ -1,6 +1,7 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
+  AuditEventMessageSource,
   AuditEventMessageType,
   FormDefinitionRequestType
 } from '@defra/forms-model'
@@ -47,6 +48,31 @@ describe('form-events', () => {
       updatedBy: author,
       slug: 'my-form'
     })
+    it('should map a payload into a FORM_UPDATED replaced event', () => {
+      const requestType = FormDefinitionRequestType.REPLACE_DRAFT
+      const s3Meta = {
+        fileId: '1111111111',
+        filename: '6883d8667a2a64da10af4312.json',
+        s3Key: formId
+      }
+      expect(formUpdatedMapper(metadata, requestType, { s3Meta })).toEqual({
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        source: AuditEventMessageSource.FORMS_MANAGER,
+        type: AuditEventMessageType.FORM_UPDATED,
+        entityId: formId,
+        createdAt: updatedAt,
+        createdBy: author,
+        messageCreatedAt: expect.any(Date),
+        data: {
+          requestType,
+          s3Meta,
+          formId,
+          slug: 'my-form'
+        }
+      })
+    })
+
     it('should map a payload into a FORM_UPDATED event', () => {
       const payload = buildQuestionPage({
         title: 'Question page',
@@ -57,29 +83,23 @@ describe('form-events', () => {
         ]
       })
       const requestType = FormDefinitionRequestType.CREATE_PAGE
-      const s3Meta = {
-        fileId: '1111111111',
-        filename: '6883d8667a2a64da10af4312.json',
-        s3Key: formId
-      }
-      expect(formUpdatedMapper(metadata, payload, requestType, s3Meta)).toEqual(
-        {
-          schemaVersion: AuditEventMessageSchemaVersion.V1,
-          category: AuditEventMessageCategory.FORM,
-          type: AuditEventMessageType.FORM_UPDATED,
-          entityId: formId,
-          createdAt: updatedAt,
-          createdBy: author,
-          messageCreatedAt: expect.any(Date),
-          data: {
-            requestType,
-            s3Meta,
-            formId,
-            slug: 'my-form',
-            payload
-          }
+
+      expect(formUpdatedMapper(metadata, requestType, { payload })).toEqual({
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        source: AuditEventMessageSource.FORMS_MANAGER,
+        type: AuditEventMessageType.FORM_UPDATED,
+        entityId: formId,
+        createdAt: updatedAt,
+        createdBy: author,
+        messageCreatedAt: expect.any(Date),
+        data: {
+          requestType,
+          formId,
+          slug: 'my-form',
+          payload
         }
-      )
+      })
     })
   })
 })
