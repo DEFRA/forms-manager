@@ -4,16 +4,17 @@ import {
   formDefinitionSchema,
   formDefinitionV2Schema
 } from '@defra/forms-model'
-import Boom from '@hapi/boom'
-import { ObjectId } from 'mongodb'
-import { pino } from 'pino'
-
 import {
   buildDefinition,
   buildQuestionPage,
   buildSummaryPage,
   buildTextFieldComponent
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { ObjectId } from 'mongodb'
+import { pino } from 'pino'
+
+import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -94,13 +95,9 @@ describe('Forms service', () => {
   describe('createDraftFromLive', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.createDraftFromLive).mockResolvedValueOnce()
-      jest.mocked(formMetadata.update).mockResolvedValueOnce({
-        acknowledged: true,
-        modifiedCount: 1,
-        matchedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null
-      })
+      jest
+        .mocked(formMetadata.update)
+        .mockResolvedValueOnce(buildMetadataDocument())
     })
 
     it("should throw bad request if there's no live definition", async () => {
@@ -142,13 +139,9 @@ describe('Forms service', () => {
   describe('createLiveFromDraft', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.createLiveFromDraft).mockResolvedValue()
-      jest.mocked(formMetadata.update).mockResolvedValue({
-        acknowledged: true,
-        modifiedCount: 1,
-        matchedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null
-      })
+      jest
+        .mocked(formMetadata.update)
+        .mockResolvedValue(buildMetadataDocument())
     })
 
     it('should create a live state from existing draft form V1', async () => {
@@ -329,7 +322,7 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.update).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue(buildDefinition())
       jest.mocked(formTemplates.emptyV2).mockReturnValue(definitionV2)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,

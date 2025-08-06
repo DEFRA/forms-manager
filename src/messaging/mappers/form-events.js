@@ -1,6 +1,7 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
+  AuditEventMessageSource,
   AuditEventMessageType
 } from '@defra/forms-model'
 
@@ -26,6 +27,7 @@ export function formCreatedEventMapper(metadata) {
   return {
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     type: AuditEventMessageType.FORM_CREATED,
     entityId: metadata.id,
     createdAt: metadata.createdAt,
@@ -336,6 +338,7 @@ export function formLiveCreatedFromDraftMapper(formId, createdAt, createdBy) {
   return {
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     type: AuditEventMessageType.FORM_LIVE_CREATED_FROM_DRAFT,
     entityId: formId,
     createdAt,
@@ -354,6 +357,7 @@ export function formDraftCreatedFromLiveMapper(formId, createdAt, createdBy) {
   return {
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     type: AuditEventMessageType.FORM_DRAFT_CREATED_FROM_LIVE,
     entityId: formId,
     createdAt,
@@ -372,6 +376,7 @@ export function formDraftDeletedMapper(metadata, author) {
   return {
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     type: AuditEventMessageType.FORM_DRAFT_DELETED,
     createdAt: auditTime,
     messageCreatedAt: auditTime,
@@ -394,6 +399,7 @@ export function formMigratedMapper(formId, createdAt, createdBy) {
   return {
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     type: AuditEventMessageType.FORM_MIGRATED,
     entityId: formId,
     createdAt,
@@ -403,6 +409,36 @@ export function formMigratedMapper(formId, createdAt, createdBy) {
 }
 
 /**
- * @import { FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage } from '@defra/forms-model'
+ *
+ * @param {FormMetadata} metadata
+ * @param {FormDefinitionRequestType} requestType
+ * @param {{
+ *   payload: unknown;
+ *   s3Meta?: undefined
+ * } | {
+ *   payload?: undefined
+ *   s3Meta: FormDefinitionS3Meta
+ * }} formState
+ * @returns {FormUpdatedMessage}
+ */
+export function formUpdatedMapper(metadata, requestType, { payload, s3Meta }) {
+  const baseData = createFormMessageDataBase(metadata)
+  const auditMessageBase = createV1MessageBase(metadata, {})
+
+  return {
+    category: AuditEventMessageCategory.FORM,
+    type: AuditEventMessageType.FORM_UPDATED,
+    ...auditMessageBase,
+    data: {
+      ...baseData,
+      requestType,
+      s3Meta,
+      payload
+    }
+  }
+}
+
+/**
+ * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

@@ -1,12 +1,18 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
-  AuditEventMessageType
+  AuditEventMessageSource,
+  AuditEventMessageType,
+  FormDefinitionRequestType
 } from '@defra/forms-model'
-import { buildMetaData } from '@defra/forms-model/stubs'
+import { buildMetaData, buildQuestionPage } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
 import author from '~/src/api/forms/service/__stubs__/author.js'
+import {
+  BASE_CREATED_DATE,
+  formMetadataDocument
+} from '~/src/api/forms/service/__stubs__/service.js'
 import { buildFormOrganisationUpdatedMessage } from '~/src/messaging/__stubs__/messages.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
@@ -16,6 +22,7 @@ import {
   publishFormDraftDeletedEvent,
   publishFormMigratedEvent,
   publishFormTitleUpdatedEvent,
+  publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
 
@@ -69,6 +76,7 @@ describe('publish', () => {
 
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -119,6 +127,7 @@ describe('publish', () => {
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
         messageCreatedAt: expect.any(Date),
+        source: AuditEventMessageSource.FORMS_MANAGER,
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_TITLE_UPDATED,
@@ -151,6 +160,7 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -172,6 +182,7 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -188,6 +199,7 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -213,12 +225,36 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_MIGRATED,
         createdAt: updatedAt,
         createdBy: updatedBy
+      })
+    })
+  })
+
+  describe('publishFormUpdatedEvent', () => {
+    it('should publish a FORM_UPDATED event', async () => {
+      const requestType = FormDefinitionRequestType.CREATE_PAGE
+      const payload = buildQuestionPage({})
+      await publishFormUpdatedEvent(formMetadataDocument, payload, requestType)
+
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchObject({
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_UPDATED,
+        createdAt: BASE_CREATED_DATE,
+        createdBy: author
+      })
+      expect(publishEventCall.data).toMatchObject({
+        requestType,
+        s3Meta: undefined,
+        slug: formMetadataDocument.slug,
+        payload
       })
     })
   })

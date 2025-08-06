@@ -1,6 +1,7 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
+  AuditEventMessageSource,
   AuditEventMessageType
 } from '@defra/forms-model'
 
@@ -24,6 +25,7 @@ const dataBase = {
 export function buildFormMessageBase(partialFormMessageBase = {}) {
   return {
     schemaVersion,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     messageCreatedAt,
     createdAt,
     createdBy,
@@ -41,6 +43,7 @@ export function buildFormTitleUpdatedMessage(
   return {
     ...buildFormMessageBase(),
     entityId,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
     type: AuditEventMessageType.FORM_TITLE_UPDATED,
@@ -69,6 +72,7 @@ export function buildFormOrganisationUpdatedMessage(
   return {
     ...buildFormMessageBase(),
     entityId,
+    source: AuditEventMessageSource.FORMS_MANAGER,
     schemaVersion: AuditEventMessageSchemaVersion.V1,
     category: AuditEventMessageCategory.FORM,
     type: AuditEventMessageType.FORM_ORGANISATION_UPDATED,

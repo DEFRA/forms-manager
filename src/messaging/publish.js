@@ -1,13 +1,15 @@
 import { messageSchema } from '@defra/forms-model'
 import Joi from 'joi'
 
+import { mapForm } from '~/src/api/forms/service/shared.js'
 import {
   formCreatedEventMapper,
   formDraftCreatedFromLiveMapper,
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
   formMigratedMapper,
-  formTitleUpdatedMapper
+  formTitleUpdatedMapper,
+  formUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 
@@ -127,5 +129,23 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 }
 
 /**
- * @import { AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ *
+ * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
+ * @param {unknown} payload
+ * @param {FormDefinitionRequestType} requestType
+ */
+export async function publishFormUpdatedEvent(
+  metadataDocument,
+  payload,
+  requestType
+) {
+  const metadata = mapForm(metadataDocument)
+  const auditMessage = formUpdatedMapper(metadata, requestType, { payload })
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * @import { FormMetadataAuthor, FormMetadataDocument, FormDefinition, FormDefinitionRequestType, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
  */
