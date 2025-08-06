@@ -12,7 +12,6 @@ import {
   formUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
-import { saveToS3 } from '~/src/messaging/s3.js'
 
 /**
  * Helper to validate and publish an event
@@ -142,9 +141,8 @@ export async function publishFormUpdatedEvent(
   definition,
   requestType
 ) {
-  const s3Meta = await saveToS3(definition)
   const metadata = mapForm(metadataDocument)
-  const auditMessage = formUpdatedMapper(metadata, payload, requestType, s3Meta)
+  const auditMessage = formUpdatedMapper(metadata, requestType, { payload })
 
   return validateAndPublishEvent(auditMessage)
 }

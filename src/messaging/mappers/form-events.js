@@ -419,7 +419,6 @@ export function formMigratedMapper(formId, createdAt, createdBy) {
  *   payload?: undefined
  *   s3Meta: FormDefinitionS3Meta
  * }} formState
- * @param {FormDefinitionS3Meta} [s3Meta]
  * @returns {FormUpdatedMessage}
  */
 export function formUpdatedMapper(metadata, requestType, { payload, s3Meta }) {

@@ -1,6 +1,7 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
+  AuditEventMessageSource,
   AuditEventMessageType,
   FormDefinitionRequestType
 } from '@defra/forms-model'
@@ -79,6 +80,7 @@ describe('publish', () => {
 
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -129,6 +131,7 @@ describe('publish', () => {
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
         messageCreatedAt: expect.any(Date),
+        source: AuditEventMessageSource.FORMS_MANAGER,
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
         type: AuditEventMessageType.FORM_TITLE_UPDATED,
@@ -161,6 +164,7 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -182,6 +186,7 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -198,6 +203,7 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -223,6 +229,7 @@ describe('publish', () => {
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
