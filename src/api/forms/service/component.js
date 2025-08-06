@@ -78,6 +78,7 @@ export async function createComponentOnDraftDefinition(
       )
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: await publishFormUpdatedEvent
     })
   } catch (err) {
     logger.error(
@@ -128,6 +129,7 @@ export async function updateComponentOnDraftDefinition(
           )
 
         await formMetadata.updateAudit(formId, author, session)
+        // TODO: await publishFormUpdatedEvent
 
         return formDefinitionPageComponent
       }
@@ -173,6 +175,7 @@ export async function deleteComponentOnDraftDefinition(
       await formDefinition.deleteComponent(formId, pageId, componentId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: await publishFormUpdatedEvent
     })
   } catch (err) {
     logger.error(

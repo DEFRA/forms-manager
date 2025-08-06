@@ -53,6 +53,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
       await formDefinition.addPage(formId, summaryWithId, session)
 
       await formMetadata.updateAudit(formId, author, session)
+      // TODO: await publishFormUpdatedEvent
     })
   } catch (err) {
     logger.error(
