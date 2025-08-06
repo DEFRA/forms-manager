@@ -15,6 +15,7 @@ import {
   hasNext,
   isConditionWrapper
 } from '@defra/forms-model'
+import HtmlToMarkdown from 'turndown'
 
 import {
   convertConditionDataToV2,
@@ -110,8 +111,9 @@ export function applyPageTitles(definition) {
 /**
  * @param {FormDefinition} definition
  * @param {ComponentDef} component - ** fn may mutate component **
+ * @param {HtmlToMarkdown} htmlToMarkdown
  */
-export function mapComponent(definition, component) {
+export function mapComponent(definition, component, htmlToMarkdown) {
   let updatedComponent = component
   if (hasFormField(component)) {
     if (hasListField(component)) {
@@ -130,6 +132,14 @@ export function mapComponent(definition, component) {
     }
   }
 
+  if (component.type === ComponentType.Html) {
+    return /** @type {ComponentDef} */ ({
+      ...component,
+      type: ComponentType.Markdown,
+      content: htmlToMarkdown.turndown(component.content)
+    })
+  }
+
   return component
 }
 
@@ -138,13 +148,14 @@ export function mapComponent(definition, component) {
  * @param {FormDefinition} definition
  */
 export function migrateComponentFields(definition) {
+  const htmlToMarkdown = new HtmlToMarkdown()
   const changedPages = definition.pages.map((page) => {
     if (!hasComponentsEvenIfNoNext(page)) {
       return page
     }
 
     const changeComponents = page.components.map((comp) => {
-      return mapComponent(definition, comp)
+      return mapComponent(definition, comp, htmlToMarkdown)
     })
 
     return {
