@@ -5,7 +5,11 @@ import {
   AuditEventMessageType,
   FormDefinitionRequestType
 } from '@defra/forms-model'
-import { buildMetaData, buildQuestionPage } from '@defra/forms-model/stubs'
+import {
+  buildDefinition,
+  buildMetaData,
+  buildQuestionPage
+} from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
 import author from '~/src/api/forms/service/__stubs__/author.js'
@@ -20,11 +24,14 @@ import {
   publishDraftCreatedFromLiveEvent,
   publishFormCreatedEvent,
   publishFormDraftDeletedEvent,
+  publishFormDraftReplacedEvent,
   publishFormMigratedEvent,
   publishFormTitleUpdatedEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
+import { saveToS3 } from '~/src/messaging/s3.js'
+jest.mock('~/src/messaging/s3.js')
 
 jest.mock('~/src/messaging/publish-base.js')
 
@@ -255,6 +262,35 @@ describe('publish', () => {
         s3Meta: undefined,
         slug: formMetadataDocument.slug,
         payload
+      })
+    })
+  })
+
+  describe('publishFormDraftReplacedEvent', () => {
+    it('should publish a REPLACE_DRAFT event', async () => {
+      const s3Meta = {
+        fileId: '3HL4kqtJlcpXrof3W3Zz4YBdvdz2FJ9n',
+        filename: '6883d8667a2a64da10af4312.json',
+        s3Key: 'audit-definitions/6883d8667a2a64da10af4312.json'
+      }
+      jest.mocked(saveToS3).mockResolvedValue(s3Meta)
+      const requestType = FormDefinitionRequestType.REPLACE_DRAFT
+      const definition = buildDefinition()
+      await publishFormDraftReplacedEvent(formMetadataDocument, definition)
+
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchObject({
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_UPDATED,
+        createdAt: BASE_CREATED_DATE,
+        createdBy: author
+      })
+      expect(publishEventCall.data).toMatchObject({
+        requestType,
+        s3Meta,
+        slug: formMetadataDocument.slug,
+        payload: undefined
       })
     })
   })
