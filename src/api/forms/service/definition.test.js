@@ -47,6 +47,7 @@ import {
 } from '~/src/api/forms/service/index.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import { publishFormDraftReplacedEvent } from '~/src/messaging/publish.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -973,6 +974,9 @@ describe('Forms service', () => {
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
       )
+      const publishEvent = jest.mocked(publishFormDraftReplacedEvent)
+
+      expect(publishEvent).toHaveBeenCalled()
     })
 
     it('should use V2 schema when form definition has schema version 2 (regardless of engine)', async () => {
