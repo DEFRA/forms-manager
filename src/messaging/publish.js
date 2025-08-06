@@ -132,13 +132,11 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
  *
  * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
  * @param {unknown} payload
- * @param {FormDefinition} definition
  * @param {FormDefinitionRequestType} requestType
  */
 export async function publishFormUpdatedEvent(
   metadataDocument,
   payload,
-  definition,
   requestType
 ) {
   const metadata = mapForm(metadataDocument)

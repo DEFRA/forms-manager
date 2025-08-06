@@ -5,11 +5,7 @@ import {
   AuditEventMessageType,
   FormDefinitionRequestType
 } from '@defra/forms-model'
-import {
-  buildDefinition,
-  buildMetaData,
-  buildQuestionPage
-} from '@defra/forms-model/stubs'
+import { buildMetaData, buildQuestionPage } from '@defra/forms-model/stubs'
 import { ValidationError } from 'joi'
 
 import author from '~/src/api/forms/service/__stubs__/author.js'
@@ -244,15 +240,7 @@ describe('publish', () => {
     it('should publish a FORM_UPDATED event', async () => {
       const requestType = FormDefinitionRequestType.CREATE_PAGE
       const payload = buildQuestionPage({})
-      const definition = buildDefinition({
-        pages: [payload]
-      })
-      await publishFormUpdatedEvent(
-        formMetadataDocument,
-        payload,
-        definition,
-        requestType
-      )
+      await publishFormUpdatedEvent(formMetadataDocument, payload, requestType)
 
       const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
       expect(publishEventCall).toMatchObject({

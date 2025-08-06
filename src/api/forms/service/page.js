@@ -69,7 +69,7 @@ export async function createPageOnDraftDefinition(formId, page, author) {
 
   try {
     await session.withTransaction(async () => {
-      const definition = await formDefinition.addPage(formId, page, session)
+      await formDefinition.addPage(formId, page, session)
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
@@ -78,7 +78,6 @@ export async function createPageOnDraftDefinition(formId, page, author) {
       await publishFormUpdatedEvent(
         metadataDocument,
         page,
-        definition,
         FormDefinitionRequestType.CREATE_PAGE
       )
     })
