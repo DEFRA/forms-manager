@@ -406,6 +406,7 @@ describe('Page service', () => {
     it('should delete the page', async () => {
       const dbDefinitionSpy = jest.spyOn(formDefinition, 'deletePage')
       const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       await deletePageOnDraftDefinition(id, pageId, author)
 
@@ -415,7 +416,15 @@ describe('Page service', () => {
       expect([calledFormId, calledPageId]).toEqual([id, pageId])
       const [metaFormId, metaUpdateOperations] = dbMetadataSpy.mock.calls[0]
       expect(metaFormId).toBe(id)
+      const [auditMessage] = publishEventSpy.mock.calls[0]
 
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.DELETE_PAGE,
+        payload: { pageId }
+      })
       expect(metaUpdateOperations).toEqual(author)
     })
 

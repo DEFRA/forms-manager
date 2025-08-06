@@ -182,9 +182,17 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
     await session.withTransaction(async () => {
       await formDefinition.deletePage(formId, pageId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
 
-      // TODO: await publishFormUpdatedEvent
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { pageId },
+        FormDefinitionRequestType.DELETE_PAGE
+      )
     })
   } catch (err) {
     logger.error(
