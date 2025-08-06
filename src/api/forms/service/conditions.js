@@ -1,7 +1,10 @@
+import { FormDefinitionRequestType } from '@defra/forms-model'
+
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -22,15 +25,27 @@ export async function addConditionToDraftFormDefinition(
   try {
     const newForm = await session.withTransaction(async () => {
       // Add the condition to the form definition
-      const returnedList = await formDefinition.addCondition(
+      const returnedCondition = await formDefinition.addCondition(
         formId,
         condition,
         session
       )
 
       await formMetadata.updateAudit(formId, author, session)
-      // TODO: await publishFormUpdatedEvent
-      return returnedList
+
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        condition,
+        FormDefinitionRequestType.ADD_CONDITION
+      )
+
+      return returnedCondition
     })
 
     logger.info(`Added condition ${condition.displayName} to form ID ${formId}`)
@@ -65,7 +80,7 @@ export async function updateConditionOnDraftFormDefinition(
   const session = client.startSession()
 
   try {
-    const updatedList = await session.withTransaction(async () => {
+    const updatedCondition = await session.withTransaction(async () => {
       // Update the condition on the form definition
       const returnedCondition = await formDefinition.updateCondition(
         formId,
@@ -74,14 +89,24 @@ export async function updateConditionOnDraftFormDefinition(
         session
       )
 
-      await formMetadata.updateAudit(formId, author, session)
-      // TODO: await publishFormUpdatedEvent
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        condition,
+        FormDefinitionRequestType.UPDATE_CONDITION
+      )
+
       return returnedCondition
     })
 
     logger.info(`Updated condition ${conditionId} for form ID ${formId}`)
 
-    return updatedList
+    return updatedCondition
   } catch (err) {
     logger.error(
       `[updateCondition] Failed to update condition ${conditionId} on Form ID ${formId} - ${getErrorMessage(err)}`
@@ -113,8 +138,17 @@ export async function removeConditionOnDraftFormDefinition(
       // Update the condition on the form definition
       await formDefinition.deleteCondition(formId, conditionId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
-      // TODO: await publishFormUpdatedEvent
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { conditionId },
+        FormDefinitionRequestType.REMOVE_CONDITION
+      )
     })
 
     logger.info(`Removed condition ${conditionId} for form ID ${formId}`)
@@ -130,6 +164,5 @@ export async function removeConditionOnDraftFormDefinition(
 }
 
 /**
- * @import { FormMetadataAuthor, List, FormDefinition, ConditionWrapperV2 } from '@defra/forms-model'
- * @import { ClientSession } from 'mongodb'
+ * @import { FormMetadataAuthor, ConditionWrapperV2 } from '@defra/forms-model'
  */
