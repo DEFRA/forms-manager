@@ -1,4 +1,8 @@
 import {
+  AuditEventMessageType,
+  FormDefinitionRequestType
+} from '@defra/forms-model'
+import {
   buildDefinition,
   buildQuestionPage,
   buildSummaryPage
@@ -114,6 +118,7 @@ describe('Page service', () => {
       )
       const dbOperationArgs = dbMetadataSpy.mock.calls[0]
       const [formId1, page1] = dbDefinitionSpy.mock.calls[0]
+      const [auditMessage] = publishEventSpy.mock.calls[0]
 
       expect(formId1).toBe(id)
       expect(page1).toMatchObject({
@@ -126,7 +131,13 @@ describe('Page service', () => {
         ...formDefinitionPageCustomisedTitle,
         id: expect.any(String)
       })
-      expect(publishEventSpy).toHaveBeenCalled()
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.CREATE_PAGE,
+        payload: page
+      })
     })
 
     it('should create a new page when a summary page does not exist', async () => {
@@ -239,6 +250,7 @@ describe('Page service', () => {
             pages: [expectedPage, summaryPage]
           })
         )
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       const page = await patchFieldsOnDraftDefinitionPage(
         '123',
@@ -248,7 +260,15 @@ describe('Page service', () => {
       )
 
       expect(page).toEqual(expectedPage)
+      const [auditMessage] = publishEventSpy.mock.calls[0]
 
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.UPDATE_PAGE_FIELDS,
+        payload: pageFields
+      })
       spy.mockRestore()
     })
 

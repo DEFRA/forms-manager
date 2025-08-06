@@ -142,9 +142,17 @@ export async function patchFieldsOnDraftDefinitionPage(
 
       page = await getFormDefinitionPage(formId, pageId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
 
-      // TODO: await publishFormUpdatedEvent
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        pageFieldsToUpdate,
+        FormDefinitionRequestType.UPDATE_PAGE_FIELDS
+      )
     })
   } catch (err) {
     logger.error(
