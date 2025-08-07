@@ -1,4 +1,8 @@
-import { Engine, FormStatus } from '@defra/forms-model'
+import {
+  Engine,
+  FormDefinitionRequestType,
+  FormStatus
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
@@ -15,6 +19,7 @@ import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishDraftCreatedFromLiveEvent,
   publishFormDraftReplacedEvent,
+  publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -298,7 +303,17 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
         session
       )
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { pageOrder: order },
+        FormDefinitionRequestType.REORDER_PAGES
+      )
 
       return reorderedForm
     })

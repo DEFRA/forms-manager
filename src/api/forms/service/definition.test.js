@@ -1,5 +1,7 @@
 import {
+  AuditEventMessageType,
   Engine,
+  FormDefinitionRequestType,
   FormStatus,
   formDefinitionSchema,
   formDefinitionV2Schema
@@ -47,7 +49,7 @@ import {
 } from '~/src/api/forms/service/index.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
-import { publishFormDraftReplacedEvent } from '~/src/messaging/publish.js'
+import * as publishBase from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -55,7 +57,8 @@ jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
-jest.mock('~/src/messaging/publish.js')
+jest.mock('~/src/messaging/publish-base.js')
+
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
@@ -91,6 +94,9 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(formMetadata.updateAudit)
+      .mockResolvedValue(formMetadataDocument)
   })
 
   describe('createDraftFromLive', () => {
@@ -952,6 +958,7 @@ describe('Forms service', () => {
     it('should update the draft form definition with required attributes upon creation', async () => {
       const updateSpy = jest.spyOn(formDefinition, 'update')
       const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       await updateDraftFormDefinition(
         '123',
@@ -974,9 +981,15 @@ describe('Forms service', () => {
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
       )
-      const publishEvent = jest.mocked(publishFormDraftReplacedEvent)
-
-      expect(publishEvent).toHaveBeenCalled()
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REPLACE_DRAFT,
+        payload: undefined,
+        s3Meta: expect.anything()
+      })
     })
 
     it('should use V2 schema when form definition has schema version 2 (regardless of engine)', async () => {
@@ -1101,7 +1114,7 @@ describe('Forms service', () => {
       jest
         .mocked(formDefinition.reorderPages)
         .mockResolvedValueOnce(modifyReorderPages(definition, orderList))
-
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
       const expectedDefinition = buildDefinition({
         pages: [pageOne, pageTwo, summaryPage]
       })
@@ -1114,6 +1127,16 @@ describe('Forms service', () => {
       const [, order] = jest.mocked(formDefinition.reorderPages).mock.calls[0]
       expect(order).toEqual(orderList)
       expect(result).toEqual(expectedDefinition)
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REORDER_PAGES,
+        payload: { pageOrder: orderList }
+      })
+
       expectMetadataUpdate()
     })
 
