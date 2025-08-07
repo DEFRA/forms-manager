@@ -5,6 +5,7 @@ import {
   queryOptionsSchema
 } from '@defra/forms-model'
 
+import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,
@@ -75,6 +76,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         payload: createFormSchema
       }
@@ -100,6 +104,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: formByIdSchema,
         // Take the form metadata update schema and make all fields optional. This acts similar to Partial<T> in Typescript.
@@ -166,6 +173,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormDelete]
+      },
       validate: {
         params: formByIdSchema
       }
@@ -208,6 +218,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         payload: updateFormDefinitionSchema
       }
@@ -226,6 +239,9 @@ export default [
       return migrateDefinitionToV2(params.id, author)
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: migrateDefinitionParamSchema
       }
@@ -270,6 +286,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormPublish]
+      },
       validate: {
         params: formByIdSchema
       }
@@ -295,6 +314,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: formByIdSchema
       }

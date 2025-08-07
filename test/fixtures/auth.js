@@ -11,6 +11,8 @@ export const auth = {
       scp: 'forms.user',
       sub: 'hgtL_1p2Me5JkBB6JeB20PyU3YDuP9PjEZwi7m1QGng',
       oid: '86758ba9-92e7-4287-9751-7705e449688e'
-    }
+    },
+    // Add all scopes for testing (admin level access)
+    scope: ['form-delete', 'form-edit', 'form-read', 'form-publish']
   }
 }

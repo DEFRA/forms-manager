@@ -1,5 +1,6 @@
 import { conditionWrapperSchemaV2 } from '@defra/forms-model'
 
+import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
   addConditionToDraftFormDefinition,
   removeConditionOnDraftFormDefinition,
@@ -39,6 +40,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: formByIdSchema,
         payload: conditionWrapperSchemaV2
@@ -70,6 +74,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: conditionByIdSchema,
         payload: conditionWrapperSchemaV2
@@ -95,6 +102,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: conditionByIdSchema
       }

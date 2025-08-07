@@ -197,6 +197,18 @@ export const config = convict({
     format: String,
     default: '',
     env: 'FORM_DEF_BUCKET_NAME'
+  },
+  entitlementUrl: {
+    doc: 'Forms entitlements API URL',
+    format: String,
+    default: 'http://localhost:3003',
+    env: 'ENTITLEMENT_URL'
+  },
+  useEntitlementApi: {
+    doc: 'Feature flag to enable entitlement API for fetching scopes',
+    format: Boolean,
+    default: false,
+    env: 'FEATURE_FLAG_USE_ENTITLEMENT_API'
   }
 })
 

@@ -1,5 +1,6 @@
 import { listSchemaV2 } from '@defra/forms-model'
 
+import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
   addListToDraftFormDefinition,
   removeListOnDraftFormDefinition,
@@ -39,6 +40,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: formByIdSchema,
         payload: listSchemaV2,
@@ -71,6 +75,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: listByIdSchema,
         payload: listSchemaWithRequiredIdSchema,
@@ -97,6 +104,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: listByIdSchema
       }

@@ -1,5 +1,6 @@
 import { componentPayloadSchemaV2 } from '@defra/forms-model'
 
+import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
   createComponentOnDraftDefinition,
   deleteComponentOnDraftDefinition,
@@ -45,6 +46,9 @@ export default [
       return component
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: pageByIdSchema,
         payload: componentPayloadSchemaV2,
@@ -70,6 +74,9 @@ export default [
       )
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: pageByIdSchema,
         payload: sortIdsSchema
@@ -96,6 +103,9 @@ export default [
       )
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: componentByIdSchema,
         payload: componentPayloadWithRequiredIdSchema
@@ -121,6 +131,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [Scopes.FormEdit]
+      },
       validate: {
         params: componentByIdSchema
       }
