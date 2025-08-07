@@ -14,9 +14,25 @@ jest.mock('~/src/config/index.js', () => ({
   config: {
     get: jest.fn((key) => {
       if (key === 'roleEditorGroupId') return 'editor-group-id'
+      if (key === 'useEntitlementApi') return false
+      if (key === 'oidcJwksUri') return 'mock-jwks-uri'
+      if (key === 'oidcVerifyAud') return 'mock-aud'
+      if (key === 'oidcVerifyIss') return 'mock-iss'
       return 'mock-value'
     })
   }
+}))
+
+jest.mock('~/src/api/entitlements/service.js', () => ({
+  getDefaultScopes: jest.fn(() => [
+    'form-delete',
+    'form-edit',
+    'form-read',
+    'form-publish'
+  ]),
+  getUserScopes: jest.fn(() =>
+    Promise.resolve(['form-delete', 'form-edit', 'form-read'])
+  )
 }))
 
 jest.mock('@hapi/jwt')
@@ -86,24 +102,24 @@ describe('auth plugin', () => {
         )
         validateFn = strategyOptions.validate
       } else {
-        validateFn = () => ({ isValid: false })
+        validateFn = () => Promise.resolve({ isValid: false })
       }
     })
 
-    test('should return isValid: false when user is missing from payload', () => {
+    test('should return isValid: false when user is missing from payload', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: null
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestInfoFn).toHaveBeenCalledWith(
         '[authMissingUser] Auth: Missing user from token payload.'
       )
     })
 
-    test('should return isValid: false when oid is missing', () => {
+    test('should return isValid: false when oid is missing', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
@@ -111,14 +127,14 @@ describe('auth plugin', () => {
           }
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestInfoFn).toHaveBeenCalledWith(
         '[authMissingOID] Auth: User OID is missing in token payload.'
       )
     })
 
-    test('should handle string groups claim that is valid JSON array', () => {
+    test('should handle string groups claim that is valid JSON array', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
@@ -127,19 +143,20 @@ describe('auth plugin', () => {
           }
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({
         isValid: true,
         credentials: {
           user: {
             oid: 'test-oid',
             groups: ['editor-group-id']
-          }
+          },
+          scope: ['form-delete', 'form-edit', 'form-read', 'form-publish']
         }
       })
     })
 
-    test('should handle string groups claim that is not a valid JSON array', () => {
+    test('should handle string groups claim that is not a valid JSON array', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
@@ -148,7 +165,7 @@ describe('auth plugin', () => {
           }
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -157,7 +174,7 @@ describe('auth plugin', () => {
       )
     })
 
-    test('should handle parsing error for string groups claim', () => {
+    test('should handle parsing error for string groups claim', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
@@ -166,7 +183,7 @@ describe('auth plugin', () => {
           }
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestErrorFn).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -175,7 +192,7 @@ describe('auth plugin', () => {
       )
     })
 
-    test('should handle array groups claim directly', () => {
+    test('should handle array groups claim directly', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
@@ -184,19 +201,20 @@ describe('auth plugin', () => {
           }
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({
         isValid: true,
         credentials: {
           user: {
             oid: 'test-oid',
             groups: ['editor-group-id']
-          }
+          },
+          scope: ['form-delete', 'form-edit', 'form-read', 'form-publish']
         }
       })
     })
 
-    test('should handle missing groups claim by setting an empty array', () => {
+    test('should handle missing groups claim by setting an empty array', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
@@ -204,7 +222,7 @@ describe('auth plugin', () => {
           }
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -213,7 +231,7 @@ describe('auth plugin', () => {
       )
     })
 
-    test('should return isValid: false when required group is not in groups array', () => {
+    test('should return isValid: false when required group is not in groups array', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
@@ -222,7 +240,7 @@ describe('auth plugin', () => {
           }
         }
       })
-      const result = validateFn(artifacts)
+      const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestWarnFn).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -240,7 +258,7 @@ describe('auth plugin', () => {
  * @typedef {AuthTypeDefinition} Auth
  */
 /**
- * @typedef {(artifacts: Artifacts<UserCredentials>) => ({ isValid: boolean, credentials?: any })} ValidateFn
+ * @typedef {(artifacts: Artifacts<UserCredentials>) => Promise<{ isValid: boolean, credentials?: any }>} ValidateFn
  */
 /**
  * @typedef {jest.Mocked<JwtTypeDefinition>} Jwt
