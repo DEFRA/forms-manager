@@ -50,6 +50,7 @@ import {
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import * as publishBase from '~/src/messaging/publish-base.js'
+import { saveToS3 } from '~/src/messaging/s3.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -58,6 +59,7 @@ jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
+jest.mock('~/src/messaging/s3.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -951,6 +953,14 @@ describe('Forms service', () => {
   })
 
   describe('updateDraftFormDefinition', () => {
+    const s3Meta = {
+      fileId: '1111',
+      filename: 'definition.json',
+      s3Key: 'dir/definition.json'
+    }
+    beforeEach(() => {
+      jest.mocked(saveToS3).mockResolvedValue(s3Meta)
+    })
     const formDefinitionCustomisedTitle = emptyFormWithSummary()
     formDefinitionCustomisedTitle.name =
       "A custom form name that shouldn't be allowed"
@@ -988,7 +998,7 @@ describe('Forms service', () => {
       expect(auditMessage.data).toMatchObject({
         requestType: FormDefinitionRequestType.REPLACE_DRAFT,
         payload: undefined,
-        s3Meta: expect.anything()
+        s3Meta
       })
     })
 
