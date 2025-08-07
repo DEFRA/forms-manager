@@ -61,6 +61,24 @@ describe('fetch utilities', () => {
       )
     })
 
+    it('should throw Boom error for non-200 status with message but no cause', async () => {
+      /** @type {any} */
+      const mockResponse = { statusCode: 400 }
+      const mockBody = { message: 'Bad Request' }
+
+      jest.mocked(Wreck.request).mockResolvedValue(mockResponse)
+      jest.mocked(Wreck.read).mockResolvedValue(mockBody)
+
+      const url = new URL('http://example.com/api')
+
+      await expect(request('get', url, {})).rejects.toThrow(
+        Boom.boomify(new Error('Bad Request'), {
+          statusCode: 400,
+          data: mockBody
+        })
+      )
+    })
+
     it('should throw Boom error for non-200 status without message in body', async () => {
       /** @type {any} */
       const mockResponse = { statusCode: 500 }
@@ -181,12 +199,32 @@ describe('fetch utilities', () => {
       )
     })
 
+    it('postJson should work with no options provided', async () => {
+      await postJson(url)
+
+      expect(jest.mocked(Wreck.request)).toHaveBeenCalledWith(
+        'post',
+        url.href,
+        {
+          json: true
+        }
+      )
+    })
+
     it('putJson should add json: true to options', async () => {
       await putJson(url, { payload: { test: 'data' } })
 
       expect(jest.mocked(Wreck.request)).toHaveBeenCalledWith('put', url.href, {
         json: true,
         payload: { test: 'data' }
+      })
+    })
+
+    it('putJson should work with no options provided', async () => {
+      await putJson(url)
+
+      expect(jest.mocked(Wreck.request)).toHaveBeenCalledWith('put', url.href, {
+        json: true
       })
     })
 
@@ -199,6 +237,18 @@ describe('fetch utilities', () => {
         {
           json: true,
           payload: { test: 'data' }
+        }
+      )
+    })
+
+    it('patchJson should work with no options provided', async () => {
+      await patchJson(url)
+
+      expect(jest.mocked(Wreck.request)).toHaveBeenCalledWith(
+        'patch',
+        url.href,
+        {
+          json: true
         }
       )
     })

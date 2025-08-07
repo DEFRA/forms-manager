@@ -249,6 +249,187 @@ describe('auth plugin', () => {
       )
     })
   })
+
+  describe('validate function with entitlements API enabled', () => {
+    /** @type {ValidateFn} */
+    let validateFn
+    /** @type {jest.MockedFunction<(oid: string, authToken?: string) => Promise<string[]>>} */
+    let getUserScopes
+    /** @type {jest.MockedFunction<() => string[]>} */
+    let getDefaultScopes
+
+    beforeEach(async () => {
+      jest.resetModules()
+      jest.clearAllMocks()
+
+      jest.doMock('~/src/config/index.js', () => ({
+        config: {
+          get: jest.fn((key) => {
+            if (key === 'roleEditorGroupId') return 'editor-group-id'
+            if (key === 'useEntitlementApi') return true
+            if (key === 'oidcJwksUri') return 'mock-jwks-uri'
+            if (key === 'oidcVerifyAud') return 'mock-aud'
+            if (key === 'oidcVerifyIss') return 'mock-iss'
+            return 'mock-value'
+          })
+        }
+      }))
+
+      const entitlementsModule = await import(
+        '~/src/api/entitlements/service.js'
+      )
+      getUserScopes =
+        /** @type {jest.MockedFunction<(oid: string, authToken?: string) => Promise<string[]>>} */ (
+          entitlementsModule.getUserScopes
+        )
+      getDefaultScopes = /** @type {jest.MockedFunction<() => string[]>} */ (
+        entitlementsModule.getDefaultScopes
+      )
+
+      const authModule = await import('~/src/plugins/auth/index.js')
+      const auth = authModule.auth
+
+      await auth.plugin.register(/** @type {any} */ (server))
+
+      if (server.auth.strategy.mock.calls.length > 0) {
+        const strategyOptions = /** @type {{ validate: ValidateFn }} */ (
+          server.auth.strategy.mock.calls[
+            server.auth.strategy.mock.calls.length - 1
+          ][2]
+        )
+        validateFn = strategyOptions.validate
+      } else {
+        validateFn = () => Promise.resolve({ isValid: false })
+      }
+    })
+
+    test('should use getUserScopes when useEntitlementApi is true', async () => {
+      const artifacts = /** @type {any} */ ({
+        decoded: {
+          payload: {
+            oid: 'test-oid',
+            groups: ['editor-group-id']
+          }
+        },
+        token: 'test-jwt-token'
+      })
+
+      const result = await validateFn(artifacts)
+
+      expect(getUserScopes).toHaveBeenCalledWith('test-oid', 'test-jwt-token')
+      expect(getDefaultScopes).not.toHaveBeenCalled()
+      expect(result).toEqual({
+        isValid: true,
+        credentials: {
+          user: {
+            oid: 'test-oid',
+            groups: ['editor-group-id']
+          },
+          scope: ['form-delete', 'form-edit', 'form-read']
+        }
+      })
+    })
+
+    test('should pass undefined token when artifacts.token is missing', async () => {
+      const artifacts = /** @type {any} */ ({
+        decoded: {
+          payload: {
+            oid: 'test-oid',
+            groups: ['editor-group-id']
+          }
+        }
+        // No token property
+      })
+
+      const result = await validateFn(artifacts)
+
+      expect(getUserScopes).toHaveBeenCalledWith('test-oid', undefined)
+      expect(result).toEqual({
+        isValid: true,
+        credentials: {
+          user: {
+            oid: 'test-oid',
+            groups: ['editor-group-id']
+          },
+          scope: ['form-delete', 'form-edit', 'form-read']
+        }
+      })
+    })
+
+    test('should handle empty scopes from getUserScopes', async () => {
+      getUserScopes.mockResolvedValueOnce([])
+
+      const artifacts = /** @type {any} */ ({
+        decoded: {
+          payload: {
+            oid: 'test-oid',
+            groups: ['editor-group-id']
+          }
+        },
+        token: 'test-jwt-token'
+      })
+
+      const result = await validateFn(artifacts)
+
+      expect(getUserScopes).toHaveBeenCalledWith('test-oid', 'test-jwt-token')
+      expect(result).toEqual({
+        isValid: true,
+        credentials: {
+          user: {
+            oid: 'test-oid',
+            groups: ['editor-group-id']
+          },
+          scope: []
+        }
+      })
+    })
+
+    test('should handle getUserScopes rejection', async () => {
+      getUserScopes.mockRejectedValueOnce(new Error('API Error'))
+
+      const artifacts = /** @type {any} */ ({
+        decoded: {
+          payload: {
+            oid: 'test-oid',
+            groups: ['editor-group-id']
+          }
+        },
+        token: 'test-jwt-token'
+      })
+
+      await expect(validateFn(artifacts)).rejects.toThrow('API Error')
+      expect(getUserScopes).toHaveBeenCalledWith('test-oid', 'test-jwt-token')
+    })
+
+    test('should not check groups when useEntitlementApi is true', async () => {
+      const artifacts = /** @type {any} */ ({
+        decoded: {
+          payload: {
+            oid: 'test-oid',
+            groups: ['some-other-group'] // Not editor-group-id
+          }
+        },
+        token: 'test-jwt-token'
+      })
+
+      const result = await validateFn(artifacts)
+
+      expect(getUserScopes).toHaveBeenCalledWith('test-oid', 'test-jwt-token')
+      expect(mockActualTestWarnFn).not.toHaveBeenCalledWith(
+        expect.stringContaining('[authGroupNotFound]')
+      )
+      expect(result).toEqual({
+        isValid: true,
+        credentials: {
+          user: {
+            oid: 'test-oid',
+            groups: ['some-other-group']
+          },
+          scope: ['form-delete', 'form-edit', 'form-read']
+        }
+      })
+    })
+  })
 })
 
 /**
