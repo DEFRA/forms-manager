@@ -60,7 +60,7 @@ export async function addListToDraftFormDefinition(formId, list, author) {
       await publishFormUpdatedEvent(
         metadataDocument,
         list,
-        FormDefinitionRequestType.ADD_LIST
+        FormDefinitionRequestType.CREATE_LIST
       )
 
       return returnedList
@@ -164,7 +164,7 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
       await publishFormUpdatedEvent(
         metadataDocument,
         { listId },
-        FormDefinitionRequestType.REMOVE_LIST
+        FormDefinitionRequestType.DELETE_LIST
       )
     })
 

@@ -142,7 +142,7 @@ describe('lists', () => {
         type: AuditEventMessageType.FORM_UPDATED
       })
       expect(auditMessage.data).toMatchObject({
-        requestType: FormDefinitionRequestType.ADD_LIST,
+        requestType: FormDefinitionRequestType.CREATE_LIST,
         payload: expectedList
       })
     })
@@ -225,7 +225,7 @@ describe('lists', () => {
         type: AuditEventMessageType.FORM_UPDATED
       })
       expect(auditMessage.data).toMatchObject({
-        requestType: FormDefinitionRequestType.REMOVE_LIST,
+        requestType: FormDefinitionRequestType.DELETE_LIST,
         payload: { listId: expectedListId }
       })
     })

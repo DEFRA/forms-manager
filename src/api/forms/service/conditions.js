@@ -42,7 +42,7 @@ export async function addConditionToDraftFormDefinition(
       await publishFormUpdatedEvent(
         metadataDocument,
         condition,
-        FormDefinitionRequestType.ADD_CONDITION
+        FormDefinitionRequestType.CREATE_CONDITION
       )
 
       return returnedCondition
@@ -147,7 +147,7 @@ export async function removeConditionOnDraftFormDefinition(
       await publishFormUpdatedEvent(
         metadataDocument,
         { conditionId },
-        FormDefinitionRequestType.REMOVE_CONDITION
+        FormDefinitionRequestType.DELETE_CONDITION
       )
     })
 

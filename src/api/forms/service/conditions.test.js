@@ -194,7 +194,7 @@ describe('conditions', () => {
         type: AuditEventMessageType.FORM_UPDATED
       })
       expect(auditMessage.data).toMatchObject({
-        requestType: FormDefinitionRequestType.ADD_CONDITION,
+        requestType: FormDefinitionRequestType.CREATE_CONDITION,
         payload: expectedCondition
       })
     })
@@ -283,7 +283,7 @@ describe('conditions', () => {
         type: AuditEventMessageType.FORM_UPDATED
       })
       expect(auditMessage.data).toMatchObject({
-        requestType: FormDefinitionRequestType.REMOVE_CONDITION,
+        requestType: FormDefinitionRequestType.DELETE_CONDITION,
         payload: { conditionId: expectedConditionId }
       })
     })
