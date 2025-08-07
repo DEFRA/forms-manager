@@ -134,7 +134,7 @@ describe('migration', () => {
 
       const [, payload, requestType] = auditMock.mock.calls[0]
       expect(payload).toMatchObject({ page: returnedSummary.summary })
-      expect(requestType).toBe(FormDefinitionRequestType.CREATE_PAGE)
+      expect(requestType).toBe(FormDefinitionRequestType.REPOSITION_SUMMARY)
     })
 
     it('should not reposition the summary if no pages exist', async () => {

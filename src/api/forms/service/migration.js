@@ -66,7 +66,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
       await publishFormUpdatedEvent(
         metadataDocument,
         { page: summaryWithId },
-        FormDefinitionRequestType.CREATE_PAGE
+        FormDefinitionRequestType.REPOSITION_SUMMARY
       )
     })
   } catch (err) {
