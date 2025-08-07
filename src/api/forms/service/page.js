@@ -142,7 +142,17 @@ export async function patchFieldsOnDraftDefinitionPage(
 
       page = await getFormDefinitionPage(formId, pageId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        pageFieldsToUpdate,
+        FormDefinitionRequestType.UPDATE_PAGE_FIELDS
+      )
     })
   } catch (err) {
     logger.error(
@@ -172,7 +182,17 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
     await session.withTransaction(async () => {
       await formDefinition.deletePage(formId, pageId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { pageId },
+        FormDefinitionRequestType.DELETE_PAGE
+      )
     })
   } catch (err) {
     logger.error(

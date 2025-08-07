@@ -1,3 +1,7 @@
+import {
+  AuditEventMessageType,
+  FormDefinitionRequestType
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { pino } from 'pino'
 
@@ -18,6 +22,7 @@ import {
 } from '~/src/api/forms/service/component.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import * as publishBase from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -53,6 +58,7 @@ jest.mock('~/src/mongo.js', () => {
     }
   }
 })
+jest.mock('~/src/messaging/publish-base.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -76,6 +82,9 @@ describe('Forms service', () => {
     definition = emptyFormWithSummary()
     jest.mocked(formTemplates.empty).mockReturnValue(definition)
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(formMetadata.updateAudit)
+      .mockResolvedValue(formMetadataDocument)
   })
 
   describe('getFormDefinitionPageComponent', () => {
@@ -142,6 +151,8 @@ describe('Forms service', () => {
 
     it('should add a component to the end of a DraftDefinition page', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition1)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
       const createdComponent = await createComponentOnDraftDefinition(
         '123',
         pageId,
@@ -168,6 +179,15 @@ describe('Forms service', () => {
       expect(createdComponent).toMatchObject({
         ...createdComponent,
         id: expect.any(String)
+      })
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.CREATE_COMPONENT,
+        payload: createdComponent
       })
     })
 
@@ -233,6 +253,7 @@ describe('Forms service', () => {
         .spyOn(formDefinition, 'updateComponent')
         .mockResolvedValueOnce(newTextFieldComponent)
       const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       const component = await updateComponentOnDraftDefinition(
         id,
@@ -257,6 +278,15 @@ describe('Forms service', () => {
       expect(metaFormId).toBe(id)
 
       expect(metaUpdateOperations).toEqual(author)
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.UPDATE_COMPONENT,
+        payload: component
+      })
     })
 
     it('should correctly surface the error is the component is not found', async () => {
@@ -308,6 +338,7 @@ describe('Forms service', () => {
 
       const dbDefinitionSpy = jest.spyOn(formDefinition, 'deleteComponent')
       const dbMetadataSpy = jest.spyOn(formMetadata, 'updateAudit')
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       await deleteComponentOnDraftDefinition(id, pageId, componentId2, author)
 
@@ -325,6 +356,15 @@ describe('Forms service', () => {
 
       expect(metaFormId).toBe(id)
       expect(metaUpdateOperations).toEqual(author)
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.DELETE_COMPONENT,
+        payload: { pageId, componentId: componentId2 }
+      })
     })
 
     it('should not fail if no component exists', async () => {

@@ -1,10 +1,15 @@
-import { FormStatus, formDefinitionSchema } from '@defra/forms-model'
+import {
+  FormDefinitionRequestType,
+  FormStatus,
+  formDefinitionSchema
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -45,7 +50,18 @@ export async function addListToDraftFormDefinition(formId, list, author) {
 
       await duplicateListGuard(formId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      // TODO: List could be > 256KB?
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        list,
+        FormDefinitionRequestType.CREATE_LIST
+      )
 
       return returnedList
     })
@@ -93,7 +109,18 @@ export async function updateListOnDraftFormDefinition(
 
       await duplicateListGuard(formId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      // TODO: List could be > 256KB?
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        list,
+        FormDefinitionRequestType.UPDATE_LIST
+      )
 
       return returnedList
     })
@@ -128,7 +155,17 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
       // Update the list on the form definition
       await formDefinition.deleteList(formId, listId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { listId },
+        FormDefinitionRequestType.DELETE_LIST
+      )
     })
 
     logger.info(`Removed list ${listId} for form ID ${formId}`)

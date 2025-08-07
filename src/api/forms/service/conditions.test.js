@@ -1,4 +1,10 @@
-import { ConditionType, Coordinator, OperatorName } from '@defra/forms-model'
+import {
+  AuditEventMessageType,
+  ConditionType,
+  Coordinator,
+  FormDefinitionRequestType,
+  OperatorName
+} from '@defra/forms-model'
 import {
   buildDefinition,
   buildQuestionPage,
@@ -18,6 +24,7 @@ import {
   updateConditionOnDraftFormDefinition
 } from '~/src/api/forms/service/conditions.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import * as publishBase from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -25,6 +32,7 @@ jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
+jest.mock('~/src/messaging/publish-base.js')
 
 jest
   .mocked(formDefinition.updatePageFields)
@@ -140,6 +148,9 @@ describe('conditions', () => {
 
   beforeEach(() => {
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(formMetadata.updateAudit)
+      .mockResolvedValue(formMetadataDocument)
   })
 
   describe('addConditionToDraftFormDefinition', () => {
@@ -165,6 +176,7 @@ describe('conditions', () => {
       const addConditionMock = jest
         .mocked(formDefinition.addCondition)
         .mockResolvedValueOnce(expectedCondition)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       const result = await addConditionToDraftFormDefinition(
         id,
@@ -176,6 +188,15 @@ describe('conditions', () => {
       expect(conditionToInsert).toEqual(expectedCondition)
       expect(result).toEqual(expectedCondition)
       expectMetadataUpdate()
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.CREATE_CONDITION,
+        payload: expectedCondition
+      })
     })
   })
 
@@ -202,6 +223,7 @@ describe('conditions', () => {
       const updateListMock = jest
         .mocked(formDefinition.updateCondition)
         .mockResolvedValueOnce(conditionToUpdate)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       const result = await updateConditionOnDraftFormDefinition(
         id,
@@ -217,6 +239,15 @@ describe('conditions', () => {
       expect(expectedConditionToUpdate).toEqual(conditionToUpdate)
       expect(result).toEqual(conditionToUpdate)
       expectMetadataUpdate()
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.UPDATE_CONDITION,
+        payload: expectedConditionToUpdate
+      })
     })
   })
 
@@ -233,6 +264,7 @@ describe('conditions', () => {
       jest
         .mocked(formDefinition.deleteCondition)
         .mockResolvedValue(buildDefinition())
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -245,6 +277,15 @@ describe('conditions', () => {
       expect(expectedFormId).toBe(id)
       expect(expectedConditionId).toBe(condition1Id)
       expectMetadataUpdate()
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.DELETE_CONDITION,
+        payload: { conditionId: expectedConditionId }
+      })
     })
 
     it('should surface errors', async () => {
