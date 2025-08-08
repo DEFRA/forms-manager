@@ -150,7 +150,7 @@ export async function patchFieldsOnDraftDefinitionPage(
 
       await publishFormUpdatedEvent(
         metadataDocument,
-        pageFieldsToUpdate,
+        { pageId, updatedFields: pageFieldsToUpdate },
         FormDefinitionRequestType.UPDATE_PAGE_FIELDS
       )
     })

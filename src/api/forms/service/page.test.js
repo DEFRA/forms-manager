@@ -267,7 +267,7 @@ describe('Page service', () => {
       })
       expect(auditMessage.data).toMatchObject({
         requestType: FormDefinitionRequestType.UPDATE_PAGE_FIELDS,
-        payload: pageFields
+        payload: { pageId, updatedFields: pageFields }
       })
       spy.mockRestore()
     })
