@@ -41,7 +41,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         params: formByIdSchema,
@@ -75,7 +75,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         params: conditionByIdSchema,
@@ -103,7 +103,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         params: conditionByIdSchema

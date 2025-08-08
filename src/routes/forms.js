@@ -78,7 +78,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         payload: createFormSchema
@@ -116,7 +116,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         params: formByIdSchema,
@@ -185,7 +185,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormDelete]
+        scope: [`+${Scopes.FormDelete}`]
       },
       validate: {
         params: formByIdSchema
@@ -230,7 +230,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         payload: updateFormDefinitionSchema
@@ -251,7 +251,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         params: migrateDefinitionParamSchema
@@ -298,7 +298,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormPublish]
+        scope: [`+${Scopes.FormPublish}`]
       },
       validate: {
         params: formByIdSchema
@@ -326,7 +326,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [Scopes.FormEdit]
+        scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
         params: formByIdSchema
