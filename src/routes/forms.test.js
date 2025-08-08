@@ -415,6 +415,7 @@ describe('Forms route', () => {
     })
 
     test('Testing PATCH /forms/{id} route returns "updated" status with id and slug', async () => {
+      jest.mocked(getForm).mockResolvedValue(stubFormMetadataOutput)
       jest.mocked(updateFormMetadata).mockResolvedValue('test-form')
 
       const response = await server.inject({
@@ -434,6 +435,7 @@ describe('Forms route', () => {
     })
 
     test('Testing PATCH /forms/{id} route with privacyNoticeUrl returns "updated" status', async () => {
+      jest.mocked(getForm).mockResolvedValue(stubFormMetadataOutput) // Mock draft form (no live property)
       jest.mocked(updateFormMetadata).mockResolvedValue('test-form')
 
       const response = await server.inject({
@@ -1004,6 +1006,105 @@ describe('Forms route', () => {
         })
       }
     )
+
+    test('Testing PATCH /forms/{id} route on live form without FormPublish scope returns 403 Forbidden', async () => {
+      const liveForm = {
+        ...stubFormMetadataOutput,
+        live: {
+          createdAt: now,
+          createdBy: author,
+          updatedAt: now,
+          updatedBy: author
+        }
+      }
+
+      const authWithoutPublishScope = {
+        ...auth,
+        credentials: {
+          ...auth.credentials,
+          scope: ['form-edit', 'form-read'] // Missing form-publish
+        }
+      }
+
+      jest.mocked(getForm).mockResolvedValue(liveForm)
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/forms/661e4ca5039739ef2902b214',
+        payload: { teamName: 'Updated Team Name' },
+        auth: authWithoutPublishScope
+      })
+
+      expect(response.statusCode).toBe(403)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'Forbidden',
+        message: 'Form is live - FormPublish scope required to update metadata'
+      })
+    })
+
+    test('Testing PATCH /forms/{id} route on live form with FormPublish scope succeeds', async () => {
+      const liveForm = {
+        ...stubFormMetadataOutput,
+        live: {
+          createdAt: now,
+          createdBy: author,
+          updatedAt: now,
+          updatedBy: author
+        }
+      }
+
+      jest.mocked(getForm).mockResolvedValue(liveForm)
+      jest.mocked(updateFormMetadata).mockResolvedValue('test-form')
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/forms/661e4ca5039739ef2902b214',
+        payload: { teamName: 'Updated Team Name' },
+        auth // This includes form-publish scope
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        slug: 'test-form',
+        status: 'updated'
+      })
+    })
+
+    test('Testing PATCH /forms/{id} route on draft form without FormPublish scope succeeds', async () => {
+      const draftForm = {
+        ...stubFormMetadataOutput
+        // No live property = draft form
+      }
+
+      jest.mocked(getForm).mockResolvedValue(draftForm)
+      jest.mocked(updateFormMetadata).mockResolvedValue('test-form')
+
+      const authWithoutPublishScope = {
+        ...auth,
+        credentials: {
+          ...auth.credentials,
+          scope: ['form-edit', 'form-read'] // Missing form-publish, but should still work for draft forms
+        }
+      }
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/forms/661e4ca5039739ef2902b214',
+        payload: { teamName: 'Updated Team Name' },
+        auth: authWithoutPublishScope
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id: stubFormMetadataOutput.id,
+        slug: 'test-form',
+        status: 'updated'
+      })
+    })
 
     test('Testing POST /forms route with a slug that already exists returns 400 FormAlreadyExistsError', async () => {
       jest
