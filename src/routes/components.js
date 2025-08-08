@@ -1,6 +1,5 @@
-import { componentPayloadSchemaV2 } from '@defra/forms-model'
+import { Scopes, componentPayloadSchemaV2 } from '@defra/forms-model'
 
-import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
   createComponentOnDraftDefinition,
   deleteComponentOnDraftDefinition,

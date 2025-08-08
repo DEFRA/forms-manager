@@ -1,12 +1,12 @@
 import {
   FormStatus,
+  Scopes,
   formMetadataInputKeys,
   formMetadataInputSchema,
   queryOptionsSchema
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,

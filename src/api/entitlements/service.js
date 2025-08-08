@@ -1,6 +1,6 @@
+import { RoleScopes, Roles } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { RoleScopes, Roles } from '~/src/api/entitlements/constants.js'
 import { config } from '~/src/config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { getJson } from '~/src/lib/fetch.js'

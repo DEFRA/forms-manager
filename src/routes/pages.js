@@ -1,6 +1,5 @@
-import { pagePayloadSchemaV2 } from '@defra/forms-model'
+import { Scopes, pagePayloadSchemaV2 } from '@defra/forms-model'
 
-import { Scopes } from '~/src/api/entitlements/constants.js'
 import { reorderDraftFormDefinitionPages } from '~/src/api/forms/service/definition.js'
 import {
   createPageOnDraftDefinition,

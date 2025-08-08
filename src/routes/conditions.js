@@ -1,6 +1,5 @@
-import { conditionWrapperSchemaV2 } from '@defra/forms-model'
+import { Scopes, conditionWrapperSchemaV2 } from '@defra/forms-model'
 
-import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
   addConditionToDraftFormDefinition,
   removeConditionOnDraftFormDefinition,
