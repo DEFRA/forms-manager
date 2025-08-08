@@ -107,7 +107,8 @@ describe('entitlements service', () => {
 
       expect(result).toEqual([])
       expect(mockLogger.error).toHaveBeenCalledWith(
-        `[entitlementsApi] Failed to fetch scopes for user ${testOid}: HTTP 404`
+        `[entitlementsApi] Failed to fetch scopes for user ${testOid}`,
+        boomError
       )
     })
 

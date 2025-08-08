@@ -4,6 +4,7 @@ import {
   formMetadataInputSchema,
   queryOptionsSchema
 } from '@defra/forms-model'
+import Boom from '@hapi/boom'
 
 import { Scopes } from '~/src/api/entitlements/constants.js'
 import {
@@ -94,6 +95,16 @@ export default [
       const { auth, params, payload } = request
       const author = getAuthor(auth.credentials.user)
       const { id } = params
+
+      const form = await getForm(id)
+      if (form.live) {
+        const userScopes = auth.credentials.scope ?? []
+        if (!userScopes.includes(Scopes.FormPublish)) {
+          throw Boom.forbidden(
+            'Form is live - FormPublish scope required to update metadata'
+          )
+        }
+      }
 
       const slug = await updateFormMetadata(id, payload, author)
 
