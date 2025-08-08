@@ -201,7 +201,7 @@ export const config = convict({
   entitlementUrl: {
     doc: 'Forms entitlements API URL',
     format: String,
-    default: 'http://localhost:3003',
+    default: 'http://localhost:3004',
     env: 'ENTITLEMENT_URL'
   },
   useEntitlementApi: {
