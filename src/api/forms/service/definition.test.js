@@ -1,19 +1,22 @@
 import {
+  AuditEventMessageType,
   Engine,
+  FormDefinitionRequestType,
   FormStatus,
   formDefinitionSchema,
   formDefinitionV2Schema
 } from '@defra/forms-model'
-import Boom from '@hapi/boom'
-import { ObjectId } from 'mongodb'
-import { pino } from 'pino'
-
 import {
   buildDefinition,
   buildQuestionPage,
   buildSummaryPage,
   buildTextFieldComponent
-} from '~/src/api/forms/__stubs__/definition.js'
+} from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
+import { ObjectId } from 'mongodb'
+import { pino } from 'pino'
+
+import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -46,6 +49,8 @@ import {
 } from '~/src/api/forms/service/index.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import * as publishBase from '~/src/messaging/publish-base.js'
+import { saveToS3 } from '~/src/messaging/s3.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -53,7 +58,9 @@ jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
-jest.mock('~/src/messaging/publish.js')
+jest.mock('~/src/messaging/publish-base.js')
+jest.mock('~/src/messaging/s3.js')
+
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
 const { empty: emptyFormWithSummary } = /** @type {typeof formTemplates} */ (
@@ -89,18 +96,17 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(formMetadata.updateAudit)
+      .mockResolvedValue(formMetadataDocument)
   })
 
   describe('createDraftFromLive', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.createDraftFromLive).mockResolvedValueOnce()
-      jest.mocked(formMetadata.update).mockResolvedValueOnce({
-        acknowledged: true,
-        modifiedCount: 1,
-        matchedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null
-      })
+      jest
+        .mocked(formMetadata.update)
+        .mockResolvedValueOnce(buildMetadataDocument())
     })
 
     it("should throw bad request if there's no live definition", async () => {
@@ -142,13 +148,9 @@ describe('Forms service', () => {
   describe('createLiveFromDraft', () => {
     beforeEach(() => {
       jest.mocked(formDefinition.createLiveFromDraft).mockResolvedValue()
-      jest.mocked(formMetadata.update).mockResolvedValue({
-        acknowledged: true,
-        modifiedCount: 1,
-        matchedCount: 1,
-        upsertedCount: 0,
-        upsertedId: null
-      })
+      jest
+        .mocked(formMetadata.update)
+        .mockResolvedValue(buildMetadataDocument())
     })
 
     it('should create a live state from existing draft form V1', async () => {
@@ -329,7 +331,7 @@ describe('Forms service', () => {
 
   describe('createForm', () => {
     beforeEach(() => {
-      jest.mocked(formDefinition.update).mockResolvedValue()
+      jest.mocked(formDefinition.update).mockResolvedValue(buildDefinition())
       jest.mocked(formTemplates.emptyV2).mockReturnValue(definitionV2)
       jest.mocked(formMetadata.create).mockResolvedValue({
         acknowledged: true,
@@ -951,6 +953,14 @@ describe('Forms service', () => {
   })
 
   describe('updateDraftFormDefinition', () => {
+    const s3Meta = {
+      fileId: '1111',
+      filename: 'definition.json',
+      s3Key: 'dir/definition.json'
+    }
+    beforeEach(() => {
+      jest.mocked(saveToS3).mockResolvedValue(s3Meta)
+    })
     const formDefinitionCustomisedTitle = emptyFormWithSummary()
     formDefinitionCustomisedTitle.name =
       "A custom form name that shouldn't be allowed"
@@ -958,6 +968,7 @@ describe('Forms service', () => {
     it('should update the draft form definition with required attributes upon creation', async () => {
       const updateSpy = jest.spyOn(formDefinition, 'update')
       const formMetadataGetSpy = jest.spyOn(formMetadata, 'get')
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       await updateDraftFormDefinition(
         '123',
@@ -980,6 +991,15 @@ describe('Forms service', () => {
       expect(formDefinitionCustomisedTitle.name).toBe(
         formMetadataDocument.title
       )
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REPLACE_DRAFT,
+        payload: undefined,
+        s3Meta
+      })
     })
 
     it('should use V2 schema when form definition has schema version 2 (regardless of engine)', async () => {
@@ -1104,7 +1124,7 @@ describe('Forms service', () => {
       jest
         .mocked(formDefinition.reorderPages)
         .mockResolvedValueOnce(modifyReorderPages(definition, orderList))
-
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
       const expectedDefinition = buildDefinition({
         pages: [pageOne, pageTwo, summaryPage]
       })
@@ -1117,6 +1137,16 @@ describe('Forms service', () => {
       const [, order] = jest.mocked(formDefinition.reorderPages).mock.calls[0]
       expect(order).toEqual(orderList)
       expect(result).toEqual(expectedDefinition)
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REORDER_PAGES,
+        payload: { pageOrder: orderList }
+      })
+
       expectMetadataUpdate()
     })
 

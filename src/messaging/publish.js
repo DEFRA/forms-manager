@@ -1,15 +1,18 @@
-import { messageSchema } from '@defra/forms-model'
+import { FormDefinitionRequestType, messageSchema } from '@defra/forms-model'
 import Joi from 'joi'
 
+import { mapForm } from '~/src/api/forms/service/shared.js'
 import {
   formCreatedEventMapper,
   formDraftCreatedFromLiveMapper,
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
   formMigratedMapper,
-  formTitleUpdatedMapper
+  formTitleUpdatedMapper,
+  formUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
+import { saveToS3 } from '~/src/messaging/s3.js'
 
 /**
  * Helper to validate and publish an event
@@ -127,5 +130,46 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
 }
 
 /**
- * @import { AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ *
+ * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
+ * @param {unknown} payload
+ * @param {FormDefinitionRequestType} requestType
+ */
+export async function publishFormUpdatedEvent(
+  metadataDocument,
+  payload,
+  requestType
+) {
+  const metadata = mapForm(metadataDocument)
+  const auditMessage = formUpdatedMapper(metadata, requestType, { payload })
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ *
+ * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
+ * @param {FormDefinition} definition
+ */
+export async function publishFormDraftReplacedEvent(
+  metadataDocument,
+  definition
+) {
+  const metadata = mapForm(metadataDocument)
+  const s3Meta = await saveToS3(metadata.id, definition)
+
+  const auditMessage = formUpdatedMapper(
+    metadata,
+    FormDefinitionRequestType.REPLACE_DRAFT,
+    {
+      s3Meta
+    }
+  )
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { WithId } from 'mongodb'
  */

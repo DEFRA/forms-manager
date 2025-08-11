@@ -57,13 +57,21 @@ export async function insert(id, formDefinition, session, schema) {
  * @param {FormDefinition} formDefinition - form definition (JSON object)
  * @param {ClientSession} session - mongo transaction session
  * @param {ObjectSchema<FormDefinition>} schema - the schema to use
+ * @returns {Promise<FormDefinition>}
  */
 export async function update(id, formDefinition, session, schema) {
   logger.info(`Updating form for form ID ${id}`)
 
-  await modifyDraft(id, () => formDefinition, session, schema)
+  const updateResult = await modifyDraft(
+    id,
+    () => formDefinition,
+    session,
+    schema
+  )
 
   logger.info(`Updated form for form ID ${id}`)
+
+  return updateResult.draft
 }
 
 /**
@@ -187,6 +195,7 @@ export async function remove(formId, session) {
  * @param {string} formId - the ID of the form
  * @param {Engine} engineVersion - the engine version e.g. 'V1' or 'V2'
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function setEngineVersion(formId, engineVersion, session) {
   logger.info(
@@ -196,11 +205,13 @@ export async function setEngineVersion(formId, engineVersion, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyEngineVersion(draft, engineVersion)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(
     `Updated engine version to ${engineVersion} for form ID ${formId}`
   )
+
+  return result.draft
 }
 
 /**
@@ -209,6 +220,7 @@ export async function setEngineVersion(formId, engineVersion, session) {
  * @param {string} name - new name for the form
  * @param {ClientSession} session
  * @param {ObjectSchema<FormDefinition>} schema - the schema to use
+ * @returns {Promise<FormDefinition>}
  */
 export async function updateName(formId, name, session, schema) {
   logger.info(`Updating form name for form ID ${formId}`)
@@ -216,9 +228,11 @@ export async function updateName(formId, name, session, schema) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyName(draft, name)
 
-  await modifyDraft(formId, callback, session, schema)
+  const result = await modifyDraft(formId, callback, session, schema)
 
   logger.info(`Updated form name for form ID ${formId}`)
+
+  return result.draft
 }
 
 /**
@@ -226,6 +240,7 @@ export async function updateName(formId, name, session, schema) {
  * @param {string} formId - the ID of the form
  * @param {RemovePagePredicate} predicate
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function deletePages(formId, predicate, session) {
   logger.info(`Removing page on ${formId}`)
@@ -233,9 +248,11 @@ export async function deletePages(formId, predicate, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeletePages(draft, predicate)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Removed page on ${formId}`)
+
+  return result.draft
 }
 
 /**
@@ -243,6 +260,7 @@ export async function deletePages(formId, predicate, session) {
  * @param {string} formId - the ID of the form
  * @param {Page} page - the new page
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function addPage(formId, page, session) {
   logger.info(`Adding page on form ID ${formId}`)
@@ -251,9 +269,11 @@ export async function addPage(formId, page, session) {
   const callback = (draft) =>
     modifyAddPage(draft, page, getPageInsertPosition(draft))
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Added page on form ID ${formId}`)
+
+  return result.draft
 }
 
 /**
@@ -262,7 +282,7 @@ export async function addPage(formId, page, session) {
  * @param {string} pageId
  * @param {Page} page
  * @param {ClientSession} session
- * @returns {Promise<void>}
+ * @returns {Promise<FormDefinition>}
  */
 export async function updatePage(formId, pageId, page, session) {
   logger.info(`Updating page ID ${pageId} on form ID ${formId}`)
@@ -270,9 +290,11 @@ export async function updatePage(formId, pageId, page, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyUpdatePage(draft, page, pageId)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Updated page ID ${pageId} on form ID ${formId}`)
+
+  return result.draft
 }
 
 /**
@@ -280,6 +302,7 @@ export async function updatePage(formId, pageId, page, session) {
  * @param {string} formId
  * @param {string[]} order
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function reorderPages(formId, order, session) {
   logger.info(`Reordering pages on form ID ${formId}`)
@@ -300,6 +323,7 @@ export async function reorderPages(formId, order, session) {
  * @param {string} pageId
  * @param {string[]} order
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function reorderComponents(formId, pageId, order, session) {
   logger.info(`Reordering components on form ID ${formId} page ID ${pageId}`)
@@ -321,7 +345,7 @@ export async function reorderComponents(formId, pageId, order, session) {
  * @param {ComponentDef} component
  * @param {ClientSession} session
  * @param {number | undefined} [position]
- * @returns {Promise<void>}
+ * @returns {Promise<FormDefinition>}
  */
 export async function addComponent(
   formId,
@@ -336,9 +360,11 @@ export async function addComponent(
   const callback = (draft) =>
     modifyAddComponent(draft, pageId, component, position)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Added a new component to form ID ${formId}`)
+
+  return result.draft
 }
 
 /**
@@ -379,6 +405,7 @@ export async function updateComponent(
  * @param {string} pageId
  * @param {string} componentId
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function deleteComponent(formId, pageId, componentId, session) {
   logger.info(
@@ -388,11 +415,13 @@ export async function deleteComponent(formId, pageId, componentId, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeleteComponent(draft, pageId, componentId)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(
     `Deleted component ID ${componentId} on page ID ${pageId} and form ID ${formId}`
   )
+
+  return result.draft
 }
 
 /**
@@ -401,6 +430,7 @@ export async function deleteComponent(formId, pageId, componentId, session) {
  * @param {string} pageId
  * @param {PatchPageFields} pageFields
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function updatePageFields(formId, pageId, pageFields, session) {
   const pageFieldKeys = Object.keys(pageFields)
@@ -412,11 +442,13 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyUpdatePageFields(draft, pageId, pageFields)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(
     `Updated page fields ${pageFieldKeys.toString()} on page ID ${pageId} and form ID ${formId}`
   )
+
+  return result.draft
 }
 
 /**
@@ -424,6 +456,7 @@ export async function updatePageFields(formId, pageId, pageFields, session) {
  * @param {string} formId
  * @param {string} pageId
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function deletePage(formId, pageId, session) {
   logger.info(`Deleting page ID ${pageId} on form ID ${formId}`)
@@ -431,9 +464,11 @@ export async function deletePage(formId, pageId, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeletePage(draft, pageId)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted page ID ${pageId} on form ID ${formId}`)
+
+  return result.draft
 }
 
 /**
@@ -483,6 +518,7 @@ export async function updateList(formId, listId, list, session) {
  * @param {string} formId
  * @param {string} listId
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function deleteList(formId, listId, session) {
   logger.info(`Deleting list ID ${listId} on form ID ${formId}`)
@@ -490,9 +526,11 @@ export async function deleteList(formId, listId, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyDeleteList(draft, listId)
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted list ID ${listId} on form ID ${formId}`)
+
+  return result.draft
 }
 
 /**
@@ -541,6 +579,7 @@ export async function updateCondition(formId, conditionId, condition, session) {
  * @param {string} formId
  * @param {string} conditionId
  * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
  */
 export async function deleteCondition(formId, conditionId, session) {
   logger.info(`Deleting condition ID ${conditionId} on form ID ${formId}`)
@@ -552,9 +591,11 @@ export async function deleteCondition(formId, conditionId, session) {
     return modifyDeleteCondition(draft, conditionId)
   }
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted condition ID ${conditionId} on form ID ${formId}`)
+
+  return result.draft
 }
 
 /**

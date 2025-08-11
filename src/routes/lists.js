@@ -1,4 +1,4 @@
-import { listSchemaV2 } from '@defra/forms-model'
+import { Scopes, listSchemaV2 } from '@defra/forms-model'
 
 import {
   addListToDraftFormDefinition,
@@ -39,6 +39,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: formByIdSchema,
         payload: listSchemaV2,
@@ -71,6 +74,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: listByIdSchema,
         payload: listSchemaWithRequiredIdSchema,
@@ -97,6 +103,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: listByIdSchema
       }

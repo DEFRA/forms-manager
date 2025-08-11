@@ -1,6 +1,7 @@
 import {
   AuditEventMessageCategory,
   AuditEventMessageSchemaVersion,
+  AuditEventMessageSource,
   AuditEventMessageType
 } from '@defra/forms-model'
 import { buildMetaData } from '@defra/forms-model/stubs'
@@ -58,6 +59,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(1)
       expect(formOrgUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -95,6 +97,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(1)
       expect(formNameUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -132,6 +135,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(1)
       expect(formEmailUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -170,6 +174,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(2)
       expect(formNameUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -191,6 +196,7 @@ describe('publish', () => {
       })
       expect(formEmailUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -228,6 +234,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(1)
       expect(formUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -265,6 +272,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(1)
       expect(formUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -302,6 +310,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(1)
       expect(formUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
@@ -350,6 +359,7 @@ describe('publish', () => {
       expect(messages).toHaveLength(1)
       expect(formUpdatedMessage).toEqual({
         entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
         messageCreatedAt: expect.any(Date),
         schemaVersion: AuditEventMessageSchemaVersion.V1,
         category: AuditEventMessageCategory.FORM,
