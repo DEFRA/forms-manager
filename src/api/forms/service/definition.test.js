@@ -1262,7 +1262,7 @@ describe('Forms service', () => {
       })
       expect(auditMessage.data).toMatchObject({
         requestType: FormDefinitionRequestType.REORDER_COMPONENTS,
-        payload: { componentOrder: orderList }
+        payload: { pageId: pageOneId, componentOrder: orderList }
       })
       expectMetadataUpdate()
     })

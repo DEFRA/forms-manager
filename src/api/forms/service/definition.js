@@ -375,7 +375,7 @@ export async function reorderDraftFormDefinitionComponents(
 
       await publishFormUpdatedEvent(
         metadataDocument,
-        { componentOrder: order },
+        { pageId, componentOrder: order },
         FormDefinitionRequestType.REORDER_COMPONENTS
       )
 
