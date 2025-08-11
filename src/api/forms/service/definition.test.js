@@ -1216,6 +1216,7 @@ describe('Forms service', () => {
 
     it('should reorder the components', async () => {
       const orderList = [componentTwoId, componentThreeId, componentOneId]
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
       jest
         .mocked(formDefinition.reorderComponents)
         .mockResolvedValueOnce(
@@ -1255,6 +1256,14 @@ describe('Forms service', () => {
         .calls[0]
       expect(order).toEqual(orderList)
       expect(result).toEqual(expectedDefinition)
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REORDER_COMPONENTS,
+        payload: { componentOrder: orderList }
+      })
       expectMetadataUpdate()
     })
 

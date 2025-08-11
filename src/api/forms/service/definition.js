@@ -47,7 +47,6 @@ export function getFormDefinition(
   state = FormStatus.Draft,
   session = undefined
 ) {
-  // TODO: if form def is v1 and target v2 - use decorator
   return formDefinition.get(formId, state, session)
 }
 
@@ -368,7 +367,17 @@ export async function reorderDraftFormDefinitionComponents(
         session
       )
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { componentOrder: order },
+        FormDefinitionRequestType.REORDER_COMPONENTS
+      )
 
       return reorderedForm
     })
