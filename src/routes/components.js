@@ -1,4 +1,4 @@
-import { componentPayloadSchemaV2 } from '@defra/forms-model'
+import { Scopes, componentPayloadSchemaV2 } from '@defra/forms-model'
 
 import {
   createComponentOnDraftDefinition,
@@ -45,6 +45,9 @@ export default [
       return component
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: pageByIdSchema,
         payload: componentPayloadSchemaV2,
@@ -70,6 +73,9 @@ export default [
       )
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: pageByIdSchema,
         payload: sortIdsSchema
@@ -96,6 +102,9 @@ export default [
       )
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: componentByIdSchema,
         payload: componentPayloadWithRequiredIdSchema
@@ -121,6 +130,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: componentByIdSchema
       }

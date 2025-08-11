@@ -1,5 +1,9 @@
 import Jwt from '@hapi/jwt'
 
+import {
+  getDefaultScopes,
+  getUserScopes
+} from '~/src/api/entitlements/service.js'
 import { config } from '~/src/config/index.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
@@ -8,6 +12,7 @@ const oidcJwksUri = config.get('oidcJwksUri')
 const oidcVerifyAud = config.get('oidcVerifyAud')
 const oidcVerifyIss = config.get('oidcVerifyIss')
 const roleEditorGroupId = config.get('roleEditorGroupId')
+const useEntitlementApi = config.get('useEntitlementApi')
 
 const logger = createLogger()
 
@@ -51,9 +56,9 @@ function processGroupsClaim(groupsClaim, oid) {
 /**
  * Validates user credentials from JWT token
  * @param {Artifacts<UserCredentials>} artifacts - JWT artifacts
- * @returns {{ isValid: boolean, credentials?: any }} Validation result
+ * @returns {Promise<{ isValid: boolean, credentials?: any }>} Validation result
  */
-function validateUserCredentials(artifacts) {
+async function validateUserCredentials(artifacts) {
   const user = artifacts.decoded.payload
 
   if (!user) {
@@ -75,7 +80,7 @@ function validateUserCredentials(artifacts) {
 
   const processedGroups = processGroupsClaim(groupsClaim, oid)
 
-  if (!processedGroups.includes(roleEditorGroupId)) {
+  if (!useEntitlementApi && !processedGroups.includes(roleEditorGroupId)) {
     logger.warn(
       `[authGroupNotFound] Auth: User ${oid}: Authorisation failed. Required group "${roleEditorGroupId}" not found`
     )
@@ -84,13 +89,23 @@ function validateUserCredentials(artifacts) {
     }
   }
 
+  let userScopes = []
+
+  if (useEntitlementApi) {
+    const authToken = artifacts.token
+    userScopes = await getUserScopes(oid, authToken)
+  } else {
+    userScopes = getDefaultScopes()
+  }
+
   return {
     isValid: true,
     credentials: {
       user: {
         ...user,
         groups: processedGroups
-      }
+      },
+      scope: userScopes
     }
   }
 }

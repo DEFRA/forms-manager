@@ -38,12 +38,6 @@ export const config = convict({
     default: null,
     env: 'SERVICE_VERSION'
   }),
-  cdpEnvironment: {
-    doc: 'The CDP environment the app is running in. With the addition of "local" for local development',
-    format: ['local', 'dev', 'test', 'perf-test', 'prod'],
-    default: 'local',
-    env: 'ENVIRONMENT'
-  },
   root: {
     doc: 'Project root',
     format: String,
@@ -167,6 +161,54 @@ export const config = convict({
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
     }
+  },
+  awsRegion: {
+    doc: 'AWS region',
+    format: String,
+    default: 'eu-west-2',
+    env: 'AWS_REGION'
+  },
+  snsEndpoint: {
+    doc: 'The SNS endpoint, if required (e.g. a local development dev service)',
+    format: String,
+    default: '',
+    env: 'SNS_ENDPOINT'
+  },
+  snsTopicArn: {
+    doc: 'SNS topic ARN',
+    format: String,
+    default: '',
+    env: 'SNS_TOPIC_ARN'
+  },
+  publishAuditEvents: {
+    doc: 'Publish audit events for forms-audit-api',
+    format: Boolean,
+    default: !isProduction,
+    env: 'FEATURE_FLAG_PUBLISH_AUDIT_EVENTS'
+  },
+  s3Endpoint: {
+    doc: 'The S3 HTTP(S) endpoint, if required (e.g. a local development dev service). Activating this will force path style addressing for compatibility with Localstack.',
+    format: String,
+    default: '',
+    env: 'S3_ENDPOINT'
+  },
+  s3Bucket: {
+    doc: 'S3 bucket name',
+    format: String,
+    default: '',
+    env: 'FORM_DEF_BUCKET_NAME'
+  },
+  entitlementUrl: {
+    doc: 'Forms entitlements API URL',
+    format: String,
+    default: 'http://localhost:3004',
+    env: 'ENTITLEMENT_URL'
+  },
+  useEntitlementApi: {
+    doc: 'Feature flag to enable entitlement API for fetching scopes',
+    format: Boolean,
+    default: false,
+    env: 'FEATURE_FLAG_USE_ENTITLEMENT_API'
   }
 })
 

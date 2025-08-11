@@ -1,9 +1,11 @@
 import {
   FormStatus,
+  Scopes,
   formMetadataInputKeys,
   formMetadataInputSchema,
   queryOptionsSchema
 } from '@defra/forms-model'
+import Boom from '@hapi/boom'
 
 import {
   createDraftFromLive,
@@ -75,6 +77,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         payload: createFormSchema
       }
@@ -91,6 +96,16 @@ export default [
       const author = getAuthor(auth.credentials.user)
       const { id } = params
 
+      const form = await getForm(id)
+      if (form.live) {
+        const userScopes = auth.credentials.scope ?? []
+        if (!userScopes.includes(Scopes.FormPublish)) {
+          throw Boom.forbidden(
+            'Form is live - FormPublish scope required to update metadata'
+          )
+        }
+      }
+
       const slug = await updateFormMetadata(id, payload, author)
 
       return {
@@ -100,6 +115,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: formByIdSchema,
         // Take the form metadata update schema and make all fields optional. This acts similar to Partial<T> in Typescript.
@@ -155,9 +173,10 @@ export default [
      * @param {RequestFormById} request
      */
     async handler(request) {
+      const { auth } = request
       const { id } = request.params
-
-      await removeForm(id)
+      const author = getAuthor(auth.credentials.user)
+      await removeForm(id, author)
 
       return {
         id,
@@ -165,6 +184,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormDelete}`]
+      },
       validate: {
         params: formByIdSchema
       }
@@ -207,6 +229,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         payload: updateFormDefinitionSchema
       }
@@ -225,6 +250,9 @@ export default [
       return migrateDefinitionToV2(params.id, author)
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: migrateDefinitionParamSchema
       }
@@ -269,6 +297,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormPublish}`]
+      },
       validate: {
         params: formByIdSchema
       }
@@ -294,6 +325,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: formByIdSchema
       }

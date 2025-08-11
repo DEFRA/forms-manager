@@ -2,12 +2,12 @@
 import { FormStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
-import { getAuthor } from '~/src/helpers/get-author.js'
+import author from '~/src/api/forms/service/__stubs__/author.js'
+
 const id = '661e4ca5039739ef2902b214'
 const slug = 'test-form'
-const author = getAuthor()
 export const DRAFT = 'draft'
-
+export const BASE_CREATED_DATE = new Date('2020-01-01')
 /**
  * @satisfies {FormMetadataInput}
  */
@@ -32,14 +32,14 @@ export const formMetadataOutput = {
   id,
   slug,
   draft: {
-    createdAt: expect.any(Date),
+    createdAt: BASE_CREATED_DATE,
     createdBy: author,
-    updatedAt: expect.any(Date),
+    updatedAt: BASE_CREATED_DATE,
     updatedBy: author
   },
-  createdAt: expect.any(Date),
+  createdAt: BASE_CREATED_DATE,
   createdBy: author,
-  updatedAt: expect.any(Date),
+  updatedAt: BASE_CREATED_DATE,
   updatedBy: author
 }
 
@@ -51,20 +51,20 @@ export const formMetadataWithLiveOutput = {
   id,
   slug,
   draft: {
-    createdAt: expect.any(Date),
+    createdAt: BASE_CREATED_DATE,
     createdBy: author,
-    updatedAt: expect.any(Date),
+    updatedAt: BASE_CREATED_DATE,
     updatedBy: author
   },
   live: {
-    createdAt: expect.any(Date),
+    createdAt: BASE_CREATED_DATE,
     createdBy: author,
-    updatedAt: expect.any(Date),
+    updatedAt: BASE_CREATED_DATE,
     updatedBy: author
   },
-  createdAt: expect.any(Date),
+  createdAt: BASE_CREATED_DATE,
   createdBy: author,
-  updatedAt: expect.any(Date),
+  updatedAt: BASE_CREATED_DATE,
   updatedBy: author
 }
 
@@ -76,9 +76,9 @@ export const formMetadataDocument = {
   _id: new ObjectId(id),
   slug: formMetadataOutput.slug,
   draft: formMetadataOutput.draft,
-  createdAt: expect.any(Date),
+  createdAt: BASE_CREATED_DATE,
   createdBy: author,
-  updatedAt: expect.any(Date),
+  updatedAt: BASE_CREATED_DATE,
   updatedBy: author
 }
 
@@ -91,9 +91,9 @@ export const formMetadataWithLiveDocument = {
   slug: formMetadataWithLiveOutput.slug,
   draft: formMetadataWithLiveOutput.draft,
   live: formMetadataWithLiveOutput.live,
-  createdAt: expect.any(Date),
+  createdAt: BASE_CREATED_DATE,
   createdBy: author,
-  updatedAt: expect.any(Date),
+  updatedAt: BASE_CREATED_DATE,
   updatedBy: author
 }
 

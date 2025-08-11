@@ -1,5 +1,6 @@
 import {
   ControllerType,
+  FormDefinitionRequestType,
   FormStatus,
   SchemaVersion,
   formDefinitionV2Schema
@@ -14,6 +15,10 @@ import {
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import {
+  publishFormMigratedEvent,
+  publishFormUpdatedEvent
+} from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -51,7 +56,18 @@ export async function repositionSummaryPipeline(formId, definition, author) {
 
       await formDefinition.addPage(formId, summaryWithId, session)
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      // TODO: Does this need an enum?
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { page: summaryWithId },
+        FormDefinitionRequestType.REPOSITION_SUMMARY
+      )
     })
   } catch (err) {
     logger.error(
@@ -96,6 +112,8 @@ export async function migrateDefinitionToV2(formId, author) {
       )
 
       await formMetadata.updateAudit(formId, author, session)
+
+      await publishFormMigratedEvent(formId, new Date(), author)
     })
   } catch (err) {
     logger.error(

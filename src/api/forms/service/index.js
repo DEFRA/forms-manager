@@ -17,6 +17,13 @@ import {
 } from '~/src/api/forms/service/shared.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
+import {
+  bulkPublishEvents,
+  publishFormCreatedEvent,
+  publishFormDraftDeletedEvent,
+  publishFormTitleUpdatedEvent
+} from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -68,12 +75,10 @@ export async function createForm(metadataInput, author) {
       metadata = mapForm({ ...document, _id })
 
       // Create the draft form definition
-      await formDefinition.insert(
-        metadata.id,
-        definition,
-        session,
-        formDefinitionV2Schema
-      )
+      // prettier-ignore
+      await formDefinition.insert(metadata.id, definition, session, formDefinitionV2Schema)
+
+      await publishFormCreatedEvent(metadata)
     })
   } finally {
     await session.endSession()
@@ -169,6 +174,15 @@ export async function updateFormMetadata(formId, formUpdate, author) {
           session,
           schema
         )
+
+        await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
+      }
+
+      const auditMessages = getFormMetadataAuditMessages(form, updatedForm)
+
+      // Publish any metadata audit messages
+      if (auditMessages.length) {
+        await bulkPublishEvents(auditMessages)
       }
     })
 
@@ -195,8 +209,9 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 /**
  * Removes a form (metadata and definition)
  * @param {string} formId
+ * @param {FormMetadataAuthor} author
  */
-export async function removeForm(formId) {
+export async function removeForm(formId, author) {
   logger.info(`Removing form with ID ${formId}`)
 
   const form = await getForm(formId)
@@ -211,6 +226,7 @@ export async function removeForm(formId) {
     await session.withTransaction(async () => {
       await formMetadata.remove(formId, session)
       await formDefinition.remove(formId, session)
+      await publishFormDraftDeletedEvent(form, author)
     })
   } finally {
     await session.endSession()
@@ -218,6 +234,7 @@ export async function removeForm(formId) {
 
   logger.info(`Removed form with ID ${formId}`)
 }
+
 /**
  * @import { FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'

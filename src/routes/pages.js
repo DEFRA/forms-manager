@@ -1,4 +1,4 @@
-import { pagePayloadSchemaV2 } from '@defra/forms-model'
+import { Scopes, pagePayloadSchemaV2 } from '@defra/forms-model'
 
 import { reorderDraftFormDefinitionPages } from '~/src/api/forms/service/definition.js'
 import {
@@ -33,6 +33,9 @@ export default [
       return createPageOnDraftDefinition(params.id, payload, author)
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: formByIdSchema,
         payload: pagePayloadSchemaV2
@@ -52,6 +55,9 @@ export default [
       return reorderDraftFormDefinitionPages(params.id, payload, author)
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: formByIdSchema,
         payload: sortIdsSchema
@@ -76,6 +82,9 @@ export default [
       )
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: pageByIdSchema,
         payload: patchPageSchema
@@ -101,6 +110,9 @@ export default [
       }
     },
     options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
       validate: {
         params: pageByIdSchema
       }

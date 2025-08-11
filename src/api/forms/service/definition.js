@@ -1,4 +1,8 @@
-import { Engine, FormStatus } from '@defra/forms-model'
+import {
+  Engine,
+  FormDefinitionRequestType,
+  FormStatus
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
@@ -12,6 +16,12 @@ import {
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
+import {
+  publishDraftCreatedFromLiveEvent,
+  publishFormDraftReplacedEvent,
+  publishFormUpdatedEvent,
+  publishLiveCreatedFromDraftEvent
+} from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -70,7 +80,14 @@ export async function updateDraftFormDefinition(formId, definition, author) {
         logger.info(`Updating form definition (draft) for form ID ${formId}`)
 
         await formDefinition.update(formId, definition, session, schema)
-        await formMetadata.updateAudit(formId, author, session)
+        const updatedMetadata = await formMetadata.updateAudit(
+          formId,
+          author,
+          session
+        )
+
+        // Publish audit message
+        await publishFormDraftReplacedEvent(updatedMetadata, definition)
       })
     } finally {
       await session.endSession()
@@ -181,6 +198,9 @@ export async function createLiveFromDraft(formId, author) {
           },
           session
         )
+
+        // Publish audit message
+        await publishLiveCreatedFromDraftEvent(formId, now, author)
       })
     } finally {
       await session.endSession()
@@ -237,6 +257,9 @@ export async function createDraftFromLive(formId, author) {
 
         // Update the form with the new draft state
         await formMetadata.update(formId, { $set: set }, session)
+
+        // Publish audit message
+        await publishDraftCreatedFromLiveEvent(formId, now, author)
       })
     } finally {
       await session.endSession()
@@ -280,7 +303,17 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
         session
       )
 
-      await formMetadata.updateAudit(formId, author, session)
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { pageOrder: order },
+        FormDefinitionRequestType.REORDER_PAGES
+      )
 
       return reorderedForm
     })
