@@ -36,12 +36,12 @@ jest.mock('~/src/messaging/s3.js')
 jest.mock('~/src/messaging/publish-base.js')
 
 describe('publish', () => {
-  const formId = '3b1bf4b2-1603-4ca5-b885-c509245567aa'
+  const formId = '689b7ab1d0eeac9711a7fb33'
   const slug = 'audit-form'
   const title = 'My Audit Event Form'
   const organisation = 'Defra'
   const teamName = 'Forms'
-  const teamEmail = 'forms@example.com'
+  const teamEmail = 'forms@example.uk'
   const createdAt = new Date('2025-07-23')
   const createdBy = {
     id: '83f09a7d-c80c-4e15-bcf3-641559c7b8a7',
@@ -141,7 +141,7 @@ describe('publish', () => {
         createdAt: updatedAt,
         createdBy: updatedBy,
         data: {
-          formId: '3b1bf4b2-1603-4ca5-b885-c509245567aa',
+          formId,
           slug: 'audit-form',
           changes: {
             previous: {
