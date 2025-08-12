@@ -320,7 +320,7 @@ describe('Forms service', () => {
 
     it('should not update draft.updatedAt and draft.updatedBy when title is not updated', async () => {
       const input = {
-        organisation: 'new organisation'
+        organisation: 'Animal and Plant Health Agency – APHA'
       }
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
@@ -337,7 +337,7 @@ describe('Forms service', () => {
       expect(dbMetadataOperationArgs[0]).toBe(id)
       expect(dbMetadataOperationArgs[1]).toMatchObject({
         $set: {
-          organisation: 'new organisation',
+          organisation: 'Animal and Plant Health Agency – APHA',
           updatedAt: dateUsedInFakeTime,
           updatedBy: author
         }
@@ -459,7 +459,7 @@ describe('Forms service', () => {
 
     it('should not update draft.updatedAt and draft.updatedBy when title is not updated', async () => {
       const input = {
-        organisation: 'new organisation'
+        organisation: 'Animal and Plant Health Agency – APHA'
       }
 
       jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
@@ -476,7 +476,7 @@ describe('Forms service', () => {
       expect(dbMetadataOperationArgs[0]).toBe(id)
       expect(dbMetadataOperationArgs[1]).toMatchObject({
         $set: {
-          organisation: 'new organisation',
+          organisation: 'Animal and Plant Health Agency – APHA',
           updatedAt: dateUsedInFakeTime,
           updatedBy: author
         }
