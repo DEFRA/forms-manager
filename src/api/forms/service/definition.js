@@ -5,6 +5,7 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
+import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -15,6 +16,10 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
+import {
+  createFormVersion,
+  getLatestFormVersion
+} from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishDraftCreatedFromLiveEvent,
@@ -42,12 +47,28 @@ export async function listForms(options) {
  * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
  */
-export function getFormDefinition(
+export async function getFormDefinition(
   formId,
   state = FormStatus.Draft,
   session = undefined
 ) {
-  return formDefinition.get(formId, state, session)
+  const [definition, latestVersion] = await Promise.all([
+    formDefinition.get(formId, state, session),
+    getLatestFormVersion(formId).catch(() => null) // Handle case where no versions exist yet
+  ])
+
+  if (!latestVersion) {
+    return definition
+  }
+
+  return {
+    ...definition,
+    versionMetadata: {
+      version: latestVersion.versionNumber,
+      createdAt: latestVersion.createdAt,
+      status: latestVersion.status
+    }
+  }
 }
 
 /**
@@ -82,6 +103,15 @@ export async function updateDraftFormDefinition(formId, definition, author) {
         const updatedMetadata = await formMetadata.updateAudit(
           formId,
           author,
+          session
+        )
+
+        await createFormVersion(
+          formId,
+          author,
+          VersionChangeTypes.FORM_UPDATED,
+          'Form definition updated',
+          FormStatus.Draft,
           session
         )
 
@@ -197,6 +227,15 @@ export async function createLiveFromDraft(formId, author) {
           session
         )
 
+        await createFormVersion(
+          formId,
+          author,
+          'live_published',
+          'Form published to live',
+          FormStatus.Live,
+          session
+        )
+
         // Publish audit message
         await publishLiveCreatedFromDraftEvent(formId, now, author)
       })
@@ -253,8 +292,16 @@ export async function createDraftFromLive(formId, author) {
 
         logger.info(`Adding form metadata (draft) for form ID ${formId}`)
 
-        // Update the form with the new draft state
         await formMetadata.update(formId, { $set: set }, session)
+
+        await createFormVersion(
+          formId,
+          author,
+          'draft_created_from_live',
+          'Draft created from live version',
+          FormStatus.Draft,
+          session
+        )
 
         // Publish audit message
         await publishDraftCreatedFromLiveEvent(formId, now, author)
@@ -304,6 +351,15 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      await createFormVersion(
+        formId,
+        author,
+        'page_reordered',
+        'Pages reordered',
+        FormStatus.Draft,
         session
       )
 
@@ -369,6 +425,15 @@ export async function reorderDraftFormDefinitionComponents(
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      await createFormVersion(
+        formId,
+        author,
+        'component_reordered',
+        'Components reordered',
+        FormStatus.Draft,
         session
       )
 

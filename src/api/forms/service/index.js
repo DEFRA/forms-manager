@@ -2,6 +2,7 @@ import { FormStatus, formDefinitionV2Schema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
+import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import { removeFormErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -15,6 +16,10 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
+import {
+  createFormVersion,
+  removeFormVersions
+} from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
@@ -77,6 +82,16 @@ export async function createForm(metadataInput, author) {
       // Create the draft form definition
       // prettier-ignore
       await formDefinition.insert(metadata.id, definition, session, formDefinitionV2Schema)
+
+      // Create the first version of the form
+      await createFormVersion(
+        metadata.id,
+        author,
+        VersionChangeTypes.FORM_CREATED,
+        `Form '${title}' created`,
+        FormStatus.Draft,
+        session
+      )
 
       await publishFormCreatedEvent(metadata)
     })
@@ -175,7 +190,28 @@ export async function updateFormMetadata(formId, formUpdate, author) {
           schema
         )
 
+        // Create a new version for the title update
+        await createFormVersion(
+          formId,
+          author,
+          VersionChangeTypes.METADATA_UPDATED,
+          `Form title updated from '${form.title}' to '${formUpdate.title}'`,
+          FormStatus.Draft,
+          session
+        )
+
         await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
+      } else if (Object.keys(formUpdate).length > 0) {
+        // Create a new version for other metadata updates (organisation, teamName, teamEmail)
+        const changedFields = Object.keys(formUpdate).join(', ')
+        await createFormVersion(
+          formId,
+          author,
+          VersionChangeTypes.METADATA_UPDATED,
+          `Form metadata updated: ${changedFields}`,
+          FormStatus.Draft,
+          session
+        )
       }
 
       const auditMessages = getFormMetadataAuditMessages(form, updatedForm)
@@ -226,6 +262,7 @@ export async function removeForm(formId, author) {
     await session.withTransaction(async () => {
       await formMetadata.remove(formId, session)
       await formDefinition.remove(formId, session)
+      await removeFormVersions(formId, session)
       await publishFormDraftDeletedEvent(form, author)
     })
   } finally {

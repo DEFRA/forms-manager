@@ -5,9 +5,11 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
+import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -53,6 +55,15 @@ export async function addListToDraftFormDefinition(formId, list, author) {
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.LIST_CREATED,
+        `List '${list.name}' created`,
+        FormStatus.Draft,
         session
       )
 
@@ -115,6 +126,15 @@ export async function updateListOnDraftFormDefinition(
         session
       )
 
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.LIST_UPDATED,
+        `List '${list.name}' updated`,
+        FormStatus.Draft,
+        session
+      )
+
       // TODO: List could be > 256KB?
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -158,6 +178,15 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.LIST_DELETED,
+        `List deleted (ID: ${listId})`,
+        FormStatus.Draft,
         session
       )
 

@@ -22,7 +22,9 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
+import { getFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import { formVersionByIdSchema } from '~/src/models/form-versions.js'
 import {
   createFormSchema,
   formByIdSchema,
@@ -332,12 +334,39 @@ export default [
         params: formByIdSchema
       }
     }
+  },
+  {
+    method: 'GET',
+    path: '/forms/{id}/definition/versions/{versionNumber}',
+    /**
+     * @param {RequestFormVersionById} request
+     */
+    async handler(request) {
+      const { params } = request
+      const { id, versionNumber } = params
+
+      const version = await getFormVersion(id, parseInt(versionNumber))
+      return {
+        ...version.formDefinition,
+        versionMetadata: {
+          version: version.versionNumber,
+          createdAt: version.createdAt,
+          status: version.status
+        }
+      }
+    },
+    options: {
+      auth: false,
+      validate: {
+        params: formVersionByIdSchema
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, MigrateDraftFormRequest } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, MigrateDraftFormRequest, RequestFormVersionById } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
