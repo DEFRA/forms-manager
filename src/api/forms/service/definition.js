@@ -139,7 +139,6 @@ function validateFormForPublishing(formId, form, draftFormDefinition) {
   }
 
   if (!form.notificationEmail) {
-    // TODO: remove the form def check once all forms have a notification email
     throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
   }
 }
