@@ -138,7 +138,7 @@ function validateFormForPublishing(formId, form, draftFormDefinition) {
     throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
   }
 
-  if (!draftFormDefinition.outputEmail && !form.notificationEmail) {
+  if (!form.notificationEmail) {
     // TODO: remove the form def check once all forms have a notification email
     throw Boom.badRequest(makeFormLiveErrorMessages.missingOutputEmail)
   }
