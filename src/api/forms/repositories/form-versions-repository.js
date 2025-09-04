@@ -177,12 +177,12 @@ export async function getLatestVersion(formId, session) {
 /**
  * Gets a paginated list of versions for a form
  * @param {string} formId - The form ID
+ * @param {ClientSession} [session] - MongoDB transaction session
  * @param {number} limit - Number of versions to return
  * @param {number} offset - Number of versions to skip
- * @param {ClientSession} [session] - MongoDB transaction session
  * @returns {Promise<{versions: FormVersionDocument[], totalCount: number}>}
  */
-export async function getVersions(formId, limit = 10, offset = 0, session) {
+export async function getVersions(formId, session, limit = 10, offset = 0) {
   logger.info(
     `Getting versions for form ID ${formId} (limit: ${limit}, offset: ${offset})`
   )

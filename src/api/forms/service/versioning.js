@@ -169,7 +169,12 @@ export async function getFormVersions(formId, limit = 10, offset = 0) {
   )
 
   try {
-    return await formVersionsRepository.getVersions(formId, limit, offset)
+    return await formVersionsRepository.getVersions(
+      formId,
+      undefined,
+      limit,
+      offset
+    )
   } catch (error) {
     logger.error(
       error,
