@@ -33,6 +33,7 @@ import {
   formMetadataWithLiveDocument,
   mockFilters
 } from '~/src/api/forms/service/__stubs__/service.js'
+import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,
@@ -47,6 +48,7 @@ import {
   getFormBySlug,
   removeForm
 } from '~/src/api/forms/service/index.js'
+import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import * as publishBase from '~/src/messaging/publish-base.js'
@@ -60,6 +62,7 @@ jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
 jest.mock('~/src/messaging/s3.js')
+jest.mock('~/src/api/forms/service/versioning.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -99,6 +102,12 @@ describe('Forms service', () => {
     jest
       .mocked(formMetadata.updateAudit)
       .mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(versioningService.createFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
+    jest
+      .mocked(versioningService.getLatestFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
   })
 
   describe('createDraftFromLive', () => {
@@ -1156,7 +1165,14 @@ describe('Forms service', () => {
         [],
         author
       )
-      expect(returnedDefinition).toEqual(definition)
+      expect(returnedDefinition).toEqual({
+        ...definition,
+        versionMetadata: {
+          createdAt: new Date('2020-01-01'),
+          status: 'draft',
+          version: 1
+        }
+      })
       expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })
@@ -1274,7 +1290,14 @@ describe('Forms service', () => {
         [],
         author
       )
-      expect(returnedDefinition).toEqual(definition)
+      expect(returnedDefinition).toEqual({
+        ...definition,
+        versionMetadata: {
+          createdAt: new Date('2020-01-01'),
+          status: 'draft',
+          version: 1
+        }
+      })
       expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })

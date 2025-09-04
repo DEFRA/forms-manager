@@ -15,6 +15,7 @@ import {
   formMetadataOutput,
   formMetadataWithLiveDocument
 } from '~/src/api/forms/service/__stubs__/service.js'
+import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
   getFormDefinition,
   updateDraftFormDefinition
@@ -25,6 +26,7 @@ import {
   removeForm,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
+import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -35,6 +37,7 @@ jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
+jest.mock('~/src/api/forms/service/versioning.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -67,6 +70,12 @@ describe('Forms service', () => {
       SequenceNumber: '1',
       $metadata: {}
     })
+    jest
+      .mocked(versioningService.createFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
+    jest
+      .mocked(versioningService.getLatestFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
   })
 
   const slugExamples = [
