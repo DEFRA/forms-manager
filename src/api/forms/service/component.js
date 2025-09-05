@@ -1,12 +1,14 @@
 import { FormDefinitionRequestType, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
+import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -84,6 +86,15 @@ export async function createComponentOnDraftDefinition(
         session
       )
 
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.COMPONENT_CREATED,
+        `Component '${component.type}' created`,
+        FormStatus.Draft,
+        session
+      )
+
       await publishFormUpdatedEvent(
         metadataDocument,
         component,
@@ -144,6 +155,15 @@ export async function updateComponentOnDraftDefinition(
           session
         )
 
+        await createFormVersion(
+          formId,
+          author,
+          VersionChangeTypes.COMPONENT_UPDATED,
+          `Component '${componentPayload.type}' updated`,
+          FormStatus.Draft,
+          session
+        )
+
         await publishFormUpdatedEvent(
           metadataDocument,
           formDefinitionPageComponent,
@@ -196,6 +216,15 @@ export async function deleteComponentOnDraftDefinition(
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.COMPONENT_DELETED,
+        `Component deleted (ID: ${componentId})`,
+        FormStatus.Draft,
         session
       )
 

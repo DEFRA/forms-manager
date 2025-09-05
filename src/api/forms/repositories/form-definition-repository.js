@@ -169,10 +169,13 @@ export async function get(
       `[get] Failed to get form definition (${state}) for form ID ${formId} - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (Boom.isBoom(error)) {
+      throw error
     }
 
+    if (error instanceof Error) {
+      throw Boom.internal(error)
+    }
     throw error
   }
 }

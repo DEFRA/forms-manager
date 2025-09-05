@@ -1,8 +1,10 @@
-import { FormDefinitionRequestType } from '@defra/forms-model'
+import { FormDefinitionRequestType, FormStatus } from '@defra/forms-model'
 
+import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -31,11 +33,18 @@ export async function addConditionToDraftFormDefinition(
         session
       )
 
-      await formMetadata.updateAudit(formId, author, session)
-
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.CONDITION_CREATED,
+        `Condition '${condition.displayName}' created`,
+        FormStatus.Draft,
         session
       )
 
@@ -95,6 +104,15 @@ export async function updateConditionOnDraftFormDefinition(
         session
       )
 
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.CONDITION_UPDATED,
+        `Condition '${condition.displayName}' updated`,
+        FormStatus.Draft,
+        session
+      )
+
       await publishFormUpdatedEvent(
         metadataDocument,
         condition,
@@ -141,6 +159,15 @@ export async function removeConditionOnDraftFormDefinition(
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.CONDITION_DELETED,
+        `Condition deleted (ID: ${conditionId})`,
+        FormStatus.Draft,
         session
       )
 

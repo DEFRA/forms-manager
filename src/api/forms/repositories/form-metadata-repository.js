@@ -126,10 +126,13 @@ export async function get(formId) {
       `[getFormById] Getting form with ID ${formId} failed - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.badRequest(error)
+    if (Boom.isBoom(error)) {
+      throw error
     }
 
+    if (error instanceof Error) {
+      throw Boom.badRequest(error)
+    }
     throw error
   }
 }
@@ -160,10 +163,13 @@ export async function getBySlug(slug) {
       `[getFormBySlug] Getting form with slug ${slug} failed - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (Boom.isBoom(error)) {
+      throw error
     }
 
+    if (error instanceof Error) {
+      throw Boom.internal(error)
+    }
     throw error
   }
 }
@@ -252,10 +258,13 @@ export async function update(formId, update, session) {
       `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (Boom.isBoom(error)) {
+      throw error
     }
 
+    if (error instanceof Error) {
+      throw Boom.internal(error)
+    }
     throw error
   }
 }

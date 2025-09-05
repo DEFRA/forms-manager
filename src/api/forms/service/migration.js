@@ -6,6 +6,7 @@ import {
   formDefinitionV2Schema
 } from '@defra/forms-model'
 
+import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
@@ -14,6 +15,7 @@ import {
 } from '~/src/api/forms/service/migration-helpers.js'
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishFormMigratedEvent,
@@ -112,6 +114,15 @@ export async function migrateDefinitionToV2(formId, author) {
       )
 
       await formMetadata.updateAudit(formId, author, session)
+
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.FORM_MIGRATED,
+        'Form migrated to v2',
+        FormStatus.Draft,
+        session
+      )
 
       await publishFormMigratedEvent(formId, new Date(), author)
     })

@@ -4,6 +4,7 @@ import {
   FormStatus
 } from '@defra/forms-model'
 
+import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
@@ -12,6 +13,7 @@ import {
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -75,6 +77,17 @@ export async function createPageOnDraftDefinition(formId, page, author) {
         author,
         session
       )
+
+      // Create a new version for page creation
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.PAGE_CREATED,
+        `Page '${page.title}' created`,
+        FormStatus.Draft,
+        session
+      )
+
       await publishFormUpdatedEvent(
         metadataDocument,
         page,
@@ -148,6 +161,17 @@ export async function patchFieldsOnDraftDefinitionPage(
         session
       )
 
+      // Create a new version for page update
+      const updatedFields = Object.keys(pageFieldsToUpdate).join(', ')
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.PAGE_UPDATED,
+        `Page fields updated: ${updatedFields}`,
+        FormStatus.Draft,
+        session
+      )
+
       await publishFormUpdatedEvent(
         metadataDocument,
         { pageId, pageFieldsToUpdate },
@@ -185,6 +209,16 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
+        session
+      )
+
+      // Create a new version for page deletion
+      await createFormVersion(
+        formId,
+        author,
+        VersionChangeTypes.PAGE_DELETED,
+        `Page deleted (ID: ${pageId})`,
+        FormStatus.Draft,
         session
       )
 
