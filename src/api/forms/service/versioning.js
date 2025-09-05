@@ -114,19 +114,23 @@ async function createVersionInTransaction(
     changeDescription
   })
 
-  return await formVersionsRepository.createVersion(versionDocument, session)
+  return formVersionsRepository.createVersion(versionDocument, session)
 }
 
 /**
  * Retrieves the latest version of a form definition
  * @param {string} formId - The form ID
- * @returns {Promise<FormVersionDocument>}
+ * @returns {Promise<FormVersionDocument | null>} The latest version or null if none exist
  */
 export async function getLatestFormVersion(formId) {
   logger.info(`Getting latest version for form ID ${formId}`)
 
   try {
-    return await formVersionsRepository.getLatestVersion(formId)
+    const result = await formVersionsRepository.getLatestVersion(formId)
+    if (!result) {
+      logger.info(`No versions exist for form ID ${formId}`)
+    }
+    return result
   } catch (error) {
     logger.error(
       error,

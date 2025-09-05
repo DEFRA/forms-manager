@@ -35,10 +35,9 @@ export async function createVersion(versionDocument, session) {
       `[createVersion] Failed to create version ${versionDocument.versionNumber} for form ID ${versionDocument.formId} - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
+    if (error instanceof Error) {
       throw Boom.internal(error)
     }
-
     throw error
   }
 }
@@ -79,10 +78,9 @@ export async function getLatestVersionNumber(formId, session) {
       `[getLatestVersionNumber] Failed to get latest version number for form ID ${formId} - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
+    if (error instanceof Error) {
       throw Boom.internal(error)
     }
-
     throw error
   }
 }
@@ -120,10 +118,13 @@ export async function getVersion(formId, versionNumber, session) {
       `[getVersion] Failed to get version ${versionNumber} for form ID ${formId} - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (Boom.isBoom(error)) {
+      throw error
     }
 
+    if (error instanceof Error) {
+      throw Boom.internal(error)
+    }
     throw error
   }
 }
@@ -132,7 +133,7 @@ export async function getVersion(formId, versionNumber, session) {
  * Gets the latest version of a form
  * @param {string} formId - The form ID
  * @param {ClientSession} [session] - MongoDB transaction session
- * @returns {Promise<FormVersionDocument>}
+ * @returns {Promise<FormVersionDocument | null>} The latest version or null if none exist
  */
 export async function getLatestVersion(formId, session) {
   logger.info(`Getting latest version for form ID ${formId}`)
@@ -152,7 +153,8 @@ export async function getLatestVersion(formId, session) {
     )
 
     if (!result) {
-      throw Boom.notFound(`No versions found for form ID '${formId}'`)
+      logger.info(`No versions found for form ID ${formId}`)
+      return null
     }
 
     logger.info(
@@ -166,10 +168,9 @@ export async function getLatestVersion(formId, session) {
       `[getLatestVersion] Failed to get latest version for form ID ${formId} - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
+    if (error instanceof Error) {
       throw Boom.internal(error)
     }
-
     throw error
   }
 }
@@ -216,10 +217,9 @@ export async function getVersions(formId, session, limit = 10, offset = 0) {
       `[getVersions] Failed to get versions for form ID ${formId} - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
+    if (error instanceof Error) {
       throw Boom.internal(error)
     }
-
     throw error
   }
 }
@@ -246,10 +246,9 @@ export async function removeVersionsForForm(formId, session) {
       `[removeVersionsForForm] Failed to remove versions for form ID ${formId} - ${getErrorMessage(error)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
+    if (error instanceof Error) {
       throw Boom.internal(error)
     }
-
     throw error
   }
 }

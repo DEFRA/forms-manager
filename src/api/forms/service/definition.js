@@ -54,7 +54,7 @@ export async function getFormDefinition(
 ) {
   const [definition, latestVersion] = await Promise.all([
     formDefinition.get(formId, state, session),
-    getLatestFormVersion(formId).catch(() => null) // Handle case where no versions exist yet
+    getLatestFormVersion(formId)
   ])
 
   if (!latestVersion) {
