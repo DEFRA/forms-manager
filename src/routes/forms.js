@@ -350,8 +350,7 @@ export default [
         ...version.formDefinition,
         versionMetadata: {
           version: version.versionNumber,
-          createdAt: version.createdAt,
-          status: version.status
+          createdAt: version.createdAt
         }
       }
     },

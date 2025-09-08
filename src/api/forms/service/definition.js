@@ -65,8 +65,7 @@ export async function getFormDefinition(
     ...definition,
     versionMetadata: {
       version: latestVersion.versionNumber,
-      createdAt: latestVersion.createdAt,
-      status: latestVersion.status
+      createdAt: latestVersion.createdAt
     }
   }
 }
