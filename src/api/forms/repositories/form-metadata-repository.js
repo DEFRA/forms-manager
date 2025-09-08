@@ -103,8 +103,9 @@ export async function list(options) {
 /**
  * Retrieves a form metadata by ID
  * @param {string} formId - ID of the form
+ * @param {ClientSession} [session] - Optional MongoDB session for transactions
  */
-export async function get(formId) {
+export async function get(formId, session) {
   logger.info(`Getting form with ID ${formId}`)
 
   const coll = /** @satisfies {Collection<Partial<FormMetadataDocument>>} */ (
@@ -112,7 +113,10 @@ export async function get(formId) {
   )
 
   try {
-    const document = await coll.findOne({ _id: new ObjectId(formId) })
+    const document = await coll.findOne(
+      { _id: new ObjectId(formId) },
+      { session }
+    )
 
     if (!document) {
       throw Boom.notFound(`Form with ID '${formId}' not found`)

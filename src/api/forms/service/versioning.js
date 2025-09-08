@@ -93,7 +93,7 @@ async function createVersionInTransaction(
 
   const [formDefinition, formMetadata] = await Promise.all([
     formDefinitionRepository.get(formId, status, session),
-    formMetadataRepository.get(formId)
+    formMetadataRepository.get(formId, session)
   ])
 
   const versionDocument = /** @type {FormVersionDocument} */ ({
