@@ -1169,7 +1169,6 @@ describe('Forms service', () => {
         ...definition,
         versionMetadata: {
           createdAt: new Date('2020-01-01'),
-          status: 'draft',
           version: 1
         }
       })
@@ -1294,7 +1293,6 @@ describe('Forms service', () => {
         ...definition,
         versionMetadata: {
           createdAt: new Date('2020-01-01'),
-          status: 'draft',
           version: 1
         }
       })
