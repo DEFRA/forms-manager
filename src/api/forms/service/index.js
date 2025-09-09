@@ -80,7 +80,6 @@ export function prepareUpdatedFormMetadata(formUpdate, author) {
  * @param {FormMetadata} form - The original form metadata
  * @param {Partial<FormMetadataInput>} formUpdate - The update payload
  * @param {PartialFormMetadataDocument} updatedForm - The prepared update
- * @param {FormMetadataAuthor} author - The author details
  * @param {ClientSession} session - MongoDB session
  */
 export async function handleTitleUpdate(
@@ -88,7 +87,6 @@ export async function handleTitleUpdate(
   form,
   formUpdate,
   updatedForm,
-  author,
   session
 ) {
   if (!formUpdate.title) {
@@ -230,14 +228,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       await formMetadata.update(formId, { $set: updatedForm }, session)
 
       if (formUpdate.title) {
-        await handleTitleUpdate(
-          formId,
-          form,
-          formUpdate,
-          updatedForm,
-          author,
-          session
-        )
+        await handleTitleUpdate(formId, form, formUpdate, updatedForm, session)
       } else {
         await handleMetadataVersioning(formId, formUpdate, session)
       }
