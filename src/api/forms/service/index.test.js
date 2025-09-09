@@ -8,6 +8,7 @@ import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import author from '~/src/api/forms/service/__stubs__/author.js'
 import {
   formMetadataDocument,
@@ -22,6 +23,7 @@ import {
 } from '~/src/api/forms/service/definition.js'
 import {
   createForm,
+  getForm,
   getFormBySlug,
   prepareUpdatedFormMetadata,
   removeForm,
@@ -36,6 +38,7 @@ import { prepareDb } from '~/src/mongo.js'
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
@@ -67,6 +70,7 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
     jest.mocked(publishEvent).mockResolvedValue({
       MessageId: messageId,
       SequenceNumber: '1',
@@ -253,15 +257,27 @@ describe('Forms service', () => {
   })
 
   describe('getFormBySlug', () => {
-    it('should return form metadata when form exists', async () => {
+    it('should return form metadata with versions when form exists', async () => {
+      const mockVersions = [
+        { versionNumber: 1, createdAt: new Date('2023-01-01') },
+        { versionNumber: 2, createdAt: new Date('2023-02-01') }
+      ]
+
       jest
         .mocked(formMetadata.getBySlug)
         .mockResolvedValue(formMetadataDocument)
+      jest
+        .mocked(formVersions.getVersionSummaries)
+        .mockResolvedValue(mockVersions)
 
       const result = await getFormBySlug(slug)
 
-      expect(result).toEqual(formMetadataOutput)
+      expect(result).toEqual({
+        ...formMetadataOutput,
+        versions: mockVersions
+      })
       expect(formMetadata.getBySlug).toHaveBeenCalledWith(slug)
+      expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
     })
 
     it('should throw an error if form does not exist', async () => {
@@ -269,6 +285,49 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.getBySlug).mockRejectedValue(error)
 
       await expect(getFormBySlug(slug)).rejects.toThrow(error)
+    })
+  })
+
+  describe('getForm', () => {
+    it('should return form metadata with versions when form exists', async () => {
+      const mockVersions = [
+        { versionNumber: 1, createdAt: new Date('2023-01-01') },
+        { versionNumber: 2, createdAt: new Date('2023-02-01') }
+      ]
+
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+      jest
+        .mocked(formVersions.getVersionSummaries)
+        .mockResolvedValue(mockVersions)
+
+      const result = await getForm(id)
+
+      expect(result).toEqual({
+        ...formMetadataOutput,
+        versions: mockVersions
+      })
+      expect(formMetadata.get).toHaveBeenCalledWith(id)
+      expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
+    })
+
+    it('should throw an error if form does not exist', async () => {
+      const error = Boom.notFound(`Form with ID '${id}' not found`)
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(getForm(id)).rejects.toThrow(error)
+    })
+
+    it('should handle empty versions array', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+      jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
+
+      const result = await getForm(id)
+
+      expect(result).toEqual({
+        ...formMetadataOutput,
+        versions: []
+      })
+      expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
     })
   })
 

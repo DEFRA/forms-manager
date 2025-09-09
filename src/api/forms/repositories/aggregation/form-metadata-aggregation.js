@@ -123,6 +123,38 @@ export function buildAggregationPipeline(
 }
 
 /**
+ * Builds the aggregation pipeline with versions lookup.
+ * @param {string} sortBy - Field to sort by ('updatedAt' or 'title').
+ * @param {string} order - Sort order ('asc' or 'desc').
+ * @param {string} title - The title to filter by.
+ * @param {string} author - The author to filter by.
+ * @param {string[]} organisations - The organisations to filter by.
+ * @param {FormStatus[]} status - The status values to filter by.
+ * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
+ */
+export function buildAggregationPipelineWithVersions(
+  sortBy,
+  order,
+  title,
+  author,
+  organisations,
+  status
+) {
+  const { pipeline, aggOptions } = buildAggregationPipeline(
+    sortBy,
+    order,
+    title,
+    author,
+    organisations,
+    status
+  )
+
+  addVersionsLookupStage(pipeline)
+
+  return { pipeline, aggOptions }
+}
+
+/**
  * Adds the ranking stage to the pipeline based on the title.
  * @see {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation/rank/}
  * @param {PipelineStage[]} pipeline - The aggregation pipeline stages.
@@ -248,6 +280,37 @@ export function addSortingStage(pipeline, sortBy, order) {
   }
 
   return collation
+}
+
+/**
+ * Adds the versions lookup stage to join with form-versions collection
+ * @param {PipelineStage[]} pipeline - The aggregation pipeline stages.
+ */
+export function addVersionsLookupStage(pipeline) {
+  pipeline.push({
+    $lookup: {
+      from: 'form-versions',
+      let: { formId: { $toString: '$_id' } },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ['$formId', '$$formId'] }
+          }
+        },
+        {
+          $project: {
+            versionNumber: 1,
+            createdAt: 1,
+            _id: 0
+          }
+        },
+        {
+          $sort: { versionNumber: -1 }
+        }
+      ],
+      as: 'versions'
+    }
+  })
 }
 
 /**

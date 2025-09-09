@@ -22,6 +22,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   modifyReorderComponents,
   modifyReorderPages
@@ -58,6 +59,7 @@ import { prepareDb } from '~/src/mongo.js'
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
@@ -99,6 +101,7 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
     jest
       .mocked(formMetadata.updateAudit)
       .mockResolvedValue(formMetadataDocument)

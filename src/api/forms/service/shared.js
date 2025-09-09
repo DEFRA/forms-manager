@@ -69,7 +69,7 @@ export function mapForm(document) {
     createdAt: created.createdAt,
     updatedBy: lastUpdated.updatedBy,
     updatedAt: lastUpdated.updatedAt,
-    ...(document.versions && { versions: document.versions })
+    versions: document.versions ?? []
   }
 }
 

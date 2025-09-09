@@ -4,6 +4,7 @@
  * @property {{ displayName: { $regex: RegExp } }} [createdBy] - Optional MongoDB regex query for author matching
  * @property {{ $in: string[] }} [organisation] - Optional MongoDB $in query for organisation matching
  * @property {{ live: { $exists: boolean } }[]} [$or] - Optional MongoDB $or query for status matching
+ * @property {object} [$expr] - Optional MongoDB $expr for expression queries
  */
 
 /**
@@ -74,6 +75,7 @@
  * @property {{ [key: string]: PipelineStage[] }} [$facet] - MongoDB $facet stage
  * @property {{ _id: string | null | object, [key: string]: any }} [$group] - MongoDB $group stage
  * @property {{ [key: string]: 0 | 1 | string }} [$project] - MongoDB $project stage
+ * @property {{ from: string, let?: object, pipeline?: PipelineStage[], localField?: string, foreignField?: string, as: string }} [$lookup] - MongoDB $lookup stage
  */
 
 /**

@@ -256,6 +256,106 @@ export async function removeVersionsForForm(formId, session) {
 }
 
 /**
+ * Gets version summaries for a form (without full definitions)
+ * @param {string} formId - The form ID
+ * @param {ClientSession} [session] - MongoDB transaction session
+ * @returns {Promise<Array<{versionNumber: number, createdAt: Date}>>}
+ */
+export async function getVersionSummaries(formId, session) {
+  logger.info(`Getting version summaries for form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<FormVersionDocument>} */ (
+    db.collection(VERSIONS_COLLECTION_NAME)
+  )
+
+  try {
+    const sessionOptions = /** @type {FindOptions} */ session && { session }
+    const versions = await coll
+      .find(
+        { formId },
+        {
+          projection: { versionNumber: 1, createdAt: 1, _id: 0 },
+          ...sessionOptions
+        }
+      )
+      .sort({ versionNumber: -1 })
+      .toArray()
+
+    logger.info(
+      `Retrieved ${versions.length} version summaries for form ID ${formId}`
+    )
+
+    return versions
+  } catch (error) {
+    logger.error(
+      error,
+      `[getVersionSummaries] Failed to get version summaries for form ID ${formId} - ${getErrorMessage(error)}`
+    )
+
+    if (error instanceof Error) {
+      throw Boom.internal(error)
+    }
+    throw error
+  }
+}
+
+/**
+ * Gets version summaries for multiple forms (batch operation)
+ * @param {string[]} formIds - Array of form IDs
+ * @param {ClientSession} [session] - MongoDB transaction session
+ * @returns {Promise<Map<string, Array<{versionNumber: number, createdAt: Date}>>>}
+ */
+export async function getVersionSummariesBatch(formIds, session) {
+  logger.info(`Getting version summaries for ${formIds.length} forms`)
+
+  const coll = /** @satisfies {Collection<FormVersionDocument>} */ (
+    db.collection(VERSIONS_COLLECTION_NAME)
+  )
+
+  try {
+    const sessionOptions = /** @type {FindOptions} */ session && { session }
+    const versions = await coll
+      .find(
+        { formId: { $in: formIds } },
+        {
+          projection: { formId: 1, versionNumber: 1, createdAt: 1, _id: 0 },
+          ...sessionOptions
+        }
+      )
+      .sort({ versionNumber: -1 })
+      .toArray()
+
+    const versionsByForm = new Map()
+    for (const formId of formIds) {
+      versionsByForm.set(formId, [])
+    }
+
+    for (const version of versions) {
+      const formVersions = versionsByForm.get(version.formId) ?? []
+      formVersions.push({
+        versionNumber: version.versionNumber,
+        createdAt: version.createdAt
+      })
+      versionsByForm.set(version.formId, formVersions)
+    }
+
+    logger.info(`Retrieved versions for ${versionsByForm.size} forms`)
+
+    return versionsByForm
+  } catch (error) {
+    logger.error(
+      error,
+      `[getVersionSummariesBatch] Failed to get version summaries for batch - ${getErrorMessage(error)}`
+    )
+
+    if (error instanceof Error) {
+      throw Boom.internal(error)
+    }
+    throw error
+  }
+}
+
+/**
  * @import { FormVersionDocument } from '~/src/api/types.js'
- * @import { ClientSession, Collection } from 'mongodb'
+ * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  */

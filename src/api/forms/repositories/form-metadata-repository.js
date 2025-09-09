@@ -3,7 +3,7 @@ import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
-  buildAggregationPipeline,
+  buildAggregationPipelineWithVersions,
   buildFilterConditions,
   buildFiltersFacet,
   processFilterResults
@@ -66,7 +66,7 @@ export async function list(options) {
 
     const filters = processFilterResults(filterResults)
 
-    const { pipeline, aggOptions } = buildAggregationPipeline(
+    const { pipeline, aggOptions } = buildAggregationPipelineWithVersions(
       sortBy,
       order,
       title,
@@ -95,6 +95,70 @@ export async function list(options) {
   } catch (error) {
     logger.error(
       `[fetchDocuments] Error fetching documents - ${getErrorMessage(error)}`
+    )
+    throw error
+  }
+}
+
+/**
+ * Retrieves the list of documents from the database with pagination, sorting, and versions.
+ * @param {QueryOptions} options - Pagination, sorting, and filtering options.
+ * @returns {Promise<{ documents: WithId<Partial<FormMetadataDocument>>[], totalItems: number, filters: FilterOptions }>}
+ */
+export async function listWithVersions(options) {
+  try {
+    const {
+      page = 1,
+      perPage = MAX_RESULTS,
+      sortBy = 'updatedAt',
+      order = 'desc',
+      title = '',
+      author = '',
+      organisations = [],
+      status = []
+    } = options
+
+    const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
+      db.collection(METADATA_COLLECTION_NAME)
+    )
+
+    const skip = (page - 1) * perPage
+
+    const [filterResults] = /** @type {[FilterAggregationResult]} */ (
+      await coll.aggregate([buildFiltersFacet()]).toArray()
+    )
+
+    const filters = processFilterResults(filterResults)
+
+    const { pipeline, aggOptions } = buildAggregationPipelineWithVersions(
+      sortBy,
+      order,
+      title,
+      author,
+      organisations,
+      status
+    )
+
+    pipeline.push({ $skip: skip }, { $limit: perPage })
+
+    const [documents, totalItems] = await Promise.all([
+      /** @type {Promise<WithId<Partial<FormMetadataDocument>>[]>} */ (
+        coll.aggregate(pipeline, aggOptions).toArray()
+      ),
+      coll.countDocuments(
+        buildFilterConditions({
+          title,
+          author,
+          organisations,
+          status
+        })
+      )
+    ])
+
+    return { documents, totalItems, filters }
+  } catch (error) {
+    logger.error(
+      `[fetchDocumentsWithVersions] Error fetching documents with versions - ${getErrorMessage(error)}`
     )
     throw error
   }
