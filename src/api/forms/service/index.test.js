@@ -23,8 +23,10 @@ import {
 import {
   createForm,
   getFormBySlug,
+  prepareUpdatedFormMetadata,
   removeForm,
-  updateFormMetadata
+  updateFormMetadata,
+  validateLiveFormTitleUpdate
 } from '~/src/api/forms/service/index.js'
 import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
@@ -557,6 +559,65 @@ describe('Forms service', () => {
       expect(publishEventCalls[0]).toMatchObject({
         type: changeLog.output
       })
+    })
+  })
+
+  describe('validateLiveFormTitleUpdate', () => {
+    it('should not throw when form is not live', () => {
+      const form = {
+        ...formMetadataDocument,
+        id: formMetadataDocument._id.toString()
+      }
+      const formUpdate = { title: 'New Title' }
+
+      expect(() => {
+        validateLiveFormTitleUpdate(form, 'formId', formUpdate)
+      }).not.toThrow()
+    })
+
+    it('should throw Boom.badRequest when trying to update live form title', () => {
+      const form = {
+        ...formMetadataWithLiveDocument,
+        id: formMetadataWithLiveDocument._id.toString()
+      }
+      const formUpdate = { title: 'New Title' }
+
+      expect(() => {
+        validateLiveFormTitleUpdate(form, 'formId', formUpdate)
+      }).toThrow(
+        Boom.badRequest(
+          "Form with ID 'formId' is live so 'title' cannot be updated"
+        )
+      )
+    })
+  })
+
+  describe('prepareUpdatedFormMetadata', () => {
+    it('should return form update with audit fields', () => {
+      const formUpdate = { organisation: 'New Org' }
+      const result = prepareUpdatedFormMetadata(formUpdate, author)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          organisation: 'New Org',
+          updatedBy: author,
+          updatedAt: expect.any(Date)
+        })
+      )
+    })
+
+    it('should add slug when title is provided', () => {
+      const formUpdate = { title: 'New Title' }
+      const result = prepareUpdatedFormMetadata(formUpdate, author)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          title: 'New Title',
+          slug: 'new-title',
+          updatedBy: author,
+          updatedAt: expect.any(Date)
+        })
+      )
     })
   })
 })
