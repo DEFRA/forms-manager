@@ -81,7 +81,7 @@ export function prepareUpdatedFormMetadata(formUpdate, author) {
  * @param {Partial<FormMetadataInput>} formUpdate - The update payload
  * @param {PartialFormMetadataDocument} updatedForm - The prepared update
  * @param {FormMetadataAuthor} author - The author details
- * @param {import('mongodb').ClientSession} session - MongoDB session
+ * @param {ClientSession} session - MongoDB session
  */
 export async function handleTitleUpdate(
   formId,
@@ -109,15 +109,9 @@ export async function handleTitleUpdate(
  * Handles versioning for non-title metadata updates
  * @param {string} formId - The form ID
  * @param {Partial<FormMetadataInput>} formUpdate - The update payload
- * @param {FormMetadataAuthor} author - The author details
  * @param {ClientSession} session - MongoDB session
  */
-export async function handleMetadataVersioning(
-  formId,
-  formUpdate,
-  author,
-  session
-) {
+export async function handleMetadataVersioning(formId, formUpdate, session) {
   if (Object.keys(formUpdate).length > 0) {
     await createFormVersion(formId, session)
   } else {
@@ -245,7 +239,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
           session
         )
       } else {
-        await handleMetadataVersioning(formId, formUpdate, author, session)
+        await handleMetadataVersioning(formId, formUpdate, session)
       }
 
       const auditMessages = getFormMetadataAuditMessages(form, updatedForm)

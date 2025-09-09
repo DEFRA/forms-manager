@@ -24,8 +24,8 @@ export async function createFormVersion(formId, session = undefined) {
 
   try {
     const result = await (shouldCreateOwnSession
-      ? workingSession.withTransaction(
-          async () => await createVersionInTransaction(formId, workingSession)
+      ? workingSession.withTransaction(async () =>
+          createVersionInTransaction(formId, workingSession)
         )
       : createVersionInTransaction(formId, workingSession))
 
