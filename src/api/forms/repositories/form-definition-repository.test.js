@@ -359,6 +359,13 @@ describe('form-definition-repository', () => {
 
       await expect(get(formId)).rejects.toThrow(boomError)
     })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(get(formId)).rejects.toBe(error)
+    })
   })
 
   describe('deletePages', () => {

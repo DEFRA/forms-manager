@@ -70,6 +70,15 @@ describe('form-versions-repository', () => {
         createVersion(mockVersionDocument, mockSession)
       ).rejects.toThrow(Boom.internal(error))
     })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.insertOne.mockRejectedValue(error)
+
+      await expect(
+        createVersion(mockVersionDocument, mockSession)
+      ).rejects.toBe(error)
+    })
   })
 
   describe('getLatestVersionNumber', () => {
@@ -94,6 +103,38 @@ describe('form-versions-repository', () => {
       const result = await getLatestVersionNumber(formId)
 
       expect(result).toBe(0)
+    })
+
+    it('should handle database errors', async () => {
+      const error = new Error('Database error')
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(getLatestVersionNumber(formId)).rejects.toThrow(
+        Boom.internal(error)
+      )
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(getLatestVersionNumber(formId)).rejects.toBe(error)
+    })
+
+    it('should work with session parameter', async () => {
+      mockCollection.findOne.mockResolvedValue({ versionNumber: 3 })
+
+      const result = await getLatestVersionNumber(formId, mockSession)
+
+      expect(mockCollection.findOne).toHaveBeenCalledWith(
+        { formId },
+        {
+          sort: { versionNumber: -1 },
+          projection: { versionNumber: 1 },
+          session: mockSession
+        }
+      )
+      expect(result).toBe(3)
     })
   })
 
@@ -121,6 +162,34 @@ describe('form-versions-repository', () => {
         )
       )
     })
+
+    it('should handle database errors (non-Boom)', async () => {
+      const error = new Error('Database error')
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(getVersion(formId, versionNumber)).rejects.toThrow(
+        Boom.internal(error)
+      )
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(getVersion(formId, versionNumber)).rejects.toBe(error)
+    })
+
+    it('should work with session parameter', async () => {
+      mockCollection.findOne.mockResolvedValue(mockVersionDocument)
+
+      const result = await getVersion(formId, versionNumber, mockSession)
+
+      expect(mockCollection.findOne).toHaveBeenCalledWith(
+        { formId, versionNumber },
+        { session: mockSession }
+      )
+      expect(result).toEqual(mockVersionDocument)
+    })
   })
 
   describe('getLatestVersion', () => {
@@ -142,6 +211,34 @@ describe('form-versions-repository', () => {
       const result = await getLatestVersion(formId)
 
       expect(result).toBeNull()
+    })
+
+    it('should handle database errors', async () => {
+      const error = new Error('Database error')
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(getLatestVersion(formId)).rejects.toThrow(
+        Boom.internal(error)
+      )
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(getLatestVersion(formId)).rejects.toBe(error)
+    })
+
+    it('should work with session parameter', async () => {
+      mockCollection.findOne.mockResolvedValue(mockVersionDocument)
+
+      const result = await getLatestVersion(formId, mockSession)
+
+      expect(mockCollection.findOne).toHaveBeenCalledWith(
+        { formId },
+        { sort: { versionNumber: -1 }, session: mockSession }
+      )
+      expect(result).toEqual(mockVersionDocument)
     })
   })
 
@@ -168,6 +265,40 @@ describe('form-versions-repository', () => {
       expect(mockCollection.find).toHaveBeenCalledWith({ formId }, undefined)
       expect(result).toEqual({ versions: mockVersions, totalCount: 3 })
     })
+
+    it('should handle database errors', async () => {
+      const error = new Error('Database error')
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        toArray: jest.fn().mockRejectedValue(error)
+      })
+
+      await expect(getVersions(formId)).rejects.toThrow(Boom.internal(error))
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        toArray: jest.fn().mockRejectedValue(error)
+      })
+
+      await expect(getVersions(formId)).rejects.toBe(error)
+    })
+
+    it('should work with session parameter', async () => {
+      const result = await getVersions(formId, mockSession, 5, 10)
+
+      expect(mockCollection.find).toHaveBeenCalledWith(
+        { formId },
+        { session: mockSession }
+      )
+      expect(result).toEqual({ versions: mockVersions, totalCount: 3 })
+    })
   })
 
   describe('removeVersionsForForm', () => {
@@ -182,6 +313,24 @@ describe('form-versions-repository', () => {
       expect(mockCollection.deleteMany).toHaveBeenCalledWith(
         { formId },
         { session: mockSession }
+      )
+    })
+
+    it('should handle database errors', async () => {
+      const error = new Error('Database error')
+      mockCollection.deleteMany.mockRejectedValue(error)
+
+      await expect(removeVersionsForForm(formId, mockSession)).rejects.toThrow(
+        Boom.internal(error)
+      )
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.deleteMany.mockRejectedValue(error)
+
+      await expect(removeVersionsForForm(formId, mockSession)).rejects.toBe(
+        error
       )
     })
   })

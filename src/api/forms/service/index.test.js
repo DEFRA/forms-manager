@@ -186,6 +186,21 @@ describe('Forms service', () => {
       await expect(createForm(input, author)).rejects.toThrow()
     })
 
+    it('should throw error when metadata is not created in transaction', async () => {
+      jest
+        .mocked(formMetadata.create)
+        .mockRejectedValueOnce(new Error('Failed to create metadata'))
+
+      const input = {
+        ...formMetadataInput,
+        organisation: 'Test Org',
+        teamName: 'Test Team',
+        teamEmail: 'test@example.com'
+      }
+
+      await expect(createForm(input, author)).rejects.toThrow()
+    })
+
     it('should return the form definition', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
 
@@ -620,4 +635,47 @@ describe('Forms service', () => {
       )
     })
   })
+
+  describe('handleTitleUpdate', () => {
+    it('should throw error when title is not provided', async () => {
+      const formUpdate = {}
+      const updatedForm = { updatedAt: dateUsedInFakeTime }
+      const mockSession = /** @type {ClientSession} */ ({})
+
+      const { handleTitleUpdate } = await import(
+        '~/src/api/forms/service/index.js'
+      )
+
+      await expect(
+        handleTitleUpdate(
+          id,
+          { ...formMetadataDocument, id: formMetadataDocument._id.toString() },
+          formUpdate,
+          updatedForm,
+          mockSession
+        )
+      ).rejects.toThrow('Title is required for title update')
+    })
+  })
+
+  describe('handleMetadataVersioning', () => {
+    it('should not create version when there are no changes', async () => {
+      const formUpdate = {}
+      const mockSession = /** @type {import('mongodb').ClientSession} */ ({})
+
+      jest.clearAllMocks()
+
+      const { handleMetadataVersioning } = await import(
+        '~/src/api/forms/service/index.js'
+      )
+
+      await handleMetadataVersioning(id, formUpdate, mockSession)
+
+      expect(versioningService.createFormVersion).not.toHaveBeenCalled()
+    })
+  })
 })
+
+/**
+ * @import { ClientSession } from 'mongodb'
+ */

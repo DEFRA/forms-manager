@@ -39,11 +39,14 @@ describe('versioning service', () => {
     jest.clearAllMocks()
     jest.useFakeTimers().setSystemTime(now)
 
-    mockSession.withTransaction.mockImplementation(
-      async (/** @type {() => Promise<any>} */ callback) => {
-        return await callback()
-      }
-    )
+    mockSession.withTransaction = jest
+      .fn()
+      .mockImplementation(
+        async (/** @type {() => Promise<any>} */ callback) => {
+          return await callback()
+        }
+      )
+    mockSession.endSession = jest.fn()
 
     const { client } = await import('~/src/mongo.js')
     jest.mocked(client.startSession).mockReturnValue(mockSession)
@@ -101,6 +104,29 @@ describe('versioning service', () => {
       )
       expect(mockSession.endSession).not.toHaveBeenCalled()
     })
+
+    it('should calculate version number from existing versions', async () => {
+      const existingVersions = [
+        { versionNumber: 1, createdAt: new Date('2023-01-01') },
+        { versionNumber: 3, createdAt: new Date('2023-01-03') },
+        { versionNumber: 2, createdAt: new Date('2023-01-02') }
+      ]
+      jest
+        .mocked(formMetadataRepository.getVersionMetadata)
+        .mockResolvedValue(existingVersions)
+
+      const expectedVersionDocument = {
+        ...mockVersionDocument,
+        versionNumber: 4
+      }
+      jest
+        .mocked(formVersionsRepository.createVersion)
+        .mockResolvedValue(expectedVersionDocument)
+
+      const result = await createFormVersion(formId, mockSession)
+
+      expect(result).toEqual(expectedVersionDocument)
+    })
   })
 
   describe('getFormVersion', () => {
@@ -124,6 +150,13 @@ describe('versioning service', () => {
         formId,
         versionNumber
       )
+    })
+
+    it('should handle errors when retrieving a version', async () => {
+      const error = new Error('Version not found')
+      jest.mocked(formVersionsRepository.getVersion).mockRejectedValue(error)
+
+      await expect(getFormVersion(formId, versionNumber)).rejects.toThrow(error)
     })
   })
 
@@ -153,6 +186,13 @@ describe('versioning service', () => {
         0
       )
     })
+
+    it('should handle errors when retrieving all versions', async () => {
+      const error = new Error('Database connection failed')
+      jest.mocked(formVersionsRepository.getVersions).mockRejectedValue(error)
+
+      await expect(getFormVersions(formId)).rejects.toThrow(error)
+    })
   })
 
   describe('getLatestFormVersion', () => {
@@ -175,10 +215,19 @@ describe('versioning service', () => {
         formId
       )
     })
+
+    it('should handle errors when retrieving latest version', async () => {
+      const error = new Error('No versions found')
+      jest
+        .mocked(formVersionsRepository.getLatestVersion)
+        .mockRejectedValue(error)
+
+      await expect(getLatestFormVersion(formId)).rejects.toThrow(error)
+    })
   })
 
   describe('removeFormVersions', () => {
-    it('should remove all versions for a form', async () => {
+    it('should remove all versions for a form and log success', async () => {
       jest
         .mocked(formVersionsRepository.removeVersionsForForm)
         .mockResolvedValue()
@@ -188,6 +237,17 @@ describe('versioning service', () => {
       expect(formVersionsRepository.removeVersionsForForm).toHaveBeenCalledWith(
         formId,
         expect.any(Object)
+      )
+    })
+
+    it('should handle errors when removing versions', async () => {
+      const error = new Error('Failed to remove versions')
+      jest
+        .mocked(formVersionsRepository.removeVersionsForForm)
+        .mockRejectedValue(error)
+
+      await expect(removeFormVersions(formId, mockSession)).rejects.toThrow(
+        error
       )
     })
   })
