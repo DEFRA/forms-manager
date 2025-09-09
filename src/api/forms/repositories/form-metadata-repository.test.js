@@ -150,6 +150,15 @@ describe('form-metadata-repository', () => {
       )
       expect(updated).toEqual(metadataAfter)
     })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.updateOne.mockRejectedValue(error)
+
+      await expect(updateAudit(metadataId, author, mockSession)).rejects.toBe(
+        error
+      )
+    })
   })
 
   describe('listAll', () => {
@@ -490,6 +499,38 @@ describe('form-metadata-repository', () => {
       expect(result.documents).toEqual([])
       expect(result.totalItems).toBe(2)
     })
+
+    it('should use default values when properties are undefined', async () => {
+      mockCollection.aggregate.mockReturnValue({
+        toArray: jest
+          .fn()
+          .mockResolvedValue([{ authors: [], organisations: [], status: [] }])
+      })
+      mockCollection.countDocuments.mockResolvedValue(0)
+
+      await listWithVersions({
+        page: 1,
+        perPage: 1,
+        sortBy: undefined,
+        order: undefined,
+        title: undefined,
+        author: undefined,
+        organisations: undefined,
+        status: undefined
+      })
+
+      expect(mockCollection.aggregate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            $facet: expect.objectContaining({
+              authors: expect.any(Array),
+              organisations: expect.any(Array),
+              status: expect.any(Array)
+            })
+          })
+        ])
+      )
+    })
   })
 
   describe('get', () => {
@@ -526,6 +567,13 @@ describe('form-metadata-repository', () => {
 
       await expect(get(metadataId)).rejects.toThrow(Boom.badRequest(error))
     })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(get(metadataId)).rejects.toBe(error)
+    })
   })
 
   describe('getBySlug', () => {
@@ -560,6 +608,13 @@ describe('form-metadata-repository', () => {
       mockCollection.findOne.mockRejectedValue(error)
 
       await expect(getBySlug(slug)).rejects.toThrow(Boom.internal(error))
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(getBySlug(slug)).rejects.toBe(error)
     })
   })
 

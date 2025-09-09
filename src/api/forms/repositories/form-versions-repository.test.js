@@ -9,6 +9,8 @@ import {
   getLatestVersion,
   getLatestVersionNumber,
   getVersion,
+  getVersionSummaries,
+  getVersionSummariesBatch,
   getVersions,
   removeVersionsForForm
 } from '~/src/api/forms/repositories/form-versions-repository.js'
@@ -332,6 +334,180 @@ describe('form-versions-repository', () => {
       await expect(removeVersionsForForm(formId, mockSession)).rejects.toBe(
         error
       )
+    })
+  })
+
+  describe('getVersionSummaries', () => {
+    it('should retrieve version summaries for a form', async () => {
+      const mockVersions = [
+        { versionNumber: 2, createdAt: now },
+        { versionNumber: 1, createdAt: new Date(now.getTime() - 1000) }
+      ]
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue(mockVersions)
+        })
+      })
+
+      const result = await getVersionSummaries(formId)
+
+      expect(result).toEqual(mockVersions)
+      expect(mockCollection.find).toHaveBeenCalledWith(
+        { formId },
+        { projection: { versionNumber: 1, createdAt: 1, _id: 0 } }
+      )
+    })
+
+    it('should handle database errors', async () => {
+      const error = new Error('Database error')
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockRejectedValue(error)
+        })
+      })
+
+      await expect(getVersionSummaries(formId)).rejects.toThrow(
+        Boom.internal(error)
+      )
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockRejectedValue(error)
+        })
+      })
+
+      await expect(getVersionSummaries(formId)).rejects.toBe(error)
+    })
+
+    it('should work with session parameter', async () => {
+      const mockVersions = [
+        { versionNumber: 2, createdAt: now },
+        { versionNumber: 1, createdAt: new Date(now.getTime() - 1000) }
+      ]
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue(mockVersions)
+        })
+      })
+
+      const result = await getVersionSummaries(formId, mockSession)
+
+      expect(result).toEqual(mockVersions)
+      expect(mockCollection.find).toHaveBeenCalledWith(
+        { formId },
+        {
+          projection: { versionNumber: 1, createdAt: 1, _id: 0 },
+          session: mockSession
+        }
+      )
+    })
+  })
+
+  describe('getVersionSummariesBatch', () => {
+    it('should retrieve version summaries for multiple forms', async () => {
+      const formIds = ['form1', 'form2']
+      const mockVersions = [
+        { formId: 'form1', versionNumber: 1, createdAt: now },
+        { formId: 'form2', versionNumber: 1, createdAt: now }
+      ]
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue(mockVersions)
+        })
+      })
+
+      const result = await getVersionSummariesBatch(formIds)
+
+      expect(result).toBeInstanceOf(Map)
+      expect(result.get('form1')).toEqual([
+        { versionNumber: 1, createdAt: now }
+      ])
+      expect(result.get('form2')).toEqual([
+        { versionNumber: 1, createdAt: now }
+      ])
+    })
+
+    it('should handle database errors', async () => {
+      const formIds = ['form1', 'form2']
+      const error = new Error('Database error')
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockRejectedValue(error)
+        })
+      })
+
+      await expect(getVersionSummariesBatch(formIds)).rejects.toThrow(
+        Boom.internal(error)
+      )
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const formIds = ['form1', 'form2']
+      const error = 'String error'
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockRejectedValue(error)
+        })
+      })
+
+      await expect(getVersionSummariesBatch(formIds)).rejects.toBe(error)
+    })
+
+    it('should work with session parameter', async () => {
+      const formIds = ['form1', 'form2']
+      const mockVersions = [
+        { formId: 'form1', versionNumber: 1, createdAt: now },
+        { formId: 'form2', versionNumber: 1, createdAt: now }
+      ]
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue(mockVersions)
+        })
+      })
+
+      const result = await getVersionSummariesBatch(formIds, mockSession)
+
+      expect(result).toBeInstanceOf(Map)
+      expect(result.get('form1')).toEqual([
+        { versionNumber: 1, createdAt: now }
+      ])
+      expect(result.get('form2')).toEqual([
+        { versionNumber: 1, createdAt: now }
+      ])
+      expect(mockCollection.find).toHaveBeenCalledWith(
+        { formId: { $in: formIds } },
+        {
+          projection: { formId: 1, versionNumber: 1, createdAt: 1, _id: 0 },
+          session: mockSession
+        }
+      )
+    })
+
+    it('should handle versions with unexpected formIds', async () => {
+      const formIds = ['form1', 'form2']
+      const mockVersions = [
+        { formId: 'form1', versionNumber: 1, createdAt: now },
+        { formId: 'form3', versionNumber: 1, createdAt: now } // form3 not in formIds array
+      ]
+      mockCollection.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          toArray: jest.fn().mockResolvedValue(mockVersions)
+        })
+      })
+
+      const result = await getVersionSummariesBatch(formIds, mockSession)
+
+      expect(result).toBeInstanceOf(Map)
+      expect(result.get('form1')).toEqual([
+        { versionNumber: 1, createdAt: now }
+      ])
+      expect(result.get('form2')).toEqual([])
+      expect(result.get('form3')).toEqual([
+        { versionNumber: 1, createdAt: now }
+      ])
     })
   })
 

@@ -11,6 +11,7 @@ import {
   getLatestFormVersion,
   removeFormVersions
 } from '~/src/api/forms/service/versioning.js'
+import { client } from '~/src/mongo.js'
 
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
@@ -35,7 +36,7 @@ describe('versioning service', () => {
   }
   const now = new Date()
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers().setSystemTime(now)
 
@@ -46,10 +47,7 @@ describe('versioning service', () => {
           return await callback()
         }
       )
-    mockSession.endSession = jest.fn()
-
-    const { client } = await import('~/src/mongo.js')
-    jest.mocked(client.startSession).mockReturnValue(mockSession)
+    mockSession.endSession = jest.fn().mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -126,6 +124,62 @@ describe('versioning service', () => {
       const result = await createFormVersion(formId, mockSession)
 
       expect(result).toEqual(expectedVersionDocument)
+    })
+
+    it('should create its own session when none provided', async () => {
+      // Ensure the mock session is properly set up
+      const mockNewSession = /** @type {any} */ ({
+        withTransaction: jest.fn().mockImplementation(async (callback) => {
+          return await callback()
+        }),
+        endSession: jest.fn().mockResolvedValue(undefined)
+      })
+      jest.mocked(client.startSession).mockReturnValue(mockNewSession)
+
+      const result = await createFormVersion(formId)
+
+      expect(result).toEqual(mockVersionDocument)
+      expect(formDefinitionRepository.get).toHaveBeenCalledWith(
+        formId,
+        FormStatus.Draft,
+        expect.any(Object)
+      )
+      expect(formVersionsRepository.createVersion).toHaveBeenCalledWith(
+        mockVersionDocument,
+        expect.any(Object)
+      )
+      expect(mockNewSession.withTransaction).toHaveBeenCalled()
+      expect(mockNewSession.endSession).toHaveBeenCalled()
+    })
+
+    it('should handle errors when creating own session', async () => {
+      const error = new Error('Transaction failed')
+      jest.mocked(formDefinitionRepository.get).mockRejectedValue(error)
+
+      const mockNewSession = /** @type {any} */ ({
+        withTransaction: jest.fn().mockImplementation(async (callback) => {
+          return await callback()
+        }),
+        endSession: jest.fn().mockResolvedValue(undefined)
+      })
+      jest.mocked(client.startSession).mockReturnValue(mockNewSession)
+
+      await expect(createFormVersion(formId)).rejects.toThrow(error)
+      expect(mockNewSession.withTransaction).toHaveBeenCalled()
+      expect(mockNewSession.endSession).toHaveBeenCalled()
+    })
+
+    it('should handle errors in transaction and still cleanup session', async () => {
+      const error = new Error('Transaction error')
+
+      const mockNewSession = /** @type {any} */ ({
+        withTransaction: jest.fn().mockRejectedValue(error),
+        endSession: jest.fn().mockResolvedValue(undefined)
+      })
+      jest.mocked(client.startSession).mockReturnValue(mockNewSession)
+
+      await expect(createFormVersion(formId)).rejects.toThrow(error)
+      expect(mockNewSession.endSession).toHaveBeenCalled()
     })
   })
 
