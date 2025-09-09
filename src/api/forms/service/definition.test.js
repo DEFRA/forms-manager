@@ -1165,13 +1165,7 @@ describe('Forms service', () => {
         [],
         author
       )
-      expect(returnedDefinition).toEqual({
-        ...definition,
-        versionMetadata: {
-          createdAt: new Date('2020-01-01'),
-          version: 1
-        }
-      })
+      expect(returnedDefinition).toEqual(definition)
       expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })
@@ -1289,13 +1283,7 @@ describe('Forms service', () => {
         [],
         author
       )
-      expect(returnedDefinition).toEqual({
-        ...definition,
-        versionMetadata: {
-          createdAt: new Date('2020-01-01'),
-          version: 1
-        }
-      })
+      expect(returnedDefinition).toEqual(definition)
       expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })

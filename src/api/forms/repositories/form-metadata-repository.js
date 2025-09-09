@@ -307,8 +307,56 @@ export async function remove(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormDefinition } from '@defra/forms-model'
+ * Adds version metadata to a form
+ * @param {string} formId - ID of the form
+ * @param {FormVersionMetadata} versionMetadata - Version metadata to add
+ * @param {ClientSession} session - mongo transaction session
+ */
+export async function addVersionMetadata(formId, versionMetadata, session) {
+  logger.info(
+    `Adding version metadata ${versionMetadata.versionNumber} to form ID ${formId}`
+  )
+
+  const result = await update(
+    formId,
+    {
+      $push: {
+        versions: {
+          $each: [versionMetadata],
+          $sort: { versionNumber: -1 }
+        }
+      }
+    },
+    session
+  )
+
+  logger.info(
+    `Added version metadata ${versionMetadata.versionNumber} to form ID ${formId}`
+  )
+
+  return result
+}
+
+/**
+ * Gets version metadata for a form
+ * @param {string} formId - ID of the form
+ * @param {ClientSession} [session] - Optional MongoDB session for transactions
+ * @returns {Promise<FormVersionMetadata[]>}
+ */
+export async function getVersionMetadata(formId, session) {
+  logger.info(`Getting version metadata for form ID ${formId}`)
+
+  const metadata = await get(formId, session)
+  const versions = metadata.versions ?? []
+
+  logger.info(`Found ${versions.length} versions for form ID ${formId}`)
+
+  return versions
+}
+
+/**
+ * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormVersionMetadata } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
- * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { PartialFormMetadataDocument,  } from '~/src/api/types.js'
  * @import { FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'
  */

@@ -4,7 +4,6 @@ import {
   FormStatus
 } from '@defra/forms-model'
 
-import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
@@ -78,15 +77,7 @@ export async function createPageOnDraftDefinition(formId, page, author) {
         session
       )
 
-      // Create a new version for page creation
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.PAGE_CREATED,
-        `Page '${page.title}' created`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -126,7 +117,6 @@ export async function patchFieldsOnDraftDefinitionPage(
   let page
 
   try {
-    // Check that page exists
     await getFormDefinitionPage(formId, pageId, session)
 
     if (pageFieldsToUpdate.path) {
@@ -161,16 +151,7 @@ export async function patchFieldsOnDraftDefinitionPage(
         session
       )
 
-      // Create a new version for page update
-      const updatedFields = Object.keys(pageFieldsToUpdate).join(', ')
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.PAGE_UPDATED,
-        `Page fields updated: ${updatedFields}`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -212,15 +193,7 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
         session
       )
 
-      // Create a new version for page deletion
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.PAGE_DELETED,
-        `Page deleted (ID: ${pageId})`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

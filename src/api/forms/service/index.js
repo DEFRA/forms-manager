@@ -2,7 +2,6 @@ import { FormStatus, formDefinitionV2Schema, slugify } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
-import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import { removeFormErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -101,14 +100,7 @@ export async function handleTitleUpdate(
 
   await formDefinition.updateName(formId, formUpdate.title, session, schema)
 
-  await createFormVersion(
-    formId,
-    author,
-    VersionChangeTypes.METADATA_UPDATED,
-    `Form title updated from '${form.title}' to '${formUpdate.title}'`,
-    FormStatus.Draft,
-    session
-  )
+  await createFormVersion(formId, session)
 
   await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
 }
@@ -127,15 +119,7 @@ export async function handleMetadataVersioning(
   session
 ) {
   if (Object.keys(formUpdate).length > 0) {
-    const changedFields = Object.keys(formUpdate).join(', ')
-    await createFormVersion(
-      formId,
-      author,
-      VersionChangeTypes.METADATA_UPDATED,
-      `Form metadata updated: ${changedFields}`,
-      FormStatus.Draft,
-      session
-    )
+    await createFormVersion(formId, session)
   } else {
     logger.debug(`No metadata changes to process for form ID ${formId}`)
   }
@@ -175,7 +159,8 @@ export async function createForm(metadataInput, author) {
     createdAt: now,
     createdBy: author,
     updatedAt: now,
-    updatedBy: author
+    updatedBy: author,
+    versions: [] // Initialize with empty versions array
   }
 
   const session = client.startSession()
@@ -194,14 +179,7 @@ export async function createForm(metadataInput, author) {
       await formDefinition.insert(metadata.id, definition, session, formDefinitionV2Schema)
 
       // Create the first version of the form
-      await createFormVersion(
-        metadata.id,
-        author,
-        VersionChangeTypes.FORM_CREATED,
-        `Form '${title}' created`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(metadata.id, session)
 
       await publishFormCreatedEvent(metadata)
     })

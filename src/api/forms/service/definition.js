@@ -5,7 +5,6 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -16,10 +15,7 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
-import {
-  createFormVersion,
-  getLatestFormVersion
-} from '~/src/api/forms/service/versioning.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishDraftCreatedFromLiveEvent,
@@ -52,22 +48,7 @@ export async function getFormDefinition(
   state = FormStatus.Draft,
   session = undefined
 ) {
-  const [definition, latestVersion] = await Promise.all([
-    formDefinition.get(formId, state, session),
-    getLatestFormVersion(formId)
-  ])
-
-  if (!latestVersion) {
-    return definition
-  }
-
-  return {
-    ...definition,
-    versionMetadata: {
-      version: latestVersion.versionNumber,
-      createdAt: latestVersion.createdAt
-    }
-  }
+  return formDefinition.get(formId, state, session)
 }
 
 /**
@@ -105,14 +86,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
           session
         )
 
-        await createFormVersion(
-          formId,
-          author,
-          VersionChangeTypes.FORM_UPDATED,
-          'Form definition updated',
-          FormStatus.Draft,
-          session
-        )
+        await createFormVersion(formId, session)
 
         // Publish audit message
         await publishFormDraftReplacedEvent(updatedMetadata, definition)
@@ -226,14 +200,7 @@ export async function createLiveFromDraft(formId, author) {
           session
         )
 
-        await createFormVersion(
-          formId,
-          author,
-          'live_published',
-          'Form published to live',
-          FormStatus.Live,
-          session
-        )
+        await createFormVersion(formId, session)
 
         // Publish audit message
         await publishLiveCreatedFromDraftEvent(formId, now, author)
@@ -293,14 +260,7 @@ export async function createDraftFromLive(formId, author) {
 
         await formMetadata.update(formId, { $set: set }, session)
 
-        await createFormVersion(
-          formId,
-          author,
-          'draft_created_from_live',
-          'Draft created from live version',
-          FormStatus.Draft,
-          session
-        )
+        await createFormVersion(formId, session)
 
         // Publish audit message
         await publishDraftCreatedFromLiveEvent(formId, now, author)
@@ -353,14 +313,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        'page_reordered',
-        'Pages reordered',
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -427,14 +380,7 @@ export async function reorderDraftFormDefinitionComponents(
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        'component_reordered',
-        'Components reordered',
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

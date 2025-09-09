@@ -5,7 +5,6 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
@@ -58,14 +57,7 @@ export async function addListToDraftFormDefinition(formId, list, author) {
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.LIST_CREATED,
-        `List '${list.name}' created`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       // TODO: List could be > 256KB?
       await publishFormUpdatedEvent(
@@ -126,14 +118,7 @@ export async function updateListOnDraftFormDefinition(
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.LIST_UPDATED,
-        `List '${list.name}' updated`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       // TODO: List could be > 256KB?
       await publishFormUpdatedEvent(
@@ -181,14 +166,7 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.LIST_DELETED,
-        `List deleted (ID: ${listId})`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

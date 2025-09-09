@@ -4,6 +4,8 @@ import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { VERSIONS_COLLECTION_NAME, db } from '~/src/mongo.js'
 
+export const MAX_VERSIONS = 100
+
 const logger = createLogger()
 
 /**

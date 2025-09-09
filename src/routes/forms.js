@@ -22,7 +22,10 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
-import { getFormVersion } from '~/src/api/forms/service/versioning.js'
+import {
+  getFormVersion,
+  getFormVersions
+} from '~/src/api/forms/service/versioning.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { formVersionByIdSchema } from '~/src/models/form-versions.js'
 import {
@@ -337,7 +340,32 @@ export default [
   },
   {
     method: 'GET',
-    path: '/forms/{id}/definition/versions/{versionNumber}',
+    path: '/forms/{id}/versions',
+    /**
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { params } = request
+      const { id } = params
+
+      const versions = await getFormVersions(id)
+      return {
+        versions: versions.map((v) => ({
+          versionNumber: v.versionNumber,
+          createdAt: v.createdAt
+        }))
+      }
+    },
+    options: {
+      auth: false,
+      validate: {
+        params: formByIdSchema
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/forms/{id}/versions/{versionNumber}',
     /**
      * @param {RequestFormVersionById} request
      */
@@ -347,12 +375,29 @@ export default [
 
       const version = await getFormVersion(id, parseInt(versionNumber))
       return {
-        ...version.formDefinition,
-        versionMetadata: {
-          version: version.versionNumber,
-          createdAt: version.createdAt
-        }
+        versionNumber: version.versionNumber,
+        createdAt: version.createdAt
       }
+    },
+    options: {
+      auth: false,
+      validate: {
+        params: formVersionByIdSchema
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/forms/{id}/versions/{versionNumber}/definition',
+    /**
+     * @param {RequestFormVersionById} request
+     */
+    async handler(request) {
+      const { params } = request
+      const { id, versionNumber } = params
+
+      const version = await getFormVersion(id, parseInt(versionNumber))
+      return version.formDefinition
     },
     options: {
       auth: false,

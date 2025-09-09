@@ -1,6 +1,5 @@
-import { FormDefinitionRequestType, FormStatus } from '@defra/forms-model'
+import { FormDefinitionRequestType } from '@defra/forms-model'
 
-import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
@@ -39,14 +38,7 @@ export async function addConditionToDraftFormDefinition(
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.CONDITION_CREATED,
-        `Condition '${condition.displayName}' created`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -104,14 +96,7 @@ export async function updateConditionOnDraftFormDefinition(
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.CONDITION_UPDATED,
-        `Condition '${condition.displayName}' updated`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -162,14 +147,7 @@ export async function removeConditionOnDraftFormDefinition(
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.CONDITION_DELETED,
-        `Condition deleted (ID: ${conditionId})`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

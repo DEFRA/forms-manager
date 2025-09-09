@@ -1,7 +1,6 @@
 import { FormDefinitionRequestType, FormStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { VersionChangeTypes } from '~/src/api/forms/constants/version-change-types.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { findComponent } from '~/src/api/forms/repositories/helpers.js'
@@ -86,14 +85,7 @@ export async function createComponentOnDraftDefinition(
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.COMPONENT_CREATED,
-        `Component '${component.type}' created`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -155,14 +147,7 @@ export async function updateComponentOnDraftDefinition(
           session
         )
 
-        await createFormVersion(
-          formId,
-          author,
-          VersionChangeTypes.COMPONENT_UPDATED,
-          `Component '${componentPayload.type}' updated`,
-          FormStatus.Draft,
-          session
-        )
+        await createFormVersion(formId, session)
 
         await publishFormUpdatedEvent(
           metadataDocument,
@@ -219,14 +204,7 @@ export async function deleteComponentOnDraftDefinition(
         session
       )
 
-      await createFormVersion(
-        formId,
-        author,
-        VersionChangeTypes.COMPONENT_DELETED,
-        `Component deleted (ID: ${componentId})`,
-        FormStatus.Draft,
-        session
-      )
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
