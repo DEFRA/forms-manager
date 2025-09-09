@@ -25,6 +25,7 @@ jest.mock('~/src/mongo.js', () => ({
 
 describe('form-versions-repository', () => {
   const formId = '661e4ca5039739ef2902b214'
+  /** @type {any} */
   const mockSession = {}
   const now = new Date()
   const mockFormDefinition = buildDefinition({})
