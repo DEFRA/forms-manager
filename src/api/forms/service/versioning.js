@@ -57,15 +57,8 @@ export async function createFormVersion(formId, session) {
  * @param {ClientSession} session
  */
 async function createVersionInTransaction(formId, session) {
-  const existingVersions = await formMetadataRepository.getVersionMetadata(
-    formId,
-    session
-  )
-  const currentVersionNumber =
-    existingVersions.length > 0
-      ? Math.max(...existingVersions.map((v) => v.versionNumber))
-      : 0
-  const nextVersionNumber = currentVersionNumber + 1
+  const nextVersionNumber =
+    await formMetadataRepository.getAndIncrementVersionNumber(formId, session)
 
   const formDefinition = await formDefinitionRepository.get(
     formId,
@@ -93,7 +86,15 @@ async function createVersionInTransaction(formId, session) {
     createdAt
   })
 
-  return formVersionsRepository.createVersion(versionDocument, session)
+  try {
+    return await formVersionsRepository.createVersion(versionDocument, session)
+  } catch (error) {
+    logger.error(
+      error,
+      `Unexpected error creating version ${nextVersionNumber} for form ID ${formId} after atomic increment`
+    )
+    throw error
+  }
 }
 
 /**

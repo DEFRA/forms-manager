@@ -13,6 +13,7 @@ import {
   addVersionMetadata,
   create,
   get,
+  getAndIncrementVersionNumber,
   getBySlug,
   getVersionMetadata,
   list,
@@ -819,6 +820,180 @@ describe('form-metadata-repository', () => {
       mockCollection.findOne.mockRejectedValue(error)
 
       await expect(get(metadataId)).rejects.toThrow(Boom.internal(error))
+    })
+  })
+
+  describe('getAndIncrementVersionNumber', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('should initialise lastVersionNumber from existing versions when field does not exist', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue({
+        _id: new ObjectId(metadataId),
+        lastVersionNumber: 4 // Should be max(3) + 1
+      })
+
+      const result = await getAndIncrementVersionNumber(metadataId, mockSession)
+
+      expect(result).toBe(4)
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: new ObjectId(metadataId) },
+        [
+          {
+            $set: {
+              lastVersionNumber: {
+                $add: [
+                  {
+                    $max: [
+                      { $ifNull: ['$lastVersionNumber', 0] },
+                      { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
+                    ]
+                  },
+                  1
+                ]
+              }
+            }
+          }
+        ],
+        {
+          returnDocument: 'after',
+          session: mockSession,
+          projection: { lastVersionNumber: 1 }
+        }
+      )
+    })
+
+    it('should increment existing lastVersionNumber when it already exists', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue({
+        _id: new ObjectId(metadataId),
+        lastVersionNumber: 11 // Incremented from 10
+      })
+
+      const result = await getAndIncrementVersionNumber(metadataId, mockSession)
+
+      expect(result).toBe(11)
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: new ObjectId(metadataId) },
+        [
+          {
+            $set: {
+              lastVersionNumber: {
+                $add: [
+                  {
+                    $max: [
+                      { $ifNull: ['$lastVersionNumber', 0] },
+                      { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
+                    ]
+                  },
+                  1
+                ]
+              }
+            }
+          }
+        ],
+        {
+          returnDocument: 'after',
+          session: mockSession,
+          projection: { lastVersionNumber: 1 }
+        }
+      )
+    })
+
+    it('should handle case where lastVersionNumber is behind versions array', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue({
+        _id: new ObjectId(metadataId),
+        lastVersionNumber: 15 // Should jump to max(versions) if it was behind
+      })
+
+      const result = await getAndIncrementVersionNumber(metadataId, mockSession)
+
+      expect(result).toBe(15)
+    })
+
+    it('should start at 1 for forms with no versions', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue({
+        _id: new ObjectId(metadataId),
+        lastVersionNumber: 1 // 0 + 1
+      })
+
+      const result = await getAndIncrementVersionNumber(metadataId, mockSession)
+
+      expect(result).toBe(1)
+    })
+
+    it('should throw Boom.notFound when form does not exist', async () => {
+      const nonExistentId = '507f1f77bcf86cd799439011'
+      mockCollection.findOneAndUpdate.mockResolvedValue(null)
+
+      await expect(
+        getAndIncrementVersionNumber(nonExistentId, mockSession)
+      ).rejects.toThrow(
+        Boom.notFound(`Form with ID ${nonExistentId} not found`)
+      )
+    })
+
+    it('should handle concurrent requests atomically', async () => {
+      mockCollection.findOneAndUpdate
+        .mockResolvedValueOnce({
+          _id: new ObjectId(metadataId),
+          lastVersionNumber: 5
+        })
+        .mockResolvedValueOnce({
+          _id: new ObjectId(metadataId),
+          lastVersionNumber: 6
+        })
+        .mockResolvedValueOnce({
+          _id: new ObjectId(metadataId),
+          lastVersionNumber: 7
+        })
+
+      const promises = [
+        getAndIncrementVersionNumber(metadataId, mockSession),
+        getAndIncrementVersionNumber(metadataId, mockSession),
+        getAndIncrementVersionNumber(metadataId, mockSession)
+      ]
+
+      const resolvedResults = await Promise.all(promises)
+
+      expect(resolvedResults).toEqual([5, 6, 7])
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledTimes(3)
+    })
+
+    it('should handle the exact duplicate key scenario from production', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce({
+        _id: new ObjectId('68a88bc836a6de2d100b3509'),
+        lastVersionNumber: 11 // max(1..10) + 1
+      })
+
+      const result = await getAndIncrementVersionNumber(
+        '68a88bc836a6de2d100b3509',
+        mockSession
+      )
+
+      expect(result).toBe(11)
+
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: new ObjectId('68a88bc836a6de2d100b3509') },
+        [
+          {
+            $set: {
+              lastVersionNumber: {
+                $add: [
+                  {
+                    $max: [
+                      { $ifNull: ['$lastVersionNumber', 0] },
+                      { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
+                    ]
+                  },
+                  1
+                ]
+              }
+            }
+          }
+        ],
+        expect.any(Object)
+      )
     })
   })
 })

@@ -413,6 +413,62 @@ export async function getVersionMetadata(formId, session) {
 }
 
 /**
+ * Atomically increments and returns the next version number for a form
+ * @param {string} formId - ID of the form
+ * @param {ClientSession} session - MongoDB session for transactions
+ * @returns {Promise<number>} The next version number
+ */
+export async function getAndIncrementVersionNumber(formId, session) {
+  logger.info(`Getting and incrementing version number for form ID ${formId}`)
+
+  const coll = /** @type {Collection<FormMetadataDocument>} */ (
+    db.collection(METADATA_COLLECTION_NAME)
+  )
+
+  // 1. Calculate the max version from the versions array
+  // 2. Compare with lastVersionNumber
+  // 3. Set lastVersionNumber to the max + 1
+  const result = await coll.findOneAndUpdate(
+    { _id: new ObjectId(formId) },
+    [
+      {
+        $set: {
+          lastVersionNumber: {
+            $add: [
+              {
+                $max: [
+                  { $ifNull: ['$lastVersionNumber', 0] },
+                  { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
+                ]
+              },
+              1
+            ]
+          }
+        }
+      }
+    ],
+    {
+      returnDocument: 'after',
+      session,
+      projection: { lastVersionNumber: 1 }
+    }
+  )
+
+  if (!result) {
+    throw Boom.notFound(`Form with ID ${formId} not found`)
+  }
+
+  // @ts-expect-error - lastVersionNumber is added dynamically
+  const nextVersionNumber = result.lastVersionNumber
+
+  logger.info(
+    `Next version number for form ID ${formId} is ${nextVersionNumber}`
+  )
+
+  return nextVersionNumber
+}
+
+/**
  * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormVersionMetadata } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument,  } from '~/src/api/types.js'

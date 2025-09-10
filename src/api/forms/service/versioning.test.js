@@ -65,8 +65,8 @@ describe('versioning service', () => {
 
     beforeEach(() => {
       jest
-        .mocked(formMetadataRepository.getVersionMetadata)
-        .mockResolvedValue([])
+        .mocked(formMetadataRepository.getAndIncrementVersionNumber)
+        .mockResolvedValue(1)
       jest
         .mocked(formDefinitionRepository.get)
         .mockResolvedValue(mockFormDefinition)
@@ -82,9 +82,17 @@ describe('versioning service', () => {
       const result = await createFormVersion(formId, mockSession)
 
       expect(result).toEqual(mockVersionDocument)
+      expect(
+        formMetadataRepository.getAndIncrementVersionNumber
+      ).toHaveBeenCalledWith(formId, expect.any(Object))
       expect(formDefinitionRepository.get).toHaveBeenCalledWith(
         formId,
         FormStatus.Draft,
+        expect.any(Object)
+      )
+      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
+        formId,
+        { versionNumber: 1, createdAt: now },
         expect.any(Object)
       )
       expect(formVersionsRepository.createVersion).toHaveBeenCalledWith(
@@ -104,15 +112,10 @@ describe('versioning service', () => {
       expect(mockSession.endSession).not.toHaveBeenCalled()
     })
 
-    it('should calculate version number from existing versions', async () => {
-      const existingVersions = [
-        { versionNumber: 1, createdAt: new Date('2023-01-01') },
-        { versionNumber: 3, createdAt: new Date('2023-01-03') },
-        { versionNumber: 2, createdAt: new Date('2023-01-02') }
-      ]
+    it('should use atomic increment for version number', async () => {
       jest
-        .mocked(formMetadataRepository.getVersionMetadata)
-        .mockResolvedValue(existingVersions)
+        .mocked(formMetadataRepository.getAndIncrementVersionNumber)
+        .mockResolvedValue(4)
 
       const expectedVersionDocument = {
         ...mockVersionDocument,
@@ -125,6 +128,14 @@ describe('versioning service', () => {
       const result = await createFormVersion(formId, mockSession)
 
       expect(result).toEqual(expectedVersionDocument)
+      expect(
+        formMetadataRepository.getAndIncrementVersionNumber
+      ).toHaveBeenCalledWith(formId, expect.any(Object))
+      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
+        formId,
+        { versionNumber: 4, createdAt: now },
+        expect.any(Object)
+      )
     })
 
     it('should create its own session when none provided', async () => {
@@ -186,7 +197,7 @@ describe('versioning service', () => {
 
   describe('getFormVersion', () => {
     const versionNumber = 1
-    const mockVersion = {
+    const mockVersionDocument = {
       formId,
       versionNumber,
       formDefinition: mockFormDefinition,
@@ -196,11 +207,11 @@ describe('versioning service', () => {
     it('should retrieve a specific version', async () => {
       jest
         .mocked(formVersionsRepository.getVersion)
-        .mockResolvedValue(mockVersion)
+        .mockResolvedValue(mockVersionDocument)
 
       const result = await getFormVersion(formId, versionNumber)
 
-      expect(result).toEqual(mockVersion)
+      expect(result).toEqual(mockVersionDocument)
       expect(formVersionsRepository.getVersion).toHaveBeenCalledWith(
         formId,
         versionNumber
@@ -221,15 +232,24 @@ describe('versioning service', () => {
         formId,
         versionNumber: 1,
         formDefinition: mockFormDefinition,
-        createdAt: new Date('2023-01-01')
+        createdAt: now
+      },
+      {
+        formId,
+        versionNumber: 2,
+        formDefinition: mockFormDefinition,
+        createdAt: now
       }
     ]
 
     it('should retrieve all versions for a form', async () => {
-      jest.mocked(formVersionsRepository.getVersions).mockResolvedValue({
+      const mockResult = {
         versions: mockVersions,
-        totalCount: 1
-      })
+        totalCount: 2
+      }
+      jest
+        .mocked(formVersionsRepository.getVersions)
+        .mockResolvedValue(mockResult)
 
       const result = await getFormVersions(formId)
 
@@ -237,13 +257,13 @@ describe('versioning service', () => {
       expect(formVersionsRepository.getVersions).toHaveBeenCalledWith(
         formId,
         undefined,
-        formVersionsRepository.MAX_VERSIONS,
+        100,
         0
       )
     })
 
     it('should handle errors when retrieving all versions', async () => {
-      const error = new Error('Database connection failed')
+      const error = new Error('Database error')
       jest.mocked(formVersionsRepository.getVersions).mockRejectedValue(error)
 
       await expect(getFormVersions(formId)).rejects.toThrow(error)
@@ -253,7 +273,7 @@ describe('versioning service', () => {
   describe('getLatestFormVersion', () => {
     const mockLatestVersion = {
       formId,
-      versionNumber: 5,
+      versionNumber: 3,
       formDefinition: mockFormDefinition,
       createdAt: now
     }
@@ -285,18 +305,18 @@ describe('versioning service', () => {
     it('should remove all versions for a form and log success', async () => {
       jest
         .mocked(formVersionsRepository.removeVersionsForForm)
-        .mockResolvedValue()
+        .mockResolvedValue(/** @type {any} */ ({ deletedCount: 5 }))
 
       await removeFormVersions(formId, mockSession)
 
       expect(formVersionsRepository.removeVersionsForForm).toHaveBeenCalledWith(
         formId,
-        expect.any(Object)
+        mockSession
       )
     })
 
     it('should handle errors when removing versions', async () => {
-      const error = new Error('Failed to remove versions')
+      const error = new Error('Delete failed')
       jest
         .mocked(formVersionsRepository.removeVersionsForForm)
         .mockRejectedValue(error)
@@ -309,5 +329,6 @@ describe('versioning service', () => {
 })
 
 /**
- * @import { FormVersionDocument } from '~/src/api/types.js'
+ * @import { ClientSession } from 'mongodb'
+ * @import { FormDefinition } from '@defra/forms-model'
  */
