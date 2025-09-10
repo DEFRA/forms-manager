@@ -6,6 +6,7 @@ import * as formMetadataRepository from '~/src/api/forms/repositories/form-metad
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   createFormVersion,
+  createFormVersionAndSession,
   getFormVersion,
   getFormVersions,
   getLatestFormVersion,
@@ -136,7 +137,7 @@ describe('versioning service', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      const result = await createFormVersion(formId)
+      const result = await createFormVersionAndSession(formId)
 
       expect(result).toEqual(mockVersionDocument)
       expect(formDefinitionRepository.get).toHaveBeenCalledWith(
@@ -164,7 +165,7 @@ describe('versioning service', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      await expect(createFormVersion(formId)).rejects.toThrow(error)
+      await expect(createFormVersionAndSession(formId)).rejects.toThrow(error)
       expect(mockNewSession.withTransaction).toHaveBeenCalled()
       expect(mockNewSession.endSession).toHaveBeenCalled()
     })
@@ -178,7 +179,7 @@ describe('versioning service', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      await expect(createFormVersion(formId)).rejects.toThrow(error)
+      await expect(createFormVersionAndSession(formId)).rejects.toThrow(error)
       expect(mockNewSession.endSession).toHaveBeenCalled()
     })
   })

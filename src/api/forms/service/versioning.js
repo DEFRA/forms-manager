@@ -11,23 +11,33 @@ import { client } from '~/src/mongo.js'
 const logger = createLogger()
 
 /**
- * Creates a new version of a form definition
- * @param {string} formId - The form ID
- * @param {ClientSession} [session] - Existing MongoDB session (if called within a transaction)
+ * Wrapper function to instantiate new session and create form version
+ * @param {string} formId
  * @returns {Promise<FormVersionDocument>}
  */
-export async function createFormVersion(formId, session = undefined) {
-  logger.info(`Creating new version for form ID ${formId}`)
-
-  const shouldCreateOwnSession = !session
-  const workingSession = session ?? client.startSession()
+export async function createFormVersionAndSession(formId) {
+  const session = client.startSession()
 
   try {
-    const result = await (shouldCreateOwnSession
-      ? workingSession.withTransaction(async () =>
-          createVersionInTransaction(formId, workingSession)
-        )
-      : createVersionInTransaction(formId, workingSession))
+    return await session.withTransaction(async () => {
+      return createFormVersion(formId, session)
+    })
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
+ * Creates a new version of a form definition
+ * @param {string} formId - The form ID
+ * @param {ClientSession} session - Existing MongoDB session (if called within a transaction)
+ * @returns {Promise<FormVersionDocument>}
+ */
+export async function createFormVersion(formId, session) {
+  logger.info(`Creating new version for form ID ${formId}`)
+
+  try {
+    const result = await createVersionInTransaction(formId, session)
 
     logger.info(`Created version ${result.versionNumber} for form ID ${formId}`)
     return result
@@ -37,10 +47,6 @@ export async function createFormVersion(formId, session = undefined) {
       `[createFormVersion] Failed to create version for form ID ${formId} - ${getErrorMessage(error)}`
     )
     throw error
-  } finally {
-    if (shouldCreateOwnSession) {
-      await workingSession.endSession()
-    }
   }
 }
 

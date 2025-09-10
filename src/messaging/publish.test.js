@@ -99,6 +99,10 @@ describe('publish', () => {
           teamEmail
         }
       })
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
+      })
     })
 
     it('should not publish the event if the schema is incorrect', async () => {
@@ -153,6 +157,10 @@ describe('publish', () => {
           }
         }
       })
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
+      })
     })
   })
 
@@ -174,6 +182,10 @@ describe('publish', () => {
         type: AuditEventMessageType.FORM_LIVE_CREATED_FROM_DRAFT,
         createdAt: updatedAt,
         createdBy: updatedBy
+      })
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
       })
     })
   })
@@ -197,6 +209,10 @@ describe('publish', () => {
         createdAt: updatedAt,
         createdBy: updatedBy
       })
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
+      })
     })
   })
 
@@ -217,6 +233,10 @@ describe('publish', () => {
           formId,
           slug
         }
+      })
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
       })
     })
   })
@@ -240,6 +260,10 @@ describe('publish', () => {
         createdAt: updatedAt,
         createdBy: updatedBy
       })
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
+      })
     })
   })
 
@@ -262,6 +286,9 @@ describe('publish', () => {
         s3Meta: undefined,
         slug: formMetadataDocument.slug,
         payload
+      })
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
       })
     })
   })
@@ -292,6 +319,9 @@ describe('publish', () => {
         slug: formMetadataDocument.slug,
         payload: undefined
       })
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
+      })
     })
   })
 
@@ -306,6 +336,10 @@ describe('publish', () => {
         }
       ])
       expect(publishEvent).toHaveBeenCalledWith(message)
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
+      })
     })
 
     it('should fail given rejection', async () => {
