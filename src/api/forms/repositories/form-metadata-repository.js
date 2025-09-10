@@ -231,13 +231,10 @@ export async function getBySlug(slug) {
       `[getFormBySlug] Getting form with slug ${slug} failed - ${getErrorMessage(error)}`
     )
 
-    if (Boom.isBoom(error)) {
-      throw error
-    }
-
-    if (error instanceof Error) {
+    if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.internal(error)
     }
+
     throw error
   }
 }
@@ -326,13 +323,10 @@ export async function update(formId, update, session) {
       `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(error)}`
     )
 
-    if (Boom.isBoom(error)) {
-      throw error
-    }
-
-    if (error instanceof Error) {
+    if (error instanceof Error && !Boom.isBoom(error)) {
       throw Boom.internal(error)
     }
+
     throw error
   }
 }
