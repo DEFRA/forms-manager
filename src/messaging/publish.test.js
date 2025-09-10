@@ -236,7 +236,8 @@ describe('publish', () => {
       })
       const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
       expect(publishEventCall).toMatchSnapshot({
-        messageCreatedAt: expect.any(Date)
+        messageCreatedAt: expect.any(Date),
+        createdAt: expect.any(Date)
       })
     })
   })

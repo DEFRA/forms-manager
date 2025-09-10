@@ -71,7 +71,7 @@ exports[`publish publishFormCreatedEvent should publish FORM_CREATED event 1`] =
 exports[`publish publishFormDraftDeletedEvent should publish a FORM_DRAFT_DELETED event 1`] = `
 {
   "category": "FORM",
-  "createdAt": 2025-09-10T11:40:16.418Z,
+  "createdAt": Any<Date>,
   "createdBy": {
     "displayName": "Enrique Chase",
     "id": "f50ceeed-b7a4-47cf-a498-094efc99f8bc",
