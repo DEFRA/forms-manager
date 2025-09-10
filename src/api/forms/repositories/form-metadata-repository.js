@@ -430,23 +430,9 @@ export async function getAndIncrementVersionNumber(formId, session) {
   // 3. Set lastVersionNumber to the max + 1
   const result = await coll.findOneAndUpdate(
     { _id: new ObjectId(formId) },
-    [
-      {
-        $set: {
-          lastVersionNumber: {
-            $add: [
-              {
-                $max: [
-                  { $ifNull: ['$lastVersionNumber', 0] },
-                  { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
-                ]
-              },
-              1
-            ]
-          }
-        }
-      }
-    ],
+    {
+      $inc: { lastVersionNumber: 1 }
+    },
     {
       returnDocument: 'after',
       session,

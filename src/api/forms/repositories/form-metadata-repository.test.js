@@ -839,23 +839,9 @@ describe('form-metadata-repository', () => {
       expect(result).toBe(4)
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: new ObjectId(metadataId) },
-        [
-          {
-            $set: {
-              lastVersionNumber: {
-                $add: [
-                  {
-                    $max: [
-                      { $ifNull: ['$lastVersionNumber', 0] },
-                      { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
-                    ]
-                  },
-                  1
-                ]
-              }
-            }
-          }
-        ],
+        {
+          $inc: { lastVersionNumber: 1 }
+        },
         {
           returnDocument: 'after',
           session: mockSession,
@@ -875,23 +861,9 @@ describe('form-metadata-repository', () => {
       expect(result).toBe(11)
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: new ObjectId(metadataId) },
-        [
-          {
-            $set: {
-              lastVersionNumber: {
-                $add: [
-                  {
-                    $max: [
-                      { $ifNull: ['$lastVersionNumber', 0] },
-                      { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
-                    ]
-                  },
-                  1
-                ]
-              }
-            }
-          }
-        ],
+        {
+          $inc: { lastVersionNumber: 1 }
+        },
         {
           returnDocument: 'after',
           session: mockSession,
@@ -975,23 +947,9 @@ describe('form-metadata-repository', () => {
 
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: new ObjectId('68a88bc836a6de2d100b3509') },
-        [
-          {
-            $set: {
-              lastVersionNumber: {
-                $add: [
-                  {
-                    $max: [
-                      { $ifNull: ['$lastVersionNumber', 0] },
-                      { $ifNull: [{ $max: '$versions.versionNumber' }, 0] }
-                    ]
-                  },
-                  1
-                ]
-              }
-            }
-          }
-        ],
+        {
+          $inc: { lastVersionNumber: 1 }
+        },
         expect.any(Object)
       )
     })

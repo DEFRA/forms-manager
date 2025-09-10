@@ -4,6 +4,7 @@ import { buildDefinition } from '@defra/forms-model/stubs'
 import * as formDefinitionRepository from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
+import { buildFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
   createFormVersion,
   createFormVersionAndSession,
@@ -56,12 +57,13 @@ describe('versioning service', () => {
   })
 
   describe('createFormVersion', () => {
-    const mockVersionDocument = {
+    const mockVersionDocument = buildFormVersionDocument({
+      _id: undefined,
       formId,
       versionNumber: 1,
       formDefinition: mockFormDefinition,
       createdAt: now
-    }
+    })
 
     beforeEach(() => {
       jest
