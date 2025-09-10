@@ -20,6 +20,7 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: ConditionWrapperV2 }>} CreateConditionDraftFormPagesRequest
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {conditionId: string}, Payload: ConditionWrapperV2 }>} UpdateConditionDraftFormPagesRequest
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {conditionId: string} }>} DeleteConditionDraftFormPagesRequest
+ * @typedef {Request<{ Server: { db: Db }, Params: {id: string, versionNumber: string} }>} RequestFormVersionById
  */
 
 /**
@@ -27,7 +28,29 @@
  */
 
 /**
- * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions, List, ConditionWrapperV2 } from '@defra/forms-model'
+ * @typedef {object} FormVersionDocument
+ * @property {ObjectId} [_id] - MongoDB ObjectId
+ * @property {string} formId - The form ID
+ * @property {number} versionNumber - The version number
+ * @property {FormDefinition} formDefinition - The complete form definition
+ * @property {Date} createdAt - When this version was created
+ */
+
+/**
+ * @typedef {FormMetadataDocument & { versions?: FormVersionMetadata[] }} FormMetadataWithVersions
+ */
+
+/**
+ * @typedef {object} VersionedFormDefinitionResponse
+ * @property {string} id - The form ID
+ * @property {FormDefinition} formDefinition - The complete form definition
+ * @property {number} version - The version number
+ * @property {FormStatus} status - The status of the form
+ * @property {Date} createdAt - When this version was created
+ */
+
+/**
+ * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormVersionMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions, List, ConditionWrapperV2, FormStatus } from '@defra/forms-model'
  * @import { Request } from '@hapi/hapi'
- * @import { Db } from 'mongodb'
+ * @import { Db, ObjectId } from 'mongodb'
  */

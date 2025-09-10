@@ -22,6 +22,7 @@ module.exports = {
     '<rootDir>/src/__fixtures__',
     '<rootDir>/test'
   ],
+  modulePathIgnorePatterns: ['<rootDir>/coverage/', '<rootDir>/.server/'],
   coverageDirectory: '<rootDir>/coverage',
   setupFiles: ['<rootDir>/jest.setup.js'],
   transform: {

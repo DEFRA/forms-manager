@@ -12,12 +12,14 @@ import {
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
+import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
   addListToDraftFormDefinition,
   duplicateListGuard,
   removeListOnDraftFormDefinition,
   updateListOnDraftFormDefinition
 } from '~/src/api/forms/service/lists.js'
+import * as versioningService from '~/src/api/forms/service/versioning.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import * as publishBase from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -27,6 +29,7 @@ jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
+jest.mock('~/src/api/forms/service/versioning.js')
 jest.mock('~/src/messaging/publish-base.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
@@ -83,6 +86,12 @@ describe('lists', () => {
     jest
       .mocked(formMetadata.updateAudit)
       .mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(versioningService.createFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
+    jest
+      .mocked(versioningService.getLatestFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
   })
 
   describe('duplicateListGuard', () => {

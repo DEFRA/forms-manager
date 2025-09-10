@@ -3,6 +3,7 @@ import {
   Engine,
   FormStatus,
   SchemaVersion,
+  Scopes,
   organisations
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
@@ -27,6 +28,10 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
+import {
+  getFormVersion,
+  getFormVersions
+} from '~/src/api/forms/service/versioning.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
 
@@ -37,6 +42,7 @@ jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')
 jest.mock('~/src/api/forms/service/migration.js')
 jest.mock('~/src/api/forms/service/conditions.js')
+jest.mock('~/src/api/forms/service/versioning.js')
 jest.mock('~/src/messaging/publish.js')
 
 describe('Forms route', () => {
@@ -59,7 +65,7 @@ describe('Forms route', () => {
   const jsonContentType = 'application/json'
   const id = '661e4ca5039739ef2902b214'
   const now = new Date()
-  const authorId = 'f50ceeed-b7a4-47cf-a498-094efc99f8bc'
+  const authorId = '86758ba9-92e7-4287-9751-7705e449688e'
   const authorDisplayName = 'Enrique Chase'
 
   /**
@@ -1471,6 +1477,377 @@ describe('Forms route', () => {
         validation: {
           source: 'payload'
         }
+      })
+    })
+  })
+
+  describe('Version endpoints', () => {
+    test('GET /forms/{id}/versions returns list of versions', async () => {
+      const mockVersions = [
+        {
+          formId: id,
+          versionNumber: 1,
+          createdAt: now,
+          formDefinition: stubFormDefinition
+        },
+        {
+          formId: id,
+          versionNumber: 2,
+          createdAt: now,
+          formDefinition: stubFormDefinition
+        }
+      ]
+
+      jest.mocked(getFormVersions).mockResolvedValue(mockVersions)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/versions`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        versions: [
+          { versionNumber: 1, createdAt: now },
+          { versionNumber: 2, createdAt: now }
+        ]
+      })
+    })
+
+    test('GET /forms/{id}/versions/{versionNumber} returns specific version', async () => {
+      const mockVersion = {
+        formId: id,
+        versionNumber: 1,
+        createdAt: now,
+        formDefinition: stubFormDefinition
+      }
+
+      jest.mocked(getFormVersion).mockResolvedValue(mockVersion)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/versions/1`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        versionNumber: 1,
+        createdAt: now
+      })
+    })
+
+    test('GET /forms/{id}/versions/{versionNumber}/definition returns version definition', async () => {
+      const mockVersion = {
+        formId: id,
+        versionNumber: 1,
+        createdAt: now,
+        formDefinition: stubFormDefinition
+      }
+
+      jest.mocked(getFormVersion).mockResolvedValue(mockVersion)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/versions/1/definition`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
+    })
+
+    test('GET /forms/{id}/versions handles error', async () => {
+      jest
+        .mocked(getFormVersions)
+        .mockRejectedValue(Boom.notFound('Form not found'))
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/versions`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(notFoundStatusCode)
+    })
+
+    test('GET /forms/{id}/versions/{versionNumber} handles version not found', async () => {
+      jest
+        .mocked(getFormVersion)
+        .mockRejectedValue(Boom.notFound('Version not found'))
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/versions/999`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(notFoundStatusCode)
+    })
+  })
+
+  describe('Form state management endpoints', () => {
+    test('POST /forms/{id}/create-live creates live from draft', async () => {
+      jest.mocked(createLiveFromDraft).mockResolvedValue()
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/create-live`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id,
+        status: 'created-live'
+      })
+      expect(createLiveFromDraft).toHaveBeenCalledWith(id, author)
+    })
+
+    test('POST /forms/{id}/create-draft creates draft from live', async () => {
+      jest.mocked(createDraftFromLive).mockResolvedValue()
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/create-draft`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        id,
+        status: 'created-draft'
+      })
+      expect(createDraftFromLive).toHaveBeenCalledWith(id, author)
+    })
+
+    test('POST /forms/{id}/create-live handles error', async () => {
+      jest
+        .mocked(createLiveFromDraft)
+        .mockRejectedValue(Boom.badRequest('No draft to publish'))
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/create-live`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: 'No draft to publish'
+      })
+    })
+
+    test('POST /forms/{id}/create-draft handles error', async () => {
+      jest
+        .mocked(createDraftFromLive)
+        .mockRejectedValue(Boom.badRequest('No live version to copy'))
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/create-draft`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: 'No live version to copy'
+      })
+    })
+  })
+
+  describe('Form migration endpoint', () => {
+    test('POST /forms/{id}/definition/draft/migrate/{version} migrates form to V2', async () => {
+      jest.mocked(migrateDefinitionToV2).mockResolvedValue(stubFormDefinition)
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/migrate/v2`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
+      expect(migrateDefinitionToV2).toHaveBeenCalledWith(id, author)
+    })
+
+    test('POST /forms/{id}/definition/draft/migrate/{version} handles migration errors', async () => {
+      jest
+        .mocked(migrateDefinitionToV2)
+        .mockRejectedValue(Boom.badRequest('Already migrated'))
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/migrate/v2`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.result).toMatchObject({
+        error: 'Bad Request',
+        message: 'Already migrated'
+      })
+    })
+  })
+
+  describe('Additional GET endpoints', () => {
+    test('GET /forms/{id}/definition returns live definition', async () => {
+      jest.mocked(getFormDefinition).mockResolvedValue(stubFormDefinition)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/definition`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
+      expect(getFormDefinition).toHaveBeenCalledWith(id, FormStatus.Live)
+    })
+
+    test('GET /forms/{id}/definition/draft returns draft definition', async () => {
+      jest.mocked(getFormDefinition).mockResolvedValue(stubFormDefinition)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/${id}/definition/draft`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormDefinition)
+      expect(getFormDefinition).toHaveBeenCalledWith(id)
+    })
+
+    test('GET /forms/slug/{slug} returns form by slug', async () => {
+      jest.mocked(getFormBySlug).mockResolvedValue(stubFormMetadataOutput)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: `/forms/slug/${slug}`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual(stubFormMetadataOutput)
+      expect(getFormBySlug).toHaveBeenCalledWith(slug)
+    })
+
+    test('GET /forms/slug/{slug} handles not found', async () => {
+      jest
+        .mocked(getFormBySlug)
+        .mockRejectedValue(Boom.notFound('Form not found'))
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/forms/slug/non-existent-slug',
+        auth
+      })
+
+      expect(response.statusCode).toEqual(notFoundStatusCode)
+      expect(response.result).toMatchObject({
+        error: 'Not Found',
+        message: 'Form not found'
+      })
+    })
+  })
+
+  describe('PATCH endpoint with permissions', () => {
+    test('PATCH /forms/{id} updates metadata when form has no live version', async () => {
+      jest.mocked(getForm).mockResolvedValue({
+        ...stubFormMetadataOutput,
+        live: undefined
+      })
+      jest.mocked(updateFormMetadata).mockResolvedValue(slug)
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: `/forms/${id}`,
+        payload: { title: 'Updated Title' },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.result).toEqual({
+        id,
+        slug,
+        status: 'updated'
+      })
+    })
+
+    test('PATCH /forms/{id} throws forbidden when form is live without FormPublish scope', async () => {
+      jest.mocked(getForm).mockResolvedValue({
+        ...stubFormMetadataOutput,
+        live: {
+          createdAt: now,
+          createdBy: author,
+          updatedAt: now,
+          updatedBy: author
+        }
+      })
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: `/forms/${id}`,
+        payload: { title: 'Updated Title' },
+        auth: {
+          ...auth,
+          credentials: {
+            ...auth.credentials,
+            scope: [Scopes.FormEdit]
+          }
+        }
+      })
+
+      expect(response.statusCode).toBe(403)
+      expect(response.result).toMatchObject({
+        error: 'Forbidden',
+        message: 'Form is live - FormPublish scope required to update metadata'
+      })
+    })
+
+    test('PATCH /forms/{id} updates metadata when form is live with FormPublish scope', async () => {
+      jest.mocked(getForm).mockResolvedValue({
+        ...stubFormMetadataOutput,
+        live: {
+          createdAt: now,
+          createdBy: author,
+          updatedAt: now,
+          updatedBy: author
+        }
+      })
+      jest.mocked(updateFormMetadata).mockResolvedValue(slug)
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: `/forms/${id}`,
+        payload: { title: 'Updated Title' },
+        auth: {
+          ...auth,
+          credentials: {
+            ...auth.credentials,
+            scope: [Scopes.FormEdit, Scopes.FormPublish]
+          }
+        }
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.result).toEqual({
+        id,
+        slug,
+        status: 'updated'
       })
     })
   })

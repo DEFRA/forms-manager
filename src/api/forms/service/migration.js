@@ -14,6 +14,7 @@ import {
 } from '~/src/api/forms/service/migration-helpers.js'
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishFormMigratedEvent,
@@ -112,6 +113,8 @@ export async function migrateDefinitionToV2(formId, author) {
       )
 
       await formMetadata.updateAudit(formId, author, session)
+
+      await createFormVersion(formId, session)
 
       await publishFormMigratedEvent(formId, new Date(), author)
     })

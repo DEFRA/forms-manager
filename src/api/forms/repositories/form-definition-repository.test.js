@@ -24,6 +24,7 @@ import { ObjectId } from 'mongodb'
 
 import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
+import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import {
   addComponent,
   addCondition,
@@ -314,6 +315,56 @@ describe('form-definition-repository', () => {
         projection: { draft: 1 },
         session: mockSession
       })
+    })
+
+    it('should get live form definition', async () => {
+      mockCollection.findOne.mockResolvedValue({
+        live: mockDefinition
+      })
+
+      const definition = await get(formId, FormStatus.Live)
+      const [filter, options] = mockCollection.findOne.mock.calls[0]
+
+      expect(filter).toEqual({ _id: new ObjectId(formId) })
+      expect(options).toEqual({ projection: { live: 1 } })
+      expect(definition).toEqual(mockDefinition)
+    })
+
+    it('should throw Boom.notFound when form definition not found', async () => {
+      mockCollection.findOne.mockResolvedValue(null)
+
+      await expect(get(formId)).rejects.toThrow(
+        Boom.notFound(`Form definition with ID '${formId}' not found`)
+      )
+    })
+
+    it('should throw Boom.notFound when state property is missing', async () => {
+      mockCollection.findOne.mockResolvedValue({})
+
+      await expect(get(formId, FormStatus.Draft)).rejects.toThrow(
+        Boom.notFound(`Form definition with ID '${formId}' not found`)
+      )
+    })
+
+    it('should throw Boom.internal for generic errors', async () => {
+      const error = new Error('Database error')
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(get(formId)).rejects.toThrow(Boom.internal(error))
+    })
+
+    it('should rethrow Boom errors', async () => {
+      const boomError = Boom.forbidden('Access denied')
+      mockCollection.findOne.mockRejectedValue(boomError)
+
+      await expect(get(formId)).rejects.toThrow(boomError)
+    })
+
+    it('should throw non-Error objects directly', async () => {
+      const error = 'String error'
+      mockCollection.findOne.mockRejectedValue(error)
+
+      await expect(get(formId)).rejects.toBe(error)
     })
   })
 
@@ -884,6 +935,74 @@ describe('form-definition-repository', () => {
           expect(definition.lists).toHaveLength(0)
         }
       )
+    })
+  })
+
+  describe('createLiveFromDraft', () => {
+    it('should copy draft to live', async () => {
+      mockCollection.updateOne.mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1
+      })
+
+      await formDefinition.createLiveFromDraft(formId, mockSession)
+
+      const [filter, pipeline, options] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({ _id: new ObjectId(formId) })
+      expect(pipeline).toEqual([{ $set: { live: '$draft' } }])
+      expect(options).toEqual({ session: mockSession })
+    })
+  })
+
+  describe('createDraftFromLive', () => {
+    it('should copy live to draft', async () => {
+      mockCollection.updateOne.mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1
+      })
+
+      await formDefinition.createDraftFromLive(formId, mockSession)
+
+      const [filter, pipeline, options] = mockCollection.updateOne.mock.calls[0]
+
+      expect(filter).toEqual({ _id: new ObjectId(formId) })
+      expect(pipeline).toEqual([{ $set: { draft: '$live' } }])
+      expect(options).toEqual({ session: mockSession })
+    })
+
+    it('should throw Boom.internal when mongodb error occurs', async () => {
+      const mongoError = new Error('Database connection failed')
+      mockCollection.updateOne.mockRejectedValue(mongoError)
+
+      await expect(
+        formDefinition.createDraftFromLive(formId, mockSession)
+      ).rejects.toThrow(Boom.internal(mongoError))
+    })
+
+    it('should rethrow Boom errors', async () => {
+      const boomError = Boom.notFound('Form not found')
+      mockCollection.updateOne.mockRejectedValue(boomError)
+
+      await expect(
+        formDefinition.createDraftFromLive(formId, mockSession)
+      ).rejects.toThrow(boomError)
+    })
+  })
+
+  describe('remove', () => {
+    it('should remove a form definition', async () => {
+      mockCollection.deleteOne.mockResolvedValue({
+        acknowledged: true,
+        deletedCount: 1
+      })
+
+      await formDefinition.remove(formId, mockSession)
+
+      const [filter, options] = mockCollection.deleteOne.mock.calls[0]
+
+      expect(filter).toEqual({ _id: new ObjectId(formId) })
+      expect(options).toEqual({ session: mockSession })
     })
   })
 })

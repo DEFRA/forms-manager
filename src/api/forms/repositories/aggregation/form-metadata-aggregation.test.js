@@ -4,7 +4,9 @@ import {
   addDateFieldStage,
   addRankingStage,
   addSortingStage,
+  addVersionsLookupStage,
   buildAggregationPipeline,
+  buildAggregationPipelineWithVersions,
   buildFilterConditions,
   buildFiltersFacet,
   processAuthorNames,
@@ -140,6 +142,183 @@ describe('Form metadata aggregation', () => {
           $or: [{ live: { $exists: true } }]
         })
         expect(pipeline).toHaveLength(4) // match, ranking, date, and sort stages
+      })
+    })
+  })
+
+  describe('buildAggregationPipelineWithVersions', () => {
+    describe('without filters', () => {
+      it('should build pipeline with versions lookup and default sorting', () => {
+        const { pipeline, aggOptions } = buildAggregationPipelineWithVersions(
+          'updatedAt',
+          'desc',
+          '',
+          '',
+          [],
+          []
+        )
+
+        expect(pipeline).toHaveLength(4) // ranking, date, sort, and versions lookup stages
+        expect(aggOptions).toEqual({
+          collation: { locale: 'en', strength: 1 }
+        })
+
+        const versionsLookupStage = pipeline[pipeline.length - 1]
+        expect(versionsLookupStage).toHaveProperty('$lookup')
+        expect(versionsLookupStage.$lookup).toEqual({
+          from: 'form-versions',
+          let: { formId: { $toString: '$_id' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$formId', '$$formId'] }
+              }
+            },
+            {
+              $project: {
+                versionNumber: 1,
+                createdAt: 1,
+                _id: 0
+              }
+            },
+            {
+              $sort: { versionNumber: -1 }
+            }
+          ],
+          as: 'versions'
+        })
+      })
+    })
+
+    describe('with multiple filters', () => {
+      it('should include match stage, filters, and versions lookup', () => {
+        const { pipeline } = buildAggregationPipelineWithVersions(
+          'title',
+          'asc',
+          'Wildlife Permit Application',
+          'Henrique',
+          ['Defra'],
+          [FormStatus.Live]
+        )
+
+        expect(pipeline[0]).toHaveProperty('$match')
+        expect(pipeline[0].$match).toEqual({
+          title: { $regex: /Wildlife Permit Application/i },
+          'createdBy.displayName': { $regex: /Henrique/i },
+          organisation: { $in: ['Defra'] },
+          $or: [{ live: { $exists: true } }]
+        })
+        expect(pipeline).toHaveLength(5) // match, ranking, date, sort, and versions lookup stages
+
+        const versionsLookupStage = pipeline[pipeline.length - 1]
+        expect(versionsLookupStage).toHaveProperty('$lookup')
+        expect(versionsLookupStage.$lookup?.from).toBe('form-versions')
+      })
+    })
+
+    describe('with title sorting', () => {
+      it('should build pipeline with title sort and versions lookup', () => {
+        const { pipeline, aggOptions } = buildAggregationPipelineWithVersions(
+          'title',
+          'asc',
+          'Test Form',
+          '',
+          [],
+          []
+        )
+
+        expect(pipeline).toHaveLength(5) // match, ranking, date, sort, and versions lookup stages
+        expect(aggOptions).toEqual({
+          collation: { locale: 'en', strength: 1 }
+        })
+
+        expect(pipeline[0]).toHaveProperty('$match')
+        expect(pipeline[0].$match?.title).toEqual({ $regex: /Test Form/i })
+
+        const sortStage = pipeline[pipeline.length - 2] // Second to last stage
+        expect(sortStage.$sort).toEqual({
+          title: 1,
+          updatedDateOnly: -1,
+          'updatedBy.displayName': 1
+        })
+      })
+    })
+  })
+
+  describe('addVersionsLookupStage', () => {
+    it('should add versions lookup stage to pipeline', () => {
+      addVersionsLookupStage(pipeline)
+
+      expect(pipeline).toHaveLength(1)
+      expect(pipeline[0]).toEqual({
+        $lookup: {
+          from: 'form-versions',
+          let: { formId: { $toString: '$_id' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$formId', '$$formId'] }
+              }
+            },
+            {
+              $project: {
+                versionNumber: 1,
+                createdAt: 1,
+                _id: 0
+              }
+            },
+            {
+              $sort: { versionNumber: -1 }
+            }
+          ],
+          as: 'versions'
+        }
+      })
+    })
+
+    it('should add versions lookup stage to existing pipeline', () => {
+      pipeline.push({ $match: { title: { $regex: /test/i } } })
+      pipeline.push({ $addFields: { testField: 1 } })
+
+      addVersionsLookupStage(pipeline)
+
+      expect(pipeline).toHaveLength(3)
+      expect(pipeline[2]).toHaveProperty('$lookup')
+      expect(pipeline[2].$lookup?.from).toBe('form-versions')
+      expect(pipeline[2].$lookup?.as).toBe('versions')
+    })
+
+    it('should create proper lookup pipeline for form versions', () => {
+      addVersionsLookupStage(pipeline)
+
+      const lookupStage = pipeline[0].$lookup
+      expect(lookupStage?.pipeline).toHaveLength(3)
+
+      expect(lookupStage?.pipeline?.[0]).toEqual({
+        $match: {
+          $expr: { $eq: ['$formId', '$$formId'] }
+        }
+      })
+
+      expect(lookupStage?.pipeline?.[1]).toEqual({
+        $project: {
+          versionNumber: 1,
+          createdAt: 1,
+          _id: 0
+        }
+      })
+
+      expect(lookupStage?.pipeline?.[2]).toEqual({
+        $sort: { versionNumber: -1 }
+      })
+    })
+
+    it('should use correct variable binding for form ID', () => {
+      addVersionsLookupStage(pipeline)
+
+      const lookupStage = pipeline[0].$lookup
+      expect(lookupStage?.let).toEqual({
+        formId: { $toString: '$_id' }
       })
     })
   })

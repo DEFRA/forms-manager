@@ -37,10 +37,12 @@ export const formMetadataOutput = {
     updatedAt: BASE_CREATED_DATE,
     updatedBy: author
   },
+  live: undefined,
   createdAt: BASE_CREATED_DATE,
   createdBy: author,
   updatedAt: BASE_CREATED_DATE,
-  updatedBy: author
+  updatedBy: author,
+  versions: []
 }
 
 /**
@@ -79,7 +81,8 @@ export const formMetadataDocument = {
   createdAt: BASE_CREATED_DATE,
   createdBy: author,
   updatedAt: BASE_CREATED_DATE,
-  updatedBy: author
+  updatedBy: author,
+  versions: []
 }
 
 /**

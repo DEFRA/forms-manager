@@ -3,6 +3,7 @@ import { FormDefinitionRequestType } from '@defra/forms-model'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -31,13 +32,13 @@ export async function addConditionToDraftFormDefinition(
         session
       )
 
-      await formMetadata.updateAudit(formId, author, session)
-
       const metadataDocument = await formMetadata.updateAudit(
         formId,
         author,
         session
       )
+
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -95,6 +96,8 @@ export async function updateConditionOnDraftFormDefinition(
         session
       )
 
+      await createFormVersion(formId, session)
+
       await publishFormUpdatedEvent(
         metadataDocument,
         condition,
@@ -143,6 +146,8 @@ export async function removeConditionOnDraftFormDefinition(
         author,
         session
       )
+
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

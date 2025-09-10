@@ -22,6 +22,7 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   modifyReorderComponents,
   modifyReorderPages
@@ -33,6 +34,7 @@ import {
   formMetadataWithLiveDocument,
   mockFilters
 } from '~/src/api/forms/service/__stubs__/service.js'
+import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,
@@ -47,6 +49,7 @@ import {
   getFormBySlug,
   removeForm
 } from '~/src/api/forms/service/index.js'
+import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import * as publishBase from '~/src/messaging/publish-base.js'
@@ -56,10 +59,12 @@ import { prepareDb } from '~/src/mongo.js'
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
 jest.mock('~/src/messaging/s3.js')
+jest.mock('~/src/api/forms/service/versioning.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -96,9 +101,16 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
     jest
       .mocked(formMetadata.updateAudit)
       .mockResolvedValue(formMetadataDocument)
+    jest
+      .mocked(versioningService.createFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
+    jest
+      .mocked(versioningService.getLatestFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
   })
 
   describe('createDraftFromLive', () => {

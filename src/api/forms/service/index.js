@@ -5,6 +5,7 @@ import { MongoServerError } from 'mongodb'
 import { removeFormErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   getValidationSchema,
   validate
@@ -15,6 +16,10 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
+import {
+  createFormVersion,
+  removeFormVersions
+} from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
@@ -25,6 +30,93 @@ import {
   publishFormTitleUpdatedEvent
 } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
+
+/**
+ * Validates that a live form title cannot be updated
+ * @param {FormMetadata} form - The form metadata
+ * @param {string} formId - The form ID
+ * @param {Partial<FormMetadataInput>} formUpdate - The update payload
+ */
+export function validateLiveFormTitleUpdate(form, formId, formUpdate) {
+  if (form.live && 'title' in formUpdate) {
+    throw Boom.badRequest(
+      `Form with ID '${formId}' is live so 'title' cannot be updated`
+    )
+  }
+}
+
+/**
+ * Prepares the updated form metadata with audit fields
+ * @param {Partial<FormMetadataInput>} formUpdate - The update payload
+ * @param {FormMetadataAuthor} author - The author details
+ * @returns {PartialFormMetadataDocument}
+ */
+export function prepareUpdatedFormMetadata(formUpdate, author) {
+  const now = new Date()
+  const { updatedAt, updatedBy, ...draftAuditFields } = partialAuditFields(
+    now,
+    author
+  )
+
+  let updatedForm = {
+    ...formUpdate,
+    updatedAt,
+    updatedBy
+  }
+
+  if (formUpdate.title) {
+    updatedForm = {
+      ...updatedForm,
+      slug: slugify(formUpdate.title),
+      ...draftAuditFields
+    }
+  }
+
+  return updatedForm
+}
+
+/**
+ * Handles title update logic including definition sync and versioning
+ * @param {string} formId - The form ID
+ * @param {FormMetadata} form - The original form metadata
+ * @param {Partial<FormMetadataInput>} formUpdate - The update payload
+ * @param {PartialFormMetadataDocument} updatedForm - The prepared update
+ * @param {ClientSession} session - MongoDB session
+ */
+export async function handleTitleUpdate(
+  formId,
+  form,
+  formUpdate,
+  updatedForm,
+  session
+) {
+  if (!formUpdate.title) {
+    throw new Error('Title is required for title update')
+  }
+
+  const definition = await formDefinition.get(formId, FormStatus.Draft, session)
+  const schema = getValidationSchema(definition)
+
+  await formDefinition.updateName(formId, formUpdate.title, session, schema)
+
+  await createFormVersion(formId, session)
+
+  await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
+}
+
+/**
+ * Handles versioning for non-title metadata updates
+ * @param {string} formId - The form ID
+ * @param {Partial<FormMetadataInput>} formUpdate - The update payload
+ * @param {ClientSession} session - MongoDB session
+ */
+export async function handleMetadataVersioning(formId, formUpdate, session) {
+  if (Object.keys(formUpdate).length > 0) {
+    await createFormVersion(formId, session)
+  } else {
+    logger.debug(`No metadata changes to process for form ID ${formId}`)
+  }
+}
 
 /**
  * Creates a new empty form
@@ -60,7 +152,8 @@ export async function createForm(metadataInput, author) {
     createdAt: now,
     createdBy: author,
     updatedAt: now,
-    updatedBy: author
+    updatedBy: author,
+    versions: []
   }
 
   const session = client.startSession()
@@ -77,6 +170,9 @@ export async function createForm(metadataInput, author) {
       // Create the draft form definition
       // prettier-ignore
       await formDefinition.insert(metadata.id, definition, session, formDefinitionV2Schema)
+
+      // Create the first version of the form
+      await createFormVersion(metadata.id, session)
 
       await publishFormCreatedEvent(metadata)
     })
@@ -98,7 +194,11 @@ export async function createForm(metadataInput, author) {
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
 
-  return mapForm(document)
+  const versions = await formVersions.getVersionSummaries(formId)
+
+  const documentWithVersions = { ...document, versions }
+
+  return mapForm(documentWithVersions)
 }
 
 /**
@@ -108,7 +208,12 @@ export async function getForm(formId) {
 export async function getFormBySlug(slug) {
   const document = await formMetadata.getBySlug(slug)
 
-  return mapForm(document)
+  const formId = document._id.toString()
+  const versions = await formVersions.getVersionSummaries(formId)
+
+  const documentWithVersions = { ...document, versions }
+
+  return mapForm(documentWithVersions)
 }
 
 /**
@@ -123,71 +228,28 @@ export async function updateFormMetadata(formId, formUpdate, author) {
   logger.info(`Updating form metadata for form ID ${formId}`)
 
   try {
-    // Get the form metadata from the db
     const form = await getForm(formId)
+    validateLiveFormTitleUpdate(form, formId, formUpdate)
 
-    if (form.live && 'title' in formUpdate) {
-      throw Boom.badRequest(
-        `Form with ID '${formId}' is live so 'title' cannot be updated`
-      )
-    }
-
-    const now = new Date()
-
-    const { updatedAt, updatedBy, ...draftAuditFields } = partialAuditFields(
-      now,
-      author
-    )
-
-    /** @type {PartialFormMetadataDocument} */
-    let updatedForm = {
-      ...formUpdate,
-      updatedAt,
-      updatedBy
-    }
-
-    if (formUpdate.title) {
-      updatedForm = {
-        ...updatedForm,
-        slug: slugify(formUpdate.title),
-        ...draftAuditFields
-      }
-    }
-
+    const updatedForm = prepareUpdatedFormMetadata(formUpdate, author)
     const session = client.startSession()
 
     await session.withTransaction(async () => {
       await formMetadata.update(formId, { $set: updatedForm }, session)
 
       if (formUpdate.title) {
-        const definition = await formDefinition.get(
-          formId,
-          FormStatus.Draft,
-          session
-        )
-        const schema = getValidationSchema(definition)
-
-        // Also update the form definition's name to keep them in sync
-        await formDefinition.updateName(
-          formId,
-          formUpdate.title,
-          session,
-          schema
-        )
-
-        await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
+        await handleTitleUpdate(formId, form, formUpdate, updatedForm, session)
+      } else {
+        await handleMetadataVersioning(formId, formUpdate, session)
       }
 
       const auditMessages = getFormMetadataAuditMessages(form, updatedForm)
-
-      // Publish any metadata audit messages
       if (auditMessages.length) {
         await bulkPublishEvents(auditMessages)
       }
     })
 
     logger.info(`Updated form metadata for form ID ${formId}`)
-
     return updatedForm.slug ?? form.slug
   } catch (err) {
     if (
@@ -200,6 +262,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       throw Boom.badRequest(`Form title ${formUpdate.title} already exists`)
     }
     logger.error(
+      err,
       `[updateFormMetadata] Updating form metadata for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
     throw err
@@ -226,6 +289,7 @@ export async function removeForm(formId, author) {
     await session.withTransaction(async () => {
       await formMetadata.remove(formId, session)
       await formDefinition.remove(formId, session)
+      await removeFormVersions(formId, session)
       await publishFormDraftDeletedEvent(form, author)
     })
   } finally {
@@ -238,4 +302,5 @@ export async function removeForm(formId, author) {
 /**
  * @import { FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, FormMetadata } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
+ * @import { ClientSession } from 'mongodb'
  */

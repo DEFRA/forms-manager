@@ -12,6 +12,7 @@ import {
 } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -75,6 +76,9 @@ export async function createPageOnDraftDefinition(formId, page, author) {
         author,
         session
       )
+
+      await createFormVersion(formId, session)
+
       await publishFormUpdatedEvent(
         metadataDocument,
         page,
@@ -113,7 +117,6 @@ export async function patchFieldsOnDraftDefinitionPage(
   let page
 
   try {
-    // Check that page exists
     await getFormDefinitionPage(formId, pageId, session)
 
     if (pageFieldsToUpdate.path) {
@@ -147,6 +150,8 @@ export async function patchFieldsOnDraftDefinitionPage(
         author,
         session
       )
+
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -187,6 +192,8 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
         author,
         session
       )
+
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

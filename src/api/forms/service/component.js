@@ -7,6 +7,7 @@ import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -84,6 +85,8 @@ export async function createComponentOnDraftDefinition(
         session
       )
 
+      await createFormVersion(formId, session)
+
       await publishFormUpdatedEvent(
         metadataDocument,
         component,
@@ -144,6 +147,8 @@ export async function updateComponentOnDraftDefinition(
           session
         )
 
+        await createFormVersion(formId, session)
+
         await publishFormUpdatedEvent(
           metadataDocument,
           formDefinitionPageComponent,
@@ -198,6 +203,8 @@ export async function deleteComponentOnDraftDefinition(
         author,
         session
       )
+
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

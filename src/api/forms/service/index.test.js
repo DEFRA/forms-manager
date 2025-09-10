@@ -8,6 +8,7 @@ import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import author from '~/src/api/forms/service/__stubs__/author.js'
 import {
   formMetadataDocument,
@@ -15,16 +16,21 @@ import {
   formMetadataOutput,
   formMetadataWithLiveDocument
 } from '~/src/api/forms/service/__stubs__/service.js'
+import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
   getFormDefinition,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
 import {
   createForm,
+  getForm,
   getFormBySlug,
+  prepareUpdatedFormMetadata,
   removeForm,
-  updateFormMetadata
+  updateFormMetadata,
+  validateLiveFormTitleUpdate
 } from '~/src/api/forms/service/index.js'
+import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
@@ -32,9 +38,11 @@ import { prepareDb } from '~/src/mongo.js'
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
+jest.mock('~/src/api/forms/service/versioning.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -62,11 +70,18 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
     jest.mocked(publishEvent).mockResolvedValue({
       MessageId: messageId,
       SequenceNumber: '1',
       $metadata: {}
     })
+    jest
+      .mocked(versioningService.createFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
+    jest
+      .mocked(versioningService.getLatestFormVersion)
+      .mockResolvedValue(mockFormVersionDocument)
   })
 
   const slugExamples = [
@@ -175,6 +190,21 @@ describe('Forms service', () => {
       await expect(createForm(input, author)).rejects.toThrow()
     })
 
+    it('should throw error when metadata is not created in transaction', async () => {
+      jest
+        .mocked(formMetadata.create)
+        .mockRejectedValueOnce(new Error('Failed to create metadata'))
+
+      const input = {
+        ...formMetadataInput,
+        organisation: 'Test Org',
+        teamName: 'Test Team',
+        teamEmail: 'test@example.com'
+      }
+
+      await expect(createForm(input, author)).rejects.toThrow()
+    })
+
     it('should return the form definition', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
 
@@ -227,15 +257,27 @@ describe('Forms service', () => {
   })
 
   describe('getFormBySlug', () => {
-    it('should return form metadata when form exists', async () => {
+    it('should return form metadata with versions when form exists', async () => {
+      const mockVersions = [
+        { versionNumber: 1, createdAt: new Date('2023-01-01') },
+        { versionNumber: 2, createdAt: new Date('2023-02-01') }
+      ]
+
       jest
         .mocked(formMetadata.getBySlug)
         .mockResolvedValue(formMetadataDocument)
+      jest
+        .mocked(formVersions.getVersionSummaries)
+        .mockResolvedValue(mockVersions)
 
       const result = await getFormBySlug(slug)
 
-      expect(result).toEqual(formMetadataOutput)
+      expect(result).toEqual({
+        ...formMetadataOutput,
+        versions: mockVersions
+      })
       expect(formMetadata.getBySlug).toHaveBeenCalledWith(slug)
+      expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
     })
 
     it('should throw an error if form does not exist', async () => {
@@ -243,6 +285,49 @@ describe('Forms service', () => {
       jest.mocked(formMetadata.getBySlug).mockRejectedValue(error)
 
       await expect(getFormBySlug(slug)).rejects.toThrow(error)
+    })
+  })
+
+  describe('getForm', () => {
+    it('should return form metadata with versions when form exists', async () => {
+      const mockVersions = [
+        { versionNumber: 1, createdAt: new Date('2023-01-01') },
+        { versionNumber: 2, createdAt: new Date('2023-02-01') }
+      ]
+
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+      jest
+        .mocked(formVersions.getVersionSummaries)
+        .mockResolvedValue(mockVersions)
+
+      const result = await getForm(id)
+
+      expect(result).toEqual({
+        ...formMetadataOutput,
+        versions: mockVersions
+      })
+      expect(formMetadata.get).toHaveBeenCalledWith(id)
+      expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
+    })
+
+    it('should throw an error if form does not exist', async () => {
+      const error = Boom.notFound(`Form with ID '${id}' not found`)
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(getForm(id)).rejects.toThrow(error)
+    })
+
+    it('should handle empty versions array', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+      jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
+
+      const result = await getForm(id)
+
+      expect(result).toEqual({
+        ...formMetadataOutput,
+        versions: []
+      })
+      expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
     })
   })
 
@@ -550,4 +635,106 @@ describe('Forms service', () => {
       })
     })
   })
+
+  describe('validateLiveFormTitleUpdate', () => {
+    it('should not throw when form is not live', () => {
+      const form = {
+        ...formMetadataDocument,
+        id: formMetadataDocument._id.toString()
+      }
+      const formUpdate = { title: 'New Title' }
+
+      expect(() => {
+        validateLiveFormTitleUpdate(form, 'formId', formUpdate)
+      }).not.toThrow()
+    })
+
+    it('should throw Boom.badRequest when trying to update live form title', () => {
+      const form = {
+        ...formMetadataWithLiveDocument,
+        id: formMetadataWithLiveDocument._id.toString()
+      }
+      const formUpdate = { title: 'New Title' }
+
+      expect(() => {
+        validateLiveFormTitleUpdate(form, 'formId', formUpdate)
+      }).toThrow(
+        Boom.badRequest(
+          "Form with ID 'formId' is live so 'title' cannot be updated"
+        )
+      )
+    })
+  })
+
+  describe('prepareUpdatedFormMetadata', () => {
+    it('should return form update with audit fields', () => {
+      const formUpdate = { organisation: 'New Org' }
+      const result = prepareUpdatedFormMetadata(formUpdate, author)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          organisation: 'New Org',
+          updatedBy: author,
+          updatedAt: expect.any(Date)
+        })
+      )
+    })
+
+    it('should add slug when title is provided', () => {
+      const formUpdate = { title: 'New Title' }
+      const result = prepareUpdatedFormMetadata(formUpdate, author)
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          title: 'New Title',
+          slug: 'new-title',
+          updatedBy: author,
+          updatedAt: expect.any(Date)
+        })
+      )
+    })
+  })
+
+  describe('handleTitleUpdate', () => {
+    it('should throw error when title is not provided', async () => {
+      const formUpdate = {}
+      const updatedForm = { updatedAt: dateUsedInFakeTime }
+      const mockSession = /** @type {ClientSession} */ ({})
+
+      const { handleTitleUpdate } = await import(
+        '~/src/api/forms/service/index.js'
+      )
+
+      await expect(
+        handleTitleUpdate(
+          id,
+          { ...formMetadataDocument, id: formMetadataDocument._id.toString() },
+          formUpdate,
+          updatedForm,
+          mockSession
+        )
+      ).rejects.toThrow('Title is required for title update')
+    })
+  })
+
+  describe('handleMetadataVersioning', () => {
+    it('should not create version when there are no changes', async () => {
+      const formUpdate = {}
+      const mockSession = /** @type {import('mongodb').ClientSession} */ ({})
+
+      jest.clearAllMocks()
+
+      const { handleMetadataVersioning } = await import(
+        '~/src/api/forms/service/index.js'
+      )
+
+      await handleMetadataVersioning(id, formUpdate, mockSession)
+
+      expect(versioningService.createFormVersion).not.toHaveBeenCalled()
+    })
+  })
 })
+
+/**
+ * @import { ClientSession } from 'mongodb'
+ */

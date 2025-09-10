@@ -15,6 +15,7 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishDraftCreatedFromLiveEvent,
@@ -42,7 +43,7 @@ export async function listForms(options) {
  * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
  */
-export function getFormDefinition(
+export async function getFormDefinition(
   formId,
   state = FormStatus.Draft,
   session = undefined
@@ -84,6 +85,8 @@ export async function updateDraftFormDefinition(formId, definition, author) {
           author,
           session
         )
+
+        await createFormVersion(formId, session)
 
         // Publish audit message
         await publishFormDraftReplacedEvent(updatedMetadata, definition)
@@ -197,6 +200,8 @@ export async function createLiveFromDraft(formId, author) {
           session
         )
 
+        await createFormVersion(formId, session)
+
         // Publish audit message
         await publishLiveCreatedFromDraftEvent(formId, now, author)
       })
@@ -253,8 +258,9 @@ export async function createDraftFromLive(formId, author) {
 
         logger.info(`Adding form metadata (draft) for form ID ${formId}`)
 
-        // Update the form with the new draft state
         await formMetadata.update(formId, { $set: set }, session)
+
+        await createFormVersion(formId, session)
 
         // Publish audit message
         await publishDraftCreatedFromLiveEvent(formId, now, author)
@@ -306,6 +312,8 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
         author,
         session
       )
+
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -371,6 +379,8 @@ export async function reorderDraftFormDefinitionComponents(
         author,
         session
       )
+
+      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
