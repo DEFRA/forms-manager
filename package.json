@@ -44,7 +44,7 @@
     "@elastic/ecs-pino-format": "^1.5.0",
     "@hapi/hapi": "^21.4.0",
     "@hapi/hoek": "^11.0.7",
-    "@hapi/jwt": "^3.2.0",
+    "@hapi/jwt": "^3.2.1",
     "aws4": "^1.13.2",
     "convict": "^6.2.4",
     "dotenv": "^17.2.1",
