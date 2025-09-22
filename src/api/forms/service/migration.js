@@ -72,6 +72,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[repositionSummary] Failed to update position of summary on Form ID ${formId} - ${getErrorMessage(err)}`
     )
     throw err
@@ -120,6 +121,7 @@ export async function migrateDefinitionToV2(formId, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[migrateToV2] Failed to migrate form with ID ${formId} to engine version 2 - ${getErrorMessage(err)}`
     )
     throw err

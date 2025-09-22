@@ -54,6 +54,7 @@ export async function addConditionToDraftFormDefinition(
     return newForm
   } catch (err) {
     logger.error(
+      err,
       `[addCondition] Failed to add condition on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -112,6 +113,7 @@ export async function updateConditionOnDraftFormDefinition(
     return updatedCondition
   } catch (err) {
     logger.error(
+      err,
       `[updateCondition] Failed to update condition ${conditionId} on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -159,6 +161,7 @@ export async function removeConditionOnDraftFormDefinition(
     logger.info(`Removed condition ${conditionId} for form ID ${formId}`)
   } catch (err) {
     logger.error(
+      err,
       `[removeCondition] Failed to remove condition ${conditionId} on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 

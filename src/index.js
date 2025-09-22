@@ -10,10 +10,11 @@ chdir(import.meta.dirname)
 
 import('~/src/server.js')
   .then((server) => server.listen())
-  .catch((/** @type {unknown} */ error) => {
+  .catch((/** @type {unknown} */ err) => {
     logger.info('Server failed to start :(')
     logger.error(
-      `[serverStartup] Server failed to start - ${getErrorMessage(error)}`
+      err,
+      `[serverStartup] Server failed to start - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   })

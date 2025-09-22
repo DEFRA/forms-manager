@@ -31,16 +31,16 @@ export async function createVersion(versionDocument, session) {
     )
 
     return { ...versionDocument, _id: result.insertedId }
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[createVersion] Failed to create version ${versionDocument.versionNumber} for form ID ${versionDocument.formId} - ${getErrorMessage(error)}`
+      err,
+      `[createVersion] Failed to create version ${versionDocument.versionNumber} for form ID ${versionDocument.formId} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -74,16 +74,16 @@ export async function getLatestVersionNumber(formId, session) {
     )
 
     return versionNumber
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getLatestVersionNumber] Failed to get latest version number for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getLatestVersionNumber] Failed to get latest version number for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -114,20 +114,20 @@ export async function getVersion(formId, versionNumber, session) {
     logger.info(`Retrieved version ${versionNumber} for form ID ${formId}`)
 
     return result
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getVersion] Failed to get version ${versionNumber} for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getVersion] Failed to get version ${versionNumber} for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
-    if (Boom.isBoom(error)) {
-      throw error
+    if (Boom.isBoom(err)) {
+      throw err
     }
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -164,16 +164,16 @@ export async function getLatestVersion(formId, session) {
     )
 
     return result
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getLatestVersion] Failed to get latest version for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getLatestVersion] Failed to get latest version for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -213,16 +213,16 @@ export async function getVersions(formId, session, limit = 10, offset = 0) {
     logger.info(`Retrieved ${versions.length} versions for form ID ${formId}`)
 
     return { versions, totalCount }
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getVersions] Failed to get versions for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getVersions] Failed to get versions for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -242,16 +242,16 @@ export async function removeVersionsForForm(formId, session) {
     const result = await coll.deleteMany({ formId }, { session })
 
     logger.info(`Removed ${result.deletedCount} versions for form ID ${formId}`)
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[removeVersionsForForm] Failed to remove versions for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[removeVersionsForForm] Failed to remove versions for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -286,16 +286,16 @@ export async function getVersionSummaries(formId, session) {
     )
 
     return versions
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getVersionSummaries] Failed to get version summaries for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getVersionSummaries] Failed to get version summaries for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -342,16 +342,16 @@ export async function getVersionSummariesBatch(formIds, session) {
     logger.info(`Retrieved versions for ${versionsByForm.size} forms`)
 
     return versionsByForm
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getVersionSummariesBatch] Failed to get version summaries for batch - ${getErrorMessage(error)}`
+      err,
+      `[getVersionSummariesBatch] Failed to get version summaries for batch - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error) {
-      throw Boom.internal(error)
+    if (err instanceof Error) {
+      throw Boom.internal(err)
     }
-    throw error
+    throw err
   }
 }
 

@@ -186,6 +186,7 @@ describe('auth plugin', () => {
       const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestErrorFn).toHaveBeenCalledWith(
+        expect.any(Error),
         expect.stringContaining(
           "[authGroupsParseError] Auth: User test-oid: Failed to parse 'groups' claim"
         )

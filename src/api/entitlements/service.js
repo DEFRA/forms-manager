@@ -44,13 +44,13 @@ export async function getUserScopes(oid, authToken) {
   } catch (err) {
     if (Boom.isBoom(err)) {
       logger.error(
-        `[entitlementsApi] Failed to fetch scopes for user ${oid}`,
-        err
+        err,
+        `[entitlementsApi] Failed to fetch scopes for user ${oid}`
       )
     } else {
       logger.error(
-        `[entitlementsApi] Failed to fetch scopes for user ${oid}:`,
-        err
+        err,
+        `[entitlementsApi] Failed to fetch scopes for user ${oid}:`
       )
     }
 

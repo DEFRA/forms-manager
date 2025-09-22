@@ -95,6 +95,7 @@ export async function createComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
+      err,
       `[addComponent] Failed to add component to page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -166,6 +167,7 @@ export async function updateComponentOnDraftDefinition(
     return updatedFormDefinitionPageComponent
   } catch (err) {
     logger.error(
+      err,
       `[updateComponent] Failed to update component ${componentId} on page ${pageId} for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -214,6 +216,7 @@ export async function deleteComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
+      err,
       `[removeComponent] Failed to remove component ${componentId} from page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 

@@ -31,6 +31,7 @@ export const checkError = (err) => {
  */
 export const failAction = (_request, _h, err) => {
   logger.error(
+    err,
     `[validationFailed] Request validation failed - ${getErrorMessage(err)}`
   )
 

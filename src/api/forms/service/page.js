@@ -87,6 +87,7 @@ export async function createPageOnDraftDefinition(formId, page, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[addPage] Failed to add page on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -161,6 +162,7 @@ export async function patchFieldsOnDraftDefinitionPage(
     })
   } catch (err) {
     logger.error(
+      err,
       `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -203,6 +205,7 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 

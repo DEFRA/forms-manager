@@ -115,6 +115,7 @@ export async function createDraftFromLive(id, session) {
     )
   } catch (err) {
     logger.error(
+      err,
       `[createDraftFromLive] Failed to copy form definition (live to draft) for form ID ${id} - ${getErrorMessage(err)}`
     )
 
@@ -164,16 +165,17 @@ export async function get(
     logger.info(`Got form definition (${state}) for form ID ${formId}`)
 
     return definition
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      `[get] Failed to get form definition (${state}) for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[get] Failed to get form definition (${state}) for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (err instanceof Error && !Boom.isBoom(err)) {
+      throw Boom.internal(err)
     }
 
-    throw error
+    throw err
   }
 }
 

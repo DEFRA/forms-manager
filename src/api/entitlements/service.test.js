@@ -107,8 +107,8 @@ describe('entitlements service', () => {
 
       expect(result).toEqual([])
       expect(mockLogger.error).toHaveBeenCalledWith(
-        `[entitlementsApi] Failed to fetch scopes for user ${testOid}`,
-        boomError
+        boomError,
+        `[entitlementsApi] Failed to fetch scopes for user ${testOid}`
       )
     })
 
@@ -120,8 +120,8 @@ describe('entitlements service', () => {
 
       expect(result).toEqual([])
       expect(mockLogger.error).toHaveBeenCalledWith(
-        `[entitlementsApi] Failed to fetch scopes for user ${testOid}:`,
-        error
+        error,
+        `[entitlementsApi] Failed to fetch scopes for user ${testOid}:`
       )
     })
 
