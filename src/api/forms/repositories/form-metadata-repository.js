@@ -9,7 +9,10 @@ import {
   processFilterResults
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
-import { partialAuditFields } from '~/src/api/forms/service/shared.js'
+import {
+  MongoError,
+  partialAuditFields
+} from '~/src/api/forms/service/shared.js'
 import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
@@ -265,7 +268,10 @@ export async function create(document, session) {
   } catch (err) {
     const message = `Creating form with slug ${document.slug} failed`
 
-    if (err instanceof MongoServerError && err.code === 11000) {
+    if (
+      err instanceof MongoServerError &&
+      err.code === MongoError.DuplicateKey
+    ) {
       const error = new FormAlreadyExistsError(document.slug, { cause: err })
 
       logger.info(
