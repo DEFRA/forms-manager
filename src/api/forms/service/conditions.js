@@ -1,10 +1,9 @@
-import { FormDefinitionRequestType } from '@defra/forms-model'
+import { FormDefinitionRequestType, getErrorMessage } from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 

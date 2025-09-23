@@ -1,10 +1,9 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormStatus, getErrorMessage } from '@defra/forms-model'
 
 import * as formDefinitionRepository from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
 import { MAX_VERSIONS } from '~/src/api/forms/repositories/form-versions-repository.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 

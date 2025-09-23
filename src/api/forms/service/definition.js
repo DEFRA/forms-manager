@@ -1,7 +1,8 @@
 import {
   Engine,
   FormDefinitionRequestType,
-  FormStatus
+  FormStatus,
+  getErrorMessage
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -16,7 +17,6 @@ import {
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishDraftCreatedFromLiveEvent,
   publishFormDraftReplacedEvent,

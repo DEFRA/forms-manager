@@ -74,10 +74,6 @@ jest.mock('~/src/helpers/logging/logger.js', () => ({
   })
 }))
 
-jest.mock('~/src/helpers/error-message.js', () => ({
-  getErrorMessage: jest.fn((error) => error.message)
-}))
-
 describe('form-metadata-repository', () => {
   const metadataBefore = buildMetadataDocument()
   const metadataAfter = buildMetadataDocument({

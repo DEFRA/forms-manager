@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormStatus, getErrorMessage } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -30,7 +30,6 @@ import {
   modifyUpdatePageFields,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
