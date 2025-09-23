@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
@@ -9,8 +10,10 @@ import {
   processFilterResults
 } from '~/src/api/forms/repositories/aggregation/form-metadata-aggregation.js'
 import { removeById } from '~/src/api/forms/repositories/helpers.js'
-import { partialAuditFields } from '~/src/api/forms/service/shared.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
+import {
+  MongoError,
+  partialAuditFields
+} from '~/src/api/forms/service/shared.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -92,11 +95,12 @@ export async function list(options) {
     ])
 
     return { documents, totalItems, filters }
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      `[fetchDocuments] Error fetching documents - ${getErrorMessage(error)}`
+      err,
+      `[fetchDocuments] Error fetching documents - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   }
 }
 
@@ -156,11 +160,12 @@ export async function listWithVersions(options) {
     ])
 
     return { documents, totalItems, filters }
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      `[fetchDocumentsWithVersions] Error fetching documents with versions - ${getErrorMessage(error)}`
+      err,
+      `[fetchDocumentsWithVersions] Error fetching documents with versions - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   }
 }
 
@@ -189,19 +194,20 @@ export async function get(formId, session) {
     logger.info(`Form with ID ${formId} found`)
 
     return document
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      `[getFormById] Getting form with ID ${formId} failed - ${getErrorMessage(error)}`
+      err,
+      `[getFormById] Getting form with ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
-    if (Boom.isBoom(error)) {
-      throw error
+    if (Boom.isBoom(err)) {
+      throw err
     }
 
-    if (error instanceof Error) {
-      throw Boom.badRequest(error)
+    if (err instanceof Error) {
+      throw Boom.badRequest(err)
     }
-    throw error
+    throw err
   }
 }
 
@@ -226,16 +232,17 @@ export async function getBySlug(slug) {
     logger.info(`Form with slug ${slug} found`)
 
     return document
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      `[getFormBySlug] Getting form with slug ${slug} failed - ${getErrorMessage(error)}`
+      err,
+      `[getFormBySlug] Getting form with slug ${slug} failed - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (err instanceof Error && !Boom.isBoom(err)) {
+      throw Boom.internal(err)
     }
 
-    throw error
+    throw err
   }
 }
 
@@ -258,26 +265,31 @@ export async function create(document, session) {
     logger.info(`Form with slug ${document.slug} created as form ID ${formId}`)
 
     return result
-  } catch (cause) {
+  } catch (err) {
     const message = `Creating form with slug ${document.slug} failed`
 
-    if (cause instanceof MongoServerError && cause.code === 11000) {
-      const error = new FormAlreadyExistsError(document.slug, { cause })
+    if (
+      err instanceof MongoServerError &&
+      err.code === MongoError.DuplicateKey
+    ) {
+      const error = new FormAlreadyExistsError(document.slug, { cause: err })
 
       logger.info(
+        err,
         `[duplicateFormSlug] Creating form with slug ${document.slug} failed - form already exists`
       )
       throw Boom.badRequest(error)
     }
 
-    if (cause instanceof MongoServerError) {
+    if (err instanceof MongoServerError) {
       logger.error(
-        `[mongoError] ${message} - MongoDB error code: ${cause.code} - ${cause.message}`
+        err,
+        `[mongoError] ${message} - MongoDB error code: ${err.code} - ${err.message}`
       )
     } else {
-      logger.error(`[updateError] ${message} - ${getErrorMessage(cause)}`)
+      logger.error(err, `[updateError] ${message} - ${getErrorMessage(err)}`)
     }
-    throw cause
+    throw err
   }
 }
 
@@ -318,16 +330,17 @@ export async function update(formId, update, session) {
     }
 
     return metadata
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(error)}`
+      err,
+      `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
-    if (error instanceof Error && !Boom.isBoom(error)) {
-      throw Boom.internal(error)
+    if (err instanceof Error && !Boom.isBoom(err)) {
+      throw Boom.internal(err)
     }
 
-    throw error
+    throw err
   }
 }
 

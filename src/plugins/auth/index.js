@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@defra/forms-model'
 import Jwt from '@hapi/jwt'
 
 import {
@@ -5,7 +6,6 @@ import {
   getUserScopes
 } from '~/src/api/entitlements/service.js'
 import { config } from '~/src/config/index.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const oidcJwksUri = config.get('oidcJwksUri')
@@ -39,9 +39,10 @@ function processGroupsClaim(groupsClaim, oid) {
           `[authGroupsInvalid] Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'`
         )
       }
-    } catch (error) {
+    } catch (err) {
       logger.error(
-        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${getErrorMessage(error)}`
+        err,
+        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${getErrorMessage(err)}`
       )
     }
   } else if (Array.isArray(groupsClaim)) {

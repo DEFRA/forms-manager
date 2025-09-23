@@ -1,10 +1,9 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormStatus, getErrorMessage } from '@defra/forms-model'
 
 import * as formDefinitionRepository from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
 import { MAX_VERSIONS } from '~/src/api/forms/repositories/form-versions-repository.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
@@ -41,12 +40,12 @@ export async function createFormVersion(formId, session) {
 
     logger.info(`Created version ${result.versionNumber} for form ID ${formId}`)
     return result
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[createFormVersion] Failed to create version for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[createFormVersion] Failed to create version for form ID ${formId} - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   }
 }
 
@@ -88,12 +87,12 @@ async function createVersionInTransaction(formId, session) {
 
   try {
     return await formVersionsRepository.createVersion(versionDocument, session)
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
+      err,
       `Unexpected error creating version ${nextVersionNumber} for form ID ${formId} after atomic increment`
     )
-    throw error
+    throw err
   }
 }
 
@@ -108,12 +107,12 @@ export async function getFormVersion(formId, versionNumber) {
 
   try {
     return await formVersionsRepository.getVersion(formId, versionNumber)
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getFormVersion] Failed to get version ${versionNumber} for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getFormVersion] Failed to get version ${versionNumber} for form ID ${formId} - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   }
 }
 
@@ -133,12 +132,12 @@ export async function getFormVersions(formId) {
       0
     )
     return versions
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getFormVersions] Failed to get versions for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getFormVersions] Failed to get versions for form ID ${formId} - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   }
 }
 
@@ -152,12 +151,12 @@ export async function getLatestFormVersion(formId) {
 
   try {
     return await formVersionsRepository.getLatestVersion(formId)
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[getLatestFormVersion] Failed to get latest version for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[getLatestFormVersion] Failed to get latest version for form ID ${formId} - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   }
 }
 
@@ -172,12 +171,12 @@ export async function removeFormVersions(formId, session) {
   try {
     await formVersionsRepository.removeVersionsForForm(formId, session)
     logger.info(`Removed all versions for form ID ${formId}`)
-  } catch (error) {
+  } catch (err) {
     logger.error(
-      error,
-      `[removeFormVersions] Failed to remove versions for form ID ${formId} - ${getErrorMessage(error)}`
+      err,
+      `[removeFormVersions] Failed to remove versions for form ID ${formId} - ${getErrorMessage(err)}`
     )
-    throw error
+    throw err
   }
 }
 

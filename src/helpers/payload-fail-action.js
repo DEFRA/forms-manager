@@ -1,11 +1,8 @@
+import { getErrorMessage } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import Joi from 'joi'
 
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
-import { createLogger } from '~/src/helpers/logging/logger.js'
-
-const logger = createLogger()
 
 /**
  * Checks for a Boom and Joi error from the
@@ -29,8 +26,9 @@ export const checkError = (err) => {
 /**
  * @type {Lifecycle.Method}
  */
-export const failAction = (_request, _h, err) => {
-  logger.error(
+export const failAction = (request, _h, err) => {
+  request.logger.error(
+    err,
     `[validationFailed] Request validation failed - ${getErrorMessage(err)}`
   )
 

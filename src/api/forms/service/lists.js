@@ -1,7 +1,8 @@
 import {
   FormDefinitionRequestType,
   FormStatus,
-  formDefinitionSchema
+  formDefinitionSchema,
+  getErrorMessage
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -9,7 +10,6 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
@@ -74,6 +74,7 @@ export async function addListToDraftFormDefinition(formId, list, author) {
     return newForm
   } catch (err) {
     logger.error(
+      err,
       `[addList] Failed to add list ${list.name} to form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -135,6 +136,7 @@ export async function updateListOnDraftFormDefinition(
     return updatedList
   } catch (err) {
     logger.error(
+      err,
       `[updateList] Failed to update list ${listId} for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -178,6 +180,7 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
     logger.info(`Removed list ${listId} for form ID ${formId}`)
   } catch (err) {
     logger.error(
+      err,
       `[removeList] Failed to remove list ${listId} for form ID ${formId} - ${getErrorMessage(err)}`
     )
 

@@ -1,7 +1,8 @@
 import {
   ApiErrorCode,
   FormDefinitionRequestType,
-  FormStatus
+  FormStatus,
+  getErrorMessage
 } from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -13,7 +14,6 @@ import {
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { SUMMARY_PAGE_ID, logger } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
@@ -87,6 +87,7 @@ export async function createPageOnDraftDefinition(formId, page, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[addPage] Failed to add page on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -161,6 +162,7 @@ export async function patchFieldsOnDraftDefinitionPage(
     })
   } catch (err) {
     logger.error(
+      err,
       `[updatePage] Failed to update page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -203,6 +205,7 @@ export async function deletePageOnDraftDefinition(formId, pageId, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[deletePage] Failed to delete Page ID ${pageId} on Form ID ${formId} - ${getErrorMessage(err)}`
     )
 

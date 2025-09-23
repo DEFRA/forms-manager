@@ -3,7 +3,8 @@ import {
   FormDefinitionRequestType,
   FormStatus,
   SchemaVersion,
-  formDefinitionV2Schema
+  formDefinitionV2Schema,
+  getErrorMessage
 } from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -15,7 +16,6 @@ import {
 import { addIdToSummary } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishFormMigratedEvent,
   publishFormUpdatedEvent
@@ -72,6 +72,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[repositionSummary] Failed to update position of summary on Form ID ${formId} - ${getErrorMessage(err)}`
     )
     throw err
@@ -120,6 +121,7 @@ export async function migrateDefinitionToV2(formId, author) {
     })
   } catch (err) {
     logger.error(
+      err,
       `[migrateToV2] Failed to migrate form with ID ${formId} to engine version 2 - ${getErrorMessage(err)}`
     )
     throw err

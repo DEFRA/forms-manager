@@ -1,4 +1,9 @@
-import { FormStatus, formDefinitionV2Schema, slugify } from '@defra/forms-model'
+import {
+  FormStatus,
+  formDefinitionV2Schema,
+  getErrorMessage,
+  slugify
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
@@ -21,7 +26,6 @@ import {
   removeFormVersions
 } from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
 import {
   bulkPublishEvents,

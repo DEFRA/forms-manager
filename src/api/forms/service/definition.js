@@ -1,7 +1,8 @@
 import {
   Engine,
   FormDefinitionRequestType,
-  FormStatus
+  FormStatus,
+  getErrorMessage
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -16,7 +17,6 @@ import {
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import {
   publishDraftCreatedFromLiveEvent,
   publishFormDraftReplacedEvent,
@@ -98,6 +98,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
     logger.info(`Updated form metadata (draft) for form ID ${formId}`)
   } catch (err) {
     logger.error(
+      err,
       `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
@@ -213,6 +214,7 @@ export async function createLiveFromDraft(formId, author) {
     logger.info(`Made draft live for form ID ${formId}`)
   } catch (err) {
     logger.error(
+      err,
       `[makeDraftLive] Make draft live for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
@@ -273,6 +275,7 @@ export async function createDraftFromLive(formId, author) {
     logger.info(`Created draft to edit for form ID ${formId}`)
   } catch (err) {
     logger.error(
+      err,
       `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
@@ -331,6 +334,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
     return newForm
   } catch (err) {
     logger.error(
+      err,
       `[reorderPages] Reordering pages on form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
@@ -398,6 +402,7 @@ export async function reorderDraftFormDefinitionComponents(
     return newForm
   } catch (err) {
     logger.error(
+      err,
       `[reorderComponents] Reordering components on form definition (draft) for form ID ${formId} pageID ${pageId} failed - ${getErrorMessage(err)}`
     )
 

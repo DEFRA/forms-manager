@@ -1,4 +1,8 @@
-import { FormDefinitionRequestType, FormStatus } from '@defra/forms-model'
+import {
+  FormDefinitionRequestType,
+  FormStatus,
+  getErrorMessage
+} from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -8,7 +12,6 @@ import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
-import { getErrorMessage } from '~/src/helpers/error-message.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
@@ -95,6 +98,7 @@ export async function createComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
+      err,
       `[addComponent] Failed to add component to page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -166,6 +170,7 @@ export async function updateComponentOnDraftDefinition(
     return updatedFormDefinitionPageComponent
   } catch (err) {
     logger.error(
+      err,
       `[updateComponent] Failed to update component ${componentId} on page ${pageId} for form ID ${formId} - ${getErrorMessage(err)}`
     )
 
@@ -214,6 +219,7 @@ export async function deleteComponentOnDraftDefinition(
     })
   } catch (err) {
     logger.error(
+      err,
       `[removeComponent] Failed to remove component ${componentId} from page ${pageId} on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
