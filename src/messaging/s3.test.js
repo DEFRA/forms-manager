@@ -31,6 +31,7 @@ describe('s3', () => {
   describe('saveToS3', () => {
     it('should put the definition to s3 and return the version id', async () => {
       const definitionId = '6883d8667a2a64da10af4312'
+      const filename = `${definitionId}.json`
       const definition = buildDefinition()
       s3Mock.on(PutObjectCommand).resolves({
         ETag: '"9b2cf535f27731c974343645a3985328"',
@@ -44,10 +45,10 @@ describe('s3', () => {
           totalRetryDelay: 0
         }
       })
-      const result = await saveToS3(definitionId, definition)
+      const result = await saveToS3(filename, definition)
       expect(result).toEqual({
         fileId: '3HL4kqtJlcpXrof3W3Zz4YBdvdz2FJ9n',
-        filename: '6883d8667a2a64da10af4312.json',
+        filename,
         s3Key: 'audit-definitions/6883d8667a2a64da10af4312.json'
       })
       expect(s3Mock).toHaveReceivedCommandWith(PutObjectCommand, {
