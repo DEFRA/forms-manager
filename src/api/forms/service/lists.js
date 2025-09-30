@@ -11,6 +11,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { logger } from '~/src/api/forms/service/shared.js'
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
+import { saveToS3 } from '~/src/messaging/s3.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -59,11 +60,14 @@ export async function addListToDraftFormDefinition(formId, list, author) {
 
       await createFormVersion(formId, session)
 
-      // TODO: List could be > 256KB?
+      const filename = `${formId}_list_${returnedList.id}.json`
+      const s3Meta = await saveToS3(filename, returnedList)
+
       await publishFormUpdatedEvent(
         metadataDocument,
-        list,
-        FormDefinitionRequestType.CREATE_LIST
+        undefined,
+        FormDefinitionRequestType.CREATE_LIST,
+        s3Meta
       )
 
       return returnedList
@@ -121,11 +125,14 @@ export async function updateListOnDraftFormDefinition(
 
       await createFormVersion(formId, session)
 
-      // TODO: List could be > 256KB?
+      const filename = `${formId}_list_${returnedList.id}.json`
+      const s3Meta = await saveToS3(filename, returnedList)
+
       await publishFormUpdatedEvent(
         metadataDocument,
-        list,
-        FormDefinitionRequestType.UPDATE_LIST
+        undefined,
+        FormDefinitionRequestType.UPDATE_LIST,
+        s3Meta
       )
 
       return returnedList

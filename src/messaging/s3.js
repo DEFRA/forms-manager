@@ -11,13 +11,12 @@ const createS3Json = (key, body) =>
 const S3_KEY_BASE = 'audit-definitions/'
 
 /**
- * @param {string} formId
- * @param {FormDefinition} formDefinition
+ * @param {string} filename
+ * @param {FormDefinition | List} entity
  * @returns {Promise<FormDefinitionS3Meta>}
  */
-export async function saveToS3(formId, formDefinition) {
-  const body = JSON.stringify(formDefinition)
-  const filename = `${formId}.json`
+export async function saveToS3(filename, entity) {
+  const body = JSON.stringify(entity)
   const s3Key = S3_KEY_BASE + filename
   const result = await createS3Json(s3Key, body)
 
@@ -29,5 +28,5 @@ export async function saveToS3(formId, formDefinition) {
 }
 
 /**
- * @import { FormDefinition, FormDefinitionS3Meta } from '@defra/forms-model'
+ * @import { FormDefinition, FormDefinitionS3Meta, List } from '@defra/forms-model'
  */

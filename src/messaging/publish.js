@@ -134,14 +134,20 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
  * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
  * @param {unknown} payload
  * @param {FormDefinitionRequestType} requestType
+ * @param {FormDefinitionS3Meta} [s3Meta]
  */
 export async function publishFormUpdatedEvent(
   metadataDocument,
   payload,
-  requestType
+  requestType,
+  s3Meta
 ) {
   const metadata = mapForm(metadataDocument)
-  const auditMessage = formUpdatedMapper(metadata, requestType, { payload })
+  const auditMessage = formUpdatedMapper(
+    metadata,
+    requestType,
+    s3Meta === undefined ? { payload } : { s3Meta }
+  )
 
   return validateAndPublishEvent(auditMessage)
 }
@@ -156,7 +162,8 @@ export async function publishFormDraftReplacedEvent(
   definition
 ) {
   const metadata = mapForm(metadataDocument)
-  const s3Meta = await saveToS3(metadata.id, definition)
+  const filename = `${metadata.id}.json`
+  const s3Meta = await saveToS3(filename, definition)
 
   const auditMessage = formUpdatedMapper(
     metadata,
@@ -170,6 +177,6 @@ export async function publishFormDraftReplacedEvent(
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser, FormDefinitionS3Meta } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */
