@@ -22,6 +22,7 @@ import {
 import * as versioningService from '~/src/api/forms/service/versioning.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import * as publishBase from '~/src/messaging/publish-base.js'
+import { saveToS3 } from '~/src/messaging/s3.js'
 import { prepareDb } from '~/src/mongo.js'
 
 jest.mock('~/src/helpers/get-author.js')
@@ -31,6 +32,7 @@ jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/api/forms/service/versioning.js')
 jest.mock('~/src/messaging/publish-base.js')
+jest.mock('~/src/messaging/s3.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 describe('lists', () => {
@@ -126,6 +128,14 @@ describe('lists', () => {
 
   describe('addListsToDraftFormDefinition', () => {
     it('should add a list to the form definition', async () => {
+      const s3Meta = {
+        fileId: '3HL4kqtJlcpXrof3W3Zz4YBdvdz2FJ9n',
+        filename:
+          '6883d8667a2a64da10af4312_list_47cfaf57-6cda-44aa-9268-f37c674823d2.json',
+        s3Key:
+          'audit-definitions/6883d8667a2a64da10af4312_list_47cfaf57-6cda-44aa-9268-f37c674823d2.json'
+      }
+      jest.mocked(saveToS3).mockResolvedValue(s3Meta)
       jest
         .mocked(formDefinition.get)
         .mockResolvedValueOnce(formDefinitionWithList)
@@ -152,7 +162,8 @@ describe('lists', () => {
       })
       expect(auditMessage.data).toMatchObject({
         requestType: FormDefinitionRequestType.CREATE_LIST,
-        payload: expectedList
+        payload: undefined,
+        s3Meta
       })
     })
     it('should fail with a conflict if there is a duplicate list', async () => {
@@ -167,6 +178,14 @@ describe('lists', () => {
 
   describe('updateListOnDraftFormDefinition', () => {
     it('should update a list on the form definition', async () => {
+      const s3Meta = {
+        fileId: '3HL4kqtJlcpXrof3W3Zz4YBdvdz2FJ9n',
+        filename:
+          '6883d8667a2a64da10af4312_list_47cfaf57-6cda-44aa-9268-f37c674823d2.json',
+        s3Key:
+          'audit-definitions/6883d8667a2a64da10af4312_list_47cfaf57-6cda-44aa-9268-f37c674823d2.json'
+      }
+      jest.mocked(saveToS3).mockResolvedValue(s3Meta)
       const listToUpdate = buildList()
       const listId = '47cfaf57-6cda-44aa-9268-f37c674823d2'
       jest
@@ -197,7 +216,8 @@ describe('lists', () => {
       })
       expect(auditMessage.data).toMatchObject({
         requestType: FormDefinitionRequestType.UPDATE_LIST,
-        payload: expectedListToUpdate
+        payload: undefined,
+        s3Meta
       })
     })
     it('should throw a conflict if updated list name or title exists in other list', async () => {
