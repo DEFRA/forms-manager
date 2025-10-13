@@ -494,9 +494,9 @@ export function modifyAddComponent(definition, pageId, component, position) {
   const page = definition.pages[idx]
 
   if (!hasComponentsEvenIfNoNext(page) && isSummaryPage(page)) {
-    /** @type {PageSummary | PageSummaryWithConfirmationEmail} */ ;(
-      page
-    ).components = []
+    const summaryPage =
+      /** @type {PageSummary | PageSummaryWithConfirmationEmail} */ (page)
+    summaryPage.components = []
   }
 
   if (hasComponentsEvenIfNoNext(page)) {
