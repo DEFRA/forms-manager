@@ -1,6 +1,27 @@
-version: '3.8'
-
 services:
+  localstack:
+    image: localstack/localstack:3.0.2
+    ports:
+      - '127.0.0.1:4566:4566' # LocalStack Gateway
+      - '127.0.0.1:4510-4559:4510-4559' # external services port range
+    env_file:
+      - 'test/integration/aws.env'
+    environment:
+      DEBUG: ${DEBUG:-1}
+      LS_LOG: WARN # Localstack DEBUG Level
+      SERVICES: s3,sqs,sns,firehose
+      LOCALSTACK_HOST: 127.0.0.1
+    volumes:
+      - '${TMPDIR:-/tmp}/localstack:/var/lib/localstack'
+      - './test/integration/start-localstack.sh:/etc/localstack/init/ready.d/start-localstack.sh'
+    healthcheck:
+      test: ['CMD', 'curl', 'localhost:4566']
+      interval: 5s
+      start_period: 5s
+      retries: 3
+    networks:
+      - forms_test_net
+
   mongo_test:
     image: mongo:6.0
     container_name: forms-manager-mongo-test
@@ -80,6 +101,8 @@ services:
       mongo_test:
         condition: service_healthy
       oidc:
+        condition: service_started
+      localstack:
         condition: service_started
     command: ['npm', 'start', '--ignore-scripts']
     networks:
