@@ -99,8 +99,8 @@ services:
       ROLE_EDITOR_GROUP_ID: '7049296f-2156-4d61-8ac3-349276438ef9'
       FORM_DEF_BUCKET_NAME: form-definition-storage
       S3_FORCE_PATH_STYLE: true
-      S3_ENDPOINT: http://host.docker.internal:4566
-      SNS_ENDPOINT: http://host.docker.internal:4566
+      S3_ENDPOINT: http://localstack:4566
+      SNS_ENDPOINT: http://localstack:4566
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_manager_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
