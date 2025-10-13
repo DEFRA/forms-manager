@@ -110,7 +110,7 @@ services:
       oidc:
         condition: service_started
       localstack:
-        condition: service_started
+        condition: service_healthy
     command: ['npm', 'start', '--ignore-scripts']
     networks:
       - forms_test_net
