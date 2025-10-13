@@ -69,7 +69,7 @@ jobs:
           --reporter-htmlextra-showConsoleLogs"
 
         EXIT_CODE=$?
-        npm run test:integration:stop
+        # npm run test:integration:stop
         exit $EXIT_CODE
 
     # Save Docker images for future runs
@@ -103,6 +103,7 @@ jobs:
           echo "=====================" >> logs.txt
           docker logs ${container} >> logs.txt
         done
+        npm run test:integration:stop
       shell: bash
     - name: Upload docker compose logs
       if: always()
