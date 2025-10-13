@@ -494,7 +494,9 @@ export function modifyAddComponent(definition, pageId, component, position) {
   const page = definition.pages[idx]
 
   if (!hasComponentsEvenIfNoNext(page) && isSummaryPage(page)) {
-    /** @type {PageSummary} */ ;(page).components = []
+    /** @type {PageSummary | PageSummaryWithConfirmationEmail} */ ;(
+      page
+    ).components = []
   }
 
   if (hasComponentsEvenIfNoNext(page)) {
@@ -723,7 +725,7 @@ export function modifyUnassignCondition(definition, conditionId) {
  */
 
 /**
- * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */
