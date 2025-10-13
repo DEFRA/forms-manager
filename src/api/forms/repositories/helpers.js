@@ -1,11 +1,11 @@
 import {
   ApiErrorCode,
-  ControllerType,
   formDefinitionV2Schema,
   hasComponents,
   hasComponentsEvenIfNoNext,
   hasRepeater,
-  isConditionWrapperV2
+  isConditionWrapperV2,
+  isSummaryPage
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
@@ -50,10 +50,7 @@ export function findPage(definition, pageId) {
 export function getPageInsertPosition(definition) {
   const pages = definition.pages
 
-  return pages.length &&
-    pages[pages.length - 1].controller === ControllerType.Summary
-    ? -1
-    : undefined
+  return pages.length && isSummaryPage(pages[pages.length - 1]) ? -1 : undefined
 }
 
 /**
@@ -496,11 +493,8 @@ export function modifyAddComponent(definition, pageId, component, position) {
   const idx = getPageIndex(definition, pageId)
   const page = definition.pages[idx]
 
-  if (
-    !hasComponentsEvenIfNoNext(page) &&
-    page.controller === ControllerType.Summary
-  ) {
-    page.components = []
+  if (!hasComponentsEvenIfNoNext(page) && isSummaryPage(page)) {
+    /** @type {PageSummary} */ ;(page).components = []
   }
 
   if (hasComponentsEvenIfNoNext(page)) {
@@ -729,7 +723,7 @@ export function modifyUnassignCondition(definition, conditionId) {
  */
 
 /**
- * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2 } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */

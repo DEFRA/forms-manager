@@ -18,6 +18,7 @@ import {
   buildQuestionPage,
   buildStatusPage,
   buildSummaryPage,
+  buildSummaryPageWithConfirmation,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
@@ -59,6 +60,11 @@ describe('migration helpers', () => {
   const summaryPageWithoutComponents = buildSummaryPage({
     id: summaryPageId
   })
+
+  const summaryPageWithoutComponentsWithConfirmation =
+    buildSummaryPageWithConfirmation({
+      id: summaryPageId
+    })
 
   const componentWithoutAnId = buildTextFieldComponent({
     name: 'Ghcbma'
@@ -543,7 +549,7 @@ describe('migration helpers', () => {
       lists: [countryList]
     })
 
-    const definitionV2 = {
+    const definitionV2WithConfirmation = {
       ...buildDefinition({
         sections: [
           { hideTitle: false, name: 'section', title: 'Section title' }
@@ -571,7 +577,8 @@ describe('migration helpers', () => {
         },
         {
           ...pages[0],
-          id: expect.any(String)
+          id: expect.any(String),
+          controller: ControllerType.SummaryWithConfirmationEmail
         }
       ],
       lists: [
@@ -583,7 +590,9 @@ describe('migration helpers', () => {
     }
 
     it('should migrate to version v2', () => {
-      expect(migrateToV2(definitionV1)).toMatchObject(definitionV2)
+      expect(migrateToV2(definitionV1)).toMatchObject(
+        definitionV2WithConfirmation
+      )
     })
 
     it('migration is an idempotent operation', () => {
@@ -606,7 +615,57 @@ describe('migration helpers', () => {
       )
     })
 
-    it('should not perform any changes if component and page ids exist', () => {
+    it('should not perform any changes if component and page ids exist and summary controller has been previously upgraded', () => {
+      const definition = buildDefinition({
+        pages: [
+          pageOneUndefinedId,
+          pageTwoNoIds,
+          summaryPageWithoutComponentsWithConfirmation
+        ],
+        sections: [
+          { hideTitle: false, name: 'section', title: 'Section title' }
+        ]
+      })
+
+      const pages = /** @type {[PageQuestion, PageQuestion, Page]} */ (
+        definition.pages
+      )
+
+      const components = /** @type {[ComponentDef, ComponentDef]} */ (
+        pages[1].components
+      )
+
+      expect(migrateToV2(definition)).toMatchObject({
+        ...definition,
+        engine: Engine.V2,
+        pages: [
+          {
+            ...pages[0],
+            id: expect.any(String)
+          },
+          {
+            ...pages[1],
+            id: expect.any(String),
+            components: [
+              {
+                ...components[0],
+                id: expect.any(String)
+              },
+              {
+                ...components[1],
+                id: expect.any(String)
+              }
+            ]
+          },
+          {
+            ...pages[2],
+            id: expect.any(String)
+          }
+        ]
+      })
+    })
+
+    it('should perform controller upgrade if summary controller is old', () => {
       const definition = buildDefinition({
         pages: [pageOneUndefinedId, pageTwoNoIds, summaryPageWithoutComponents],
         sections: [
@@ -645,7 +704,7 @@ describe('migration helpers', () => {
             ]
           },
           {
-            ...pages[2],
+            ...summaryPageWithoutComponentsWithConfirmation,
             id: expect.any(String)
           }
         ]
@@ -1145,5 +1204,5 @@ function buildMinimalDefinition(overrides = {}) {
 }
 
 /**
- * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef, ConditionDataV2 } from '@defra/forms-model'
+ * @import { FormDefinition, List, PageQuestion, Page, PageSummary, ComponentDef, ConditionDataV2, PageSummaryWithConfirmationEmail } from '@defra/forms-model'
  */
