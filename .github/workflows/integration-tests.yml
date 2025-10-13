@@ -89,3 +89,31 @@ jobs:
         name: integration-test-report
         path: ./newman-reports/newman-report.html
         if-no-files-found: warn
+
+    - name: debug
+      if: always()
+      run: |
+        echo "Docker Image Versions" >> logs.txt
+        echo "=====================" >> logs.txt
+        if [ -f forms-development-tools/test-harness/image-versions.txt ]; then
+          cat forms-development-tools/test-harness/image-versions.txt >> logs.txt
+        else
+          echo "image-versions.txt not found" >> logs.txt
+        fi
+        echo " " >> logs.txt
+        docker ps >> logs.txt
+        containers=`docker ps | awk '{print $1}' | grep -v "CONTAINER"`
+        for container in ${containers};
+        do
+          echo "=====================" >> logs.txt
+          echo CONTAINER ${container} >> logs.txt
+          echo "=====================" >> logs.txt
+          docker logs ${container} >> logs.txt
+        done
+      shell: bash
+    - name: Upload docker compose logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-compose-logs
+        path: ./logs.txt
