@@ -1,6 +1,27 @@
-version: '3.8'
-
 services:
+  localstack:
+    image: localstack/localstack:3.0.2
+    ports:
+      - '127.0.0.1:4566:4566' # LocalStack Gateway
+      - '127.0.0.1:4510-4559:4510-4559' # external services port range
+    env_file:
+      - 'test/integration/aws.env'
+    environment:
+      DEBUG: ${DEBUG:-1}
+      LS_LOG: WARN # Localstack DEBUG Level
+      SERVICES: s3,sqs,sns,firehose
+      LOCALSTACK_HOST: 127.0.0.1
+    volumes:
+      - '${TMPDIR:-/tmp}/localstack:/var/lib/localstack'
+      - './test/integration/start-localstack.sh:/etc/localstack/init/ready.d/start-localstack.sh'
+    healthcheck:
+      test: ['CMD', 'curl', 'localhost:4566']
+      interval: 5s
+      start_period: 5s
+      retries: 3
+    networks:
+      - forms_test_net
+
   mongo_test:
     image: mongo:6.0
     container_name: forms-manager-mongo-test
@@ -76,11 +97,20 @@ services:
       OIDC_VERIFY_AUD: 'newman-test-client'
       OIDC_VERIFY_ISS: 'http://oidc:80'
       ROLE_EDITOR_GROUP_ID: '7049296f-2156-4d61-8ac3-349276438ef9'
+      FORM_DEF_BUCKET_NAME: form-definition-storage
+      S3_FORCE_PATH_STYLE: true
+      S3_ENDPOINT: http://localstack:4566
+      SNS_ENDPOINT: http://localstack:4566
+      SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_manager_events
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
     depends_on:
       mongo_test:
         condition: service_healthy
       oidc:
         condition: service_started
+      localstack:
+        condition: service_healthy
     command: ['npm', 'start', '--ignore-scripts']
     networks:
       - forms_test_net

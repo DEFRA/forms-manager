@@ -41,6 +41,23 @@ export function buildSummaryPage(partialSummaryPage = {}) {
 }
 
 /**
+ * @param {Partial<PageSummaryWithConfirmationEmail>} [partialSummaryPage]
+ */
+export function buildSummaryPageWithConfirmation(partialSummaryPage = {}) {
+  /** @type {PageSummaryWithConfirmationEmail } */
+  const page = /** @satisfies {PageSummaryWithConfirmationEmail} */ (
+    structuredClone({
+      id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
+      title: 'Summary',
+      path: ControllerPath.Summary,
+      controller: ControllerType.SummaryWithConfirmationEmail,
+      ...partialSummaryPage
+    })
+  )
+  return page
+}
+
+/**
  * @param {Partial<PageStatus>} partialStatusPage
  */
 export function buildStatusPage(partialStatusPage = {}) {
@@ -148,5 +165,5 @@ export function buildTextFieldComponent(partialTextField = {}) {
   )
 }
 /**
- * @import { FormDefinition, PageSummary, PageQuestion, PageStatus, TextFieldComponent, Item, List, ConditionWrapperV2 } from '@defra/forms-model'
+ * @import { FormDefinition, PageSummary, PageSummaryWithConfirmationEmail, PageQuestion, PageStatus, TextFieldComponent, Item, List, ConditionWrapperV2 } from '@defra/forms-model'
  */

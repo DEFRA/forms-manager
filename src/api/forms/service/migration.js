@@ -1,10 +1,10 @@
 import {
-  ControllerType,
   FormDefinitionRequestType,
   FormStatus,
   SchemaVersion,
   formDefinitionV2Schema,
-  getErrorMessage
+  getErrorMessage,
+  isSummaryPage
 } from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -51,7 +51,7 @@ export async function repositionSummaryPipeline(formId, definition, author) {
     await session.withTransaction(async () => {
       await formDefinition.deletePages(
         formId,
-        (page) => page.controller === ControllerType.Summary,
+        (page) => isSummaryPage(page),
         session
       )
 

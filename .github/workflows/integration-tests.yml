@@ -69,7 +69,7 @@ jobs:
           --reporter-htmlextra-showConsoleLogs"
 
         EXIT_CODE=$?
-        npm run test:integration:stop
+        # npm run test:integration:stop
         exit $EXIT_CODE
 
     # Save Docker images for future runs
@@ -89,3 +89,25 @@ jobs:
         name: integration-test-report
         path: ./newman-reports/newman-report.html
         if-no-files-found: warn
+
+    - name: debug
+      if: always()
+      run: |
+        echo " " > logs.txt
+        docker ps >> logs.txt
+        containers=`docker ps | awk '{print $1}' | grep -v "CONTAINER"`
+        for container in ${containers};
+        do
+          echo "=====================" >> logs.txt
+          echo CONTAINER ${container} >> logs.txt
+          echo "=====================" >> logs.txt
+          docker logs ${container} >> logs.txt
+        done
+        npm run test:integration:stop
+      shell: bash
+    - name: Upload docker compose logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-compose-logs
+        path: ./logs.txt

@@ -13,7 +13,8 @@ import {
   hasFormField,
   hasListField,
   hasNext,
-  isConditionWrapper
+  isConditionWrapper,
+  isSummaryPage
 } from '@defra/forms-model'
 
 import {
@@ -32,9 +33,7 @@ import { validate } from '~/src/api/forms/service/helpers/definition.js'
  */
 export function summaryHelper(definition) {
   const lastIndex = definition.pages.length - 1
-  const summaryIndex = definition.pages.findIndex(
-    (page) => page.controller === ControllerType.Summary
-  )
+  const summaryIndex = definition.pages.findIndex((page) => isSummaryPage(page))
   const summaryExists = summaryIndex >= 0
   const shouldRepositionSummary = summaryExists && summaryIndex !== lastIndex
 
@@ -86,12 +85,42 @@ export function repositionSummary(definition) {
 }
 
 /**
+ * Repositions summary to the end of the pages
+ * @param {FormDefinition} definition
+ */
+export function upgradeSummary(definition) {
+  const summaryHelperOutput = summaryHelper(definition)
+
+  const { summary, indexOf } =
+    /** @type {{ summary: PageSummary | PageSummaryWithConfirmationEmail, indexOf: number}} */ (
+      summaryHelperOutput
+    )
+
+  if (summary.controller === ControllerType.Summary) {
+    const pagesWithoutSummary = removeSummary(definition.pages, indexOf)
+
+    return /** @type {FormDefinition} */ ({
+      ...definition,
+      pages: [
+        ...pagesWithoutSummary,
+        {
+          ...summary,
+          controller: ControllerType.SummaryWithConfirmationEmail
+        }
+      ]
+    })
+  }
+
+  return definition
+}
+
+/**
  * Applies page titles if they are missing
  * @param {FormDefinition} definition
  */
 export function applyPageTitles(definition) {
   const changedPages = definition.pages.map((page) => {
-    if (page.controller !== ControllerType.Summary && !page.title) {
+    if (!isSummaryPage(page) && !page.title) {
       return {
         ...page,
         title: hasComponents(page) ? page.components[0].title : ''
@@ -166,8 +195,8 @@ export function migrateComponentFields(definition) {
 export function convertDeclaration(originalDefinition) {
   const definition = structuredClone(originalDefinition)
 
-  const summaryPage = definition.pages.find(
-    (p) => p.controller === ControllerType.Summary
+  const summaryPage = /** @type { PageSummary | undefined } */ (
+    definition.pages.find((p) => isSummaryPage(p))
   )
 
   let declarationComponent
@@ -480,6 +509,7 @@ export function convertControllerPathsToNames(definition) {
 const migrationSteps = [
   convertControllerPathsToNames,
   repositionSummary,
+  upgradeSummary,
   applyPageTitles,
   migrateComponentFields,
   convertDeclaration,
@@ -516,5 +546,5 @@ export function migrateToV2(definition) {
 }
 
 /**
- * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, PageSummaryWithConfirmationEmail, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
  */
