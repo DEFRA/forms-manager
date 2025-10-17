@@ -11,34 +11,21 @@ const BATCH_SIZE = 10
 
 /**
  * @param {Collection<{ draft?: FormDefinition; live?: FormDefinition;}>} definitionCollection
+ * @param {DRAFT | LIVE} draftOrLive
  */
-async function getDraftFormIdsToMigrate(definitionCollection) {
-  return await definitionCollection
-    .find(
-      {
-        'draft.pages.controller': ControllerTypeSummary
-      },
-      {
-        projection: { draft: { name: 1 } }
-      }
-    )
-    .limit(BATCH_SIZE)
-    .toArray()
-}
+async function getFormIdsToMigrate(definitionCollection, draftOrLive) {
+  const query =
+    draftOrLive === DRAFT
+      ? { 'draft.pages.controller': ControllerTypeSummary }
+      : { 'live.pages.controller': ControllerTypeSummary }
 
-/**
- * @param {Collection<{ draft?: FormDefinition; live?: FormDefinition;}>} definitionCollection
- */
-async function getLiveFormIdsToMigrate(definitionCollection) {
+  const projection =
+    draftOrLive === DRAFT
+      ? { projection: { draft: { name: 1 } } }
+      : { projection: { live: { name: 1 } } }
+
   return await definitionCollection
-    .find(
-      {
-        'live.pages.controller': ControllerTypeSummary
-      },
-      {
-        projection: { live: { name: 1 } }
-      }
-    )
+    .find(query, projection)
     .limit(BATCH_SIZE)
     .toArray()
 }
@@ -59,10 +46,10 @@ async function updateDefinitions(client, definitionCollection, draftOrLive) {
     let formIdsToMigrate = []
 
     try {
-      formIdsToMigrate =
-        draftOrLive === DRAFT
-          ? await getDraftFormIdsToMigrate(definitionCollection)
-          : await getLiveFormIdsToMigrate(definitionCollection)
+      formIdsToMigrate = await getFormIdsToMigrate(
+        definitionCollection,
+        draftOrLive
+      )
 
       total = formIdsToMigrate.length
 
