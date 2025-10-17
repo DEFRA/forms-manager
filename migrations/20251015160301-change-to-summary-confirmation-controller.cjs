@@ -125,6 +125,48 @@ async function updateDefinitions(client, definitionCollection, draftOrLive) {
   }
 }
 
+/**
+ * @param {MongoClient} client
+ * @param {Collection<{ draft?: FormDefinition; live?: FormDefinition;}>} definitionCollection
+ * @param {DRAFT | LIVE} draftOrLive
+ */
+async function migrateDraftOrLive(client, definitionCollection, draftOrLive) {
+  const stats = {
+    updated: 0,
+    skipped: 0,
+    errors: 0,
+    total: 0
+  }
+
+  do {
+    const res = await updateDefinitions(
+      client,
+      definitionCollection,
+      draftOrLive
+    )
+
+    stats.updated += res.updated
+    stats.skipped += res.skipped
+    stats.errors += res.errors
+    stats.total += res.total
+
+    if (res.total === 0) {
+      console.log(`\n=== Migration Summary (${draftOrLive.toUpperCase()}) ===`)
+      console.log(`Total forms processed: ${stats.total}`)
+      console.log(
+        `Successfully migrated to new SummaryWithConfrimationEmail controller: ${stats.updated}`
+      )
+      console.log(`Skipped (already migrated): ${stats.skipped}`)
+      console.log(`Errors: ${stats.errors}`)
+
+      console.log(' ')
+      console.log(' ')
+      break
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  } while (true)
+}
+
 /* eslint-disable */
 module.exports = {
   /**
@@ -139,49 +181,9 @@ module.exports = {
         db.collection(DEFINITION_COLLECTION_NAME)
       )
 
-    do {
-      const draftRes = await updateDefinitions(
-        client,
-        definitionCollection,
-        DRAFT
-      )
-      console.log('\n=== Migration Summary (DRAFT) ===')
-      console.log(`Total forms processed: ${draftRes.total}`)
-      console.log(
-        `Successfully migrated to new SummaryWithConfrimationEmail controller: ${draftRes.updated}`
-      )
-      console.log(`Skipped (already migrated): ${draftRes.skipped}`)
-      console.log(`Errors: ${draftRes.errors}`)
+    await migrateDraftOrLive(client, definitionCollection, DRAFT)
 
-      console.log(' ')
-      console.log(' ')
-
-      if (draftRes.total === 0) {
-        break
-      }
-    } while (true)
-
-    do {
-      const liveRes = await updateDefinitions(
-        client,
-        definitionCollection,
-        LIVE
-      )
-      console.log('\n=== Migration Summary (LIVE) ===')
-      console.log(`Total forms processed: ${liveRes.total}`)
-      console.log(
-        `Successfully migrated to new SummaryWithConfrimationEmail controller: ${liveRes.updated}`
-      )
-      console.log(`Skipped (already migrated): ${liveRes.skipped}`)
-      console.log(`Errors: ${liveRes.errors}`)
-
-      console.log(' ')
-      console.log(' ')
-
-      if (liveRes.total === 0) {
-        break
-      }
-    } while (true)
+    await migrateDraftOrLive(client, definitionCollection, LIVE)
   },
 
   /**
