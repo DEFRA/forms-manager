@@ -141,7 +141,7 @@ async function migrateDraftOrLive(client, definitionCollection, draftOrLive) {
       console.log(`\n=== Migration Summary (${draftOrLive.toUpperCase()}) ===`)
       console.log(`Total forms processed: ${stats.total}`)
       console.log(
-        `Successfully migrated to new SummaryWithConfrimationEmail controller: ${stats.updated}`
+        `Successfully migrated to new SummaryWithConfirmationEmail controller: ${stats.updated}`
       )
       console.log(`Skipped (already migrated): ${stats.skipped}`)
       console.log(`Errors: ${stats.errors}`)
