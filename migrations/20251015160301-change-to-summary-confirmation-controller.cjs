@@ -4,6 +4,7 @@ const DRAFT = 'draft'
 
 // Cannot import values from '@defra/forms-model' due to restrictions
 const ControllerTypeSummary = 'SummaryPageController'
+const v1ControllerTypeSummary = './pages/summary.js'
 const ControllerTypeSummaryWithConfirmationEmail =
   'SummaryPageWithConfirmationEmailController'
 const DEFINITION_COLLECTION_NAME = 'form-definition'
@@ -16,8 +17,16 @@ const BATCH_SIZE = 10
 async function getFormIdsToMigrate(definitionCollection, draftOrLive) {
   const query =
     draftOrLive === DRAFT
-      ? { 'draft.pages.controller': ControllerTypeSummary }
-      : { 'live.pages.controller': ControllerTypeSummary }
+      ? {
+          'draft.pages.controller': {
+            $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+          }
+        }
+      : {
+          'live.pages.controller': {
+            $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+          }
+        }
 
   const projection =
     draftOrLive === DRAFT
@@ -86,7 +95,15 @@ async function updateDefinitions(client, definitionCollection, draftOrLive) {
         await definitionCollection.findOneAndUpdate(
           { _id: form._id },
           setExpr,
-          { arrayFilters: [{ 'elem.controller': ControllerTypeSummary }] }
+          {
+            arrayFilters: [
+              {
+                'elem.controller': {
+                  $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+                }
+              }
+            ]
+          }
         )
         updated++
         console.log(
