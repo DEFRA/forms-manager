@@ -31,7 +31,7 @@ export function buildSummaryPage(partialSummaryPage = {}) {
   const page = /** @satisfies {PageSummary} */ (
     structuredClone({
       id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
-      title: 'Summary',
+      title: '',
       path: ControllerPath.Summary,
       controller: ControllerType.Summary,
       ...partialSummaryPage
@@ -48,7 +48,7 @@ export function buildSummaryPageWithConfirmation(partialSummaryPage = {}) {
   const page = /** @satisfies {PageSummaryWithConfirmationEmail} */ (
     structuredClone({
       id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
-      title: 'Summary',
+      title: '',
       path: ControllerPath.Summary,
       controller: ControllerType.SummaryWithConfirmationEmail,
       ...partialSummaryPage

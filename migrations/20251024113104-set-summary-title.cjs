@@ -5,6 +5,8 @@ const DRAFT = 'draft'
 // Cannot import values from '@defra/forms-model' due to restrictions
 const ControllerTypeSummary = 'SummaryPageController'
 const v1ControllerTypeSummary = './pages/summary.js'
+const ControllerTypeSummaryWithConfirmationEmail =
+  'SummaryPageWithConfirmationEmailController'
 const CHECK_YOUR_ANSWERS_TITLE = 'Check your answers before sending your form'
 const DEFINITION_COLLECTION_NAME = 'form-definition'
 const BATCH_SIZE = 10
@@ -23,7 +25,11 @@ async function getV1FormIdsToMigrate(definitionCollection, draftOrLive) {
             },
             {
               'draft.pages.controller': {
-                $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+                $in: [
+                  ControllerTypeSummary,
+                  v1ControllerTypeSummary,
+                  ControllerTypeSummaryWithConfirmationEmail
+                ]
               }
             },
             {
@@ -38,7 +44,11 @@ async function getV1FormIdsToMigrate(definitionCollection, draftOrLive) {
             },
             {
               'live.pages.controller': {
-                $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+                $in: [
+                  ControllerTypeSummary,
+                  v1ControllerTypeSummary,
+                  ControllerTypeSummaryWithConfirmationEmail
+                ]
               }
             },
             {
@@ -72,7 +82,11 @@ async function getV2FormIdsToMigrate(definitionCollection, draftOrLive) {
             },
             {
               'draft.pages.controller': {
-                $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+                $in: [
+                  ControllerTypeSummary,
+                  v1ControllerTypeSummary,
+                  ControllerTypeSummaryWithConfirmationEmail
+                ]
               }
             },
             {
@@ -87,7 +101,11 @@ async function getV2FormIdsToMigrate(definitionCollection, draftOrLive) {
             },
             {
               'live.pages.controller': {
-                $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+                $in: [
+                  ControllerTypeSummary,
+                  v1ControllerTypeSummary,
+                  ControllerTypeSummaryWithConfirmationEmail
+                ]
               }
             },
             {
@@ -167,7 +185,11 @@ async function updateDefinitionsV1(client, definitionCollection, draftOrLive) {
             arrayFilters: [
               {
                 'elem.controller': {
-                  $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+                  $in: [
+                    ControllerTypeSummary,
+                    v1ControllerTypeSummary,
+                    ControllerTypeSummaryWithConfirmationEmail
+                  ]
                 }
               }
             ]
@@ -257,7 +279,11 @@ async function updateDefinitionsV2(client, definitionCollection, draftOrLive) {
             arrayFilters: [
               {
                 'elem.controller': {
-                  $in: [ControllerTypeSummary, v1ControllerTypeSummary]
+                  $in: [
+                    ControllerTypeSummary,
+                    v1ControllerTypeSummary,
+                    ControllerTypeSummaryWithConfirmationEmail
+                  ]
                 }
               }
             ]

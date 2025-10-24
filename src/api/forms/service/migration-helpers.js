@@ -105,7 +105,8 @@ export function upgradeSummary(definition) {
         ...pagesWithoutSummary,
         {
           ...summary,
-          controller: ControllerType.SummaryWithConfirmationEmail
+          controller: ControllerType.SummaryWithConfirmationEmail,
+          title: ''
         }
       ]
     })
