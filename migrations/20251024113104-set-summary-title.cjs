@@ -3,10 +3,11 @@ const LIVE = 'live'
 const DRAFT = 'draft'
 
 // Cannot import values from '@defra/forms-model' due to restrictions
-const ControllerTypeSummary = 'SummaryPageController'
-const v1ControllerTypeSummary = './pages/summary.js'
-const ControllerTypeSummaryWithConfirmationEmail =
+const SummaryControllers = [
+  './pages/summary.js',
+  'SummaryPageController',
   'SummaryPageWithConfirmationEmailController'
+]
 const CHECK_YOUR_ANSWERS_TITLE = 'Check your answers before sending your form'
 const DEFINITION_COLLECTION_NAME = 'form-definition'
 const BATCH_SIZE = 10
@@ -16,46 +17,21 @@ const BATCH_SIZE = 10
  * @param {DRAFT | LIVE} draftOrLive
  */
 async function getV1FormIdsToMigrate(definitionCollection, draftOrLive) {
-  const query =
-    draftOrLive === DRAFT
-      ? {
-          $and: [
-            {
-              'draft.schema': { $ne: 2 }
-            },
-            {
-              'draft.pages.controller': {
-                $in: [
-                  ControllerTypeSummary,
-                  v1ControllerTypeSummary,
-                  ControllerTypeSummaryWithConfirmationEmail
-                ]
-              }
-            },
-            {
-              'draft.pages.title': 'Summary'
-            }
-          ]
+  const query = {
+    $and: [
+      {
+        [`${draftOrLive}.schema`]: { $ne: 2 }
+      },
+      {
+        [`${draftOrLive}.pages.controller`]: {
+          $in: SummaryControllers
         }
-      : {
-          $and: [
-            {
-              'live.schema': { $ne: 2 }
-            },
-            {
-              'live.pages.controller': {
-                $in: [
-                  ControllerTypeSummary,
-                  v1ControllerTypeSummary,
-                  ControllerTypeSummaryWithConfirmationEmail
-                ]
-              }
-            },
-            {
-              'live.pages.title': 'Summary'
-            }
-          ]
-        }
+      },
+      {
+        [`${draftOrLive}.pages.title`]: 'Summary'
+      }
+    ]
+  }
 
   const projection =
     draftOrLive === DRAFT
@@ -73,46 +49,21 @@ async function getV1FormIdsToMigrate(definitionCollection, draftOrLive) {
  * @param {DRAFT | LIVE} draftOrLive
  */
 async function getV2FormIdsToMigrate(definitionCollection, draftOrLive) {
-  const query =
-    draftOrLive === DRAFT
-      ? {
-          $and: [
-            {
-              'draft.schema': 2
-            },
-            {
-              'draft.pages.controller': {
-                $in: [
-                  ControllerTypeSummary,
-                  v1ControllerTypeSummary,
-                  ControllerTypeSummaryWithConfirmationEmail
-                ]
-              }
-            },
-            {
-              'draft.pages.title': 'Summary'
-            }
-          ]
+  const query = {
+    $and: [
+      {
+        [`${draftOrLive}.schema`]: 2
+      },
+      {
+        [`${draftOrLive}.pages.controller`]: {
+          $in: SummaryControllers
         }
-      : {
-          $and: [
-            {
-              'live.schema': 2
-            },
-            {
-              'live.pages.controller': {
-                $in: [
-                  ControllerTypeSummary,
-                  v1ControllerTypeSummary,
-                  ControllerTypeSummaryWithConfirmationEmail
-                ]
-              }
-            },
-            {
-              'live.pages.title': 'Summary'
-            }
-          ]
-        }
+      },
+      {
+        [`${draftOrLive}.pages.title`]: 'Summary'
+      }
+    ]
+  }
 
   const projection =
     draftOrLive === DRAFT
@@ -129,8 +80,14 @@ async function getV2FormIdsToMigrate(definitionCollection, draftOrLive) {
  * @param {MongoClient} client
  * @param {Collection<{ draft?: FormDefinition; live?: FormDefinition;}>} definitionCollection
  * @param {DRAFT | LIVE} draftOrLive
+ * @param {'v1' | 'v2'} version
  */
-async function updateDefinitionsV1(client, definitionCollection, draftOrLive) {
+async function updateDefinitions(
+  client,
+  definitionCollection,
+  draftOrLive,
+  version
+) {
   let total = 0
   let updated = 0
   let errors = 0
@@ -138,19 +95,19 @@ async function updateDefinitionsV1(client, definitionCollection, draftOrLive) {
   const session = client.startSession()
 
   await session.withTransaction(async () => {
-    let v1FormIdsToMigrate = []
+    let formIdsToMigrate = []
 
     try {
-      v1FormIdsToMigrate = await getV1FormIdsToMigrate(
-        definitionCollection,
-        draftOrLive
-      )
+      formIdsToMigrate =
+        version === 'v1'
+          ? await getV1FormIdsToMigrate(definitionCollection, draftOrLive)
+          : await getV2FormIdsToMigrate(definitionCollection, draftOrLive)
 
-      total = v1FormIdsToMigrate.length
+      total = formIdsToMigrate.length
 
-      if (v1FormIdsToMigrate.length === 0) {
+      if (formIdsToMigrate.length === 0) {
         console.log(
-          `No ${draftOrLive.toUpperCase()} v1 forms found for migration`
+          `No ${draftOrLive.toUpperCase()} ${version} forms found for migration`
         )
         return {
           updated,
@@ -160,117 +117,17 @@ async function updateDefinitionsV1(client, definitionCollection, draftOrLive) {
         }
       } else {
         console.log(
-          `Found ${v1FormIdsToMigrate.length} ${draftOrLive.toUpperCase()} v1 forms for migration`
+          `Found ${formIdsToMigrate.length} ${draftOrLive.toUpperCase()} ${version} forms for migration`
         )
       }
 
-      for (const form of v1FormIdsToMigrate) {
-        const setExpr =
-          draftOrLive === DRAFT
-            ? {
-                $set: {
-                  'draft.pages.$[elem].title': CHECK_YOUR_ANSWERS_TITLE
-                }
-              }
-            : {
-                $set: {
-                  'live.pages.$[elem].title': CHECK_YOUR_ANSWERS_TITLE
-                }
-              }
-
-        await definitionCollection.findOneAndUpdate(
-          { _id: form._id },
-          setExpr,
-          {
-            arrayFilters: [
-              {
-                'elem.controller': {
-                  $in: [
-                    ControllerTypeSummary,
-                    v1ControllerTypeSummary,
-                    ControllerTypeSummaryWithConfirmationEmail
-                  ]
-                }
-              }
-            ]
+      for (const form of formIdsToMigrate) {
+        const setExpr = {
+          $set: {
+            [`${draftOrLive}.pages.$[elem].title`]:
+              version === 'v1' ? CHECK_YOUR_ANSWERS_TITLE : ''
           }
-        )
-        updated++
-        console.log(
-          `Migrated v1 ${draftOrLive.toUpperCase()} form ${form.draft?.name ?? form.live?.name} to use new summary title`
-        )
-      }
-    } catch (error) {
-      console.error(
-        `Migration v1 failed for ${draftOrLive}:`,
-        error instanceof Error ? error.message : String(error)
-      )
-      errors = v1FormIdsToMigrate.length - updated
-    } finally {
-      await session.endSession()
-    }
-  })
-
-  return {
-    updated,
-    skipped: total - updated - errors,
-    errors,
-    total
-  }
-}
-
-/**
- * @param {MongoClient} client
- * @param {Collection<{ draft?: FormDefinition; live?: FormDefinition;}>} definitionCollection
- * @param {DRAFT | LIVE} draftOrLive
- */
-async function updateDefinitionsV2(client, definitionCollection, draftOrLive) {
-  let total = 0
-  let updated = 0
-  let errors = 0
-
-  const session = client.startSession()
-
-  await session.withTransaction(async () => {
-    let v2FormIdsToMigrate = []
-
-    try {
-      v2FormIdsToMigrate = await getV2FormIdsToMigrate(
-        definitionCollection,
-        draftOrLive
-      )
-
-      total = v2FormIdsToMigrate.length
-
-      if (v2FormIdsToMigrate.length === 0) {
-        console.log(
-          `No ${draftOrLive.toUpperCase()} v2 forms found for migration`
-        )
-        return {
-          updated,
-          skipped: 0,
-          errors,
-          total
         }
-      } else {
-        console.log(
-          `Found ${v2FormIdsToMigrate.length} ${draftOrLive.toUpperCase()} v2 forms for migration`
-        )
-      }
-
-      for (const form of v2FormIdsToMigrate) {
-        const setExpr =
-          draftOrLive === DRAFT
-            ? {
-                $set: {
-                  'draft.pages.$[elem].title': ''
-                }
-              }
-            : {
-                $set: {
-                  'live.pages.$[elem].title': ''
-                }
-              }
 
         await definitionCollection.findOneAndUpdate(
           { _id: form._id },
@@ -279,11 +136,7 @@ async function updateDefinitionsV2(client, definitionCollection, draftOrLive) {
             arrayFilters: [
               {
                 'elem.controller': {
-                  $in: [
-                    ControllerTypeSummary,
-                    v1ControllerTypeSummary,
-                    ControllerTypeSummaryWithConfirmationEmail
-                  ]
+                  $in: SummaryControllers
                 }
               }
             ]
@@ -291,15 +144,15 @@ async function updateDefinitionsV2(client, definitionCollection, draftOrLive) {
         )
         updated++
         console.log(
-          `Migrated v2 ${draftOrLive.toUpperCase()} form ${form.draft?.name ?? form.live?.name} to use clear summary title so default gets used`
+          `Migrated ${version} ${draftOrLive.toUpperCase()} form ${form.draft?.name ?? form.live?.name} to use new summary title`
         )
       }
     } catch (error) {
       console.error(
-        `Migration v2 failed for ${draftOrLive}:`,
+        `Migration ${version} failed for ${draftOrLive}:`,
         error instanceof Error ? error.message : String(error)
       )
-      errors = v2FormIdsToMigrate.length - updated
+      errors = formIdsToMigrate.length - updated
     } finally {
       await session.endSession()
     }
@@ -333,10 +186,12 @@ async function migrateDraftOrLive(
   }
 
   do {
-    const res =
-      version === 'v1'
-        ? await updateDefinitionsV1(client, definitionCollection, draftOrLive)
-        : await updateDefinitionsV2(client, definitionCollection, draftOrLive)
+    const res = await updateDefinitions(
+      client,
+      definitionCollection,
+      draftOrLive,
+      version
+    )
 
     stats.updated += res.updated
     stats.skipped += res.skipped
