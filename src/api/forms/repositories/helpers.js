@@ -1,5 +1,7 @@
 import {
   ApiErrorCode,
+  ComponentType,
+  ControllerType,
   formDefinitionV2Schema,
   hasComponents,
   hasComponentsEvenIfNoNext,
@@ -573,6 +575,9 @@ export function modifyUpdatePageFields(definition, pageId, pageFields) {
   }
   if (controller) {
     page.controller = controller
+    if (controller === ControllerType.FileUpload && hasComponents(page)) {
+      page.components[0].type = ComponentType.FileUploadField
+    }
   }
   if (controller === null) {
     delete page.controller
