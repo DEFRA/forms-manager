@@ -1,5 +1,7 @@
 import {
   ApiErrorCode,
+  ComponentType,
+  ControllerType,
   formDefinitionV2Schema,
   hasComponents,
   hasComponentsEvenIfNoNext,
@@ -554,6 +556,23 @@ export function modifyDeleteComponent(definition, pageId, componentId) {
 }
 
 /**
+ * Causes SIDE-EFFECTS to incoming Page
+ * @param {Page} page
+ * @param { ControllerType | null | undefined } controller
+ */
+export function handleControllerPatch(page, controller) {
+  if (controller) {
+    page.controller = controller
+    if (controller === ControllerType.FileUpload && hasComponents(page)) {
+      page.components[0].type = ComponentType.FileUploadField
+    }
+  }
+  if (controller === null) {
+    delete page.controller
+  }
+}
+
+/**
  * Deletes a component with component id
  * @param {FormDefinition} definition
  * @param {string} pageId
@@ -571,12 +590,8 @@ export function modifyUpdatePageFields(definition, pageId, pageFields) {
   if (path) {
     page.path = path
   }
-  if (controller) {
-    page.controller = controller
-  }
-  if (controller === null) {
-    delete page.controller
-  }
+
+  handleControllerPatch(page, controller)
 
   // Repeater
   if (repeat && hasRepeater(page)) {
