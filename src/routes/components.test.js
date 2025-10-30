@@ -200,10 +200,7 @@ describe('Components route', () => {
         url: `/forms/${id}/definition/draft/pages/${pageId}/components`,
         errors: {
           message: '"id" must be a valid GUID',
-          validation: {
-            keys: ['id'],
-            source: 'payload'
-          }
+          error: 'InvalidFormDefinitionError'
         }
       }
     ])(
@@ -218,11 +215,14 @@ describe('Components route', () => {
 
         expect(response.statusCode).toEqual(badRequestStatusCode)
         expect(response.headers['content-type']).toContain(jsonContentType)
+        const validation = errors.validation
+          ? { validation: errors.validation }
+          : {}
         expect(response.result).toMatchObject({
-          error: 'Bad Request',
+          error: errors.error ?? 'Bad Request',
           message: errors.message,
           statusCode: 400,
-          validation: errors.validation
+          ...validation
         })
       }
     )
@@ -241,12 +241,9 @@ describe('Components route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
         message: '"type" is required. "id" must be a string',
-        statusCode: 400,
-        validation: {
-          keys: ['type', 'id']
-        }
+        statusCode: 400
       })
     })
 
@@ -266,12 +263,9 @@ describe('Components route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
         message: '"id" is required',
-        statusCode: 400,
-        validation: {
-          keys: ['id']
-        }
+        statusCode: 400
       })
     })
 
