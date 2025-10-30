@@ -16,38 +16,6 @@ const BATCH_SIZE = 10
  * @param {Collection<{ draft?: FormDefinition; live?: FormDefinition;}>} definitionCollection
  * @param {DRAFT | LIVE} draftOrLive
  */
-async function getV1FormIdsToMigrate(definitionCollection, draftOrLive) {
-  const query = {
-    $and: [
-      {
-        [`${draftOrLive}.schema`]: { $ne: 2 }
-      },
-      {
-        [`${draftOrLive}.pages.controller`]: {
-          $in: SummaryControllers
-        }
-      },
-      {
-        [`${draftOrLive}.pages.title`]: 'Summary'
-      }
-    ]
-  }
-
-  const projection =
-    draftOrLive === DRAFT
-      ? { projection: { draft: { name: 1 } } }
-      : { projection: { live: { name: 1 } } }
-
-  return await definitionCollection
-    .find(query, projection)
-    .limit(BATCH_SIZE)
-    .toArray()
-}
-
-/**
- * @param {Collection<{ draft?: FormDefinition; live?: FormDefinition;}>} definitionCollection
- * @param {DRAFT | LIVE} draftOrLive
- */
 async function getV2FormIdsToMigrate(definitionCollection, draftOrLive) {
   const query = {
     $and: [
@@ -98,10 +66,10 @@ async function updateDefinitions(
     let formIdsToMigrate = []
 
     try {
-      formIdsToMigrate =
-        version === 'v1'
-          ? await getV1FormIdsToMigrate(definitionCollection, draftOrLive)
-          : await getV2FormIdsToMigrate(definitionCollection, draftOrLive)
+      formIdsToMigrate = await getV2FormIdsToMigrate(
+        definitionCollection,
+        draftOrLive
+      )
 
       total = formIdsToMigrate.length
 
@@ -229,10 +197,7 @@ module.exports = {
         db.collection(DEFINITION_COLLECTION_NAME)
       )
 
-    await migrateDraftOrLive(client, definitionCollection, DRAFT, 'v1')
     await migrateDraftOrLive(client, definitionCollection, DRAFT, 'v2')
-
-    await migrateDraftOrLive(client, definitionCollection, LIVE, 'v1')
     await migrateDraftOrLive(client, definitionCollection, LIVE, 'v2')
   },
 
