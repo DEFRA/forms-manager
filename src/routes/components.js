@@ -7,6 +7,7 @@ import {
 } from '~/src/api/forms/service/component.js'
 import { reorderDraftFormDefinitionComponents } from '~/src/api/forms/service/definition.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import { failAction } from '~/src/helpers/payload-fail-action.js'
 import {
   componentByIdSchema,
   componentPayloadWithRequiredIdSchema,
@@ -51,7 +52,8 @@ export default [
       validate: {
         params: pageByIdSchema,
         payload: componentPayloadSchemaV2,
-        query: prependQuerySchema
+        query: prependQuerySchema,
+        failAction
       }
     }
   },
@@ -78,7 +80,8 @@ export default [
       },
       validate: {
         params: pageByIdSchema,
-        payload: sortIdsSchema
+        payload: sortIdsSchema,
+        failAction
       }
     }
   },
@@ -107,7 +110,8 @@ export default [
       },
       validate: {
         params: componentByIdSchema,
-        payload: componentPayloadWithRequiredIdSchema
+        payload: componentPayloadWithRequiredIdSchema,
+        failAction
       }
     }
   },
@@ -134,7 +138,8 @@ export default [
         scope: [`+${Scopes.FormEdit}`]
       },
       validate: {
-        params: componentByIdSchema
+        params: componentByIdSchema,
+        failAction
       }
     }
   }
