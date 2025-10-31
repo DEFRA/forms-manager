@@ -8,14 +8,11 @@ prepareSecureContext(console.log) // eslint-disable-line no-console
 if (!process.env.MONGO_URI) {
   throw new Error('Missing required environment variable: MONGO_URI')
 }
-if (!process.env.MONGO_DATABASE) {
-  throw new Error('Missing required environment variable: MONGO_DATABASE')
-}
 
 const config = {
   mongodb: {
     url: process.env.MONGO_URI,
-    databaseName: process.env.MONGO_DATABASE,
+    databaseName: process.env.MONGO_DATABASE ?? 'forms-manager',
     options: {
       //   connectTimeoutMS: 3600000, // increase connection timeout to 1 hour
       //   socketTimeoutMS: 3600000, // increase socket timeout to 1 hour
