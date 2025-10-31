@@ -33,7 +33,7 @@ USER node
 
 COPY --from=development /home/node/package*.json ./
 COPY --from=development /home/node/.server ./.server/
-COPY --from=development /home/node/migrate-mongo-config.cjs ./
+COPY --from=development /home/node/migrate-mongo-config.js ./
 COPY --from=development /home/node/migrations ./migrations/
 COPY --from=development /home/node/scripts ./scripts/
 
