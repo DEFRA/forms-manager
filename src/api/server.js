@@ -66,7 +66,7 @@ export async function createServer() {
   await server.register(queryHandler)
 
   if (isProduction) {
-    prepareSecureContext(server)
+    prepareSecureContext(server.logger.info)
   }
 
   await prepareDb(server.logger)

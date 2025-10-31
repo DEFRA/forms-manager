@@ -183,35 +183,26 @@ async function migrateDraftOrLive(
   } while (true)
 }
 
-/* eslint-disable */
-module.exports = {
-  /**
-   * Changes any summary controllers from 'Summary' to 'SummaryWithConfirmationEmail'
-   * @param {Db} db
-   * @param {MongoClient} client
-   * @returns {Promise<void>}
-   */
-  async up(db, client) {
-    const definitionCollection =
-      /** @satisfies {Collection<{draft?: FormDefinition, live?: FormDefinition}>} */ (
-        db.collection(DEFINITION_COLLECTION_NAME)
-      )
+/**
+ * Changes any summary controllers from 'Summary' to 'SummaryWithConfirmationEmail'
+ * @param {import('mongodb').Db} db
+ * @param {import('mongodb').MongoClient} client
+ * @returns {Promise<void>}
+ */
+export async function up(db, client) {
+  const definitionCollection = db.collection(DEFINITION_COLLECTION_NAME)
+  await migrateDraftOrLive(client, definitionCollection, DRAFT, 'v2')
+  await migrateDraftOrLive(client, definitionCollection, LIVE, 'v2')
+}
 
-    await migrateDraftOrLive(client, definitionCollection, DRAFT, 'v2')
-    await migrateDraftOrLive(client, definitionCollection, LIVE, 'v2')
-  },
-
-  /**
-   * This migration is a one-way data consolidation fix.
-   * @param db {import('mongodb').Db}
-   * @param client {import('mongodb').MongoClient}
-   * @returns {Promise<void>}
-   */
-  async down(db, client) {
-    throw new Error(
-      'Migration rollback is not supported for data safety reasons'
-    )
-  }
+/**
+ * This migration is a one-way data consolidation fix.
+ * @returns {Promise<void>}
+ */
+export function down() {
+  return Promise.reject(
+    new Error('Migration rollback is not supported for data safety reasons')
+  )
 }
 
 /**
