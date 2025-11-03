@@ -1,18 +1,18 @@
 import 'dotenv/config'
 // eslint-disable-next-line no-restricted-imports -- we're not running this via babel so can't use tilde imports
+import { config as appConfig } from './src/config/index.js'
+// eslint-disable-next-line no-restricted-imports -- we're not running this via babel so can't use tilde imports
 import { prepareSecureContext } from './src/secure-context.js'
 
 // Prepare secure context for MongoDB TLS connections
-prepareSecureContext(console.log) // eslint-disable-line no-console
-
-if (!process.env.MONGO_URI) {
-  throw new Error('Missing required environment variable: MONGO_URI')
+if (appConfig.get('isProduction')) {
+  prepareSecureContext(console.log) // eslint-disable-line no-console
 }
 
 const config = {
   mongodb: {
-    url: process.env.MONGO_URI,
-    databaseName: process.env.MONGO_DATABASE ?? 'forms-manager',
+    url: appConfig.get('mongo.uri'),
+    databaseName: appConfig.get('mongo.databaseName'),
     options: {
       //   connectTimeoutMS: 3600000, // increase connection timeout to 1 hour
       //   socketTimeoutMS: 3600000, // increase socket timeout to 1 hour
