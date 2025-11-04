@@ -564,7 +564,13 @@ export function handleControllerPatch(page, controller) {
   if (controller) {
     page.controller = controller
     if (controller === ControllerType.FileUpload && hasComponents(page)) {
-      page.components[0].type = ComponentType.FileUploadField
+      // There could be a markdown component so look for first non-markdown
+      const fileComponent = page.components.find(
+        (comp) => comp.type !== ComponentType.Markdown
+      )
+      if (fileComponent) {
+        fileComponent.type = ComponentType.FileUploadField
+      }
     }
   }
   if (controller === null) {
