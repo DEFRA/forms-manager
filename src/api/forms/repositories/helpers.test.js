@@ -7,6 +7,7 @@ import {
   hasComponentsEvenIfNoNext,
   hasRepeater
 } from '@defra/forms-model'
+import { buildMarkdownComponent } from '@defra/forms-model/stubs'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -34,6 +35,7 @@ import {
   getPage,
   getPageIndex,
   getPageInsertPosition,
+  handleControllerPatch,
   modifyAddComponent,
   modifyAddList,
   modifyAddPage,
@@ -1092,6 +1094,137 @@ describe('repository helpers', () => {
       const result = modifyUnassignCondition(definition, conditionId)
 
       expect(result).toBe(definition)
+    })
+  })
+
+  describe('handleControllerPatch', () => {
+    it('should unassign controller if passed as null', () => {
+      const page = buildQuestionPage({
+        title: 'Page title',
+        controller: ControllerType.Page
+      })
+      const controller = null
+
+      handleControllerPatch(page, controller)
+
+      expect(page).toEqual({
+        id: expect.any(String),
+        components: [],
+        title: 'Page title',
+        path: '/page-one',
+        next: []
+      })
+    })
+
+    it('should assign controller', () => {
+      const page = buildQuestionPage({
+        title: 'Page title',
+        controller: ControllerType.Page
+      })
+      const controller = ControllerType.Repeat
+
+      handleControllerPatch(page, controller)
+
+      expect(page).toEqual({
+        id: expect.any(String),
+        controller: 'RepeatPageController',
+        components: [],
+        title: 'Page title',
+        path: '/page-one',
+        next: []
+      })
+    })
+
+    it('should assign FileUpload controller when no components', () => {
+      const page = buildQuestionPage({
+        title: 'Page title',
+        controller: ControllerType.Page
+      })
+      const controller = ControllerType.FileUpload
+
+      handleControllerPatch(page, controller)
+
+      expect(page).toEqual({
+        id: expect.any(String),
+        controller: 'FileUploadPageController',
+        components: [],
+        title: 'Page title',
+        path: '/page-one',
+        next: []
+      })
+    })
+
+    it('should assign FileUpload controller when one component', () => {
+      const page = buildQuestionPage({
+        title: 'Page title',
+        controller: ControllerType.Page,
+        components: [buildTextFieldComponent()]
+      })
+      const controller = ControllerType.FileUpload
+
+      handleControllerPatch(page, controller)
+
+      expect(page).toEqual({
+        id: expect.any(String),
+        controller: 'FileUploadPageController',
+        components: [
+          {
+            hint: '',
+            id: expect.any(String),
+            name: 'TextField',
+            options: {},
+            schema: {},
+            shortDescription: 'Text field',
+            title: 'Text field',
+            type: 'FileUploadField'
+          }
+        ],
+        title: 'Page title',
+        path: '/page-one',
+        next: []
+      })
+    })
+
+    it('should assign FileUpload controller when guidance component', () => {
+      const page = buildQuestionPage({
+        title: 'Page title',
+        controller: ControllerType.Page,
+        components: [
+          buildMarkdownComponent({ content: 'Some markdown text' }),
+          buildTextFieldComponent()
+        ]
+      })
+      const controller = ControllerType.FileUpload
+
+      handleControllerPatch(page, controller)
+
+      expect(page).toEqual({
+        id: expect.any(String),
+        controller: 'FileUploadPageController',
+        components: [
+          {
+            content: 'Some markdown text',
+            id: expect.any(String),
+            name: 'MarkdownComponent',
+            options: {},
+            title: 'Markdown Component',
+            type: 'Markdown'
+          },
+          {
+            hint: '',
+            id: expect.any(String),
+            name: 'TextField',
+            options: {},
+            schema: {},
+            shortDescription: 'Text field',
+            title: 'Text field',
+            type: 'FileUploadField'
+          }
+        ],
+        title: 'Page title',
+        path: '/page-one',
+        next: []
+      })
     })
   })
 })
