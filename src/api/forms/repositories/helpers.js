@@ -7,6 +7,7 @@ import {
   hasComponentsEvenIfNoNext,
   hasRepeater,
   isConditionWrapperV2,
+  isFormType,
   isSummaryPage
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
@@ -564,12 +565,12 @@ export function handleControllerPatch(page, controller) {
   if (controller) {
     page.controller = controller
     if (controller === ControllerType.FileUpload && hasComponents(page)) {
-      // There could be a markdown component so look for first non-markdown
-      const fileComponent = page.components.find(
-        (comp) => comp.type !== ComponentType.Markdown
+      // There could be a markdown component (or other non-form components) so look for first non-markdown
+      const firstFormComponent = page.components.find((comp) =>
+        isFormType(comp.type)
       )
-      if (fileComponent) {
-        fileComponent.type = ComponentType.FileUploadField
+      if (firstFormComponent) {
+        firstFormComponent.type = ComponentType.FileUploadField
       }
     }
   }
