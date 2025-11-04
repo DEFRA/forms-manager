@@ -565,7 +565,7 @@ export function handleControllerPatch(page, controller) {
   if (controller) {
     page.controller = controller
     if (controller === ControllerType.FileUpload && hasComponents(page)) {
-      // There could be a markdown component (or other non-form components) so look for first non-markdown
+      // There could be a markdown component (or other non-form components) so look for first non-content field
       const firstFormComponent = page.components.find((comp) =>
         isFormType(comp.type)
       )
