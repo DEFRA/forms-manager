@@ -43,7 +43,7 @@ export function emptyV2() {
     pages: [
       {
         id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
-        title: 'Summary',
+        title: '',
         path: ControllerPath.Summary,
         controller: ControllerType.SummaryWithConfirmationEmail
       }
