@@ -145,8 +145,9 @@ describe('form-definition-repository', () => {
   let conditions
 
   beforeEach(() => {
-    jest.mocked(db.collection).mockReturnValue(mockCollection)
-
+    jest
+      .mocked(db.collection)
+      .mockReturnValue(/** @type {any} */ (mockCollection))
     mockDefinition = buildDefinition({})
     const component1 = buildTextFieldComponent({
       id: component1Id

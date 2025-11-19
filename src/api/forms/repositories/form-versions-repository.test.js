@@ -41,7 +41,9 @@ describe('form-versions-repository', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.mocked(db.collection).mockReturnValue(mockCollection)
+    jest
+      .mocked(db.collection)
+      .mockReturnValue(/** @type {any} */ (mockCollection))
   })
 
   describe('createVersion', () => {
