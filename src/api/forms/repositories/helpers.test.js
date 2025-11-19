@@ -436,7 +436,9 @@ describe('repository helpers', () => {
 
   describe('removeById', () => {
     beforeEach(() => {
-      jest.mocked(db.collection).mockReturnValue(mockCollection)
+      jest
+        .mocked(db.collection)
+        .mockReturnValue(/** @type {any} */ (mockCollection))
     })
 
     it('should remove', async () => {

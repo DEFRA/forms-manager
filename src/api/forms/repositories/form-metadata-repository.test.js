@@ -83,7 +83,9 @@ describe('form-metadata-repository', () => {
   })
 
   beforeEach(() => {
-    jest.mocked(db.collection).mockReturnValue(mockCollection)
+    jest
+      .mocked(db.collection)
+      .mockReturnValue(/** @type {any} */ (mockCollection))
     jest.clearAllMocks()
   })
   describe('update', () => {

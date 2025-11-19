@@ -4,6 +4,7 @@ export const buildMockCollection = () => {
     bulkWrite: jest.fn(),
     count: jest.fn(),
     countDocuments: jest.fn(),
+    db: jest.fn(),
     deleteMany: jest.fn(),
     deleteOne: jest.fn(),
     hint: jest.fn(),

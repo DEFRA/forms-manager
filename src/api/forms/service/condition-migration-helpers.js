@@ -273,7 +273,7 @@ export function convertConditionDataToV2(
   // if a condition can't be migrated and is in use, throw an error, else we discard the orphaned condition
   if (componentId) {
     return {
-      id: randomUUID().toString(),
+      id: randomUUID(),
       componentId,
       operator: conditionData.operator,
       type: determineConditionType(conditionData),

@@ -36,7 +36,7 @@ function processGroupsClaim(groupsClaim, oid) {
         processedGroups = parsed
       } else {
         logger.warn(
-          `[authGroupsInvalid] Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${String(groupsClaim)}'`
+          `[authGroupsInvalid] Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${groupsClaim}'`
         )
       }
     } catch (err) {
