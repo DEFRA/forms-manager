@@ -12,6 +12,7 @@ export const transformErrors = {
   name: 'transform-errors',
   register(server) {
     server.ext('onPreResponse', (request, h) => {
+      console.log('on Pre Response - start')
       const response = request.response
 
       if (Boom.isBoom(response)) {
@@ -33,6 +34,7 @@ export const transformErrors = {
         }
       }
 
+      console.log('on Pre Response - end')
       return h.continue
     })
   }

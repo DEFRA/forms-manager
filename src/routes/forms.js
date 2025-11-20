@@ -158,11 +158,14 @@ export default [
     /**
      * @param {RequestFormBySlug} request
      */
-    handler(request) {
+    async handler(request) {
       const { params } = request
       const { slug } = params
 
-      return getFormBySlug(slug)
+      console.log(`######## GET /forms/slug/${slug} - start`)
+      const meta = await getFormBySlug(slug)
+      console.log(`######## GET /forms/slug/${slug} - end`)
+      return meta
     },
     options: {
       auth: false,
@@ -203,11 +206,14 @@ export default [
     /**
      * @param {RequestFormById} request
      */
-    handler(request) {
+    async handler(request) {
       const { params } = request
       const { id } = params
 
-      return getFormDefinition(id)
+      console.log(`######## GET /forms/${id}/definition/draft - start`)
+      const def = await getFormDefinition(id)
+      console.log(`######## GET /forms/${id}/definition/draft - end`)
+      return def
     },
     options: {
       auth: false,
