@@ -117,10 +117,10 @@ export async function reinstateFeedbackForm(client, logger) {
       // Rather than do an upsert (which would be based on slug or id), overwrite even if it exists
       // to ensure the contents exactly match the supplied JSON
 
-      // Ensure exact metadata exists
+      // Ensure metadata exists with expected content
       const formId = await saveMetadata(session, logger)
 
-      // Ensure exact metadata exists
+      // Ensure definition exists with expected content
       await saveDefinition(formId, session, logger)
     })
     logger.info(`${moduleTag} Completed check for feedback form`)
