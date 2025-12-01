@@ -86,12 +86,10 @@ describe('reinstate', () => {
   })
 
   test('should insert only metadata when missing', async () => {
-    mockCollection.findOne
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValue({
-        draft: feedbackDefinition,
-        live: feedbackDefinition
-      })
+    mockCollection.findOne.mockResolvedValueOnce(undefined).mockResolvedValue({
+      draft: feedbackDefinition,
+      live: feedbackDefinition
+    })
     mockCollection.insertOne.mockResolvedValue({ insertedId: formId })
     mockCollection.findOneAndUpdate.mockResolvedValue({ insertedId: formId })
 
@@ -187,12 +185,10 @@ describe('reinstate', () => {
   })
 
   test('should throw error when db error', async () => {
-    mockCollection.findOne
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValue({
-        draft: feedbackDefinition,
-        live: feedbackDefinition
-      })
+    mockCollection.findOne.mockResolvedValueOnce(undefined).mockResolvedValue({
+      draft: feedbackDefinition,
+      live: feedbackDefinition
+    })
     mockCollection.insertOne.mockImplementation(() => {
       throw new Error('DB error')
     })
