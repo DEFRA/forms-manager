@@ -583,7 +583,10 @@ describe('form-metadata-repository', () => {
 
       const result = await getBySlug(slug)
 
-      expect(mockCollection.findOne).toHaveBeenCalledWith({ slug })
+      expect(mockCollection.findOne).toHaveBeenCalledWith(
+        { slug },
+        { session: undefined }
+      )
       expect(result).toEqual(metadataBefore)
     })
 
