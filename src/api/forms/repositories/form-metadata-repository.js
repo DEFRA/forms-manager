@@ -214,8 +214,9 @@ export async function get(formId, session) {
 /**
  * Retrieves a form metadata by slug
  * @param {string} slug - The slug of the form
+ * @param {ClientSession} [session]
  */
-export async function getBySlug(slug) {
+export async function getBySlug(slug, session) {
   logger.info(`Getting form with slug ${slug}`)
 
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
@@ -223,7 +224,7 @@ export async function getBySlug(slug) {
   )
 
   try {
-    const document = await coll.findOne({ slug })
+    const document = await coll.findOne({ slug }, { session })
 
     if (!document) {
       throw Boom.notFound(`Form with slug '${slug}' not found`)
