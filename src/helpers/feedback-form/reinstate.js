@@ -8,14 +8,12 @@ import { feedbackMetadata } from '~/src/helpers/feedback-form/metadata.js'
 const moduleTag = '[reinstateFeedbackForm]'
 
 /**
+ * @param {FormMetadata} metadata
  * @param {ClientSession} session
  * @param {Logger} logger
  */
-export async function saveMetadata(session, logger) {
-  const { modifiedCount, upsertedCount } = await meta.upsert(
-    feedbackMetadata,
-    session
-  )
+export async function saveMetadata(metadata, session, logger) {
+  const { modifiedCount, upsertedCount } = await meta.upsert(metadata, session)
 
   if (modifiedCount + upsertedCount) {
     logger.error(`${moduleTag} Metadata - inserted or updated`)
@@ -44,6 +42,11 @@ export async function saveDefinition(formId, session, logger) {
   } else {
     logger.info(`${moduleTag} Definition - already exists with correct content`)
   }
+
+  return {
+    modifiedCount,
+    upsertedCount
+  }
 }
 
 /**
@@ -61,10 +64,26 @@ export async function reinstateFeedbackForm(client, logger) {
   try {
     await session.withTransaction(async () => {
       // Ensure definition exists with expected content
-      await saveDefinition(feedbackMetadata.id, session, logger)
+      const { modifiedCount, upsertedCount } = await saveDefinition(
+        feedbackMetadata.id,
+        session,
+        logger
+      )
 
       // Ensure metadata exists with expected content
-      await saveMetadata(session, logger)
+      const metadata = { ...feedbackMetadata }
+
+      if (upsertedCount) {
+        // Set CreatedAt timestamp on metadata
+        metadata.createdAt = new Date()
+      }
+
+      if (upsertedCount || modifiedCount) {
+        // Set UpdatedAt timestamp on metadata
+        metadata.updatedAt = new Date()
+      }
+
+      await saveMetadata(metadata, session, logger)
     })
     logger.info(`${moduleTag} Completed check for feedback form`)
   } catch (err) {

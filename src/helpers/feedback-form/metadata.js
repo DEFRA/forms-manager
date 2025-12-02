@@ -17,12 +17,12 @@ export const feedbackMetadata = /** @type {FormMetadata} */ ({
   slug: 'feedback',
   createdAt: new Date('2025-11-19T12:25:13.789+00:00'),
   createdBy: user,
-  updatedAt: new Date('2025-11-26T10:20:12.337+00:00'),
+  updatedAt: new Date('2025-11-19T12:25:13.789+00:00'),
   updatedBy: user,
   versions: [
     {
       versionNumber: 1,
-      createdAt: new Date('2025-11-19T12:25:13.805+00:00')
+      createdAt: new Date('2025-11-19T12:25:13.789+00:00')
     }
   ],
   lastVersionNumber: 1,

@@ -77,6 +77,15 @@ describe('reinstate', () => {
     expect(mockLogger.error.mock.calls[1][0]).toBe(
       '[reinstateFeedbackForm] Metadata - inserted or updated'
     )
+
+    // Metadata - both createdAt and updatedAt timestamps should have been updated
+    const { $set: root } = mockCollection.updateOne.mock.calls[1][1]
+    const { createdAt, updatedAt } = root
+    const createdAtMillis = new Date(createdAt).getTime()
+    const updatedAtMillis = new Date(updatedAt).getTime()
+    const oldDateMillis = new Date('2025-11-19T12:25:13.789+00:00').getTime()
+    expect(createdAtMillis).toBeGreaterThan(oldDateMillis)
+    expect(updatedAtMillis).toBeGreaterThan(oldDateMillis)
   })
 
   test('should insert only metadata when missing', async () => {
@@ -102,7 +111,17 @@ describe('reinstate', () => {
     expect(mockLogger.error.mock.calls[0][0]).toBe(
       '[reinstateFeedbackForm] Metadata - inserted or updated'
     )
+
+    // Metadata - both createdAt and updatedAt timestamps should have original timestamps
+    const { $set: root } = mockCollection.updateOne.mock.calls[1][1]
+    const { createdAt, updatedAt } = root
+    const createdAtMillis = new Date(createdAt).getTime()
+    const updatedAtMillis = new Date(updatedAt).getTime()
+    const oldDateMillis = new Date('2025-11-19T12:25:13.789+00:00').getTime()
+    expect(createdAtMillis).toEqual(oldDateMillis)
+    expect(updatedAtMillis).toEqual(oldDateMillis)
   })
+
   test('should update only draft definition when different', async () => {
     mockCollection.updateOne
       .mockResolvedValueOnce({ upsertedCount: 0, modifiedCount: 1 })
@@ -126,6 +145,15 @@ describe('reinstate', () => {
     expect(mockLogger.error.mock.calls[0][0]).toBe(
       '[reinstateFeedbackForm] Definition - inserted or updated'
     )
+
+    // Metadata - updatedAt timestamp should have new timestamp
+    const { $set: root } = mockCollection.updateOne.mock.calls[1][1]
+    const { createdAt, updatedAt } = root
+    const createdAtMillis = new Date(createdAt).getTime()
+    const updatedAtMillis = new Date(updatedAt).getTime()
+    const oldDateMillis = new Date('2025-11-19T12:25:13.789+00:00').getTime()
+    expect(createdAtMillis).toEqual(oldDateMillis)
+    expect(updatedAtMillis).toBeGreaterThan(oldDateMillis)
   })
 
   test('should throw error when db error', async () => {
