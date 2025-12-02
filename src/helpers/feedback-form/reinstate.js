@@ -32,7 +32,10 @@ export async function saveMetadata(session, logger) {
 export async function saveDefinition(formId, session, logger) {
   const { modifiedCount, upsertedCount } = await def.upsertDraftAndLive(
     formId,
-    feedbackDefinition,
+    {
+      draft: feedbackDefinition,
+      live: feedbackDefinition
+    },
     session
   )
 
