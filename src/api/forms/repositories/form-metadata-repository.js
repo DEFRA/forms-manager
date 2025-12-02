@@ -346,6 +346,38 @@ export async function update(formId, update, session) {
 }
 
 /**
+ * Insert or update a whole document in the database
+ * @param {FormMetadata} document - form metadata document update filter
+ * @param {ClientSession} [session] - mongo transaction session
+ */
+export async function upsert(document, session) {
+  const coll = /** @satisfies {Collection<PartialFormMetadataDocument>} */ (
+    db.collection(METADATA_COLLECTION_NAME)
+  )
+
+  try {
+    const result = await coll.updateOne(
+      { _id: new ObjectId(document.id) },
+      { $set: document },
+      { session, upsert: true }
+    )
+
+    return result
+  } catch (err) {
+    logger.error(
+      err,
+      `[upsertFormMetadata] Updating form with ID ${document.id} failed - ${getErrorMessage(err)}`
+    )
+
+    if (err instanceof Error && !Boom.isBoom(err)) {
+      throw Boom.internal(err)
+    }
+
+    throw err
+  }
+}
+
+/**
  * @param {string} formId - ID of the form
  * @param {FormMetadataAuthor} author
  * @param {ClientSession} session - mongo transaction session
@@ -469,7 +501,7 @@ export async function getAndIncrementVersionNumber(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormVersionMetadata } from '@defra/forms-model'
+ * @import { FormMetadata, FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormVersionMetadata } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument,  } from '~/src/api/types.js'
  * @import { FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'

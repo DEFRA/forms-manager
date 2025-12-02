@@ -20,7 +20,7 @@ import {
   buildTextFieldComponent
 } from '@defra/forms-model/stubs'
 import Boom from '@hapi/boom'
-import { ObjectId } from 'mongodb'
+import { MongoServerError, ObjectId } from 'mongodb'
 
 import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
@@ -1004,6 +1004,51 @@ describe('form-definition-repository', () => {
 
       expect(filter).toEqual({ _id: new ObjectId(formId) })
       expect(options).toEqual({ session: mockSession })
+    })
+  })
+
+  describe('upsertDraftAndLive', () => {
+    const document = {
+      draft: buildDefinition(),
+      live: buildDefinition()
+    }
+
+    it('should psert a new document', async () => {
+      mockCollection.updateOne.mockResolvedValue({
+        upsertedCount: 1
+      })
+
+      const result = await formDefinition.upsertDraftAndLive(
+        formId,
+        document,
+        mockSession
+      )
+
+      expect(mockCollection.updateOne).toHaveBeenCalledWith(
+        { _id: new ObjectId(formId) },
+        { $set: document },
+        { session: mockSession, upsert: true }
+      )
+      expect(result).toHaveProperty('upsertedCount', 1)
+    })
+
+    it('should handle other MongoServerErrors', async () => {
+      const mongoError = new MongoServerError({ message: 'Other error' })
+      mongoError.code = 123
+      mockCollection.updateOne.mockRejectedValue(mongoError)
+
+      await expect(
+        formDefinition.upsertDraftAndLive(formId, document, mockSession)
+      ).rejects.toThrow(mongoError)
+    })
+
+    it('should handle generic errors', async () => {
+      const error = new Error('Generic error')
+      mockCollection.updateOne.mockRejectedValue(error)
+
+      await expect(
+        formDefinition.upsertDraftAndLive(formId, document, mockSession)
+      ).rejects.toThrow(error)
     })
   })
 })
