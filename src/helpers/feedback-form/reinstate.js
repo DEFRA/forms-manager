@@ -16,7 +16,7 @@ const moduleTag = '[reinstateFeedbackForm]'
 export async function saveMetadata(metadata, session, logger) {
   const { modifiedCount, upsertedCount } = await meta.upsert(metadata, session)
 
-  if (modifiedCount + upsertedCount) {
+  if (modifiedCount || upsertedCount) {
     logger.error(`${moduleTag} Metadata - inserted or updated`)
   } else {
     logger.info(`${moduleTag} Metadata - already exists with correct content`)
@@ -38,7 +38,7 @@ export async function saveDefinition(formId, session, logger) {
     session
   )
 
-  if (result.modifiedCount + result.upsertedCount) {
+  if (result.modifiedCount || result.upsertedCount) {
     logger.error(`${moduleTag} Definition - inserted or updated`)
   } else {
     logger.info(`${moduleTag} Definition - already exists with correct content`)
