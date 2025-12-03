@@ -105,8 +105,8 @@ export const sortIdsSchema = Joi.array()
 
 export const sectionAssignmentItemSchema = Joi.object().keys({
   id: Joi.string().uuid().optional(),
-  name: Joi.string().trim().optional(),
-  title: Joi.string().trim().required(),
+  name: Joi.string().trim().min(1).optional(),
+  title: Joi.string().trim().min(1).required(),
   hideTitle: Joi.boolean().optional(),
   pageIds: Joi.array().items(Joi.string().uuid()).required()
 })
