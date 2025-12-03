@@ -600,6 +600,40 @@ export async function deleteCondition(formId, conditionId, session) {
 }
 
 /**
+ * Insert or update a document in the database
+ * @param {string} formId - the id of the form
+ * @param {{draft: FormDefinition, live: FormDefinition}} document - form metadata document update filter
+ * @param {ClientSession} [session] - mongo transaction session
+ */
+export async function upsertDraftAndLive(formId, document, session) {
+  const coll =
+    /** @satisfies {Collection<{draft: FormDefinition, live: FormDefinition}>} */ (
+      db.collection(DEFINITION_COLLECTION_NAME)
+    )
+
+  try {
+    const result = await coll.updateOne(
+      { _id: new ObjectId(formId) },
+      { $set: document },
+      { session, upsert: true }
+    )
+
+    return result
+  } catch (err) {
+    logger.error(
+      err,
+      `[upsertFormDefinition] Updating form with ID ${formId} failed - ${getErrorMessage(err)}`
+    )
+
+    if (err instanceof Error && !Boom.isBoom(err)) {
+      throw Boom.internal(err)
+    }
+
+    throw err
+  }
+}
+
+/**
  * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2 } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'

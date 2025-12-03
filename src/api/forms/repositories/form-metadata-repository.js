@@ -214,8 +214,9 @@ export async function get(formId, session) {
 /**
  * Retrieves a form metadata by slug
  * @param {string} slug - The slug of the form
+ * @param {ClientSession} [session]
  */
-export async function getBySlug(slug) {
+export async function getBySlug(slug, session) {
   logger.info(`Getting form with slug ${slug}`)
 
   const coll = /** @satisfies {Collection<FormMetadataDocument>} */ (
@@ -223,7 +224,7 @@ export async function getBySlug(slug) {
   )
 
   try {
-    const document = await coll.findOne({ slug })
+    const document = await coll.findOne({ slug }, { session })
 
     if (!document) {
       throw Boom.notFound(`Form with slug '${slug}' not found`)
@@ -334,6 +335,38 @@ export async function update(formId, update, session) {
     logger.error(
       err,
       `[updateFormMetadata] Updating form with ID ${formId} failed - ${getErrorMessage(err)}`
+    )
+
+    if (err instanceof Error && !Boom.isBoom(err)) {
+      throw Boom.internal(err)
+    }
+
+    throw err
+  }
+}
+
+/**
+ * Insert or update a whole document in the database
+ * @param {FormMetadata} document - form metadata document update filter
+ * @param {ClientSession} [session] - mongo transaction session
+ */
+export async function upsert(document, session) {
+  const coll = /** @satisfies {Collection<PartialFormMetadataDocument>} */ (
+    db.collection(METADATA_COLLECTION_NAME)
+  )
+
+  try {
+    const result = await coll.updateOne(
+      { _id: new ObjectId(document.id) },
+      { $set: document },
+      { session, upsert: true }
+    )
+
+    return result
+  } catch (err) {
+    logger.error(
+      err,
+      `[upsertFormMetadata] Updating form with ID ${document.id} failed - ${getErrorMessage(err)}`
     )
 
     if (err instanceof Error && !Boom.isBoom(err)) {
@@ -468,7 +501,7 @@ export async function getAndIncrementVersionNumber(formId, session) {
 }
 
 /**
- * @import { FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormVersionMetadata } from '@defra/forms-model'
+ * @import { FormMetadata, FormMetadataDocument, QueryOptions, FilterOptions, FormMetadataAuthor, FormVersionMetadata } from '@defra/forms-model'
  * @import { ClientSession, Collection, UpdateFilter, WithId } from 'mongodb'
  * @import { PartialFormMetadataDocument,  } from '~/src/api/types.js'
  * @import { FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'

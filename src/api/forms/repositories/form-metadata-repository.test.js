@@ -21,7 +21,8 @@ import {
   listWithVersions,
   remove,
   update,
-  updateAudit
+  updateAudit,
+  upsert
 } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import author from '~/src/api/forms/service/__stubs__/author.js'
 import { db } from '~/src/mongo.js'
@@ -583,7 +584,10 @@ describe('form-metadata-repository', () => {
 
       const result = await getBySlug(slug)
 
-      expect(mockCollection.findOne).toHaveBeenCalledWith({ slug })
+      expect(mockCollection.findOne).toHaveBeenCalledWith(
+        { slug },
+        { session: undefined }
+      )
       expect(result).toEqual(metadataBefore)
     })
 
@@ -950,6 +954,43 @@ describe('form-metadata-repository', () => {
         },
         expect.any(Object)
       )
+    })
+  })
+
+  describe('upsert', () => {
+    const formId = metadataId
+    const document = /** @type {FormMetadata} */ {
+      ...buildMetadataDocument(),
+      id: formId
+    }
+
+    it('should psert a new document', async () => {
+      mockCollection.updateOne.mockResolvedValue({
+        upsertedCount: 1
+      })
+
+      const result = await upsert(document, mockSession)
+
+      expect(mockCollection.updateOne).toHaveBeenCalledWith(
+        { _id: new ObjectId(document.id) },
+        { $set: document },
+        { session: mockSession, upsert: true }
+      )
+      expect(result).toHaveProperty('upsertedCount', 1)
+    })
+
+    it('should handle Boom errors', async () => {
+      const error = Boom.badRequest('Boom error')
+      mockCollection.updateOne.mockRejectedValue(error)
+
+      await expect(upsert(document, mockSession)).rejects.toThrow(error)
+    })
+
+    it('should handle generic errors', async () => {
+      const error = new Error('Generic error')
+      mockCollection.updateOne.mockRejectedValue(error)
+
+      await expect(upsert(document, mockSession)).rejects.toThrow(error)
     })
   })
 })

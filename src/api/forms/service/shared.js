@@ -1,4 +1,5 @@
 import { FormStatus } from '@defra/forms-model'
+import { ObjectId } from 'mongodb'
 
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
@@ -108,6 +109,18 @@ export function getCreated(document) {
     return document.draft
   } else {
     return { createdAt: defaultDate, createdBy: defaultAuthor }
+  }
+}
+
+/**
+ * Maps a form metadata document from MongoDB to form metadata
+ * @param {FormMetadata} document - form metadata document (with ID)
+ * @returns {WithId<Partial<FormMetadataDocument>>}
+ */
+export function mapToDocument(document) {
+  return {
+    ...document,
+    _id: new ObjectId(document.id)
   }
 }
 
