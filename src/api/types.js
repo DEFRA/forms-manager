@@ -21,6 +21,21 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {conditionId: string}, Payload: ConditionWrapperV2 }>} UpdateConditionDraftFormPagesRequest
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {conditionId: string} }>} DeleteConditionDraftFormPagesRequest
  * @typedef {Request<{ Server: { db: Db }, Params: {id: string, versionNumber: string} }>} RequestFormVersionById
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: SectionAssignmentPayload }>} RequestSectionAssignment
+ */
+
+/**
+ * @typedef {object} SectionAssignmentItem
+ * @property {string} [id] - The section ID (UUID). Auto-generated if not provided.
+ * @property {string} [name] - The section name. Auto-generated from title if not provided.
+ * @property {string} title - The section title
+ * @property {boolean} [hideTitle] - Whether to hide the section title
+ * @property {string[]} pageIds - The page IDs assigned to this section
+ */
+
+/**
+ * @typedef {object} SectionAssignmentPayload
+ * @property {SectionAssignmentItem[]} sections - The sections with their page assignments
  */
 
 /**

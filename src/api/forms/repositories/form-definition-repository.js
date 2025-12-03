@@ -3,6 +3,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
+  buildSectionsResponse,
   getComponent,
   getCondition,
   getList,
@@ -12,6 +13,7 @@ import {
   modifyAddCondition,
   modifyAddList,
   modifyAddPage,
+  modifyAssignSections,
   modifyDeleteComponent,
   modifyDeleteCondition,
   modifyDeleteList,
@@ -634,8 +636,29 @@ export async function upsertDraftAndLive(formId, document, session) {
 }
 
 /**
+ * Assigns sections to pages in the form definition
+ * @param {string} formId
+ * @param {SectionAssignmentItem[]} sectionAssignments
+ * @param {ClientSession} session
+ * @returns {Promise<SectionAssignmentItem[]>}
+ */
+export async function assignSections(formId, sectionAssignments, session) {
+  logger.info(`Assigning sections on form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyAssignSections(draft, sectionAssignments)
+
+  const result = await modifyDraft(formId, callback, session)
+
+  logger.info(`Assigned sections on form ID ${formId}`)
+
+  return buildSectionsResponse(result.draft)
+}
+
+/**
  * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2 } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'
+ * @import { SectionAssignmentItem } from '~/src/api/types.js'
  */

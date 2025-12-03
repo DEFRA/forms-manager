@@ -333,6 +333,60 @@ export function convertListNamesToIds(definition) {
 }
 
 /**
+ * Converts a form from using section names to using section ids.
+ * For each page, if it has a "section" property referencing a section by name,
+ * it replaces it with the corresponding section's id.
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+export function convertSectionNamesToIds(definition) {
+  // Ensure all sections have an id
+  /** @type {SectionWithId[]} */
+  const sections = definition.sections.map((section) => {
+    const sectionWithId = /** @type {SectionWithId} */ (section)
+    if (sectionWithId.id) {
+      return sectionWithId
+    }
+
+    return {
+      ...section,
+      id: randomUUID()
+    }
+  })
+
+  // Build a map from section name to id
+  const nameToId = new Map(
+    sections.map((section) => [section.name, section.id])
+  )
+
+  // Update pages to use section id instead of name
+  const pages = definition.pages.map((page) => {
+    if (!page.section) {
+      return page
+    }
+
+    const newSectionReference = nameToId.get(page.section)
+
+    if (!newSectionReference) {
+      // Section name not found - remove invalid reference
+      delete page.section
+      return page
+    }
+
+    return {
+      ...page,
+      section: newSectionReference
+    }
+  })
+
+  return {
+    ...definition,
+    pages,
+    sections
+  }
+}
+
+/**
  * Build a map from component name (old) to component id (new) for all components in all pages
  * @param {FormDefinition} definition
  * @returns {Map<string, string>}
@@ -514,6 +568,7 @@ const migrationSteps = [
   migrateComponentFields,
   convertDeclaration,
   convertListNamesToIds,
+  convertSectionNamesToIds,
   addComponentIdsToDefinition,
   convertConditions
 ]
@@ -544,6 +599,15 @@ export function migrateToV2(definition) {
 
   return value
 }
+
+/**
+ * Section with required id field (for V2 schema migration)
+ * @typedef {object} SectionWithId
+ * @property {string} id - The section ID
+ * @property {string} name - The section name
+ * @property {string} title - The section title
+ * @property {boolean} [hideTitle] - Whether to hide the section title
+ */
 
 /**
  * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, PageSummaryWithConfirmationEmail, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
