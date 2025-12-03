@@ -66,6 +66,5 @@ export async function assignSectionsToForm(formId, sectionAssignments, author) {
 }
 
 /**
- * @import { FormMetadataAuthor } from '@defra/forms-model'
- * @import { SectionAssignmentItem } from '~/src/api/types.js'
+ * @import { FormMetadataAuthor, SectionAssignmentItem } from '@defra/forms-model'
  */

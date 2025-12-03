@@ -656,9 +656,8 @@ export async function assignSections(formId, sectionAssignments, session) {
 }
 
 /**
- * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2 } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'
- * @import { SectionAssignmentItem } from '~/src/api/types.js'
  */

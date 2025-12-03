@@ -25,15 +25,6 @@
  */
 
 /**
- * @typedef {object} SectionAssignmentItem
- * @property {string} [id] - The section ID (UUID). Auto-generated if not provided.
- * @property {string} [name] - The section name. Auto-generated from title if not provided.
- * @property {string} title - The section title
- * @property {boolean} [hideTitle] - Whether to hide the section title
- * @property {string[]} pageIds - The page IDs assigned to this section
- */
-
-/**
  * @typedef {object} SectionAssignmentPayload
  * @property {SectionAssignmentItem[]} sections - The sections with their page assignments
  */
@@ -65,7 +56,7 @@
  */
 
 /**
- * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormVersionMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions, List, ConditionWrapperV2, FormStatus } from '@defra/forms-model'
+ * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormVersionMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions, List, ConditionWrapperV2, FormStatus, SectionAssignmentItem } from '@defra/forms-model'
  * @import { Request } from '@hapi/hapi'
  * @import { Db, ObjectId } from 'mongodb'
  */

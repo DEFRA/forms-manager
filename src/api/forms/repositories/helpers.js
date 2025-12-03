@@ -830,8 +830,7 @@ export function buildSectionsResponse(definition) {
  */
 
 /**
- * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
- * @import { SectionAssignmentItem } from '~/src/api/types.js'
  */
