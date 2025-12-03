@@ -62,21 +62,20 @@ describe('reinstate', () => {
 
     await reinstateFeedbackForm(client, mockLogger)
 
-    expect(mockLogger.info).toHaveBeenCalledTimes(2)
-    expect(mockLogger.error).toHaveBeenCalledTimes(2)
+    expect(mockLogger.info).toHaveBeenCalledTimes(4)
 
     expect(mockLogger.info.mock.calls[0][0]).toBe(
       '[reinstateFeedbackForm] Checking if feedback form exists and has correct contents'
     )
     expect(mockLogger.info.mock.calls[1][0]).toBe(
-      '[reinstateFeedbackForm] Completed check for feedback form'
-    )
-
-    expect(mockLogger.error.mock.calls[0][0]).toBe(
       '[reinstateFeedbackForm] Definition - inserted or updated'
     )
-    expect(mockLogger.error.mock.calls[1][0]).toBe(
+    expect(mockLogger.info.mock.calls[2][0]).toBe(
       '[reinstateFeedbackForm] Metadata - inserted or updated'
+    )
+
+    expect(mockLogger.info.mock.calls[3][0]).toBe(
+      '[reinstateFeedbackForm] Completed check for feedback form'
     )
 
     // Metadata - both createdAt and updatedAt timestamps should have been updated
@@ -96,8 +95,7 @@ describe('reinstate', () => {
 
     await reinstateFeedbackForm(client, mockLogger)
 
-    expect(mockLogger.info).toHaveBeenCalledTimes(3)
-    expect(mockLogger.error).toHaveBeenCalledTimes(1)
+    expect(mockLogger.info).toHaveBeenCalledTimes(4)
 
     expect(mockLogger.info.mock.calls[0][0]).toBe(
       '[reinstateFeedbackForm] Checking if feedback form exists and has correct contents'
@@ -106,11 +104,10 @@ describe('reinstate', () => {
       '[reinstateFeedbackForm] Definition - already exists with correct content'
     )
     expect(mockLogger.info.mock.calls[2][0]).toBe(
-      '[reinstateFeedbackForm] Completed check for feedback form'
-    )
-
-    expect(mockLogger.error.mock.calls[0][0]).toBe(
       '[reinstateFeedbackForm] Metadata - inserted or updated'
+    )
+    expect(mockLogger.info.mock.calls[3][0]).toBe(
+      '[reinstateFeedbackForm] Completed check for feedback form'
     )
 
     // Metadata - both createdAt and updatedAt timestamps should have original timestamps
@@ -130,21 +127,19 @@ describe('reinstate', () => {
 
     await reinstateFeedbackForm(client, mockLogger)
 
-    expect(mockLogger.info).toHaveBeenCalledTimes(3)
-    expect(mockLogger.error).toHaveBeenCalledTimes(1)
+    expect(mockLogger.info).toHaveBeenCalledTimes(4)
 
     expect(mockLogger.info.mock.calls[0][0]).toBe(
       '[reinstateFeedbackForm] Checking if feedback form exists and has correct contents'
     )
     expect(mockLogger.info.mock.calls[1][0]).toBe(
-      '[reinstateFeedbackForm] Metadata - already exists with correct content'
+      '[reinstateFeedbackForm] Definition - inserted or updated'
     )
     expect(mockLogger.info.mock.calls[2][0]).toBe(
-      '[reinstateFeedbackForm] Completed check for feedback form'
+      '[reinstateFeedbackForm] Metadata - already exists with correct content'
     )
-
-    expect(mockLogger.error.mock.calls[0][0]).toBe(
-      '[reinstateFeedbackForm] Definition - inserted or updated'
+    expect(mockLogger.info.mock.calls[3][0]).toBe(
+      '[reinstateFeedbackForm] Completed check for feedback form'
     )
 
     // Metadata - updatedAt timestamp should have new timestamp
