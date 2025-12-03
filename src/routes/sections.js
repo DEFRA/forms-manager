@@ -2,6 +2,7 @@ import { Scopes } from '@defra/forms-model'
 
 import { assignSectionsToForm } from '~/src/api/forms/service/sections.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
+import { failAction } from '~/src/helpers/payload-fail-action.js'
 import {
   formByIdSchema,
   sectionAssignmentPayloadSchema
@@ -36,7 +37,8 @@ export default [
       },
       validate: {
         params: formByIdSchema,
-        payload: sectionAssignmentPayloadSchema
+        payload: sectionAssignmentPayloadSchema,
+        failAction
       }
     }
   }

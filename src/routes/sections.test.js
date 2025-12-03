@@ -1,3 +1,8 @@
+import {
+  FormDefinitionError,
+  FormDefinitionErrorType
+} from '@defra/forms-model'
+
 import { assignSectionsToForm } from '~/src/api/forms/service/sections.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -90,7 +95,22 @@ describe('Sections route', () => {
       const [calledFormId, calledAssignments, calledAuthor] =
         assignSectionsMock.mock.calls[0]
       expect(calledFormId).toBe(id)
-      expect(calledAssignments).toEqual(sectionAssignments)
+
+      expect(calledAssignments).toEqual([
+        expect.objectContaining({
+          name: 'personal-details',
+          title: 'Personal Details',
+          pageIds: ['ffefd409-f3f4-49fe-882e-6e89f44631b1'],
+          hideTitle: false
+        }),
+        expect.objectContaining({
+          name: 'business-info',
+          title: 'Business Information',
+          pageIds: ['449a45f6-4541-4a46-91bd-8b8931b07b50'],
+          hideTitle: false
+        })
+      ])
+
       expect(calledAuthor).toEqual(expectedAuthor)
     })
 
@@ -138,7 +158,16 @@ describe('Sections route', () => {
       const [calledFormId, calledAssignments, calledAuthor] =
         assignSectionsMock.mock.calls[0]
       expect(calledFormId).toBe(id)
-      expect(calledAssignments).toEqual(sectionAssignments)
+
+      expect(calledAssignments).toEqual([
+        {
+          id: existingId,
+          name: 'existing-section',
+          title: 'Existing Section',
+          pageIds: ['ffefd409-f3f4-49fe-882e-6e89f44631b1'],
+          hideTitle: false
+        }
+      ])
       expect(calledAuthor).toEqual(expectedAuthor)
     })
 
@@ -205,7 +234,7 @@ describe('Sections route', () => {
   })
 
   describe('Error responses', () => {
-    test('Testing PUT /forms/{id}/definition/draft/sections with missing sections key returns validation error', async () => {
+    test('Testing PUT /forms/{id}/definition/draft/sections with missing sections key returns structured validation error', async () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
@@ -216,17 +245,20 @@ describe('Sections route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
         message: '"sections" is required',
         statusCode: 400,
-        validation: {
-          keys: ['sections'],
-          source: 'payload'
-        }
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type,
+            message: '"sections" is required'
+          }
+        ]
       })
     })
 
-    test('Testing PUT /forms/{id}/definition/draft/sections with invalid section name returns validation error', async () => {
+    test('Testing PUT /forms/{id}/definition/draft/sections with invalid section name returns structured validation error', async () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
@@ -245,15 +277,18 @@ describe('Sections route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
         statusCode: 400,
-        validation: {
-          source: 'payload'
-        }
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type
+          }
+        ]
       })
     })
 
-    test('Testing PUT /forms/{id}/definition/draft/sections with invalid pageId returns validation error', async () => {
+    test('Testing PUT /forms/{id}/definition/draft/sections with invalid pageId returns structured validation error', async () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
@@ -272,15 +307,18 @@ describe('Sections route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
         statusCode: 400,
-        validation: {
-          source: 'payload'
-        }
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type
+          }
+        ]
       })
     })
 
-    test('Testing PUT /forms/{id}/definition/draft/sections with missing section title returns validation error', async () => {
+    test('Testing PUT /forms/{id}/definition/draft/sections with missing section title returns structured validation error', async () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
@@ -298,15 +336,20 @@ describe('Sections route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'Bad Request',
+        error: 'InvalidFormDefinitionError',
+        message: '"sections[0].title" is required',
         statusCode: 400,
-        validation: {
-          source: 'payload'
-        }
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type,
+            message: '"sections[0].title" is required'
+          }
+        ]
       })
     })
 
-    test('Testing PUT /forms/{id}/definition/draft/sections with missing pageIds returns validation error', async () => {
+    test('Testing PUT /forms/{id}/definition/draft/sections with missing pageIds returns structured validation error', async () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
@@ -324,11 +367,150 @@ describe('Sections route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
+        error: 'InvalidFormDefinitionError',
+        message: '"sections[0].pageIds" is required',
+        statusCode: 400,
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type,
+            message: '"sections[0].pageIds" is required'
+          }
+        ]
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/sections with invalid form id still returns standard Bad Request', async () => {
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/invalid-id/definition/draft/sections`,
+        payload: {
+          sections: []
+        },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+
+      expect(response.result).toMatchObject({
         error: 'Bad Request',
         statusCode: 400,
-        validation: {
-          source: 'payload'
-        }
+        validation: { source: 'params' }
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/sections with duplicate section id returns uniqueness validation error', async () => {
+      const duplicateId = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/sections`,
+        payload: {
+          sections: [
+            {
+              id: duplicateId,
+              title: 'Section One',
+              pageIds: []
+            },
+            {
+              id: duplicateId,
+              title: 'Section Two',
+              pageIds: []
+            }
+          ]
+        },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'InvalidFormDefinitionError',
+        message: '"sections[1]" contains a duplicate value',
+        statusCode: 400,
+        cause: [
+          {
+            id: FormDefinitionError.UniqueSectionId,
+            type: FormDefinitionErrorType.Unique,
+            message: '"sections[1]" contains a duplicate value',
+            detail: { path: ['sections', 1], pos: 1, dupePos: 0 }
+          }
+        ]
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/sections with duplicate section name returns uniqueness validation error', async () => {
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/sections`,
+        payload: {
+          sections: [
+            {
+              name: 'duplicate-name',
+              title: 'Section One',
+              pageIds: []
+            },
+            {
+              name: 'duplicate-name',
+              title: 'Section Two',
+              pageIds: []
+            }
+          ]
+        },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'InvalidFormDefinitionError',
+        message: '"sections[1]" contains a duplicate value',
+        statusCode: 400,
+        cause: [
+          {
+            id: FormDefinitionError.UniqueSectionName,
+            type: FormDefinitionErrorType.Unique,
+            message: '"sections[1]" contains a duplicate value',
+            detail: { path: ['sections', 1], pos: 1, dupePos: 0 }
+          }
+        ]
+      })
+    })
+
+    test('Testing PUT /forms/{id}/definition/draft/sections with duplicate section title returns uniqueness validation error', async () => {
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/sections`,
+        payload: {
+          sections: [
+            {
+              title: 'Duplicate Title',
+              pageIds: []
+            },
+            {
+              title: 'Duplicate Title',
+              pageIds: []
+            }
+          ]
+        },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'InvalidFormDefinitionError',
+        message: '"sections[1]" contains a duplicate value',
+        statusCode: 400,
+        cause: [
+          {
+            id: FormDefinitionError.UniqueSectionTitle,
+            type: FormDefinitionErrorType.Unique,
+            message: '"sections[1]" contains a duplicate value',
+            detail: { path: ['sections', 1], pos: 1, dupePos: 0 }
+          }
+        ]
       })
     })
   })

@@ -1,4 +1,6 @@
 import {
+  FormDefinitionError,
+  checkErrors,
   componentSchema,
   formDefinitionSchema,
   formDefinitionV2Schema,
@@ -7,6 +9,7 @@ import {
   listSchemaV2,
   pageRepeatSchema,
   pageSchemaV2,
+  sectionsSchemaV2,
   slugSchema
 } from '@defra/forms-model'
 import Joi from 'joi'
@@ -103,16 +106,28 @@ export const sortIdsSchema = Joi.array()
   .min(1)
   .required()
 
-export const sectionAssignmentItemSchema = Joi.object().keys({
-  id: Joi.string().uuid().optional(),
-  name: Joi.string().trim().min(1).optional(),
-  title: Joi.string().trim().min(1).required(),
-  hideTitle: Joi.boolean().optional(),
-  pageIds: Joi.array().items(Joi.string().uuid()).required()
-})
+export const sectionAssignmentItemSchema = sectionsSchemaV2.concat(
+  Joi.object({
+    name: Joi.string().trim().min(1).optional(),
+    title: Joi.string().trim().min(1).required(),
+    pageIds: Joi.array().items(Joi.string().uuid()).required()
+  })
+)
 
 export const sectionAssignmentPayloadSchema = Joi.object()
   .keys({
-    sections: Joi.array().items(sectionAssignmentItemSchema).required()
+    sections: Joi.array()
+      .items(sectionAssignmentItemSchema)
+      .unique('id', { ignoreUndefined: true })
+      .unique('name', { ignoreUndefined: true })
+      .unique('title')
+      .required()
+      .error(
+        checkErrors([
+          FormDefinitionError.UniqueSectionId,
+          FormDefinitionError.UniqueSectionName,
+          FormDefinitionError.UniqueSectionTitle
+        ])
+      )
   })
   .required()
