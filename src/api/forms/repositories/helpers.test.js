@@ -22,6 +22,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
+  buildSectionsResponse,
   findComponent,
   findConditionIndex,
   findListIndex,
@@ -39,6 +40,7 @@ import {
   modifyAddComponent,
   modifyAddList,
   modifyAddPage,
+  modifyAssignSections,
   modifyDeleteComponent,
   modifyDeleteList,
   modifyDeletePage,
@@ -1229,4 +1231,352 @@ describe('repository helpers', () => {
       })
     })
   })
+
+  describe('modifyAssignSections', () => {
+    it('should assign sections to pages', () => {
+      const page1 = buildQuestionPage({
+        id: 'page-1',
+        title: 'Page 1'
+      })
+      const page2 = buildQuestionPage({
+        id: 'page-2',
+        title: 'Page 2'
+      })
+
+      const definition = buildDefinition({
+        pages: [page1, page2],
+        sections: []
+      })
+
+      /** @type {SectionAssignmentItem[]} */
+      const sectionAssignments = [
+        {
+          name: 'section-1',
+          title: 'Section 1',
+          pageIds: ['page-1']
+        },
+        {
+          name: 'section-2',
+          title: 'Section 2',
+          pageIds: ['page-2']
+        }
+      ]
+
+      const modified = modifyAssignSections(definition, sectionAssignments)
+
+      expect(modified.sections).toHaveLength(2)
+      expect(modified.sections[0]).toMatchObject({
+        id: expect.any(String),
+        name: 'section-1',
+        title: 'Section 1'
+      })
+      expect(modified.sections[1]).toMatchObject({
+        id: expect.any(String),
+        name: 'section-2',
+        title: 'Section 2'
+      })
+      expect(modified.pages[0].section).toBe(modified.sections[0].id)
+      expect(modified.pages[1].section).toBe(modified.sections[1].id)
+    })
+
+    it('should clear existing section assignments', () => {
+      const page1 = buildQuestionPage({
+        id: 'page-1',
+        title: 'Page 1',
+        section: 'old-section'
+      })
+
+      const definition = buildDefinition({
+        pages: [page1],
+        sections: [{ name: 'old-section', title: 'Old Section' }]
+      })
+
+      /** @type {SectionAssignmentItem[]} */
+      const sectionAssignments = [
+        {
+          name: 'new-section',
+          title: 'New Section',
+          pageIds: []
+        }
+      ]
+
+      const modified = modifyAssignSections(definition, sectionAssignments)
+
+      expect(modified.pages[0].section).toBeUndefined()
+    })
+
+    it('should handle empty sections array', () => {
+      const page1 = buildQuestionPage({
+        id: 'page-1',
+        title: 'Page 1',
+        section: 'old-section'
+      })
+
+      const definition = buildDefinition({
+        pages: [page1],
+        sections: [{ name: 'old-section', title: 'Old Section' }]
+      })
+
+      const modified = modifyAssignSections(definition, [])
+
+      expect(modified.sections).toHaveLength(0)
+      expect(modified.pages[0].section).toBeUndefined()
+    })
+
+    it('should preserve existing section id when provided', () => {
+      const existingId = '550e8400-e29b-41d4-a716-446655440000'
+      const page1 = buildQuestionPage({
+        id: 'page-1',
+        title: 'Page 1'
+      })
+
+      const definition = buildDefinition({
+        pages: [page1],
+        sections: []
+      })
+
+      /** @type {SectionAssignmentItem[]} */
+      const sectionAssignments = [
+        {
+          id: existingId,
+          name: 'section-1',
+          title: 'Section 1',
+          pageIds: ['page-1']
+        }
+      ]
+
+      const modified = modifyAssignSections(definition, sectionAssignments)
+
+      expect(modified.sections[0].id).toBe(existingId)
+      expect(modified.pages[0].section).toBe(existingId)
+    })
+
+    it('should auto-generate name from title when name not provided', () => {
+      const definition = buildDefinition({
+        pages: [],
+        sections: []
+      })
+
+      /** @type {SectionAssignmentItem[]} */
+      const sectionAssignments = [
+        {
+          title: 'Contact Details',
+          pageIds: []
+        },
+        {
+          title: 'Unicorn Information',
+          pageIds: []
+        }
+      ]
+
+      const modified = modifyAssignSections(definition, sectionAssignments)
+
+      expect(modified.sections[0]).toMatchObject({
+        id: expect.any(String),
+        name: 'contact-details',
+        title: 'Contact Details'
+      })
+      expect(modified.sections[1]).toMatchObject({
+        id: expect.any(String),
+        name: 'unicorn-information',
+        title: 'Unicorn Information'
+      })
+    })
+
+    it('should handle hideTitle property', () => {
+      const definition = buildDefinition({
+        pages: [],
+        sections: []
+      })
+
+      /** @type {SectionAssignmentItem[]} */
+      const sectionAssignments = [
+        {
+          name: 'hidden-section',
+          title: 'Hidden Section',
+          hideTitle: true,
+          pageIds: []
+        }
+      ]
+
+      const modified = modifyAssignSections(definition, sectionAssignments)
+
+      expect(modified.sections[0]).toMatchObject({
+        name: 'hidden-section',
+        title: 'Hidden Section',
+        hideTitle: true
+      })
+    })
+
+    it('should not include hideTitle when undefined', () => {
+      const definition = buildDefinition({
+        pages: [],
+        sections: []
+      })
+
+      /** @type {SectionAssignmentItem[]} */
+      const sectionAssignments = [
+        {
+          name: 'section-1',
+          title: 'Section 1',
+          pageIds: []
+        }
+      ]
+
+      const modified = modifyAssignSections(definition, sectionAssignments)
+
+      expect(modified.sections[0]).not.toHaveProperty('hideTitle')
+    })
+  })
+
+  describe('buildSectionsResponse', () => {
+    it('should build sections with pageIds from page assignments', () => {
+      const sectionId = '550e8400-e29b-41d4-a716-446655440000'
+      const page1 = buildQuestionPage({
+        id: 'page-1',
+        section: sectionId
+      })
+      const page2 = buildQuestionPage({
+        id: 'page-2',
+        path: '/page-two',
+        section: sectionId
+      })
+      const definition = buildDefinition({
+        pages: [page1, page2],
+        sections: [{ id: sectionId, name: 'section-1', title: 'Section 1' }]
+      })
+
+      const result = buildSectionsResponse(definition)
+
+      expect(result).toEqual([
+        {
+          id: sectionId,
+          name: 'section-1',
+          title: 'Section 1',
+          pageIds: ['page-1', 'page-2']
+        }
+      ])
+    })
+
+    it('should handle sections with no assigned pages', () => {
+      const sectionId = '550e8400-e29b-41d4-a716-446655440001'
+      const page1 = buildQuestionPage({
+        id: 'page-1'
+      })
+      const definition = buildDefinition({
+        pages: [page1],
+        sections: [{ id: sectionId, name: 'empty-section', title: 'Empty' }]
+      })
+
+      const result = buildSectionsResponse(definition)
+
+      expect(result).toEqual([
+        {
+          id: sectionId,
+          name: 'empty-section',
+          title: 'Empty',
+          pageIds: []
+        }
+      ])
+    })
+
+    it('should handle hideTitle property', () => {
+      const sectionId = '550e8400-e29b-41d4-a716-446655440002'
+      const definition = buildDefinition({
+        pages: [],
+        sections: [
+          {
+            id: sectionId,
+            name: 'hidden-section',
+            title: 'Hidden Section',
+            hideTitle: true
+          }
+        ]
+      })
+
+      const result = buildSectionsResponse(definition)
+
+      expect(result).toEqual([
+        {
+          id: sectionId,
+          name: 'hidden-section',
+          title: 'Hidden Section',
+          hideTitle: true,
+          pageIds: []
+        }
+      ])
+    })
+
+    it('should not include hideTitle when undefined', () => {
+      const sectionId = '550e8400-e29b-41d4-a716-446655440003'
+      const definition = buildDefinition({
+        pages: [],
+        sections: [{ id: sectionId, name: 'section-1', title: 'Section 1' }]
+      })
+
+      const result = buildSectionsResponse(definition)
+
+      expect(result[0]).not.toHaveProperty('hideTitle')
+    })
+
+    it('should handle multiple sections with different page assignments', () => {
+      const section1Id = '550e8400-e29b-41d4-a716-446655440004'
+      const section2Id = '550e8400-e29b-41d4-a716-446655440005'
+
+      const page1 = buildQuestionPage({
+        id: 'page-1',
+        section: section1Id
+      })
+      const page2 = buildQuestionPage({
+        id: 'page-2',
+        path: '/page-two',
+        section: section2Id
+      })
+      const page3 = buildQuestionPage({
+        id: 'page-3',
+        path: '/page-three',
+        section: section1Id
+      })
+
+      const definition = buildDefinition({
+        pages: [page1, page2, page3],
+        sections: [
+          { id: section1Id, name: 'section-1', title: 'Section 1' },
+          { id: section2Id, name: 'section-2', title: 'Section 2' }
+        ]
+      })
+
+      const result = buildSectionsResponse(definition)
+
+      expect(result).toEqual([
+        {
+          id: section1Id,
+          name: 'section-1',
+          title: 'Section 1',
+          pageIds: ['page-1', 'page-3']
+        },
+        {
+          id: section2Id,
+          name: 'section-2',
+          title: 'Section 2',
+          pageIds: ['page-2']
+        }
+      ])
+    })
+
+    it('should return empty array for definition with no sections', () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage({ id: 'page-1' })],
+        sections: []
+      })
+
+      const result = buildSectionsResponse(definition)
+
+      expect(result).toEqual([])
+    })
+  })
 })
+
+/**
+ * @import { SectionAssignmentItem } from '@defra/forms-model'
+ */

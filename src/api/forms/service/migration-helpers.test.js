@@ -33,6 +33,7 @@ import {
   convertControllerPathsToNames,
   convertDeclaration,
   convertListNamesToIds,
+  convertSectionNamesToIds,
   mapComponent,
   migrateComponentFields,
   migrateToV2,
@@ -1110,6 +1111,108 @@ describe('convertListNamesToIds', () => {
     expect(() => convertListNamesToIds(definition)).toThrow(
       'List name "invalidList" not found in definition lists - cannot migrate'
     )
+  })
+})
+
+describe('convertSectionNamesToIds', () => {
+  it('maps section names to their IDs on pages', () => {
+    const definition = buildMinimalDefinition({
+      sections: [{ name: 'personalDetails', title: 'Personal Details' }],
+      pages: [
+        {
+          id: 'page1',
+          section: 'personalDetails'
+        }
+      ]
+    })
+
+    const result = convertSectionNamesToIds(definition)
+
+    // Section should have an ID generated
+    expect(result.sections[0].id).toBeDefined()
+
+    // Page section reference should be updated to use the section ID
+    expect(result.pages[0].section).toBe(result.sections[0].id)
+  })
+
+  it('preserves existing section IDs', () => {
+    const existingId = '550e8400-e29b-41d4-a716-446655440000'
+    const definition = buildMinimalDefinition({
+      sections: [
+        { id: existingId, name: 'personalDetails', title: 'Personal Details' }
+      ],
+      pages: [
+        {
+          id: 'page1',
+          section: 'personalDetails'
+        }
+      ]
+    })
+
+    const result = convertSectionNamesToIds(definition)
+
+    // Existing ID should be preserved
+    expect(result.sections[0].id).toBe(existingId)
+
+    // Page section reference should be updated to use the section ID
+    expect(result.pages[0].section).toBe(existingId)
+  })
+
+  it('leaves pages unchanged if they have no section', () => {
+    const definition = buildMinimalDefinition({
+      sections: [{ name: 'personalDetails', title: 'Personal Details' }],
+      pages: [
+        {
+          id: 'page1'
+        }
+      ]
+    })
+
+    const result = convertSectionNamesToIds(definition)
+
+    expect(result.pages[0].section).toBeUndefined()
+  })
+
+  it('removes invalid section references from pages', () => {
+    const definition = buildMinimalDefinition({
+      sections: [{ name: 'personalDetails', title: 'Personal Details' }],
+      pages: [
+        {
+          id: 'page1',
+          section: 'nonExistentSection'
+        }
+      ]
+    })
+
+    const result = convertSectionNamesToIds(definition)
+
+    // Invalid section reference should be removed
+    expect(result.pages[0].section).toBeUndefined()
+  })
+
+  it('handles multiple sections and pages', () => {
+    const definition = buildMinimalDefinition({
+      sections: [
+        { name: 'section1', title: 'Section 1' },
+        { name: 'section2', title: 'Section 2' }
+      ],
+      pages: [
+        { id: 'page1', section: 'section1' },
+        { id: 'page2', section: 'section2' },
+        { id: 'page3' } // No section
+      ]
+    })
+
+    const result = convertSectionNamesToIds(definition)
+
+    // Both sections should have IDs
+    expect(result.sections[0].id).toBeDefined()
+    expect(result.sections[1].id).toBeDefined()
+
+    // Pages should reference correct section IDs
+    expect(result.pages[0].section).toBe(result.sections[0].id)
+    expect(result.pages[1].section).toBe(result.sections[1].id)
+    expect(result.pages[2].section).toBeUndefined()
   })
 })
 
