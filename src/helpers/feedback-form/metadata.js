@@ -4,8 +4,7 @@
  * Be aware that any changes to this file will result in changes across all environments as deployments happen.
  */
 
-// This date will need to be updated to a newer date if you change the form definition and expect the
-// forms-runner to pick up a newer version
+// This date will get automatically updated when applied to the DB
 export const createdUpdatedDate = new Date('2025-11-19T12:25:13.789+00:00')
 
 const user = {
@@ -38,9 +37,9 @@ export const feedbackMetadata = /** @type {FormMetadata} */ ({
   submissionGuidance: 'Not sure yet',
   privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice',
   live: {
-    updatedAt: new Date('2025-11-26T10:20:12.337+00:00'),
+    updatedAt: createdUpdatedDate,
     updatedBy: user,
-    createdAt: new Date('2025-11-19T12:28:30.644+00:00'),
+    createdAt: createdUpdatedDate,
     createdBy: user
   }
 })

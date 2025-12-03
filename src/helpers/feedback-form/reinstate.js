@@ -2,6 +2,7 @@ import { getErrorMessage } from '@defra/forms-model'
 
 import * as def from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as meta from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { mapForm, mapToDocument } from '~/src/api/forms/service/shared.js'
 import { feedbackDefinition } from '~/src/helpers/feedback-form/definition.js'
 import { feedbackMetadata } from '~/src/helpers/feedback-form/metadata.js'
 
@@ -28,7 +29,7 @@ export async function saveMetadata(metadata, session, logger) {
  * @param {Logger} logger
  */
 export async function saveDefinition(formId, session, logger) {
-  const { modifiedCount, upsertedCount } = await def.upsertDraftAndLive(
+  const result = await def.upsertDraftAndLive(
     formId,
     {
       draft: feedbackDefinition,
@@ -37,16 +38,13 @@ export async function saveDefinition(formId, session, logger) {
     session
   )
 
-  if (modifiedCount + upsertedCount) {
+  if (result.modifiedCount + result.upsertedCount) {
     logger.error(`${moduleTag} Definition - inserted or updated`)
   } else {
     logger.info(`${moduleTag} Definition - already exists with correct content`)
   }
 
-  return {
-    modifiedCount,
-    upsertedCount
-  }
+  return result
 }
 
 /**
@@ -64,25 +62,44 @@ export async function reinstateFeedbackForm(client, logger) {
   try {
     await session.withTransaction(async () => {
       // Ensure definition exists with expected content
-      const { modifiedCount, upsertedCount } = await saveDefinition(
+      const { upsertedCount, modifiedCount } = await saveDefinition(
         feedbackMetadata.id,
         session,
         logger
       )
 
-      // Ensure metadata exists with expected content
-      const metadata = { ...feedbackMetadata }
+      let currentMeta
+      try {
+        currentMeta = await meta.get(feedbackMetadata.id, session)
+      } catch {}
+
+      // Align structures, whether from DB or codebase metadata
+      const metadata = currentMeta
+        ? mapForm(currentMeta)
+        : mapForm(mapToDocument(feedbackMetadata))
+
+      // Only update timestamps if the form definition has changed or was newly-inserted
+      const now = new Date()
 
       if (upsertedCount) {
         // Set CreatedAt timestamp on metadata
-        metadata.createdAt = new Date()
+        metadata.createdAt = now
+        metadata.updatedAt = now
+        if (metadata.live) {
+          metadata.live.createdAt = now
+          metadata.live.updatedAt = now
+        }
       }
 
       if (upsertedCount || modifiedCount) {
         // Set UpdatedAt timestamp on metadata
-        metadata.updatedAt = new Date()
+        metadata.updatedAt = now
+        if (metadata.live) {
+          metadata.live.updatedAt = now
+        }
       }
 
+      // Ensure metadata exists with expected content
       await saveMetadata(metadata, session, logger)
     })
     logger.info(`${moduleTag} Completed check for feedback form`)
@@ -97,7 +114,7 @@ export async function reinstateFeedbackForm(client, logger) {
 }
 
 /**
- * @import { ClientSession, MongoClient, WithId } from 'mongodb'
- * @import { FormDefinition, FormMetadata, FormMetadataDocument } from '@defra/forms-model'
+ * @import { ClientSession, MongoClient, UpdateResult } from 'mongodb'
+ * @import { FormMetadata } from '@defra/forms-model'
  * @import { Logger } from 'pino'
  */
