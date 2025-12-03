@@ -53,6 +53,10 @@ export function mapForm(document) {
   const lastUpdated = getLastUpdated(document)
   const created = getCreated(document)
 
+  // 'draft' or 'live' should be omitted from the object if they dont have content
+  const draft = document.draft ? { draft: document.draft } : {}
+  const live = document.live ? { live: document.live } : {}
+
   return {
     id: document._id.toString(),
     slug: document.slug,
@@ -64,8 +68,8 @@ export function mapForm(document) {
     submissionGuidance: document.submissionGuidance,
     privacyNoticeUrl: document.privacyNoticeUrl,
     notificationEmail: document.notificationEmail,
-    draft: document.draft,
-    live: document.live,
+    ...draft,
+    ...live,
     createdBy: created.createdBy,
     createdAt: created.createdAt,
     updatedBy: lastUpdated.updatedBy,
