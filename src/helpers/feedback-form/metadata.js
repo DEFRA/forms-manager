@@ -14,10 +14,10 @@ const user = {
 
 export const feedbackMetadata = /** @type {FormMetadata} */ ({
   id: '691db72966b1bdc98fa3e72a',
-  title: 'Feedback',
+  title: 'Feedback (do not remove)',
   organisation: 'Defra',
   teamName: 'Team Forms',
-  teamEmail: 'jeremy.barnsley@defra.gov.uk',
+  teamEmail: 'defraforms@defra.gov.uk',
   slug: 'feedback',
   createdAt: createdUpdatedDate,
   createdBy: user,
@@ -30,7 +30,7 @@ export const feedbackMetadata = /** @type {FormMetadata} */ ({
     }
   ],
   lastVersionNumber: 1,
-  notificationEmail: 'jeremy.barnsley@esynergy.co.uk',
+  notificationEmail: 'defraforms@defra.gov.uk',
   contact: {
     phone: 'Telephone: 020 7946 0101\r\nMonday to Friday, 8am to 6pm'
   },
