@@ -1,4 +1,5 @@
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
+import { createdUpdatedDate } from '~/src/helpers/feedback-form/metadata.js'
 import { reinstateFeedbackForm } from '~/src/helpers/feedback-form/reinstate.js'
 import { client, db } from '~/src/mongo.js'
 
@@ -83,7 +84,7 @@ describe('reinstate', () => {
     const { createdAt, updatedAt } = root
     const createdAtMillis = new Date(createdAt).getTime()
     const updatedAtMillis = new Date(updatedAt).getTime()
-    const oldDateMillis = new Date('2025-11-19T12:25:13.789+00:00').getTime()
+    const oldDateMillis = createdUpdatedDate.getTime()
     expect(createdAtMillis).toBeGreaterThan(oldDateMillis)
     expect(updatedAtMillis).toBeGreaterThan(oldDateMillis)
   })
@@ -117,7 +118,7 @@ describe('reinstate', () => {
     const { createdAt, updatedAt } = root
     const createdAtMillis = new Date(createdAt).getTime()
     const updatedAtMillis = new Date(updatedAt).getTime()
-    const oldDateMillis = new Date('2025-11-19T12:25:13.789+00:00').getTime()
+    const oldDateMillis = createdUpdatedDate.getTime()
     expect(createdAtMillis).toEqual(oldDateMillis)
     expect(updatedAtMillis).toEqual(oldDateMillis)
   })
@@ -151,7 +152,7 @@ describe('reinstate', () => {
     const { createdAt, updatedAt } = root
     const createdAtMillis = new Date(createdAt).getTime()
     const updatedAtMillis = new Date(updatedAt).getTime()
-    const oldDateMillis = new Date('2025-11-19T12:25:13.789+00:00').getTime()
+    const oldDateMillis = createdUpdatedDate.getTime()
     expect(createdAtMillis).toEqual(oldDateMillis)
     expect(updatedAtMillis).toBeGreaterThan(oldDateMillis)
   })

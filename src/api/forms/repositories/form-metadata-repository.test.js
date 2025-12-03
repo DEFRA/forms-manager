@@ -979,12 +979,11 @@ describe('form-metadata-repository', () => {
       expect(result).toHaveProperty('upsertedCount', 1)
     })
 
-    it('should handle other MongoServerErrors', async () => {
-      const mongoError = new MongoServerError({ message: 'Other error' })
-      mongoError.code = 123
-      mockCollection.updateOne.mockRejectedValue(mongoError)
+    it('should handle Boom errors', async () => {
+      const error = Boom.badRequest('Boom error')
+      mockCollection.updateOne.mockRejectedValue(error)
 
-      await expect(upsert(document, mockSession)).rejects.toThrow(mongoError)
+      await expect(upsert(document, mockSession)).rejects.toThrow(error)
     })
 
     it('should handle generic errors', async () => {

@@ -3,6 +3,11 @@
  * This form metadata is reinstated whenever the forms-manmager service startups up.
  * Be aware that any changes to this file will result in changes across all environments as deployments happen.
  */
+
+// This date will need to be updated to a newer date if you change the form definition and expect the
+// forms-runner to pick up a newer version
+export const createdUpdatedDate = new Date('2025-11-19T12:25:13.789+00:00')
+
 const user = {
   id: '86758ba9-92e7-4287-9751-7705e449688e',
   displayName: 'Local Service Account'
@@ -15,14 +20,14 @@ export const feedbackMetadata = /** @type {FormMetadata} */ ({
   teamName: 'Team Forms',
   teamEmail: 'jeremy.barnsley@defra.gov.uk',
   slug: 'feedback',
-  createdAt: new Date('2025-11-19T12:25:13.789+00:00'),
+  createdAt: createdUpdatedDate,
   createdBy: user,
-  updatedAt: new Date('2025-11-19T12:25:13.789+00:00'),
+  updatedAt: createdUpdatedDate,
   updatedBy: user,
   versions: [
     {
       versionNumber: 1,
-      createdAt: new Date('2025-11-19T12:25:13.789+00:00')
+      createdAt: createdUpdatedDate
     }
   ],
   lastVersionNumber: 1,

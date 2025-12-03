@@ -20,7 +20,7 @@ import {
   buildTextFieldComponent
 } from '@defra/forms-model/stubs'
 import Boom from '@hapi/boom'
-import { MongoServerError, ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb'
 
 import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
@@ -1013,7 +1013,7 @@ describe('form-definition-repository', () => {
       live: buildDefinition()
     }
 
-    it('should psert a new document', async () => {
+    it('should upsert a new document', async () => {
       mockCollection.updateOne.mockResolvedValue({
         upsertedCount: 1
       })
@@ -1032,14 +1032,13 @@ describe('form-definition-repository', () => {
       expect(result).toHaveProperty('upsertedCount', 1)
     })
 
-    it('should handle other MongoServerErrors', async () => {
-      const mongoError = new MongoServerError({ message: 'Other error' })
-      mongoError.code = 123
-      mockCollection.updateOne.mockRejectedValue(mongoError)
+    it('should handle Boom errors', async () => {
+      const error = Boom.badRequest('Boom error')
+      mockCollection.updateOne.mockRejectedValue(error)
 
       await expect(
         formDefinition.upsertDraftAndLive(formId, document, mockSession)
-      ).rejects.toThrow(mongoError)
+      ).rejects.toThrow(error)
     })
 
     it('should handle generic errors', async () => {
