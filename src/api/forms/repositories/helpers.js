@@ -744,13 +744,9 @@ export function modifyUnassignCondition(definition, conditionId) {
  */
 export function modifyAssignSections(definition, sectionAssignments) {
   const sectionsWithIds = sectionAssignments.map((assignment) => ({
+    ...assignment,
     id: assignment.id ?? randomUUID(),
-    name: assignment.name ?? slugify(assignment.title),
-    title: assignment.title,
-    ...(assignment.hideTitle !== undefined && {
-      hideTitle: assignment.hideTitle
-    }),
-    pageIds: assignment.pageIds
+    name: assignment.name ?? slugify(assignment.title)
   }))
 
   /** @type {Map<string, string>} */
