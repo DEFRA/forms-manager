@@ -1095,6 +1095,107 @@
       "response": []
     },
     {
+      "name": "/forms/:form_id/definition/draft/sections - Add sections",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.expect(response.status).to.eq('updated')",
+              "    pm.expect(response.sections).to.be.an('Array')",
+              "    pm.expect(response.sections).to.have.lengthOf(2)",
+              "    pm.expect(response.sections[0].title).to.eq('Personal Details')",
+              "    pm.expect(response.sections[1].title).to.eq('Address Information')",
+              "    pm.expect(response.sections[0].id).to.be.a('String')",
+              "    pm.expect(response.sections[1].id).to.be.a('String')",
+              "    pm.collectionVariables.set('section_id', response.sections[0].id)",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sections\": [\n        {\n            \"title\": \"Personal Details\",\n            \"pageIds\": [\"{{page_id_2}}\"]\n        },\n        {\n            \"title\": \"Address Information\",\n            \"pageIds\": [\"{{page_id_3}}\"]\n        }\n    ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/sections",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "sections"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition/draft/sections - Remove sections",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.expect(response.status).to.eq('updated')",
+              "    pm.expect(response.sections).to.be.an('Array')",
+              "    pm.expect(response.sections).to.have.lengthOf(0)",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sections\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/sections",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "sections"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "/forms/:form_id/definition/draft Copy",
       "event": [
         {
@@ -1594,6 +1695,10 @@
     },
     {
       "key": "go_live_form_id",
+      "value": ""
+    },
+    {
+      "key": "section_id",
       "value": ""
     }
   ]
