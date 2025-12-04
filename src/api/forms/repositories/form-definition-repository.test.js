@@ -30,6 +30,7 @@ import {
   addCondition,
   addList,
   addPage,
+  assignSections,
   deleteComponent,
   deleteCondition,
   deleteList,
@@ -1050,9 +1051,39 @@ describe('form-definition-repository', () => {
       ).rejects.toThrow(error)
     })
   })
+
+  describe('assignSections', () => {
+    it('should assign sections to pages', async () => {
+      /** @type {SectionAssignmentItem[]} */
+      const sectionAssignments = [
+        {
+          name: 'personal-details',
+          title: 'Personal Details',
+          pageIds: [page1Id]
+        }
+      ]
+
+      await helper(
+        async () => {
+          await assignSections(formId, sectionAssignments, mockSession)
+        },
+        (definition) => {
+          expect(definition.sections).toHaveLength(1)
+          expect(definition.sections[0]).toMatchObject({
+            id: expect.any(String),
+            name: 'personal-details',
+            title: 'Personal Details'
+          })
+          // Verify page section assignment
+          const page = definition.pages.find((p) => p.id === page1Id)
+          expect(page?.section).toBe(definition.sections[0].id)
+        }
+      )
+    })
+  })
 })
 
 /**
- * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List, ConditionWrapperV2 } from '@defra/forms-model'
+ * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
  * @import { UpdateFilter } from 'mongodb'
  */
