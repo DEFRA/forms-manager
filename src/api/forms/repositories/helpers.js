@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+
 import {
   ApiErrorCode,
   ComponentType,
@@ -8,7 +10,8 @@ import {
   hasRepeater,
   isConditionWrapperV2,
   isFormType,
-  isSummaryPage
+  isSummaryPage,
+  slugify
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
@@ -733,6 +736,82 @@ export function modifyUnassignCondition(definition, conditionId) {
 }
 
 /**
+ * Assigns sections to pages in the form definition.
+ * Replaces the sections array and updates page section assignments.
+ * @param {FormDefinition} definition
+ * @param {SectionAssignmentItem[]} sectionAssignments
+ * @returns {FormDefinition}
+ */
+export function modifyAssignSections(definition, sectionAssignments) {
+  const sectionsWithIds = sectionAssignments.map((assignment) => ({
+    ...assignment,
+    id: assignment.id ?? randomUUID(),
+    name: assignment.name ?? slugify(assignment.title)
+  }))
+
+  /** @type {Map<string, string>} */
+  const pageToSectionMap = new Map()
+
+  for (const section of sectionsWithIds) {
+    for (const pageId of section.pageIds) {
+      pageToSectionMap.set(pageId, section.id)
+    }
+  }
+
+  // Update the sections array with the new sections (without pageIds)
+  definition.sections = sectionsWithIds.map(
+    ({ id, name, title, hideTitle }) => ({
+      id,
+      name,
+      title,
+      ...(hideTitle !== undefined && { hideTitle })
+    })
+  )
+
+  // First, clear all existing section assignments from pages
+  for (const page of definition.pages) {
+    delete page.section
+  }
+
+  // Then, assign sections to pages based on the mapping (using section ID)
+  for (const page of definition.pages) {
+    if (page.id && pageToSectionMap.has(page.id)) {
+      page.section = pageToSectionMap.get(page.id)
+    }
+  }
+
+  return definition
+}
+
+/**
+ * Builds sections response with pageIds from the definition
+ * @param {FormDefinition} definition
+ * @returns {SectionAssignmentItem[]}
+ */
+export function buildSectionsResponse(definition) {
+  /** @type {Map<string, string[]>} */
+  const sectionToPages = new Map()
+
+  // Build map of sectionId -> pageIds
+  for (const page of definition.pages) {
+    if (page.id && page.section) {
+      const pageIds = sectionToPages.get(page.section) ?? []
+      pageIds.push(page.id)
+      sectionToPages.set(page.section, pageIds)
+    }
+  }
+
+  // Return sections with their pageIds
+  return definition.sections.map((section) => ({
+    id: section.id,
+    name: section.name,
+    title: section.title,
+    ...(section.hideTitle !== undefined && { hideTitle: section.hideTitle }),
+    pageIds: sectionToPages.get(section.id ?? '') ?? []
+  }))
+}
+
+/**
  * The update callback method
  * @callback UpdateCallback
  * @param {FormDefinition} definition
@@ -747,7 +826,7 @@ export function modifyUnassignCondition(definition, conditionId) {
  */
 
 /**
- * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */

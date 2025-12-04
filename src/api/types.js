@@ -21,6 +21,12 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {conditionId: string}, Payload: ConditionWrapperV2 }>} UpdateConditionDraftFormPagesRequest
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {conditionId: string} }>} DeleteConditionDraftFormPagesRequest
  * @typedef {Request<{ Server: { db: Db }, Params: {id: string, versionNumber: string} }>} RequestFormVersionById
+ * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: SectionAssignmentPayload }>} RequestSectionAssignment
+ */
+
+/**
+ * @typedef {object} SectionAssignmentPayload
+ * @property {SectionAssignmentItem[]} sections - The sections with their page assignments
  */
 
 /**
@@ -50,7 +56,7 @@
  */
 
 /**
- * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormVersionMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions, List, ConditionWrapperV2, FormStatus } from '@defra/forms-model'
+ * @import { FormByIdInput, FormByIDAndPageByIdInput, FormByIDAndPageByIdAndComponentByIdInput, FormBySlugInput, FormDefinition, FormVersionMetadata, FormMetadataAuthor, FormMetadataDocument, FormMetadataInput, QueryOptions, Page, ComponentDef, PatchPageFields, AddComponentQueryOptions, List, ConditionWrapperV2, FormStatus, SectionAssignmentItem } from '@defra/forms-model'
  * @import { Request } from '@hapi/hapi'
  * @import { Db, ObjectId } from 'mongodb'
  */
