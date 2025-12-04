@@ -58,7 +58,7 @@ export const feedbackDefinition = /** @type {FormDefinition} */ ({
     },
     {
       id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
-      title: 'Check your answers (not used)',
+      title: '',
       path: '/summary',
       controller: 'SummaryPageWithConfirmationEmailController',
       // @ts-expect-error - extra property gets saved
