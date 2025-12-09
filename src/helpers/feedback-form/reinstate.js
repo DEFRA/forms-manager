@@ -53,7 +53,7 @@ export async function saveDefinition(formId, session, logger) {
  * @param {ClientSession} session
  */
 export async function saveFormVersion(formId, session) {
-  return await createFormVersion(formId, session)
+  return createFormVersion(formId, session)
 }
 
 /**
