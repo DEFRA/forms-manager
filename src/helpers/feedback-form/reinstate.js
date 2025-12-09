@@ -3,6 +3,7 @@ import { getErrorMessage } from '@defra/forms-model'
 import * as def from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as meta from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { mapForm, mapToDocument } from '~/src/api/forms/service/shared.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { feedbackDefinition } from '~/src/helpers/feedback-form/definition.js'
 import { feedbackMetadata } from '~/src/helpers/feedback-form/metadata.js'
 
@@ -45,6 +46,14 @@ export async function saveDefinition(formId, session, logger) {
   }
 
   return result
+}
+
+/**
+ * @param {string} formId
+ * @param {ClientSession} session
+ */
+export async function saveFormVersion(formId, session) {
+  return await createFormVersion(formId, session)
 }
 
 /**
@@ -101,6 +110,8 @@ export async function reinstateFeedbackForm(client, logger) {
 
       // Ensure metadata exists with expected content
       await saveMetadata(metadata, session, logger)
+
+      await saveFormVersion(feedbackMetadata.id, session)
     })
     logger.info(`${moduleTag} Completed check for feedback form`)
   } catch (err) {
