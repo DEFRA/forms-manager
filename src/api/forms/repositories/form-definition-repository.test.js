@@ -33,6 +33,7 @@ import {
   assignSections,
   deleteComponent,
   deleteCondition,
+  deleteDraft,
   deleteList,
   deletePage,
   deletePages,
@@ -1079,6 +1080,46 @@ describe('form-definition-repository', () => {
           expect(page?.section).toBe(definition.sections[0].id)
         }
       )
+    })
+  })
+
+  describe('deleteDraft', () => {
+    const formId = '620653928dfe476a90b6a6f2'
+    it('should throw if document not found', async () => {
+      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
+        "Document not found '620653928dfe476a90b6a6f2'"
+      )
+    })
+
+    it('should throw if draft not found', async () => {
+      mockCollection.findOne.mockReturnValueOnce({ live: {} })
+      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
+        "Draft not found in document '620653928dfe476a90b6a6f2'"
+      )
+    })
+
+    it('should throw if first update fails', async () => {
+      mockCollection.findOne.mockReturnValueOnce({ draft: {} })
+      mockCollection.findOneAndUpdate.mockReturnValueOnce(undefined)
+      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
+        "Unexpected empty result from 'findOneAndUpdate' for FormDefinition of form '620653928dfe476a90b6a6f2'"
+      )
+    })
+
+    it('should throw if second update fails', async () => {
+      mockCollection.findOne.mockReturnValueOnce({ draft: {} })
+      mockCollection.findOneAndUpdate
+        .mockReturnValueOnce({})
+        .mockReturnValueOnce(undefined)
+      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
+        "Unexpected empty result from 'findOneAndUpdate' for Metadata of form '620653928dfe476a90b6a6f2'"
+      )
+    })
+
+    it('should update successfully', async () => {
+      mockCollection.findOne.mockReturnValueOnce({ draft: {} })
+      mockCollection.findOneAndUpdate.mockReturnValue({ result: 'ok' })
+      expect(await deleteDraft(formId, mockSession)).toEqual({ result: 'ok' })
     })
   })
 })

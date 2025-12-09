@@ -33,7 +33,11 @@ import {
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
-import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
+import {
+  DEFINITION_COLLECTION_NAME,
+  METADATA_COLLECTION_NAME,
+  db
+} from '~/src/mongo.js'
 
 const logger = createLogger()
 
@@ -656,7 +660,70 @@ export async function assignSections(formId, sectionAssignments, session) {
 }
 
 /**
- * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
+ * Updates a draft form definition
+ * @param {string} formId - the form id
+ * @param {ClientSession} session - the mongo transaction session
+ */
+export async function deleteDraft(formId, session) {
+  const coll = /** @satisfies {Collection<{draft?: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const id = { _id: new ObjectId(formId) }
+  const document = await coll.findOne(id, { session })
+
+  if (!document) {
+    throw Boom.notFound(`Document not found '${formId}'`)
+  }
+
+  if (!document.draft) {
+    throw Boom.notFound(`Draft not found in document '${formId}'`)
+  }
+
+  // Delete the draft
+  const col2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const colMeta = /** @satisfies {Collection<FormMetadata>} */ (
+    db.collection(METADATA_COLLECTION_NAME)
+  )
+
+  const updateResult = await col2.findOneAndUpdate(
+    id,
+    { $unset: { draft: '' } },
+    {
+      session,
+      returnDocument: 'after'
+    }
+  )
+
+  if (!updateResult) {
+    throw Boom.notFound(
+      `Unexpected empty result from 'findOneAndUpdate' for FormDefinition of form '${formId}'`
+    )
+  }
+
+  const updateResultMeta = await colMeta.findOneAndUpdate(
+    id,
+    { $unset: { draft: '' } },
+    {
+      session,
+      returnDocument: 'after'
+    }
+  )
+
+  if (!updateResultMeta) {
+    throw Boom.notFound(
+      `Unexpected empty result from 'findOneAndUpdate' for Metadata of form '${formId}'`
+    )
+  }
+
+  return updateResult
+}
+
+/**
+ * @import { FormDefinition, FormMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'

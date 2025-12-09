@@ -18,11 +18,7 @@ import { ObjectId } from 'mongodb'
 
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
-import {
-  DEFINITION_COLLECTION_NAME,
-  METADATA_COLLECTION_NAME,
-  db
-} from '~/src/mongo.js'
+import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 const logger = createLogger()
 
@@ -375,69 +371,6 @@ export async function modifyDraft(
 
   if (!updateResult) {
     throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
-  }
-
-  return updateResult
-}
-
-/**
- * Updates a draft form definition
- * @param {string} formId - the form id
- * @param {ClientSession} session - the mongo transaction session
- */
-export async function deleteDraft(formId, session) {
-  const coll = /** @satisfies {Collection<{draft?: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  const id = { _id: new ObjectId(formId) }
-  const document = await coll.findOne(id, { session })
-
-  if (!document) {
-    throw Boom.notFound(`Document not found '${formId}'`)
-  }
-
-  if (!document.draft) {
-    throw Boom.notFound(`Draft not found in document '${formId}'`)
-  }
-
-  // Delete the draft
-  const col2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  const colMeta = /** @satisfies {Collection<FormMetadata>} */ (
-    db.collection(METADATA_COLLECTION_NAME)
-  )
-
-  const updateResult = await col2.findOneAndUpdate(
-    id,
-    { $unset: { draft: '' } },
-    {
-      session,
-      returnDocument: 'after'
-    }
-  )
-
-  if (!updateResult) {
-    throw Boom.notFound(
-      `Unexpected empty result from 'findOneAndUpdate' for FormDefinition`
-    )
-  }
-
-  const updateResultMeta = await colMeta.findOneAndUpdate(
-    id,
-    { $unset: { draft: '' } },
-    {
-      session,
-      returnDocument: 'after'
-    }
-  )
-
-  if (!updateResultMeta) {
-    throw Boom.notFound(
-      `Unexpected empty result from 'findOneAndUpdate' for Metadata`
-    )
   }
 
   return updateResult
@@ -893,7 +826,7 @@ export function buildSectionsResponse(definition) {
  */
 
 /**
- * @import { FormDefinition, FormMetadata, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */
