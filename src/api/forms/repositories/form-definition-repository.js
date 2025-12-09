@@ -661,39 +661,23 @@ export async function assignSections(formId, sectionAssignments, session) {
  * @param {ClientSession} session - the mongo transaction session
  */
 export async function deleteDraft(formId, session) {
-  const coll = /** @satisfies {Collection<{draft?: FormDefinition}>} */ (
+  // Delete the draft
+  const col = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
-  const id = { _id: new ObjectId(formId) }
-  const document = await coll.findOne(id, { session })
+  const updateResult = await col.updateOne(
+    { _id: new ObjectId(formId) },
+    { $unset: { draft: '' } },
+    { session }
+  )
 
-  if (!document) {
+  if (updateResult.matchedCount === 0) {
     throw Boom.notFound(`Document not found '${formId}'`)
   }
 
-  if (!document.draft) {
+  if (updateResult.modifiedCount === 0) {
     throw Boom.notFound(`Draft not found in document '${formId}'`)
-  }
-
-  // Delete the draft
-  const col2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
-    db.collection(DEFINITION_COLLECTION_NAME)
-  )
-
-  const updateResult = await col2.findOneAndUpdate(
-    id,
-    { $unset: { draft: '' } },
-    {
-      session,
-      returnDocument: 'after'
-    }
-  )
-
-  if (!updateResult) {
-    throw Boom.notFound(
-      `Unexpected empty result from 'findOneAndUpdate' for FormDefinition of form '${formId}'`
-    )
   }
 
   return updateResult

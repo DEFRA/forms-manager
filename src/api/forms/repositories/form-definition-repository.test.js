@@ -1086,30 +1086,24 @@ describe('form-definition-repository', () => {
   describe('deleteDraft', () => {
     const formId = '620653928dfe476a90b6a6f2'
     it('should throw if document not found', async () => {
+      mockCollection.updateOne.mockReturnValueOnce({ matchedCount: 0 })
       await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
         "Document not found '620653928dfe476a90b6a6f2'"
       )
     })
 
     it('should throw if draft not found', async () => {
-      mockCollection.findOne.mockReturnValueOnce({ live: {} })
+      mockCollection.updateOne.mockReturnValueOnce({ modifiedCount: 0 })
       await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
         "Draft not found in document '620653928dfe476a90b6a6f2'"
       )
     })
 
-    it('should throw if update fails', async () => {
-      mockCollection.findOne.mockReturnValueOnce({ draft: {} })
-      mockCollection.findOneAndUpdate.mockReturnValueOnce(undefined)
-      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
-        "Unexpected empty result from 'findOneAndUpdate' for FormDefinition of form '620653928dfe476a90b6a6f2'"
-      )
-    })
-
     it('should update successfully', async () => {
-      mockCollection.findOne.mockReturnValueOnce({ draft: {} })
-      mockCollection.findOneAndUpdate.mockReturnValue({ result: 'ok' })
-      expect(await deleteDraft(formId, mockSession)).toEqual({ result: 'ok' })
+      mockCollection.updateOne.mockReturnValueOnce({ modifiedCount: 1 })
+      expect(await deleteDraft(formId, mockSession)).toEqual({
+        modifiedCount: 1
+      })
     })
   })
 })
