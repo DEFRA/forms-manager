@@ -36,6 +36,8 @@ jest.mock('~/src/mongo.js', () => {
   }
 })
 
+jest.mock('~/src/api/forms/service/versioning.js')
+
 jest.mock('~/src/helpers/logging/logger.js', () => ({
   createLogger: () => ({
     error: jest.fn(),

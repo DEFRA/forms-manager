@@ -10,6 +10,7 @@ import Boom from '@hapi/boom'
 import {
   createDraftFromLive,
   createLiveFromDraft,
+  deleteDraftFormDefinition,
   getFormDefinition,
   listForms,
   updateDraftFormDefinition
@@ -182,6 +183,33 @@ export default [
       const { id } = request.params
       const author = getAuthor(auth.credentials.user)
       await removeForm(id, author)
+
+      return {
+        id,
+        status: 'deleted'
+      }
+    },
+    options: {
+      auth: {
+        scope: [`+${Scopes.FormDelete}`]
+      },
+      validate: {
+        params: formByIdSchema
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/forms/{id}/draft',
+    /**
+     * Delete the draft definition only of a form, leaving the live definition (including relevant metadata)
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { auth } = request
+      const { id } = request.params
+      const author = getAuthor(auth.credentials.user)
+      await deleteDraftFormDefinition(id, author)
 
       return {
         id,

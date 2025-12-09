@@ -16,6 +16,7 @@ import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,
+  deleteDraftFormDefinition,
   getFormDefinition,
   listForms,
   updateDraftFormDefinition
@@ -477,6 +478,26 @@ describe('Forms route', () => {
         status: 'deleted'
       })
       expect(removeForm).toHaveBeenCalledWith(id, {
+        displayName: 'Enrique Chase',
+        id: '86758ba9-92e7-4287-9751-7705e449688e'
+      })
+    })
+
+    test('Testing DELETE /forms/{id}/draft route returns a "deleted" status', async () => {
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}/draft`,
+        auth,
+        payload: {}
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        id,
+        status: 'deleted'
+      })
+      expect(deleteDraftFormDefinition).toHaveBeenCalledWith(id, {
         displayName: 'Enrique Chase',
         id: '86758ba9-92e7-4287-9751-7705e449688e'
       })

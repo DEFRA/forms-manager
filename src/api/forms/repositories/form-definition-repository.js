@@ -656,7 +656,35 @@ export async function assignSections(formId, sectionAssignments, session) {
 }
 
 /**
- * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
+ * Updates a draft form definition
+ * @param {string} formId - the form id
+ * @param {ClientSession} session - the mongo transaction session
+ */
+export async function deleteDraft(formId, session) {
+  // Delete the draft
+  const col = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
+    db.collection(DEFINITION_COLLECTION_NAME)
+  )
+
+  const updateResult = await col.updateOne(
+    { _id: new ObjectId(formId) },
+    { $unset: { draft: '' } },
+    { session }
+  )
+
+  if (updateResult.matchedCount === 0) {
+    throw Boom.notFound(`Document not found '${formId}'`)
+  }
+
+  if (updateResult.modifiedCount === 0) {
+    throw Boom.notFound(`Draft not found in document '${formId}'`)
+  }
+
+  return updateResult
+}
+
+/**
+ * @import { FormDefinition, FormMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'
