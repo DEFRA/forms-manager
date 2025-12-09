@@ -1098,21 +1098,11 @@ describe('form-definition-repository', () => {
       )
     })
 
-    it('should throw if first update fails', async () => {
+    it('should throw if update fails', async () => {
       mockCollection.findOne.mockReturnValueOnce({ draft: {} })
       mockCollection.findOneAndUpdate.mockReturnValueOnce(undefined)
       await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
         "Unexpected empty result from 'findOneAndUpdate' for FormDefinition of form '620653928dfe476a90b6a6f2'"
-      )
-    })
-
-    it('should throw if second update fails', async () => {
-      mockCollection.findOne.mockReturnValueOnce({ draft: {} })
-      mockCollection.findOneAndUpdate
-        .mockReturnValueOnce({})
-        .mockReturnValueOnce(undefined)
-      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
-        "Unexpected empty result from 'findOneAndUpdate' for Metadata of form '620653928dfe476a90b6a6f2'"
       )
     })
 

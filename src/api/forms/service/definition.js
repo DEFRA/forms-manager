@@ -143,7 +143,11 @@ export async function deleteDraftFormDefinition(formId, author) {
         }
         delete updatedMeta.draft
 
-        await formMetadata.update(formId, { $set: updatedMeta }, session)
+        await formMetadata.update(
+          formId,
+          { $set: updatedMeta, $unset: { draft: '' } },
+          session
+        )
 
         // Publish audit message
         await publishFormDraftDeletedEvent(updatedMeta, author)

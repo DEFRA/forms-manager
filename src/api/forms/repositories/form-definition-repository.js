@@ -33,11 +33,7 @@ import {
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
-import {
-  DEFINITION_COLLECTION_NAME,
-  METADATA_COLLECTION_NAME,
-  db
-} from '~/src/mongo.js'
+import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 const logger = createLogger()
 
@@ -685,10 +681,6 @@ export async function deleteDraft(formId, session) {
     db.collection(DEFINITION_COLLECTION_NAME)
   )
 
-  const colMeta = /** @satisfies {Collection<FormMetadata>} */ (
-    db.collection(METADATA_COLLECTION_NAME)
-  )
-
   const updateResult = await col2.findOneAndUpdate(
     id,
     { $unset: { draft: '' } },
@@ -701,21 +693,6 @@ export async function deleteDraft(formId, session) {
   if (!updateResult) {
     throw Boom.notFound(
       `Unexpected empty result from 'findOneAndUpdate' for FormDefinition of form '${formId}'`
-    )
-  }
-
-  const updateResultMeta = await colMeta.findOneAndUpdate(
-    id,
-    { $unset: { draft: '' } },
-    {
-      session,
-      returnDocument: 'after'
-    }
-  )
-
-  if (!updateResultMeta) {
-    throw Boom.notFound(
-      `Unexpected empty result from 'findOneAndUpdate' for Metadata of form '${formId}'`
     )
   }
 
