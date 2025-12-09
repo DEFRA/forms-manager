@@ -9,6 +9,7 @@ import Boom from '@hapi/boom'
 import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { deleteDraft } from '~/src/api/forms/repositories/helpers.js'
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import {
@@ -19,6 +20,7 @@ import {
 import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import {
   publishDraftCreatedFromLiveEvent,
+  publishFormDraftDeletedEvent,
   publishFormDraftReplacedEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
@@ -90,6 +92,61 @@ export async function updateDraftFormDefinition(formId, definition, author) {
 
         // Publish audit message
         await publishFormDraftReplacedEvent(updatedMetadata, definition)
+      })
+    } finally {
+      await session.endSession()
+    }
+
+    logger.info(`Updated form metadata (draft) for form ID ${formId}`)
+  } catch (err) {
+    logger.error(
+      err,
+      `[updateFormDefinition] Updating form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
+    )
+
+    throw err
+  }
+}
+
+/**
+ * Delete the draft definition but leave the live definition as is
+ * @param {string} formId - ID of the form
+ * @param {FormMetadataAuthor} author - the author details
+ */
+export async function deleteDraftFormDefinition(formId, author) {
+  logger.info(`Deleting form definition (draft) for form ID ${formId}`)
+
+  try {
+    // Get the form metadata from the db
+    const form = await getForm(formId)
+
+    if (!form.draft) {
+      throw Boom.badRequest(`Form with ID '${formId}' has no draft state`)
+    }
+
+    if (!form.live) {
+      throw Boom.badRequest(`Form with ID '${formId}' has no live state`)
+    }
+
+    const session = client.startSession()
+
+    try {
+      await session.withTransaction(async () => {
+        logger.info(`Deleting form definition (draft) for form ID ${formId}`)
+
+        await deleteDraft(form.id, session)
+
+        const updatedMeta = {
+          ...form,
+          updatedAt: new Date(),
+          updatedBy: author
+        }
+        delete updatedMeta.draft
+
+        await formMetadata.update(formId, { $set: updatedMeta }, session)
+
+        // Publish audit message
+        await publishFormDraftDeletedEvent(updatedMeta, author)
       })
     } finally {
       await session.endSession()
