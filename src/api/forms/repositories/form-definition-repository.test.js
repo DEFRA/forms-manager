@@ -33,6 +33,7 @@ import {
   assignSections,
   deleteComponent,
   deleteCondition,
+  deleteDraft,
   deleteList,
   deletePage,
   deletePages,
@@ -1079,6 +1080,30 @@ describe('form-definition-repository', () => {
           expect(page?.section).toBe(definition.sections[0].id)
         }
       )
+    })
+  })
+
+  describe('deleteDraft', () => {
+    const formId = '620653928dfe476a90b6a6f2'
+    it('should throw if document not found', async () => {
+      mockCollection.updateOne.mockReturnValueOnce({ matchedCount: 0 })
+      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
+        "Document not found '620653928dfe476a90b6a6f2'"
+      )
+    })
+
+    it('should throw if draft not found', async () => {
+      mockCollection.updateOne.mockReturnValueOnce({ modifiedCount: 0 })
+      await expect(deleteDraft(formId, mockSession)).rejects.toThrow(
+        "Draft not found in document '620653928dfe476a90b6a6f2'"
+      )
+    })
+
+    it('should update successfully', async () => {
+      mockCollection.updateOne.mockReturnValueOnce({ modifiedCount: 1 })
+      expect(await deleteDraft(formId, mockSession)).toEqual({
+        modifiedCount: 1
+      })
     })
   })
 })

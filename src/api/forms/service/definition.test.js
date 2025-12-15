@@ -38,6 +38,7 @@ import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versi
 import {
   createDraftFromLive,
   createLiveFromDraft,
+  deleteDraftFormDefinition,
   getFormDefinition,
   listForms,
   reorderDraftFormDefinitionComponents,
@@ -1304,6 +1305,50 @@ describe('Forms service', () => {
           author
         )
       ).rejects.toThrow(boomInternal)
+    })
+  })
+
+  describe('deleteDraftFormDefinition', () => {
+    it('should throw if no draft', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue({
+        ...formMetadataDocument,
+        draft: undefined
+      })
+      await expect(deleteDraftFormDefinition(id, author)).rejects.toThrow(
+        "Form with ID '661e4ca5039739ef2902b214' has no draft state"
+      )
+    })
+
+    it('should throw if no live', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue({
+        ...formMetadataDocument,
+        live: undefined
+      })
+      await expect(deleteDraftFormDefinition(id, author)).rejects.toThrow(
+        "Form with ID '661e4ca5039739ef2902b214' has no live state"
+      )
+    })
+
+    it('should throw if update error', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue({
+        ...formMetadataDocument,
+        live: { ...formMetadataDocument.draft }
+      })
+      jest.mocked(formMetadata.update).mockImplementationOnce(() => {
+        throw new Error('DB error')
+      })
+      await expect(deleteDraftFormDefinition(id, author)).rejects.toThrow(
+        'DB error'
+      )
+    })
+
+    it('should delete draft', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue({
+        ...formMetadataDocument,
+        live: { ...formMetadataDocument.draft }
+      })
+      await deleteDraftFormDefinition(id, author)
+      expect(true).toBe(true)
     })
   })
 })
