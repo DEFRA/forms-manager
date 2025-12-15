@@ -1,6 +1,7 @@
 import {
   FormDefinitionError,
-  FormDefinitionErrorType
+  FormDefinitionErrorType,
+  FormDefinitionRequestType
 } from '@defra/forms-model'
 
 import { assignSectionsToForm } from '~/src/api/forms/service/sections.js'
@@ -80,7 +81,10 @@ describe('Sections route', () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
-        payload: { sections: sectionAssignments },
+        payload: {
+          sections: sectionAssignments,
+          requestType: FormDefinitionRequestType.ASSIGN_SECTIONS
+        },
         auth
       })
 
@@ -92,7 +96,7 @@ describe('Sections route', () => {
         status: 'updated'
       })
 
-      const [calledFormId, calledAssignments, calledAuthor] =
+      const [calledFormId, calledAssignments, calledAuthor, calledRequestType] =
         assignSectionsMock.mock.calls[0]
       expect(calledFormId).toBe(id)
 
@@ -112,6 +116,7 @@ describe('Sections route', () => {
       ])
 
       expect(calledAuthor).toEqual(expectedAuthor)
+      expect(calledRequestType).toBe(FormDefinitionRequestType.ASSIGN_SECTIONS)
     })
 
     test('Testing PUT /forms/{id}/definition/draft/sections with section id provided', async () => {
@@ -144,7 +149,10 @@ describe('Sections route', () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
-        payload: { sections: sectionAssignments },
+        payload: {
+          sections: sectionAssignments,
+          requestType: FormDefinitionRequestType.CREATE_SECTION
+        },
         auth
       })
 
@@ -155,7 +163,7 @@ describe('Sections route', () => {
         status: 'updated'
       })
 
-      const [calledFormId, calledAssignments, calledAuthor] =
+      const [calledFormId, calledAssignments, calledAuthor, calledRequestType] =
         assignSectionsMock.mock.calls[0]
       expect(calledFormId).toBe(id)
 
@@ -169,6 +177,7 @@ describe('Sections route', () => {
         }
       ])
       expect(calledAuthor).toEqual(expectedAuthor)
+      expect(calledRequestType).toBe(FormDefinitionRequestType.CREATE_SECTION)
     })
 
     test('Testing PUT /forms/{id}/definition/draft/sections with empty sections array', async () => {
@@ -180,7 +189,10 @@ describe('Sections route', () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
-        payload: { sections: [] },
+        payload: {
+          sections: [],
+          requestType: FormDefinitionRequestType.DELETE_SECTION
+        },
         auth
       })
 
@@ -220,7 +232,10 @@ describe('Sections route', () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
-        payload: { sections: sectionAssignments },
+        payload: {
+          sections: sectionAssignments,
+          requestType: FormDefinitionRequestType.ASSIGN_SECTIONS
+        },
         auth
       })
 
@@ -238,7 +253,7 @@ describe('Sections route', () => {
       const response = await server.inject({
         method: 'PUT',
         url: `/forms/${id}/definition/draft/sections`,
-        payload: {},
+        payload: { requestType: FormDefinitionRequestType.ASSIGN_SECTIONS },
         auth
       })
 
@@ -258,6 +273,30 @@ describe('Sections route', () => {
       })
     })
 
+    test('Testing PUT /forms/{id}/definition/draft/sections with missing requestType returns structured validation error', async () => {
+      const response = await server.inject({
+        method: 'PUT',
+        url: `/forms/${id}/definition/draft/sections`,
+        payload: { sections: [] },
+        auth
+      })
+
+      expect(response.statusCode).toEqual(badRequestStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toMatchObject({
+        error: 'InvalidFormDefinitionError',
+        message: '"requestType" is required',
+        statusCode: 400,
+        cause: [
+          {
+            id: FormDefinitionError.Other,
+            type: FormDefinitionErrorType.Type,
+            message: '"requestType" is required'
+          }
+        ]
+      })
+    })
+
     test('Testing PUT /forms/{id}/definition/draft/sections with invalid section name returns structured validation error', async () => {
       const response = await server.inject({
         method: 'PUT',
@@ -269,7 +308,8 @@ describe('Sections route', () => {
               title: 'Valid Title',
               pageIds: []
             }
-          ]
+          ],
+          requestType: FormDefinitionRequestType.CREATE_SECTION
         },
         auth
       })
@@ -299,7 +339,8 @@ describe('Sections route', () => {
               title: 'Valid Title',
               pageIds: ['not-a-valid-uuid']
             }
-          ]
+          ],
+          requestType: FormDefinitionRequestType.ASSIGN_SECTIONS
         },
         auth
       })
@@ -328,7 +369,8 @@ describe('Sections route', () => {
               name: 'valid-name',
               pageIds: []
             }
-          ]
+          ],
+          requestType: FormDefinitionRequestType.CREATE_SECTION
         },
         auth
       })
@@ -359,7 +401,8 @@ describe('Sections route', () => {
               name: 'valid-name',
               title: 'Valid Title'
             }
-          ]
+          ],
+          requestType: FormDefinitionRequestType.CREATE_SECTION
         },
         auth
       })
@@ -385,7 +428,8 @@ describe('Sections route', () => {
         method: 'PUT',
         url: `/forms/invalid-id/definition/draft/sections`,
         payload: {
-          sections: []
+          sections: [],
+          requestType: FormDefinitionRequestType.DELETE_SECTION
         },
         auth
       })
@@ -418,7 +462,8 @@ describe('Sections route', () => {
               title: 'Section Two',
               pageIds: []
             }
-          ]
+          ],
+          requestType: FormDefinitionRequestType.CREATE_SECTION
         },
         auth
       })
@@ -456,7 +501,8 @@ describe('Sections route', () => {
               title: 'Section Two',
               pageIds: []
             }
-          ]
+          ],
+          requestType: FormDefinitionRequestType.CREATE_SECTION
         },
         auth
       })
@@ -492,7 +538,8 @@ describe('Sections route', () => {
               title: 'Duplicate Title',
               pageIds: []
             }
-          ]
+          ],
+          requestType: FormDefinitionRequestType.CREATE_SECTION
         },
         auth
       })
