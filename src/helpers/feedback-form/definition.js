@@ -85,8 +85,8 @@ export const feedbackDefinition = /** @type {FormDefinition} */ ({
         },
         {
           id: 'ee4db6ec-7246-430e-8dd2-e24cf4c34376',
-          text: 'Neither satisfied not dissatisfied',
-          value: 'Neither satisfied not dissatisfied'
+          text: 'Neither satisfied nor dissatisfied',
+          value: 'Neither satisfied nor dissatisfied'
         },
         {
           id: '3b720c19-e580-405d-81ca-189452e9d873',
