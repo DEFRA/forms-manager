@@ -1,4 +1,4 @@
-import { FormDefinitionRequestType, getErrorMessage } from '@defra/forms-model'
+import { getErrorMessage } from '@defra/forms-model'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -13,9 +13,15 @@ import { client } from '~/src/mongo.js'
  * @param {string} formId
  * @param {SectionAssignmentItem[]} sectionAssignments
  * @param {FormMetadataAuthor} author
+ * @param {FormDefinitionRequestType} requestType
  * @returns {Promise<SectionAssignmentItem[]>}
  */
-export async function assignSectionsToForm(formId, sectionAssignments, author) {
+export async function assignSectionsToForm(
+  formId,
+  sectionAssignments,
+  author,
+  requestType
+) {
   logger.info(`Assigning sections to form ID ${formId}`)
 
   const session = client.startSession()
@@ -35,11 +41,6 @@ export async function assignSectionsToForm(formId, sectionAssignments, author) {
       )
 
       await createFormVersion(formId, session)
-
-      const requestType =
-        sectionAssignments.length === 0
-          ? FormDefinitionRequestType.UNASSIGN_SECTIONS
-          : FormDefinitionRequestType.ASSIGN_SECTIONS
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -66,5 +67,5 @@ export async function assignSectionsToForm(formId, sectionAssignments, author) {
 }
 
 /**
- * @import { FormMetadataAuthor, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinitionRequestType, FormMetadataAuthor, SectionAssignmentItem } from '@defra/forms-model'
  */

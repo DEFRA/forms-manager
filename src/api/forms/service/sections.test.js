@@ -98,7 +98,8 @@ describe('sections', () => {
       const result = await assignSectionsToForm(
         id,
         sectionAssignments,
-        defaultAuthor
+        defaultAuthor,
+        FormDefinitionRequestType.ASSIGN_SECTIONS
       )
 
       // Verify repository was called with correct arguments
@@ -141,7 +142,8 @@ describe('sections', () => {
       const result = await assignSectionsToForm(
         id,
         emptyAssignments,
-        defaultAuthor
+        defaultAuthor,
+        FormDefinitionRequestType.UNASSIGN_SECTIONS
       )
 
       expect(result).toEqual(emptySections)
@@ -161,7 +163,12 @@ describe('sections', () => {
         .mockRejectedValueOnce(boomNotFound)
 
       await expect(
-        assignSectionsToForm(id, sectionAssignments, defaultAuthor)
+        assignSectionsToForm(
+          id,
+          sectionAssignments,
+          defaultAuthor,
+          FormDefinitionRequestType.ASSIGN_SECTIONS
+        )
       ).rejects.toThrow(boomNotFound)
     })
 
@@ -174,7 +181,12 @@ describe('sections', () => {
       jest.mocked(formMetadata.updateAudit).mockRejectedValueOnce(boomInternal)
 
       await expect(
-        assignSectionsToForm(id, sectionAssignments, defaultAuthor)
+        assignSectionsToForm(
+          id,
+          sectionAssignments,
+          defaultAuthor,
+          FormDefinitionRequestType.ASSIGN_SECTIONS
+        )
       ).rejects.toThrow(boomInternal)
     })
 
@@ -207,10 +219,57 @@ describe('sections', () => {
       const result = await assignSectionsToForm(
         id,
         assignmentsWithHideTitle,
-        defaultAuthor
+        defaultAuthor,
+        FormDefinitionRequestType.ASSIGN_SECTIONS
       )
 
       expect(result).toEqual(expectedWithHideTitle)
+    })
+
+    it('should use CREATE_SECTION request type when adding a section', async () => {
+      const assignSectionsMock = jest
+        .mocked(formDefinition.assignSections)
+        .mockResolvedValueOnce(expectedSections)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+      await assignSectionsToForm(
+        id,
+        sectionAssignments,
+        defaultAuthor,
+        FormDefinitionRequestType.CREATE_SECTION
+      )
+
+      expect(assignSectionsMock).toHaveBeenCalled()
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.CREATE_SECTION,
+        payload: { sections: sectionAssignments }
+      })
+    })
+
+    it('should use DELETE_SECTION request type when removing a section', async () => {
+      const remainingSections = /** @type {SectionAssignmentItem[]} */ ([
+        expectedSections[0]
+      ])
+
+      jest
+        .mocked(formDefinition.assignSections)
+        .mockResolvedValueOnce(remainingSections)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+      await assignSectionsToForm(
+        id,
+        [sectionAssignments[0]],
+        defaultAuthor,
+        FormDefinitionRequestType.DELETE_SECTION
+      )
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.DELETE_SECTION,
+        payload: { sections: [sectionAssignments[0]] }
+      })
     })
   })
 })

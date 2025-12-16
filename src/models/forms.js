@@ -1,5 +1,6 @@
 import {
   FormDefinitionError,
+  FormDefinitionRequestType,
   checkErrors,
   componentSchema,
   formDefinitionSchema,
@@ -128,6 +129,14 @@ export const sectionAssignmentPayloadSchema = Joi.object()
           FormDefinitionError.UniqueSectionName,
           FormDefinitionError.UniqueSectionTitle
         ])
+      ),
+    requestType: Joi.string()
+      .valid(
+        FormDefinitionRequestType.CREATE_SECTION,
+        FormDefinitionRequestType.DELETE_SECTION,
+        FormDefinitionRequestType.ASSIGN_SECTIONS,
+        FormDefinitionRequestType.UNASSIGN_SECTIONS
       )
+      .required()
   })
   .required()

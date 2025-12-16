@@ -23,7 +23,12 @@ export default [
       const { id } = params
       const author = getAuthor(auth.credentials.user)
 
-      const sections = await assignSectionsToForm(id, payload.sections, author)
+      const sections = await assignSectionsToForm(
+        id,
+        payload.sections,
+        author,
+        payload.requestType
+      )
 
       return {
         id,
