@@ -57,7 +57,7 @@ services:
         - Name: "newman-test-client"
           DisplayName: "Forms Manager API Test Resource"
           Scopes: ["newman-test-client"]
-          UserClaims: ["oid", "groups", "email", "name", "preferred_username", "email_verified"]
+          UserClaims: ["oid", "email", "name", "preferred_username", "email_verified"]
       SERVER_OPTIONS_INLINE: |
         {
           "IssuerUri": "http://oidc:80",
