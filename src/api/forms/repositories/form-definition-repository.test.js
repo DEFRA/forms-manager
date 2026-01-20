@@ -47,6 +47,7 @@ import {
   updateCondition,
   updateList,
   updateName,
+  updateOption,
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
@@ -1104,6 +1105,20 @@ describe('form-definition-repository', () => {
       expect(await deleteDraft(formId, mockSession)).toEqual({
         modifiedCount: 1
       })
+    })
+  })
+
+  describe('updateOption', () => {
+    it('should set option', async () => {
+      /** @type {SectionAssignmentItem[]} */
+      await helper(
+        async () => {
+          await updateOption(formId, 'showReferenceNumber', 'true', mockSession)
+        },
+        (definition) => {
+          expect(definition.options?.showReferenceNumber).toBe(true)
+        }
+      )
     })
   })
 })

@@ -52,6 +52,7 @@ import {
   modifyUnassignCondition,
   modifyUpdateComponent,
   modifyUpdateList,
+  modifyUpdateOption,
   modifyUpdatePage,
   modifyUpdatePageFields,
   removeById,
@@ -1426,6 +1427,30 @@ describe('repository helpers', () => {
       const modified = modifyAssignSections(definition, sectionAssignments)
 
       expect(modified.sections[0]).not.toHaveProperty('hideTitle')
+    })
+  })
+
+  describe('modfiyUpdateOption', () => {
+    it('should add then update the option', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdateOption(
+        definition,
+        'showReferenceNumber',
+        'true'
+      )
+
+      expect(modified.options?.showReferenceNumber).toBe(true)
+
+      const updated = modifyUpdateOption(
+        definition,
+        'showReferenceNumber',
+        'false'
+      )
+
+      expect(updated.options?.showReferenceNumber).toBe(false)
     })
   })
 

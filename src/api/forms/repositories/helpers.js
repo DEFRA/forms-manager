@@ -812,6 +812,29 @@ export function buildSectionsResponse(definition) {
 }
 
 /**
+ * Uddates an option
+ * @param {FormDefinition} definition
+ * @param {string} optionName
+ * @param {string} optionValue
+ * @returns {FormDefinition}
+ */
+export function modifyUpdateOption(definition, optionName, optionValue) {
+  // Set defaults if 'options' is missing
+  definition.options =
+    definition.options ??
+    /** @type {FormOptions} */ ({
+      showReferenceNumber: false
+    })
+
+  if (optionName === 'showReferenceNumber') {
+    // Convert to boolean
+    definition.options.showReferenceNumber = optionValue === 'true'
+  }
+
+  return definition
+}
+
+/**
  * The update callback method
  * @callback UpdateCallback
  * @param {FormDefinition} definition
@@ -826,7 +849,7 @@ export function buildSectionsResponse(definition) {
  */
 
 /**
- * @import { FormDefinition, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, FormOptions, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */
