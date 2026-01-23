@@ -812,7 +812,7 @@ export function buildSectionsResponse(definition) {
 }
 
 /**
- * Uddates an option
+ * Updates an option
  * @param {FormDefinition} definition
  * @param {string} optionName
  * @param {string} optionValue

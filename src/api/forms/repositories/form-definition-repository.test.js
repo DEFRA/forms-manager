@@ -1110,7 +1110,6 @@ describe('form-definition-repository', () => {
 
   describe('updateOption', () => {
     it('should set option', async () => {
-      /** @type {SectionAssignmentItem[]} */
       await helper(
         async () => {
           await updateOption(formId, 'showReferenceNumber', 'true', mockSession)

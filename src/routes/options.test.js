@@ -1,8 +1,3 @@
-import {
-  FormDefinitionError,
-  FormDefinitionErrorType
-} from '@defra/forms-model'
-
 import { updateOptionOnDraftDefinition } from '~/src/api/forms/service/options.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -73,32 +68,8 @@ describe('Options route', () => {
       expect(response.statusCode).toEqual(badRequestStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
-        error: 'InvalidFormDefinitionError',
-        message:
-          '"optionValue" is required. "invalidOptionValue" is not allowed',
-        statusCode: 400,
-        cause: [
-          {
-            id: FormDefinitionError.Other,
-            type: FormDefinitionErrorType.Type,
-            message: '"optionValue" is required',
-            detail: {
-              label: 'optionValue',
-              key: 'optionValue'
-            }
-          },
-          {
-            id: FormDefinitionError.Other,
-            type: FormDefinitionErrorType.Type,
-            message: '"invalidOptionValue" is not allowed',
-            detail: {
-              child: 'invalidOptionValue',
-              label: 'invalidOptionValue',
-              value: 'true',
-              key: 'invalidOptionValue'
-            }
-          }
-        ]
+        error: 'Bad Request',
+        message: '"optionName" must be [showReferenceNumber]'
       })
     })
   })

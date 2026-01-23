@@ -67,7 +67,7 @@ describe('options', () => {
       .mockResolvedValue(mockFormVersionDocument)
   })
 
-  describe('updateOptionOnDraftFormDefinition', () => {
+  describe('updateOptionOnDraftDefinition', () => {
     it('should add a list to the form definition', async () => {
       jest
         .mocked(formDefinition.get)
