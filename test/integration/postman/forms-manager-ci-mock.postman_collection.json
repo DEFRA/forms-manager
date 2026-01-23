@@ -1614,6 +1614,151 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Get form option - get reference number true",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    const option = response.options ? response.options.showReferenceNumber : undefined;",
+              "    pm.expect(option).to.eq(true);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Set form option - reference number to false",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"optionValue\": \"false\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/options/showReferenceNumber",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "options",
+            "showReferenceNumber"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get form option - get reference number false",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    const option = response.options ? response.options.showReferenceNumber : undefined;",
+              "    pm.expect(option).to.eq(false);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "auth": {
