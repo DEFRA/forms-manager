@@ -57,6 +57,14 @@ export const conditionByIdSchema = Joi.object()
   })
   .required()
 
+export const optionByNameSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    optionName: Joi.string().valid('showReferenceNumber').required()
+    // If we add more options here, probably best to create an enum in forms-model that we can use here
+  })
+  .required()
+
 export const componentPayloadWithRequiredIdSchema = componentSchema.keys({
   id: Joi.string().uuid().required()
 })

@@ -28,6 +28,7 @@ import {
   modifyUpdateComponent,
   modifyUpdateCondition,
   modifyUpdateList,
+  modifyUpdateOption,
   modifyUpdatePage,
   modifyUpdatePageFields,
   removeById
@@ -684,7 +685,28 @@ export async function deleteDraft(formId, session) {
 }
 
 /**
- * @import { FormDefinition, FormMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
+ * Adds or updates an option
+ * @param {string} formId
+ * @param {string} optionName
+ * @param {string} optionValue
+ * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
+ */
+export async function updateOption(formId, optionName, optionValue, session) {
+  logger.info(`Updating option ${optionName} on form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyUpdateOption(draft, optionName, optionValue)
+
+  const result = await modifyDraft(formId, callback, session)
+
+  logger.info(`Updated option ${optionName} on form ID ${formId}`)
+
+  return result.draft
+}
+
+/**
+ * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'

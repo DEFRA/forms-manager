@@ -6,6 +6,7 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: Page }>} RequestPage
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIDAndPageByIdInput, Payload: PatchPageFields }>} PatchPageRequest
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIDAndPageByIdInput, Payload: ComponentDef; Query: AddComponentQueryOptions }>} RequestComponent
+ * @typedef {Request<{ Server: { db: Db }, Params: {id: string, optionName: string}, Payload: { optionValue: string } }>} RequestOption
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIDAndPageByIdInput, Payload: string[] }>} SortDraftFormComponentsRequest
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIDAndPageByIdAndComponentByIdInput, Payload: ComponentDef }>} RequestUpdateComponent
  * @typedef {Request<{ Server: { db: Db }, Payload: FormMetadataInput }>} RequestFormMetadataCreate
