@@ -4,6 +4,7 @@ import { MongoServerError, ObjectId } from 'mongodb'
 
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
+  buildAggregationPipeline,
   buildAggregationPipelineWithVersions,
   buildFilterConditions,
   buildFiltersFacet,
@@ -69,7 +70,7 @@ export async function list(options) {
 
     const filters = processFilterResults(filterResults)
 
-    const { pipeline, aggOptions } = buildAggregationPipelineWithVersions(
+    const { pipeline, aggOptions } = buildAggregationPipeline(
       sortBy,
       order,
       title,
@@ -78,7 +79,11 @@ export async function list(options) {
       status
     )
 
-    pipeline.push({ $skip: skip }, { $limit: perPage })
+    pipeline.push(
+      { $skip: skip },
+      { $limit: perPage },
+      { $project: { versions: 0 } }
+    )
 
     const [documents, totalItems] = await Promise.all([
       /** @type {Promise<WithId<Partial<FormMetadataDocument>>[]>} */ (
