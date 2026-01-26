@@ -693,14 +693,10 @@ export async function deleteDraft(formId, session) {
  * @returns {Promise<FormDefinition>}
  */
 export async function updateOption(formId, optionName, optionValue, session) {
-  logger.info(`Updating option ${optionName} on form ID ${formId}`)
-
   /** @type {UpdateCallback} */
   const callback = (draft) => modifyUpdateOption(draft, optionName, optionValue)
 
   const result = await modifyDraft(formId, callback, session)
-
-  logger.info(`Updated option ${optionName} on form ID ${formId}`)
 
   return result.draft
 }

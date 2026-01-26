@@ -60,7 +60,7 @@ export async function updateOptionOnDraftDefinition(
     await session.endSession()
   }
 
-  logger.info(`updated option ${optionName} on Form ID ${formId}`)
+  logger.info(`Updated option ${optionName} on Form ID ${formId}`)
 
   return payload
 }
