@@ -1,9 +1,9 @@
 {
   "info": {
-    "_postman_id": "99fb4de2-c42c-44aa-96d1-42892844a99c",
+    "_postman_id": "009a2da5-d6f8-46f3-ad9e-e2deba436450",
     "name": "forms-manager",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "1257159"
+    "_exporter_id": "23938788"
   },
   "item": [
     {
@@ -1115,7 +1115,8 @@
               "});"
             ],
             "type": "text/javascript",
-            "packages": {}
+            "packages": {},
+            "requests": {}
           }
         }
       ],
@@ -1124,7 +1125,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"sections\": [\n        {\n            \"title\": \"Personal Details\",\n            \"pageIds\": [\"{{page_id_2}}\"]\n        },\n        {\n            \"title\": \"Address Information\",\n            \"pageIds\": [\"{{page_id_3}}\"]\n        }\n    ]\n}",
+          "raw": "{\n    \"sections\": [\n        {\n            \"title\": \"Personal Details\",\n            \"pageIds\": [\"{{page_id_2}}\"]\n        },\n        {\n            \"title\": \"Address Information\",\n            \"pageIds\": [\"{{page_id_3}}\"]\n        }\n    ],\n    \"requestType\": \"CREATE_SECTION\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -1163,7 +1164,8 @@
               "});"
             ],
             "type": "text/javascript",
-            "packages": {}
+            "packages": {},
+            "requests": {}
           }
         }
       ],
@@ -1172,7 +1174,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"sections\": []\n}",
+          "raw": "{\n    \"sections\": [],\n    \"requestType\": \"DELETE_SECTION\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -1518,7 +1520,56 @@
       "response": []
     },
     {
-      "name": "/forms/:form_id/definition",
+      "name": "Get form option - undefined reference number",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    const option = response.options ? response.options.showReferenceNumber : undefined;",
+              "    pm.expect(option).to.be.undefined;",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Set form option - reference number to true",
       "event": [
         {
           "listen": "test",
@@ -1530,7 +1581,57 @@
               "});"
             ],
             "type": "text/javascript",
-            "packages": {}
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"optionValue\": \"true\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/options/showReferenceNumber",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "options",
+            "showReferenceNumber"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get form option - get reference number true",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    const option = response.options ? response.options.showReferenceNumber : undefined;",
+              "    pm.expect(option).to.eq(true);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
           }
         },
         {
@@ -1540,7 +1641,8 @@
               ""
             ],
             "type": "text/javascript",
-            "packages": {}
+            "packages": {},
+            "requests": {}
           }
         }
       ],
@@ -1548,14 +1650,111 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/definition",
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
           "host": [
             "{{root}}"
           ],
           "path": [
             "forms",
             "{{go_live_form_id}}",
-            "definition"
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Set form option - reference number to false",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"optionValue\": \"false\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/options/showReferenceNumber",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "options",
+            "showReferenceNumber"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get form option - get reference number false",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    const option = response.options ? response.options.showReferenceNumber : undefined;",
+              "    pm.expect(option).to.eq(false);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
           ]
         }
       },
