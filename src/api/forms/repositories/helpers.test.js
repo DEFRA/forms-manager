@@ -15,6 +15,7 @@ import {
   buildCondition,
   buildDefinition,
   buildList,
+  buildPaymentPage,
   buildQuestionPage,
   buildStatusPage,
   buildSummaryPage,
@@ -121,6 +122,7 @@ describe('repository helpers', () => {
     id: componentId
   })
   const summaryPage = buildSummaryPage()
+  const paymentPage = buildPaymentPage()
 
   const questionPageWithComponent = buildQuestionPage({
     id: pageId,
@@ -249,14 +251,42 @@ describe('repository helpers', () => {
       const definition = buildDefinition({
         pages: [questionPageWithoutComponent, summaryPage]
       })
-      expect(getPageInsertPosition(definition)).toBe(-1)
+      expect(getPageInsertPosition(definition, false)).toBe(-1)
     })
 
     it('should return undefined if a summary page does not exist', () => {
       const definition = buildDefinition({
         pages: [questionPageWithoutComponent]
       })
-      expect(getPageInsertPosition(definition)).toBeUndefined()
+      expect(getPageInsertPosition(definition, false)).toBeUndefined()
+    })
+
+    it('should return -2 if both a summary page and a payment page exist', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, paymentPage, summaryPage]
+      })
+      expect(getPageInsertPosition(definition, false)).toBe(-2)
+    })
+
+    it('should return -1 if inserting a payment page and a summary page exists', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent, summaryPage]
+      })
+      expect(getPageInsertPosition(definition, true)).toBe(-1)
+    })
+
+    it('should return undefined if inserting a payment page and no summary page exists', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithoutComponent]
+      })
+      expect(getPageInsertPosition(definition, true)).toBeUndefined()
+    })
+
+    it('should return undefined if no pages yet', () => {
+      const definition = buildDefinition({
+        pages: []
+      })
+      expect(getPageInsertPosition(definition, false)).toBeUndefined()
     })
   })
 
