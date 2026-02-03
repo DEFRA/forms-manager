@@ -14,6 +14,7 @@ import {
   hasListField,
   hasNext,
   isConditionWrapper,
+  isPaymentPage,
   isSummaryPage
 } from '@defra/forms-model'
 
@@ -22,6 +23,7 @@ import {
   isConditionData
 } from '~/src/api/forms/service/condition-migration-helpers.js'
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
+
 /**
  * @param {FormDefinition} definition
  * @returns {{
@@ -51,11 +53,40 @@ export function summaryHelper(definition) {
 }
 
 /**
+ * @param {FormDefinition} definition
+ * @returns {{
+ *  readonly payment: PageQuestion | undefined;
+ *  shouldRepositionPayment: boolean;
+ *  paymentExists: boolean;
+ *  indexOf: number;
+ * }}
+ */
+export function paymentHelper(definition) {
+  const lastButOneIndex = definition.pages.length - 2
+  const paymentIndex = definition.pages.findIndex((page) => isPaymentPage(page))
+  const paymentExists = paymentIndex >= 0
+  const shouldRepositionPayment =
+    paymentExists && paymentIndex !== lastButOneIndex
+
+  return {
+    paymentExists,
+    shouldRepositionPayment,
+    get payment() {
+      const paymentPage = /** @type {PageQuestion | undefined} */ (
+        definition.pages[paymentIndex]
+      )
+      return paymentPage
+    },
+    indexOf: paymentIndex
+  }
+}
+
+/**
  * @param {Page[]} pages
  * @param {number} indexOf
  * @returns {Page[]}
  */
-function removeSummary(pages, indexOf) {
+function removePage(pages, indexOf) {
   return /** @type {Page[]} */ (pages.toSpliced(indexOf, 1))
 }
 
@@ -73,11 +104,43 @@ export function repositionSummary(definition) {
         summaryHelperOutput
       )
 
-    const pagesWithoutSummary = removeSummary(definition.pages, indexOf)
+    const pagesWithoutSummary = removePage(definition.pages, indexOf)
 
     return {
       ...definition,
       pages: [...pagesWithoutSummary, summary]
+    }
+  }
+
+  return definition
+}
+
+/**
+ * Repositions payment page to just before summary page
+ * @param {FormDefinition} definition
+ */
+export function repositionPayment(definition) {
+  const paymentHelperOutput = paymentHelper(definition)
+  const { shouldRepositionPayment } = paymentHelperOutput
+
+  if (shouldRepositionPayment) {
+    const { payment, indexOf } =
+      /** @type {{ payment: PageQuestion, indexOf: number}} */ (
+        paymentHelperOutput
+      )
+
+    const pagesWithoutPayment = removePage(definition.pages, indexOf)
+    const summary = /** @type {PageSummary} */ (
+      definition.pages.find((page) => isSummaryPage(page))
+    )
+    const pagesWithoutPaymentAndSummary = removePage(
+      pagesWithoutPayment,
+      pagesWithoutPayment.length - 1
+    )
+
+    return {
+      ...definition,
+      pages: [...pagesWithoutPaymentAndSummary, payment, summary]
     }
   }
 
@@ -97,7 +160,7 @@ export function upgradeSummary(definition) {
     )
 
   if (summary.controller === ControllerType.Summary) {
-    const pagesWithoutSummary = removeSummary(definition.pages, indexOf)
+    const pagesWithoutSummary = removePage(definition.pages, indexOf)
 
     return /** @type {FormDefinition} */ ({
       ...definition,
@@ -564,6 +627,7 @@ const migrationSteps = [
   convertControllerPathsToNames,
   repositionSummary,
   upgradeSummary,
+  repositionPayment,
   applyPageTitles,
   migrateComponentFields,
   convertDeclaration,
@@ -610,5 +674,5 @@ export function migrateToV2(definition) {
  */
 
 /**
- * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, PageSummaryWithConfirmationEmail, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageQuestion, PageSummary, PageSummaryWithConfirmationEmail, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
  */

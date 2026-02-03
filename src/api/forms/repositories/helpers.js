@@ -10,6 +10,7 @@ import {
   hasRepeater,
   isConditionWrapperV2,
   isFormType,
+  isPaymentPage,
   isSummaryPage,
   slugify
 } from '@defra/forms-model'
@@ -52,11 +53,24 @@ export function findPage(definition, pageId) {
 /**
  * Gets the position a new page should be inserted
  * @param {FormDefinition} definition
+ * @param {boolean} isPayment
  */
-export function getPageInsertPosition(definition) {
+export function getPageInsertPosition(definition, isPayment) {
   const pages = definition.pages
 
-  return pages.length && isSummaryPage(pages[pages.length - 1]) ? -1 : undefined
+  if (pages.length) {
+    const summaryExists = isSummaryPage(pages[pages.length - 1])
+    if (isPayment) {
+      return summaryExists ? -1 : undefined
+    }
+    const paymentExists = isPaymentPage(pages[pages.length - 2])
+    if (summaryExists && paymentExists) {
+      return -2
+    }
+    return summaryExists ? -1 : undefined
+  }
+
+  return undefined
 }
 
 /**
