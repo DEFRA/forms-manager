@@ -25,6 +25,34 @@ import {
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
 
 /**
+ * @param {FormDefinition} definition
+ * @returns {{
+ *  readonly summary: PageSummary | undefined;
+ *  shouldRepositionSummary: boolean;
+ *  summaryExists: boolean;
+ *  indexOf: number;
+ * }}
+ */
+export function summaryHelper(definition) {
+  const lastIndex = definition.pages.length - 1
+  const summaryIndex = definition.pages.findIndex((page) => isSummaryPage(page))
+  const summaryExists = summaryIndex >= 0
+  const shouldRepositionSummary = summaryExists && summaryIndex !== lastIndex
+
+  return {
+    summaryExists,
+    shouldRepositionSummary,
+    get summary() {
+      const summaryPage = /** @type {PageSummary | undefined} */ (
+        definition.pages[summaryIndex]
+      )
+      return summaryPage
+    },
+    indexOf: summaryIndex
+  }
+}
+
+/**
  * Repositions payment page to just before summary page
  * @param {FormDefinition} definition
  */
