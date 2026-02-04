@@ -440,6 +440,8 @@ export function modifyAddPage(definition, page, position) {
     definition.pages.splice(position, 0, page)
   }
 
+  applyReferenceNumberSetting(definition)
+
   return definition
 }
 
@@ -454,6 +456,23 @@ export function modifyUpdatePage(definition, page, pageId) {
   const idx = getPageIndex(definition, pageId)
 
   definition.pages[idx] = page
+
+  return definition
+}
+
+/**
+ * Overrides reference number setting if a payment page exists
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+export function applyReferenceNumberSetting(definition) {
+  const hasPayment = definition.pages.some((page) => isPaymentPage(page))
+  if (hasPayment) {
+    definition.options = {
+      ...definition.options,
+      showReferenceNumber: true
+    }
+  }
 
   return definition
 }
@@ -527,6 +546,8 @@ export function modifyAddComponent(definition, pageId, component, position) {
     }
   }
 
+  applyReferenceNumberSetting(definition)
+
   return definition
 }
 
@@ -551,6 +572,8 @@ export function modifyUpdateComponent(
   if (hasComponentsEvenIfNoNext(page)) {
     page.components[componentIdx] = component
   }
+
+  applyReferenceNumberSetting(definition)
 
   return definition
 }
