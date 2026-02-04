@@ -1,4 +1,4 @@
-import { FormStatus, getErrorMessage, isPaymentPage } from '@defra/forms-model'
+import { FormStatus, getErrorMessage } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
@@ -7,7 +7,6 @@ import {
   getComponent,
   getCondition,
   getList,
-  getPageInsertPosition,
   insertDraft,
   modifyAddComponent,
   modifyAddCondition,
@@ -270,12 +269,7 @@ export async function addPage(formId, page, session) {
   logger.info(`Adding page on form ID ${formId}`)
 
   /** @type {UpdateCallback} */
-  const callback = (draft) =>
-    modifyAddPage(
-      draft,
-      page,
-      getPageInsertPosition(draft, isPaymentPage(page))
-    )
+  const callback = (draft) => modifyAddPage(draft, page)
 
   const result = await modifyDraft(formId, callback, session)
 

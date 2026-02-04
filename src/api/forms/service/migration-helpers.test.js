@@ -38,11 +38,8 @@ import {
   mapComponent,
   migrateComponentFields,
   migrateToV2,
-  paymentHelper,
   populateComponentIds,
-  repositionPayment,
-  repositionSummary,
-  summaryHelper
+  repositionPaymentAndSummary
 } from '~/src/api/forms/service/migration-helpers.js'
 
 jest.mock('@defra/forms-model', () => ({
@@ -132,147 +129,19 @@ describe('migration helpers', () => {
   })
   delete pageTwoNoIds.id
 
-  describe('summaryHelper', () => {
-    it('should push the summary to the end if it not in the correct place', () => {
-      const definition = buildDefinition({
-        pages: [summaryPageWithoutComponents, pageOneUndefinedId]
-      })
-      expect(summaryHelper(definition)).toEqual({
-        indexOf: 0,
-        shouldRepositionSummary: true,
-        summaryExists: true,
-        summary: summaryPageWithoutComponents
-      })
-    })
-
-    it('should not push summary to the end if it is in the correct place', () => {
-      const definition = buildDefinition({
-        pages: [pageOneUndefinedId, summaryPageWithoutComponents]
-      })
-      expect(summaryHelper(definition)).toEqual({
-        indexOf: 1,
-        shouldRepositionSummary: false,
-        summaryExists: true,
-        summary: summaryPageWithoutComponents
-      })
-    })
-
-    it('should not push summary to the end if no pages', () => {
-      const definition = buildDefinition({
-        pages: []
-      })
-      expect(summaryHelper(definition)).toEqual({
-        indexOf: -1,
-        shouldRepositionSummary: false,
-        summaryExists: false,
-        summary: undefined
-      })
-    })
-
-    it('should not push summary to the end if summary page does not exist', () => {
-      const definition = buildDefinition({
-        pages: [pageOneUndefinedId]
-      })
-      expect(summaryHelper(definition)).toEqual({
-        indexOf: -1,
-        shouldRepositionSummary: false,
-        summaryExists: false,
-        summary: undefined
-      })
-    })
-  })
-
-  describe('paymentHelper', () => {
-    it('should push the payment page to the end but one if it not in the correct place', () => {
-      const definition = buildDefinition({
-        pages: [paymentPage, pageOneUndefinedId, summaryPageWithoutComponents]
-      })
-      expect(paymentHelper(definition)).toEqual({
-        indexOf: 0,
-        shouldRepositionPayment: true,
-        paymentExists: true,
-        payment: paymentPage
-      })
-    })
-
-    it('should not push payment page to the end but one if it is in the correct place', () => {
-      const definition = buildDefinition({
-        pages: [pageOneUndefinedId, paymentPage, summaryPageWithoutComponents]
-      })
-      expect(paymentHelper(definition)).toEqual({
-        indexOf: 1,
-        shouldRepositionPayment: false,
-        paymentExists: true,
-        payment: paymentPage
-      })
-    })
-
-    it('should not push payment page to the end but one if no pages', () => {
-      const definition = buildDefinition({
-        pages: []
-      })
-      expect(paymentHelper(definition)).toEqual({
-        indexOf: -1,
-        shouldRepositionPayment: false,
-        paymentExists: false,
-        payment: undefined
-      })
-    })
-
-    it('should not push payment page to the end but one if payment page does not exist', () => {
-      const definition = buildDefinition({
-        pages: [pageOneUndefinedId]
-      })
-      expect(paymentHelper(definition)).toEqual({
-        indexOf: -1,
-        shouldRepositionPayment: false,
-        paymentExists: false,
-        payment: undefined
-      })
-    })
-  })
-
-  describe('repositionSummary', () => {
-    const expectedDefinition = buildDefinition({
-      pages: [pageOneUndefinedId, summaryPageWithoutComponents]
-    })
-
-    it('should move definition to the end if it is not in place', () => {
-      const definition1 = buildDefinition({
-        pages: [summaryPageWithoutComponents, pageOneUndefinedId]
-      })
-
-      expect(repositionSummary(definition1)).toEqual(expectedDefinition)
-    })
-
-    it('should no change the order if summary is in the correct place', () => {
-      const definition1 = buildDefinition({
-        pages: [pageOneUndefinedId, summaryPageWithoutComponents]
-      })
-      const definition2 = buildDefinition({
-        pages: []
-      })
-      const definition3 = buildDefinition({
-        pages: [pageOneUndefinedId]
-      })
-
-      expect(repositionSummary(definition1)).toEqual(expectedDefinition)
-      expect(repositionSummary(definition2)).toEqual(definition2)
-      expect(repositionSummary(definition3)).toEqual(definition3)
-    })
-  })
-
-  describe('repositionPayment', () => {
+  describe('repositionPaymentAndSummary', () => {
     const expectedDefinition = buildDefinition({
       pages: [pageOneUndefinedId, paymentPage, summaryPageWithoutComponents]
     })
 
-    it('should move payment to the end but one if it is not in place', () => {
+    it('should move payment to the end but one and summary to end if it is not in place', () => {
       const definition1 = buildDefinition({
-        pages: [paymentPage, pageOneUndefinedId, summaryPageWithoutComponents]
+        pages: [paymentPage, summaryPageWithoutComponents, pageOneUndefinedId]
       })
 
-      expect(repositionPayment(definition1)).toEqual(expectedDefinition)
+      expect(repositionPaymentAndSummary(definition1)).toEqual(
+        expectedDefinition
+      )
     })
 
     it('should not change the order if payment is in the correct place', () => {
@@ -286,9 +155,11 @@ describe('migration helpers', () => {
         pages: [pageOneUndefinedId]
       })
 
-      expect(repositionPayment(definition1)).toEqual(expectedDefinition)
-      expect(repositionPayment(definition2)).toEqual(definition2)
-      expect(repositionPayment(definition3)).toEqual(definition3)
+      expect(repositionPaymentAndSummary(definition1)).toEqual(
+        expectedDefinition
+      )
+      expect(repositionPaymentAndSummary(definition2)).toEqual(definition2)
+      expect(repositionPaymentAndSummary(definition3)).toEqual(definition3)
     })
   })
 

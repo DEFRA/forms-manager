@@ -25,126 +25,32 @@ import {
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
 
 /**
- * @param {FormDefinition} definition
- * @returns {{
- *  readonly summary: PageSummary | undefined;
- *  shouldRepositionSummary: boolean;
- *  summaryExists: boolean;
- *  indexOf: number;
- * }}
- */
-export function summaryHelper(definition) {
-  const lastIndex = definition.pages.length - 1
-  const summaryIndex = definition.pages.findIndex((page) => isSummaryPage(page))
-  const summaryExists = summaryIndex >= 0
-  const shouldRepositionSummary = summaryExists && summaryIndex !== lastIndex
-
-  return {
-    summaryExists,
-    shouldRepositionSummary,
-    get summary() {
-      const summaryPage = /** @type {PageSummary | undefined} */ (
-        definition.pages[summaryIndex]
-      )
-      return summaryPage
-    },
-    indexOf: summaryIndex
-  }
-}
-
-/**
- * @param {FormDefinition} definition
- * @returns {{
- *  readonly payment: PageQuestion | undefined;
- *  shouldRepositionPayment: boolean;
- *  paymentExists: boolean;
- *  indexOf: number;
- * }}
- */
-export function paymentHelper(definition) {
-  const lastButOneIndex = definition.pages.length - 2
-  const paymentIndex = definition.pages.findIndex((page) => isPaymentPage(page))
-  const paymentExists = paymentIndex >= 0
-  const shouldRepositionPayment =
-    paymentExists && paymentIndex !== lastButOneIndex
-
-  return {
-    paymentExists,
-    shouldRepositionPayment,
-    get payment() {
-      const paymentPage = /** @type {PageQuestion | undefined} */ (
-        definition.pages[paymentIndex]
-      )
-      return paymentPage
-    },
-    indexOf: paymentIndex
-  }
-}
-
-/**
- * @param {Page[]} pages
- * @param {number} indexOf
- * @returns {Page[]}
- */
-function removePage(pages, indexOf) {
-  return /** @type {Page[]} */ (pages.toSpliced(indexOf, 1))
-}
-
-/**
- * Repositions summary to the end of the pages
- * @param {FormDefinition} definition
- */
-export function repositionSummary(definition) {
-  const summaryHelperOutput = summaryHelper(definition)
-  const { shouldRepositionSummary } = summaryHelperOutput
-
-  if (shouldRepositionSummary) {
-    const { summary, indexOf } =
-      /** @type {{ summary: PageSummary, indexOf: number}} */ (
-        summaryHelperOutput
-      )
-
-    const pagesWithoutSummary = removePage(definition.pages, indexOf)
-
-    return {
-      ...definition,
-      pages: [...pagesWithoutSummary, summary]
-    }
-  }
-
-  return definition
-}
-
-/**
  * Repositions payment page to just before summary page
  * @param {FormDefinition} definition
  */
-export function repositionPayment(definition) {
-  const paymentHelperOutput = paymentHelper(definition)
-  const { shouldRepositionPayment } = paymentHelperOutput
+export function repositionPaymentAndSummary(definition) {
+  const payment = /** @type { PageQuestion | undefined } */ (
+    definition.pages.find((page) => isPaymentPage(page))
+  )
+  const summary = /** @type { PageSummary | undefined } */ (
+    definition.pages.find((page) => isSummaryPage(page))
+  )
 
-  if (shouldRepositionPayment) {
-    const { payment, indexOf } =
-      /** @type {{ payment: PageQuestion, indexOf: number}} */ (
-        paymentHelperOutput
-      )
+  const pagesWithoutPaymentAndSummary = definition.pages.filter(
+    (page) => !isSummaryPage(page) && !isPaymentPage(page)
+  )
 
-    const pagesWithoutPayment = removePage(definition.pages, indexOf)
-    const summary = /** @type {PageSummary} */ (
-      definition.pages.find((page) => isSummaryPage(page))
-    )
-    const pagesWithoutPaymentAndSummary = removePage(
-      pagesWithoutPayment,
-      pagesWithoutPayment.length - 1
-    )
-
-    return {
-      ...definition,
-      pages: [...pagesWithoutPaymentAndSummary, payment, summary]
-    }
+  const sortedPages = pagesWithoutPaymentAndSummary
+  if (payment) {
+    sortedPages.push(payment)
   }
-
-  return definition
+  if (summary) {
+    sortedPages.push(summary)
+  }
+  return {
+    ...definition,
+    pages: sortedPages
+  }
 }
 
 /**
@@ -152,29 +58,19 @@ export function repositionPayment(definition) {
  * @param {FormDefinition} definition
  */
 export function upgradeSummary(definition) {
-  const summaryHelperOutput = summaryHelper(definition)
+  const repositionedPages = repositionPaymentAndSummary(definition).pages
 
-  const { summary, indexOf } =
-    /** @type {{ summary: PageSummary | PageSummaryWithConfirmationEmail, indexOf: number}} */ (
-      summaryHelperOutput
-    )
+  const summary = repositionedPages[repositionedPages.length - 1]
 
   if (summary.controller === ControllerType.Summary) {
-    const pagesWithoutSummary = removePage(definition.pages, indexOf)
-
-    return /** @type {FormDefinition} */ ({
-      ...definition,
-      pages: [
-        ...pagesWithoutSummary,
-        {
-          ...summary,
-          controller: ControllerType.SummaryWithConfirmationEmail
-        }
-      ]
-    })
+    // @ts-expect-error - custom controller
+    summary.controller = ControllerType.SummaryWithConfirmationEmail
   }
 
-  return definition
+  return {
+    ...definition,
+    pages: repositionedPages
+  }
 }
 
 /**
@@ -625,9 +521,8 @@ export function convertControllerPathsToNames(definition) {
 
 const migrationSteps = [
   convertControllerPathsToNames,
-  repositionSummary,
+  repositionPaymentAndSummary,
   upgradeSummary,
-  repositionPayment,
   applyPageTitles,
   migrateComponentFields,
   convertDeclaration,

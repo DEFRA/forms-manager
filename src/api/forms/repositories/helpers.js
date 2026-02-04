@@ -18,7 +18,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
-import { repositionPayment } from '~/src/api/forms/service/migration-helpers.js'
+import { repositionPaymentAndSummary } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -49,32 +49,6 @@ export async function removeById(session, collectionName, id) {
  */
 export function findPage(definition, pageId) {
   return definition.pages.find((page) => page.id === pageId)
-}
-
-/**
- * Gets the position a new page should be inserted
- * @param {FormDefinition} definition
- * @param {boolean} isPayment
- */
-export function getPageInsertPosition(definition, isPayment) {
-  const pages = definition.pages
-  const paymentPagePositionRelative = 2
-
-  if (pages.length) {
-    const summaryExists = isSummaryPage(pages[pages.length - 1])
-    if (isPayment) {
-      return summaryExists ? -1 : undefined
-    }
-    const paymentExists = isPaymentPage(
-      pages[pages.length - paymentPagePositionRelative]
-    )
-    if (summaryExists && paymentExists) {
-      return -paymentPagePositionRelative
-    }
-    return summaryExists ? -1 : undefined
-  }
-
-  return undefined
 }
 
 /**
@@ -370,7 +344,7 @@ export async function modifyDraft(
   // Apply the update
   const updated = updateCallback(document.draft)
 
-  const repositioned = repositionPayment(updated)
+  const repositioned = repositionPaymentAndSummary(updated)
 
   // Validate form definition
   const draft = validate(repositioned, schema)
