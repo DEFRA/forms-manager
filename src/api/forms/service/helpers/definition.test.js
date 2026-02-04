@@ -1,14 +1,21 @@
 import {
+  ComponentType,
   SchemaVersion,
   formDefinitionSchema,
   formDefinitionV2Schema
 } from '@defra/forms-model'
 import Joi from 'joi'
 
-import { buildDefinition } from '~/src/api/forms/__stubs__/definition.js'
+import {
+  buildDefinition,
+  buildPaymentPage,
+  buildQuestionPage,
+  buildTextFieldComponent
+} from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
   getValidationSchema,
+  postSchemaValidation,
   validate
 } from '~/src/api/forms/service/helpers/definition.js'
 
@@ -86,6 +93,52 @@ describe('definition helpers', () => {
       expect(mockSchema.validate).toHaveBeenCalledWith(definition, {
         abortEarly: false
       })
+    })
+  })
+
+  describe('postSchemaValidation', () => {
+    it('should return undefined if no pages', () => {
+      // @ts-expect-error - missing pages from definition
+      expect(postSchemaValidation({})).toBeUndefined()
+    })
+
+    it('should return undefined if no payment pages', () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage(buildTextFieldComponent())]
+      })
+      expect(postSchemaValidation(definition)).toBeUndefined()
+    })
+
+    it('should return error if more than one payment component on a page', () => {
+      const paymentPage = buildPaymentPage()
+      paymentPage.components.push({
+        type: ComponentType.PaymentField,
+        title: 'Payment required2',
+        name: 'paymentField2',
+        options: {
+          required: true,
+          amount: 200,
+          description: 'Payment desc2'
+        }
+      })
+      const definition = buildDefinition({
+        pages: [paymentPage]
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        'More than one payment component on page /payment-required'
+      )
+    })
+
+    it('should return error if more than one payment page in form', () => {
+      const paymentPage = buildPaymentPage()
+      const definition = buildDefinition({
+        pages: [paymentPage, paymentPage]
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe('More than one payment page in form')
     })
   })
 })

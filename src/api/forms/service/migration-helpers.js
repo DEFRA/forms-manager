@@ -14,6 +14,7 @@ import {
   hasListField,
   hasNext,
   isConditionWrapper,
+  isPaymentPage,
   isSummaryPage
 } from '@defra/forms-model'
 
@@ -22,66 +23,34 @@ import {
   isConditionData
 } from '~/src/api/forms/service/condition-migration-helpers.js'
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
-/**
- * @param {FormDefinition} definition
- * @returns {{
- *  readonly summary: PageSummary | undefined;
- *  shouldRepositionSummary: boolean;
- *  summaryExists: boolean;
- *  indexOf: number;
- * }}
- */
-export function summaryHelper(definition) {
-  const lastIndex = definition.pages.length - 1
-  const summaryIndex = definition.pages.findIndex((page) => isSummaryPage(page))
-  const summaryExists = summaryIndex >= 0
-  const shouldRepositionSummary = summaryExists && summaryIndex !== lastIndex
 
+/**
+ * Repositions payment page to just before summary page
+ * @param {FormDefinition} definition
+ */
+export function repositionPaymentAndSummary(definition) {
+  const payment = /** @type { PageQuestion | undefined } */ (
+    definition.pages.find((page) => isPaymentPage(page))
+  )
+  const summary = /** @type { PageSummary | undefined } */ (
+    definition.pages.find((page) => isSummaryPage(page))
+  )
+
+  const pagesWithoutPaymentAndSummary = definition.pages.filter(
+    (page) => !isSummaryPage(page) && !isPaymentPage(page)
+  )
+
+  const sortedPages = pagesWithoutPaymentAndSummary
+  if (payment) {
+    sortedPages.push(payment)
+  }
+  if (summary) {
+    sortedPages.push(summary)
+  }
   return {
-    summaryExists,
-    shouldRepositionSummary,
-    get summary() {
-      const summaryPage = /** @type {PageSummary | undefined} */ (
-        definition.pages[summaryIndex]
-      )
-      return summaryPage
-    },
-    indexOf: summaryIndex
+    ...definition,
+    pages: sortedPages
   }
-}
-
-/**
- * @param {Page[]} pages
- * @param {number} indexOf
- * @returns {Page[]}
- */
-function removeSummary(pages, indexOf) {
-  return /** @type {Page[]} */ (pages.toSpliced(indexOf, 1))
-}
-
-/**
- * Repositions summary to the end of the pages
- * @param {FormDefinition} definition
- */
-export function repositionSummary(definition) {
-  const summaryHelperOutput = summaryHelper(definition)
-  const { shouldRepositionSummary } = summaryHelperOutput
-
-  if (shouldRepositionSummary) {
-    const { summary, indexOf } =
-      /** @type {{ summary: PageSummary, indexOf: number}} */ (
-        summaryHelperOutput
-      )
-
-    const pagesWithoutSummary = removeSummary(definition.pages, indexOf)
-
-    return {
-      ...definition,
-      pages: [...pagesWithoutSummary, summary]
-    }
-  }
-
-  return definition
 }
 
 /**
@@ -89,29 +58,19 @@ export function repositionSummary(definition) {
  * @param {FormDefinition} definition
  */
 export function upgradeSummary(definition) {
-  const summaryHelperOutput = summaryHelper(definition)
+  const repositionedPages = repositionPaymentAndSummary(definition).pages
 
-  const { summary, indexOf } =
-    /** @type {{ summary: PageSummary | PageSummaryWithConfirmationEmail, indexOf: number}} */ (
-      summaryHelperOutput
-    )
+  const summary = repositionedPages[repositionedPages.length - 1]
 
   if (summary.controller === ControllerType.Summary) {
-    const pagesWithoutSummary = removeSummary(definition.pages, indexOf)
-
-    return /** @type {FormDefinition} */ ({
-      ...definition,
-      pages: [
-        ...pagesWithoutSummary,
-        {
-          ...summary,
-          controller: ControllerType.SummaryWithConfirmationEmail
-        }
-      ]
-    })
+    // @ts-expect-error - custom controller
+    summary.controller = ControllerType.SummaryWithConfirmationEmail
   }
 
-  return definition
+  return {
+    ...definition,
+    pages: repositionedPages
+  }
 }
 
 /**
@@ -562,7 +521,7 @@ export function convertControllerPathsToNames(definition) {
 
 const migrationSteps = [
   convertControllerPathsToNames,
-  repositionSummary,
+  repositionPaymentAndSummary,
   upgradeSummary,
   applyPageTitles,
   migrateComponentFields,
@@ -610,5 +569,5 @@ export function migrateToV2(definition) {
  */
 
 /**
- * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageSummary, PageSummaryWithConfirmationEmail, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, MarkdownComponent, Page, PageQuestion, PageSummary, PageSummaryWithConfirmationEmail, ConditionWrapper, ConditionWrapperV2 } from '@defra/forms-model'
  */

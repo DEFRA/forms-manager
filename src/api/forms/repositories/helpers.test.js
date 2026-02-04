@@ -15,6 +15,7 @@ import {
   buildCondition,
   buildDefinition,
   buildList,
+  buildPaymentPage,
   buildQuestionPage,
   buildStatusPage,
   buildSummaryPage,
@@ -22,6 +23,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
+  applyReferenceNumberSetting,
   buildSectionsResponse,
   findComponent,
   findConditionIndex,
@@ -35,7 +37,6 @@ import {
   getListIndex,
   getPage,
   getPageIndex,
-  getPageInsertPosition,
   handleControllerPatch,
   modifyAddComponent,
   modifyAddList,
@@ -241,22 +242,6 @@ describe('repository helpers', () => {
       expect(() => {
         getPageIndex(definition, 'incorrect-id')
       }).toThrow(Boom.notFound("Page not found with id 'incorrect-id'"))
-    })
-  })
-
-  describe('getPageInsertPosition', () => {
-    it('should return -1 if a summary page exists', () => {
-      const definition = buildDefinition({
-        pages: [questionPageWithoutComponent, summaryPage]
-      })
-      expect(getPageInsertPosition(definition)).toBe(-1)
-    })
-
-    it('should return undefined if a summary page does not exist', () => {
-      const definition = buildDefinition({
-        pages: [questionPageWithoutComponent]
-      })
-      expect(getPageInsertPosition(definition)).toBeUndefined()
     })
   })
 
@@ -1598,6 +1583,47 @@ describe('repository helpers', () => {
       const result = buildSectionsResponse(definition)
 
       expect(result).toEqual([])
+    })
+  })
+
+  describe('applyReferenceNumberSetting', () => {
+    it('should retain existing options if no payment', () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage({ id: 'page-1' })],
+        // @ts-expect-error - test property
+        options: { option1: 'abc' }
+      })
+      expect(applyReferenceNumberSetting(definition).options).toEqual({
+        option1: 'abc'
+      })
+    })
+
+    it('should omit options if no options and if no payment', () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage({ id: 'page-1' })]
+      })
+      expect(applyReferenceNumberSetting(definition).options).toBeUndefined()
+    })
+
+    it('should add showReferenceNumber option of true if no options and form has a payment page', () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage({ id: 'page-1' }), buildPaymentPage()]
+      })
+      expect(applyReferenceNumberSetting(definition).options).toEqual({
+        showReferenceNumber: true
+      })
+    })
+
+    it('should add showReferenceNumber option of true and retain existing options when form has a payment page', () => {
+      const definition = buildDefinition({
+        pages: [buildQuestionPage({ id: 'page-1' }), buildPaymentPage()],
+        // @ts-expect-error - test property
+        options: { option1: 'abc' }
+      })
+      expect(applyReferenceNumberSetting(definition).options).toEqual({
+        option1: 'abc',
+        showReferenceNumber: true
+      })
     })
   })
 })

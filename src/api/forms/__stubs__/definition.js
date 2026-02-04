@@ -58,6 +58,35 @@ export function buildSummaryPageWithConfirmation(partialSummaryPage = {}) {
 }
 
 /**
+ * @param {Partial<PageQuestion>} [partialPaymentPage]
+ */
+export function buildPaymentPage(partialPaymentPage = {}) {
+  /** @type {PageQuestion} */
+  const page = /** @satisfies {PageQuestion} */ (
+    structuredClone({
+      id: '222a45f6-4541-4a46-91bd-8b8931b07b50',
+      title: 'Payment required on this page',
+      path: '/payment-required',
+      components: [
+        {
+          type: ComponentType.PaymentField,
+          title: 'Payment required',
+          name: 'paymentField',
+          options: {
+            required: true,
+            amount: 100,
+            description: 'Payment desc'
+          }
+        }
+      ],
+      next: [],
+      ...partialPaymentPage
+    })
+  )
+  return page
+}
+
+/**
  * @param {Partial<PageStatus>} partialStatusPage
  */
 export function buildStatusPage(partialStatusPage = {}) {

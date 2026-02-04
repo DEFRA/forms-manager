@@ -10,6 +10,7 @@ import {
   hasRepeater,
   isConditionWrapperV2,
   isFormType,
+  isPaymentPage,
   isSummaryPage,
   slugify
 } from '@defra/forms-model'
@@ -17,6 +18,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
+import { repositionPaymentAndSummary } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -47,16 +49,6 @@ export async function removeById(session, collectionName, id) {
  */
 export function findPage(definition, pageId) {
   return definition.pages.find((page) => page.id === pageId)
-}
-
-/**
- * Gets the position a new page should be inserted
- * @param {FormDefinition} definition
- */
-export function getPageInsertPosition(definition) {
-  const pages = definition.pages
-
-  return pages.length && isSummaryPage(pages[pages.length - 1]) ? -1 : undefined
 }
 
 /**
@@ -352,8 +344,10 @@ export async function modifyDraft(
   // Apply the update
   const updated = updateCallback(document.draft)
 
+  const repositioned = repositionPaymentAndSummary(updated)
+
   // Validate form definition
-  const draft = validate(updated, schema)
+  const draft = validate(repositioned, schema)
 
   // Persist the updated draft
   const coll2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
@@ -426,6 +420,8 @@ export function modifyAddPage(definition, page, position) {
     definition.pages.splice(position, 0, page)
   }
 
+  applyReferenceNumberSetting(definition)
+
   return definition
 }
 
@@ -440,6 +436,23 @@ export function modifyUpdatePage(definition, page, pageId) {
   const idx = getPageIndex(definition, pageId)
 
   definition.pages[idx] = page
+
+  return definition
+}
+
+/**
+ * Overrides reference number setting if a payment page exists
+ * @param {FormDefinition} definition
+ * @returns {FormDefinition}
+ */
+export function applyReferenceNumberSetting(definition) {
+  const hasPayment = definition.pages.some((page) => isPaymentPage(page))
+  if (hasPayment) {
+    definition.options = {
+      ...definition.options,
+      showReferenceNumber: true
+    }
+  }
 
   return definition
 }
@@ -513,6 +526,8 @@ export function modifyAddComponent(definition, pageId, component, position) {
     }
   }
 
+  applyReferenceNumberSetting(definition)
+
   return definition
 }
 
@@ -537,6 +552,8 @@ export function modifyUpdateComponent(
   if (hasComponentsEvenIfNoNext(page)) {
     page.components[componentIdx] = component
   }
+
+  applyReferenceNumberSetting(definition)
 
   return definition
 }
