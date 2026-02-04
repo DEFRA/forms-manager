@@ -57,15 +57,18 @@ export function findPage(definition, pageId) {
  */
 export function getPageInsertPosition(definition, isPayment) {
   const pages = definition.pages
+  const paymentPagePositionRelative = 2
 
   if (pages.length) {
     const summaryExists = isSummaryPage(pages[pages.length - 1])
     if (isPayment) {
       return summaryExists ? -1 : undefined
     }
-    const paymentExists = isPaymentPage(pages[pages.length - 2])
+    const paymentExists = isPaymentPage(
+      pages[pages.length - paymentPagePositionRelative]
+    )
     if (summaryExists && paymentExists) {
-      return -2
+      return -paymentPagePositionRelative
     }
     return summaryExists ? -1 : undefined
   }

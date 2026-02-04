@@ -104,7 +104,7 @@ export function postSchemaValidation(definition) {
     }
   }
   return paymentPages > 1
-    ? createJoiError('/', 'More than one payment page on form')
+    ? createJoiError('/', 'More than one payment page in form')
     : undefined
 }
 
