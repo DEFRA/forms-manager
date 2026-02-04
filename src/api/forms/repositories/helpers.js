@@ -18,6 +18,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
+import { repositionPayment } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
 
@@ -369,8 +370,10 @@ export async function modifyDraft(
   // Apply the update
   const updated = updateCallback(document.draft)
 
+  const repositioned = repositionPayment(updated)
+
   // Validate form definition
-  const draft = validate(updated, schema)
+  const draft = validate(repositioned, schema)
 
   // Persist the updated draft
   const coll2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
