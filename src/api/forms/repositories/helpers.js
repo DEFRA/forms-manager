@@ -848,6 +848,11 @@ export function modifyUpdateOption(definition, optionName, optionValue) {
     definition.options.showReferenceNumber = optionValue === 'true'
   }
 
+  if (optionName === 'disableUserFeedback') {
+    // Convert to boolean
+    definition.options.disableUserFeedback = optionValue === 'true'
+  }
+
   return definition
 }
 

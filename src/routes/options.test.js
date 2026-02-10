@@ -24,7 +24,7 @@ describe('Options route', () => {
   const id = '661e4ca5039739ef2902b214'
 
   describe('Success responses', () => {
-    test('Testing POST /forms/{id}/definition/draft/options/{optionName}', async () => {
+    test('Testing POST /forms/{id}/definition/draft/options/{optionName} showReferenceNumber', async () => {
       const payload = {
         optionValue: 'true'
       }
@@ -50,6 +50,33 @@ describe('Options route', () => {
       expect(calledName).toBe('showReferenceNumber')
       expect(calledValue).toBe('true')
     })
+
+    test('Testing POST /forms/{id}/definition/draft/options/{optionName} disableUserFeedback', async () => {
+      const payload = {
+        optionValue: 'true'
+      }
+
+      const updateOption = jest
+        .mocked(updateOptionOnDraftDefinition)
+        // @ts-expect-error - type for testing
+        .mockResolvedValueOnce({ disableUserFeedback: true })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/options/disableUserFeedback`,
+        payload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        disableUserFeedback: true
+      })
+      const [, calledName, calledValue] = updateOption.mock.calls[0]
+      expect(calledName).toBe('disableUserFeedback')
+      expect(calledValue).toBe('true')
+    })
   })
 
   describe('Error responses', () => {
@@ -69,7 +96,8 @@ describe('Options route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Bad Request',
-        message: '"optionName" must be [showReferenceNumber]'
+        message:
+          '"optionName" must be one of [showReferenceNumber, disableUserFeedback]'
       })
     })
   })
