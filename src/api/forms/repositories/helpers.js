@@ -8,6 +8,7 @@ import {
   hasComponents,
   hasComponentsEvenIfNoNext,
   hasRepeater,
+  includesPaymentField,
   isConditionWrapperV2,
   isFormType,
   isPaymentPage,
@@ -592,6 +593,13 @@ export function handleControllerPatch(page, controller) {
       if (firstFormComponent) {
         firstFormComponent.type = ComponentType.FileUploadField
       }
+    }
+    if (
+      controller === ControllerType.Repeat &&
+      hasComponents(page) &&
+      includesPaymentField(page.components)
+    ) {
+      delete page.controller
     }
   }
   if (controller === null) {

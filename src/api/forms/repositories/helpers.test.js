@@ -1216,6 +1216,15 @@ describe('repository helpers', () => {
         next: []
       })
     })
+
+    it('should not assign Repeat controller when page has PaymentField', () => {
+      const page = buildPaymentPage()
+      const controller = ControllerType.Repeat
+
+      handleControllerPatch(page, controller)
+
+      expect(page.controller).toBeUndefined()
+    })
   })
 
   describe('modifyAssignSections', () => {
