@@ -68,7 +68,7 @@ describe('options', () => {
   })
 
   describe('updateOptionOnDraftDefinition', () => {
-    it('should add a list to the form definition', async () => {
+    it('should add option of showReferenceNumber to form definition', async () => {
       jest
         .mocked(formDefinition.get)
         .mockResolvedValueOnce(formDefinitionWithList)
@@ -96,6 +96,37 @@ describe('options', () => {
       expect(auditMessage.data).toMatchObject({
         requestType: FormDefinitionRequestType.UPDATE_OPTION,
         payload: { option: { showReferenceNumber: 'true' } }
+      })
+    })
+
+    it('should add option of disableUserFeedback to form definition', async () => {
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(formDefinitionWithList)
+      const updateOptionMock = jest
+        .mocked(formDefinition.updateOption)
+        .mockResolvedValueOnce(formDefinitionWithList)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+      const result = await updateOptionOnDraftDefinition(
+        id,
+        'disableUserFeedback',
+        'true',
+        defaultAuthor
+      )
+      const [expectedFormId, optionName] = updateOptionMock.mock.calls[0]
+      expect(expectedFormId).toBe(id)
+      expect(optionName).toBe('disableUserFeedback')
+      expect(result).toEqual({ option: { disableUserFeedback: 'true' } })
+      expectMetadataUpdate()
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.UPDATE_OPTION,
+        payload: { option: { disableUserFeedback: 'true' } }
       })
     })
   })

@@ -1425,7 +1425,7 @@ describe('repository helpers', () => {
   })
 
   describe('modfiyUpdateOption', () => {
-    it('should add then update the option', () => {
+    it('should add then update the option - showReferenceNumber', () => {
       const definition = buildDefinition({
         pages: [questionPageWithComponent]
       })
@@ -1445,6 +1445,28 @@ describe('repository helpers', () => {
       )
 
       expect(updated.options?.showReferenceNumber).toBe(false)
+    })
+
+    it('should add then update the option - disableUserFeedback', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent]
+      })
+
+      const modified = modifyUpdateOption(
+        definition,
+        'disableUserFeedback',
+        'true'
+      )
+
+      expect(modified.options?.disableUserFeedback).toBe(true)
+
+      const updated = modifyUpdateOption(
+        definition,
+        'disableUserFeedback',
+        'false'
+      )
+
+      expect(updated.options?.disableUserFeedback).toBe(false)
     })
   })
 
