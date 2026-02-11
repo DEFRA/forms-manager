@@ -16,7 +16,8 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
   getValidationSchema,
   postSchemaValidation,
-  validate
+  validate,
+  validatePaymentAmount
 } from '~/src/api/forms/service/helpers/definition.js'
 
 describe('definition helpers', () => {
@@ -140,5 +141,52 @@ describe('definition helpers', () => {
       expect(res).toBeInstanceOf(Joi.ValidationError)
       expect(res?.message).toBe('More than one payment page in form')
     })
+
+    it('should return error if payment amount is invalid', () => {
+      const paymentPage = buildPaymentPage({
+        components: [
+          {
+            type: ComponentType.PaymentField,
+            title: 'Payment required',
+            name: 'paymentField',
+            options: {
+              required: true,
+              amount: -10,
+              description: 'Payment desc'
+            }
+          }
+        ]
+      })
+      const definition = buildDefinition({ pages: [paymentPage] })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+    })
+  })
+
+  describe('validatePaymentAmount', () => {
+    it.each([
+      { amount: -10, desc: 'negative' },
+      { amount: 0, desc: 'zero' },
+      { amount: 0.1, desc: 'below minimum (£0.30)' },
+      { amount: 100_001, desc: 'above maximum (£100,000)' },
+      { amount: NaN, desc: 'NaN' },
+      { amount: Infinity, desc: 'Infinity' }
+    ])(
+      'should return an error when amount is $desc ($amount)',
+      ({ amount }) => {
+        expect(validatePaymentAmount(amount)).toBeDefined()
+      }
+    )
+
+    it.each([
+      { amount: 0.3, desc: 'minimum boundary (£0.30)' },
+      { amount: 1, desc: '£1' },
+      { amount: 100_000, desc: 'maximum boundary (£100,000)' }
+    ])(
+      'should return undefined when amount is $desc ($amount)',
+      ({ amount }) => {
+        expect(validatePaymentAmount(amount)).toBeUndefined()
+      }
+    )
   })
 })
