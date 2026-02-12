@@ -3,7 +3,8 @@ import {
   SchemaVersion,
   formDefinitionSchema,
   formDefinitionV2Schema,
-  hasComponentsEvenIfNoNext
+  hasComponentsEvenIfNoNext,
+  paymentAmountSchema
 } from '@defra/forms-model'
 import Joi from 'joi'
 
@@ -88,24 +89,42 @@ export function postSchemaValidation(definition) {
   // Look for more than one payment component per form
   let paymentPages = 0
   for (const page of definition.pages) {
-    const paymentCount = hasComponentsEvenIfNoNext(page)
+    const paymentComponents = hasComponentsEvenIfNoNext(page)
       ? page.components.filter(
           (comp) => comp.type === ComponentType.PaymentField
-        ).length
-      : 0
-    if (paymentCount > 0) {
+        )
+      : []
+    if (paymentComponents.length > 0) {
       paymentPages++
     }
-    if (paymentCount > 1) {
+    if (paymentComponents.length > 1) {
       return createJoiError(
         page.path,
         `More than one payment component on page ${page.path}`
       )
     }
+    if (paymentComponents.length === 1) {
+      const amountError = validatePaymentAmount(
+        paymentComponents[0].options.amount
+      )
+      if (amountError) {
+        return createJoiError(page.path, amountError)
+      }
+    }
   }
   return paymentPages > 1
     ? createJoiError('/', 'More than one payment page in form')
     : undefined
+}
+
+/**
+ * Validates a payment amount against the GOV.UK Pay schema
+ * @param {number} amount
+ * @returns {string | undefined} error message if invalid, undefined if valid
+ */
+export function validatePaymentAmount(amount) {
+  const { error } = paymentAmountSchema.validate(amount)
+  return error?.message
 }
 
 /**
