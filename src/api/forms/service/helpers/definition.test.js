@@ -160,6 +160,30 @@ describe('definition helpers', () => {
       const definition = buildDefinition({ pages: [paymentPage] })
       const res = postSchemaValidation(definition)
       expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe('"value" must be greater than or equal to 0.3')
+    })
+
+    it('should return error if payment enabled but ref num disabled', () => {
+      const paymentPage = buildPaymentPage({
+        components: [
+          {
+            type: ComponentType.PaymentField,
+            title: 'Payment required',
+            name: 'paymentField',
+            options: {
+              required: true,
+              amount: 10,
+              description: 'Payment desc'
+            }
+          }
+        ]
+      })
+      const definition = buildDefinition({ pages: [paymentPage] })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        'Reference number must be enabled if the form has a payment question'
+      )
     })
   })
 

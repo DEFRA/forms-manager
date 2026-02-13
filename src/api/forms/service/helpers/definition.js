@@ -112,9 +112,20 @@ export function postSchemaValidation(definition) {
       }
     }
   }
-  return paymentPages > 1
-    ? createJoiError('/', 'More than one payment page in form')
-    : undefined
+  if (paymentPages > 1) {
+    return createJoiError('/', 'More than one payment page in form')
+  }
+
+  // Check if there is an incompatibility between reference number and payment
+  if (paymentPages === 1) {
+    if (!definition.options?.showReferenceNumber) {
+      return createJoiError(
+        '/',
+        'Reference number must be enabled if the form has a payment question'
+      )
+    }
+  }
+  return undefined
 }
 
 /**
