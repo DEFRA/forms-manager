@@ -66,6 +66,8 @@ export function mapForm(document) {
     teamEmail: document.teamEmail,
     contact: document.contact,
     submissionGuidance: document.submissionGuidance,
+    privacyNoticeType: document.privacyNoticeType,
+    privacyNoticeText: document.privacyNoticeText,
     privacyNoticeUrl: document.privacyNoticeUrl,
     notificationEmail: document.notificationEmail,
     ...draft,

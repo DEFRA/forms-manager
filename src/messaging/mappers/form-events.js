@@ -266,8 +266,12 @@ export function formSubmissionGuidanceUpdatedMapper(metadata, updatedForm) {
  * @returns {FormPrivacyNoticeUpdatedMessage}
  */
 export function formPrivacyNoticeUpdatedMapper(metadata, updatedForm) {
-  const { privacyNoticeUrl: oldPrivacyNoticeUrl } = metadata
-  const { privacyNoticeUrl } = updatedForm
+  const {
+    privacyNoticeType: oldPrivacyNoticeType,
+    privacyNoticeText: oldPrivacyNoticeText,
+    privacyNoticeUrl: oldPrivacyNoticeUrl
+  } = metadata
+  const { privacyNoticeType, privacyNoticeText, privacyNoticeUrl } = updatedForm
   const baseData = createFormMessageDataBase(metadata)
 
   /**
@@ -277,9 +281,13 @@ export function formPrivacyNoticeUpdatedMapper(metadata, updatedForm) {
     ...baseData,
     changes: {
       previous: {
+        privacyNoticeType: oldPrivacyNoticeType,
+        privacyNoticeText: oldPrivacyNoticeText,
         privacyNoticeUrl: oldPrivacyNoticeUrl
       },
       new: {
+        privacyNoticeType,
+        privacyNoticeText,
         privacyNoticeUrl
       }
     }

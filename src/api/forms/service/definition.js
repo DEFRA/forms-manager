@@ -189,9 +189,13 @@ function validateFormForPublishing(formId, form, draftFormDefinition) {
     throw Boom.badRequest(makeFormLiveErrorMessages.missingSubmissionGuidance)
   }
 
-  if (!form.privacyNoticeUrl) {
+  if (
+    !form.privacyNoticeType ||
+    (form.privacyNoticeType === 'text' && !form.privacyNoticeText) ||
+    (form.privacyNoticeType === 'link' && !form.privacyNoticeUrl)
+  ) {
     logger.info(
-      `[missingPrivacyNotice] Form ${formId} missing privacy notice URL - validation failed, cannot publish`
+      `[missingPrivacyNotice] Form ${formId} missing privacy notice - validation failed, cannot publish`
     )
     throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
   }

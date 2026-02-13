@@ -17,6 +17,8 @@ const mapperLookup = {
   teamEmail: formTeamEmailUpdatedMapper,
   notificationEmail: formNotificationEmailUpdatedMapper,
   submissionGuidance: formSubmissionGuidanceUpdatedMapper,
+  privacyNoticeType: formPrivacyNoticeUpdatedMapper,
+  privacyNoticeText: formPrivacyNoticeUpdatedMapper,
   privacyNoticeUrl: formPrivacyNoticeUpdatedMapper,
   contact: formSupportUpdatedMapper
 }
