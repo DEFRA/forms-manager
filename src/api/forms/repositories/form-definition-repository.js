@@ -23,6 +23,7 @@ import {
   modifyName,
   modifyReorderComponents,
   modifyReorderPages,
+  modifyReorderSections,
   modifyUnassignCondition,
   modifyUpdateComponent,
   modifyUpdateCondition,
@@ -315,6 +316,26 @@ export async function reorderPages(formId, order, session) {
   const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Reordered pages on form ID ${formId}`)
+
+  return result.draft
+}
+
+/**
+ * Reorders the sections
+ * @param {string} formId
+ * @param {string[]} order
+ * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
+ */
+export async function reorderSections(formId, order, session) {
+  logger.info(`Reordering sections on form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyReorderSections(draft, order)
+
+  const result = await modifyDraft(formId, callback, session)
+
+  logger.info(`Reordered sections on form ID ${formId}`)
 
   return result.draft
 }

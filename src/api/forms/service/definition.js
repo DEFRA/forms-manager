@@ -417,6 +417,71 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
 }
 
 /**
+ * Based on a list of Section ids will reorder the sections
+ * @param {string} formId
+ * @param {string[]} order
+ * @param {FormMetadataAuthor} author
+ */
+export async function reorderDraftFormDefinitionSections(
+  formId,
+  order,
+  author
+) {
+  logger.info(
+    `Reordering sections on Form Definition (draft) for form ID ${formId}`
+  )
+
+  const form = await getFormDefinition(formId)
+
+  if (!order.length) {
+    return form
+  }
+
+  const session = client.startSession()
+
+  try {
+    const newForm = await session.withTransaction(async () => {
+      const reorderedForm = await formDefinition.reorderSections(
+        formId,
+        order,
+        session
+      )
+
+      const metadataDocument = await formMetadata.updateAudit(
+        formId,
+        author,
+        session
+      )
+
+      await createFormVersion(formId, session)
+
+      await publishFormUpdatedEvent(
+        metadataDocument,
+        { sectionOrder: order },
+        FormDefinitionRequestType.REORDER_SECTIONS
+      )
+
+      return reorderedForm
+    })
+
+    logger.info(
+      `Reordered sections on Form Definition (draft) for form ID ${formId}`
+    )
+
+    return newForm
+  } catch (err) {
+    logger.error(
+      err,
+      `[reorderSections] Reordering sections on form definition (draft) for form ID ${formId} failed - ${getErrorMessage(err)}`
+    )
+
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
  * Based on a list of component ids will reorder the components on a page
  * @param {string} formId
  * @param {string} pageId
