@@ -4,12 +4,15 @@ import {
   FormDefinitionRequestType
 } from '@defra/forms-model'
 
+import { buildDefinition, buildSummaryPage } from '~/src/api/forms/__stubs__/definition.js'
+import { reorderDraftFormDefinitionSections } from '~/src/api/forms/service/definition.js'
 import { assignSectionsToForm } from '~/src/api/forms/service/sections.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
 
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/api/forms/service/sections.js')
+jest.mock('~/src/api/forms/service/definition.js')
 
 describe('Sections route', () => {
   /** @type {Server} */
@@ -560,6 +563,45 @@ describe('Sections route', () => {
         ]
       })
     })
+  })
+
+  test('Testing POST /forms/{id}/definition/draft/sections/order reorders the sections in the db', async () => {
+    const sectionOneId = '5113a8ab-b297-46b5-b732-7fe42660c4db'
+    const sectionTwoId = 'd3dc6af2-3235-4455-80f7-941f0bf69c4f'
+    const section1 = {
+      id: sectionOneId,
+      name: 'section1',
+      title: 'Section One',
+      hideTitle: false
+    }
+
+    const section2 = {
+      id: sectionTwoId,
+      name: 'section2',
+      title: 'Section Two',
+      hideTitle: false
+    }
+
+    const expectedDefinition = buildDefinition({
+      pages: [
+        buildSummaryPage()
+      ],
+      sections: [section1, section2]
+    })
+    jest
+      .mocked(reorderDraftFormDefinitionSections)
+      .mockResolvedValue(expectedDefinition)
+
+    const response = await server.inject({
+      method: 'POST',
+      url: `/forms/${id}/definition/draft/sections/order`,
+      payload: [sectionOneId, sectionTwoId],
+      auth
+    })
+
+    expect(response.result).toEqual(expectedDefinition)
+    expect(response.statusCode).toEqual(okStatusCode)
+    expect(response.headers['content-type']).toContain(jsonContentType)
   })
 })
 

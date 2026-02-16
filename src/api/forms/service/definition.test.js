@@ -25,7 +25,8 @@ import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-reposito
 import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   modifyReorderComponents,
-  modifyReorderPages
+  modifyReorderPages,
+  modifyReorderSections
 } from '~/src/api/forms/repositories/helpers.js'
 import {
   formMetadataDocument,
@@ -43,6 +44,7 @@ import {
   listForms,
   reorderDraftFormDefinitionComponents,
   reorderDraftFormDefinitionPages,
+  reorderDraftFormDefinitionSections,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
 import {
@@ -1181,6 +1183,92 @@ describe('Forms service', () => {
         .mockRejectedValueOnce(boomInternal)
       await expect(
         reorderDraftFormDefinitionPages(
+          id,
+          ['5a1c2ef7-ed4e-4ec7-9119-226fc3063bda'],
+          author
+        )
+      ).rejects.toThrow(boomInternal)
+    })
+  })
+
+  describe('reorderDraftFormDefinitionSections', () => {
+    const sectionOneId = 'e6511b1c-c813-43d7-92c4-d84ba35d5f62'
+    const sectionTwoId = 'e3a1cb1e-8c9e-41d7-8ba7-719829bce84a'
+    const summaryPageId = 'b90e6453-d4c1-46a4-a233-3dbee566c79e'
+
+    const sectionOne = {
+      id: sectionOneId,
+      name: 'section1',
+      title: 'Section One'
+    }
+    const sectionTwo = {
+      id: sectionTwoId,
+      name: 'section2',
+      title: 'Section Two'
+    }
+    const summaryPage = buildSummaryPage({
+      id: summaryPageId
+    })
+
+    const definition = buildDefinition({
+      pages: [summaryPage],
+      sections: [sectionTwo, sectionOne]
+    })
+
+    beforeEach(() => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+    })
+
+    it('should reorder the sections', async () => {
+      const orderList = [sectionOneId, sectionTwoId]
+      jest
+        .mocked(formDefinition.reorderSections)
+        .mockResolvedValueOnce(modifyReorderSections(definition, orderList))
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+      const expectedDefinition = buildDefinition({
+        pages: [summaryPage],
+        sections: [sectionOne, sectionTwo]
+      })
+      const result = await reorderDraftFormDefinitionSections(
+        id,
+        orderList,
+        author
+      )
+
+      const [, order] = jest.mocked(formDefinition.reorderSections).mock.calls[0]
+      expect(order).toEqual(orderList)
+      expect(result).toEqual(expectedDefinition)
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_UPDATED
+      })
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REORDER_SECTIONS,
+        payload: { sectionOrder: orderList }
+      })
+
+      expectMetadataUpdate()
+    })
+
+    it('should not do any updates if no order list is sent', async () => {
+      const returnedDefinition = await reorderDraftFormDefinitionSections(
+        id,
+        [],
+        author
+      )
+      expect(returnedDefinition).toEqual(definition)
+      expect(formDefinition.update).not.toHaveBeenCalled()
+      expect(formMetadata.update).not.toHaveBeenCalled()
+    })
+
+    it('should surface errors', async () => {
+      const boomInternal = Boom.internal('Something went wrong')
+      jest
+        .mocked(formDefinition.reorderSections)
+        .mockRejectedValueOnce(boomInternal)
+      await expect(
+        reorderDraftFormDefinitionSections(
           id,
           ['5a1c2ef7-ed4e-4ec7-9119-226fc3063bda'],
           author
