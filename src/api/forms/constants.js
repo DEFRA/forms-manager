@@ -10,7 +10,7 @@ export const makeFormLiveErrorMessages = {
   missingSubmissionGuidance:
     'You need to tell your users what happens after they submit their form before you can make it live.',
   missingPrivacyNotice:
-    'You need to add a link to the privacy notice before you can publish this form.'
+    'You need to add a privacy notice before you can publish this form.'
 }
 
 export const removeFormErrorMessages = {

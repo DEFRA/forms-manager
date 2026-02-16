@@ -168,6 +168,17 @@ export async function deleteDraftFormDefinition(formId, author) {
 }
 
 /**
+ * @param {FormMetadata} form
+ */
+function missingPrivacyNotice(form) {
+  return (
+    !form.privacyNoticeType ||
+    (form.privacyNoticeType === 'text' && !form.privacyNoticeText) ||
+    (form.privacyNoticeType === 'link' && !form.privacyNoticeUrl)
+  )
+}
+
+/**
  * Validates form and form definition for publishing to live
  * @param {string} formId - ID of the form
  * @param {FormMetadata} form - Form metadata
@@ -189,9 +200,9 @@ function validateFormForPublishing(formId, form, draftFormDefinition) {
     throw Boom.badRequest(makeFormLiveErrorMessages.missingSubmissionGuidance)
   }
 
-  if (!form.privacyNoticeUrl) {
+  if (missingPrivacyNotice(form)) {
     logger.info(
-      `[missingPrivacyNotice] Form ${formId} missing privacy notice URL - validation failed, cannot publish`
+      `[missingPrivacyNotice] Form ${formId} missing privacy notice - validation failed, cannot publish`
     )
     throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
   }
