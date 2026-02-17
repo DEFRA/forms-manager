@@ -358,17 +358,21 @@ export async function createDraftFromLive(formId, author) {
 /**
  * Based on a list of Page ids will reorder the pages
  * @param {string} formId
- * @param {string[]} order
+ * @param {string[]} orderOfPageIds
  * @param {FormMetadataAuthor} author
  */
-export async function reorderDraftFormDefinitionPages(formId, order, author) {
+export async function reorderDraftFormDefinitionPages(
+  formId,
+  orderOfPageIds,
+  author
+) {
   logger.info(
     `Reordering pages on Form Definition (draft) for form ID ${formId}`
   )
 
   const form = await getFormDefinition(formId)
 
-  if (!order.length) {
+  if (!orderOfPageIds.length) {
     return form
   }
 
@@ -378,7 +382,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
     const newForm = await session.withTransaction(async () => {
       const reorderedForm = await formDefinition.reorderPages(
         formId,
-        order,
+        orderOfPageIds,
         session
       )
 
@@ -392,7 +396,7 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
 
       await publishFormUpdatedEvent(
         metadataDocument,
-        { pageOrder: order },
+        { pageOrder: orderOfPageIds },
         FormDefinitionRequestType.REORDER_PAGES
       )
 
@@ -419,12 +423,12 @@ export async function reorderDraftFormDefinitionPages(formId, order, author) {
 /**
  * Based on a list of Section ids will reorder the sections
  * @param {string} formId
- * @param {string[]} order
+ * @param {string[]} orderOfSectionIds
  * @param {FormMetadataAuthor} author
  */
 export async function reorderDraftFormDefinitionSections(
   formId,
-  order,
+  orderOfSectionIds,
   author
 ) {
   logger.info(
@@ -433,7 +437,7 @@ export async function reorderDraftFormDefinitionSections(
 
   const form = await getFormDefinition(formId)
 
-  if (!order.length) {
+  if (!orderOfSectionIds.length) {
     return form
   }
 
@@ -443,7 +447,7 @@ export async function reorderDraftFormDefinitionSections(
     const newForm = await session.withTransaction(async () => {
       const reorderedForm = await formDefinition.reorderSections(
         formId,
-        order,
+        orderOfSectionIds,
         session
       )
 
@@ -457,7 +461,7 @@ export async function reorderDraftFormDefinitionSections(
 
       await publishFormUpdatedEvent(
         metadataDocument,
-        { sectionOrder: order },
+        { sectionOrder: orderOfSectionIds },
         FormDefinitionRequestType.REORDER_SECTIONS
       )
 
@@ -485,13 +489,13 @@ export async function reorderDraftFormDefinitionSections(
  * Based on a list of component ids will reorder the components on a page
  * @param {string} formId
  * @param {string} pageId
- * @param {string[]} order
+ * @param {string[]} orderOfComponentIds
  * @param {FormMetadataAuthor} author
  */
 export async function reorderDraftFormDefinitionComponents(
   formId,
   pageId,
-  order,
+  orderOfComponentIds,
   author
 ) {
   logger.info(
@@ -500,7 +504,7 @@ export async function reorderDraftFormDefinitionComponents(
 
   const form = await getFormDefinition(formId)
 
-  if (!order.length) {
+  if (!orderOfComponentIds.length) {
     return form
   }
 
@@ -511,7 +515,7 @@ export async function reorderDraftFormDefinitionComponents(
       const reorderedForm = await formDefinition.reorderComponents(
         formId,
         pageId,
-        order,
+        orderOfComponentIds,
         session
       )
 
@@ -525,7 +529,7 @@ export async function reorderDraftFormDefinitionComponents(
 
       await publishFormUpdatedEvent(
         metadataDocument,
-        { pageId, componentOrder: order },
+        { pageId, componentOrder: orderOfComponentIds },
         FormDefinitionRequestType.REORDER_COMPONENTS
       )
 
