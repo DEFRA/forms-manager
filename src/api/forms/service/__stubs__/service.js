@@ -20,6 +20,7 @@ export const formMetadataInput = {
     phone: '0800 000 1234'
   },
   submissionGuidance: 'We’ll send you an email to let you know the outcome.',
+  privacyNoticeText: '',
   privacyNoticeType: 'link',
   privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice',
   notificationEmail: 'defraforms@defra.gov.uk'
