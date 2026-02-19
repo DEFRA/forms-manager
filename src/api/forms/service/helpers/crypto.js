@@ -1,4 +1,4 @@
-import { JSEncrypt } from 'jsencrypt'
+import crypto from 'node:crypto'
 
 import { config } from '~/src/config/index.js'
 
@@ -7,16 +7,11 @@ import { config } from '~/src/config/index.js'
  * @returns {string} base64-encoded result
  */
 export function encryptSecret(secretValue) {
-  const crypt = new JSEncrypt()
   const publicKey = config.get('publicKeyForSecrets')
   if (!publicKey) {
     throw new Error('Public key is missing')
   }
-  crypt.setPublicKey(publicKey)
-  const encrypted = crypt.encrypt(secretValue)
-  if (encrypted === false) {
-    throw new Error('Error during encryption')
-  }
-  return /** @type {string} */ (crypt.encrypt(secretValue))
+  const encrypted = crypto.publicEncrypt(publicKey, secretValue)
+  return encrypted.toString()
 }
 
