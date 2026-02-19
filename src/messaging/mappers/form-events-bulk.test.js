@@ -332,6 +332,44 @@ describe('publish', () => {
       })
     })
 
+    it('should get FORM_TERMS_AND_CONDITIONS_AGREED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        termsAndConditionsAgreed: true,
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formUpdatedMessage).toEqual({
+        entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_TERMS_AND_CONDITIONS_AGREED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              termsAndConditionsAgreed: undefined
+            },
+            new: {
+              termsAndConditionsAgreed: true
+            }
+          }
+        }
+      })
+    })
+
     it('should get FORM_SUPPORT_CONTACT_UPDATED audit message', () => {
       const updatedAt = new Date('2025-07-27')
       const updatedBy = {
