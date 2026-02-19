@@ -1,10 +1,10 @@
 import { Scopes, idSchema, nameSchema } from '@defra/forms-model'
 import { StatusCodes } from 'http-status-codes'
 import Joi from 'joi'
-import { existsFormSecret, getFormSecret, saveFormSecret } from '~/src/api/forms/service/secrets.js'
 
+import { existsFormSecret, getFormSecret, saveFormSecret } from '~/src/api/forms/service/secrets.js'
+import { failAction } from '~/src/helpers/fail-action.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
-import { failAction } from '~/src/helpers/payload-fail-action.js'
 
 const ROUTE_SECRETS = '/forms/{id}/secrets/{name}'
 const ROUTE_SECRET_EXISTS = '/forms/{id}/secrets/{name}/exists'
