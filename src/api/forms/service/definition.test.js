@@ -41,6 +41,7 @@ import {
   deleteDraftFormDefinition,
   getFormDefinition,
   listForms,
+  missingPrivacyNotice,
   reorderDraftFormDefinitionComponents,
   reorderDraftFormDefinitionPages,
   updateDraftFormDefinition
@@ -1351,9 +1352,64 @@ describe('Forms service', () => {
       expect(true).toBe(true)
     })
   })
+
+  describe('missingPrivacyNotice', () => {
+    it('should return false if only a url saved', () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        privacyNoticeUrl: 'https://some-url'
+      })
+      expect(missingPrivacyNotice(metadata)).toBe(false)
+    })
+
+    it('should return false if link type and url aved', () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        privacyNoticeType: 'link',
+        privacyNoticeUrl: 'https://some-url'
+      })
+      expect(missingPrivacyNotice(metadata)).toBe(false)
+    })
+
+    it('should return false if text type and text saved', () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        privacyNoticeType: 'text',
+        privacyNoticeText: 'Some text'
+      })
+      expect(missingPrivacyNotice(metadata)).toBe(false)
+    })
+
+    it('should return true if type link but no link', () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        privacyNoticeType: 'link'
+      })
+      expect(missingPrivacyNotice(metadata)).toBe(true)
+    })
+
+    it('should return true if type text but no text', () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        privacyNoticeType: 'text'
+      })
+      expect(missingPrivacyNotice(metadata)).toBe(true)
+    })
+
+    it('should return false if type text and some text', () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        privacyNoticeType: 'text',
+        privacyNoticeText: 'Some text'
+      })
+      expect(missingPrivacyNotice(metadata)).toBe(false)
+    })
+
+    it('should return false if type link and a link', () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        privacyNoticeType: 'link',
+        privacyNoticeUrl: 'https://some-link'
+      })
+      expect(missingPrivacyNotice(metadata)).toBe(false)
+    })
+  })
 })
 
 /**
- * @import { FormDefinition, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */
