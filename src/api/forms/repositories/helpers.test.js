@@ -164,11 +164,11 @@ describe('repository helpers', () => {
 
   const conditions = [condition]
 
-const section1Id = 'f07566be-dd04-49df-890f-b226b92f3907'
-const section2Id = 'cb185708-203d-4560-9929-ecc27750244a'
-const section3Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
+  const section1Id = 'f07566be-dd04-49df-890f-b226b92f3907'
+  const section2Id = 'cb185708-203d-4560-9929-ecc27750244a'
+  const section3Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
 
-const section1 = {
+  const section1 = {
     id: section1Id,
     name: 'section1',
     title: 'Section One',
@@ -703,7 +703,10 @@ const section1 = {
         sections: [section1, section2, section3]
       })
 
-      const modified = modifyReorderSections(definition, [section3Id, section2Id])
+      const modified = modifyReorderSections(definition, [
+        section3Id,
+        section2Id
+      ])
 
       expect(modified.sections.at(0)?.id).toEqual(section3Id)
       expect(modified.sections.at(1)?.id).toEqual(section2Id)
@@ -711,7 +714,7 @@ const section1 = {
     })
   })
 
-  describe('modifyReorderComponentss', () => {
+  describe('modifyReorderComponents', () => {
     const componentId1 = 'fadeb416-2869-48b5-9292-ba45c01da52c'
     const componentId2 = 'd7981cfe-ea1d-49fe-9303-dc4465d3a776'
     const componentId3 = '57b5bd21-521d-467e-ab8a-1cd13eec984d'
