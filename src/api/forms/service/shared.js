@@ -69,7 +69,7 @@ export function mapForm(document) {
     privacyNoticeType: document.privacyNoticeType ?? 'link',
     privacyNoticeText: document.privacyNoticeText ?? '',
     privacyNoticeUrl: document.privacyNoticeUrl,
-    termsAndConditionsAgreed: document.termsAndConditionsAgreed,
+    termsAndConditionsAgreed: document.termsAndConditionsAgreed ?? false,
     notificationEmail: document.notificationEmail,
     ...draft,
     ...live,
