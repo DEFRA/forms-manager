@@ -4,7 +4,10 @@ import {
   FormDefinitionRequestType
 } from '@defra/forms-model'
 
-import { buildDefinition, buildSummaryPage } from '~/src/api/forms/__stubs__/definition.js'
+import {
+  buildDefinition,
+  buildSummaryPage
+} from '~/src/api/forms/__stubs__/definition.js'
 import { reorderDraftFormDefinitionSections } from '~/src/api/forms/service/definition.js'
 import { assignSectionsToForm } from '~/src/api/forms/service/sections.js'
 import { createServer } from '~/src/api/server.js'
@@ -583,9 +586,7 @@ describe('Sections route', () => {
     }
 
     const expectedDefinition = buildDefinition({
-      pages: [
-        buildSummaryPage()
-      ],
+      pages: [buildSummaryPage()],
       sections: [section1, section2]
     })
     jest

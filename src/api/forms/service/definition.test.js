@@ -1236,7 +1236,8 @@ describe('Forms service', () => {
         author
       )
 
-      const [, order] = jest.mocked(formDefinition.reorderSections).mock.calls[0]
+      const [, order] = jest.mocked(formDefinition.reorderSections).mock
+        .calls[0]
       expect(order).toEqual(orderList)
       expect(result).toEqual(expectedDefinition)
 
