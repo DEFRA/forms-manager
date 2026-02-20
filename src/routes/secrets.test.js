@@ -1,4 +1,8 @@
-import { existsFormSecret, getFormSecret, saveFormSecret } from '~/src/api/forms/service/secrets.js'
+import {
+  existsFormSecret,
+  getFormSecret,
+  saveFormSecret
+} from '~/src/api/forms/service/secrets.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
 
@@ -38,7 +42,7 @@ describe('Secrets routes', () => {
     })
 
     test('Testing GET /forms/{id}/secrets/{name}/exists', async () => {
-      jest.mocked(existsFormSecret).mockResolvedValueOnce(true)
+      jest.mocked(existsFormSecret).mockResolvedValueOnce({ exists: true })
 
       const response = await server.inject({
         method: 'GET',
@@ -47,7 +51,7 @@ describe('Secrets routes', () => {
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
-      expect(response.result).toBe(true)
+      expect(response.result).toEqual({ exists: true })
     })
 
     test('Testing POST /forms/{id}/secrets/{name}', async () => {

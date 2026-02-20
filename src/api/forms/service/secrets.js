@@ -12,10 +12,7 @@ import { client } from '~/src/mongo.js'
  * @param {string} formId - id of the form
  * @param {string} secretName - name of the secret
  */
-export async function getFormSecret(
-  formId,
-  secretName
-) {
+export async function getFormSecret(formId, secretName) {
   const document = await secretsRepository.get(formId, secretName)
   return document.secretValue
 }
@@ -25,11 +22,10 @@ export async function getFormSecret(
  * @param {string} formId - id of the form
  * @param {string} secretName - name of the secret
  */
-export async function existsFormSecret(
-  formId,
-  secretName
-) {
-  return await secretsRepository.exists(formId, secretName)
+export async function existsFormSecret(formId, secretName) {
+  return {
+    exists: await secretsRepository.exists(formId, secretName)
+  }
 }
 
 /**
@@ -39,12 +35,7 @@ export async function existsFormSecret(
  * @param {string} secretValue - cleartext secret value
  * @param {FormMetadataAuthor} author
  */
-export async function saveFormSecret(
-  formId,
-  secretName,
-  secretValue,
-  author
-) {
+export async function saveFormSecret(formId, secretName, secretValue, author) {
   const session = client.startSession()
 
   try {
@@ -56,11 +47,7 @@ export async function saveFormSecret(
 
       await secretsRepository.save(formId, secretName, encryptedSecret, session)
 
-      await publishSavedFormSecretEvent(
-        metadata,
-        secretName,
-        author
-      )
+      await publishSavedFormSecretEvent(metadata, secretName, author)
     })
 
     logger.info(`Saved secret '${secretName}' to form ID ${formId}`)

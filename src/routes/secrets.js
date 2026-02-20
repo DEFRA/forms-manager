@@ -2,7 +2,11 @@ import { Scopes, idSchema, nameSchema } from '@defra/forms-model'
 import { StatusCodes } from 'http-status-codes'
 import Joi from 'joi'
 
-import { existsFormSecret, getFormSecret, saveFormSecret } from '~/src/api/forms/service/secrets.js'
+import {
+  existsFormSecret,
+  getFormSecret,
+  saveFormSecret
+} from '~/src/api/forms/service/secrets.js'
 import { failAction } from '~/src/helpers/fail-action.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 
@@ -52,11 +56,11 @@ export default [
     /**
      * @param {RequestGetFormSecret} request
      */
-    async handler(request) {
+    handler(request) {
       const { params } = request
       const { id, name } = params
 
-      return await existsFormSecret(id, name)
+      return existsFormSecret(id, name)
     },
     options: {
       auth: false,
@@ -76,12 +80,7 @@ export default [
       const { id, name } = params
       const author = getAuthor(auth.credentials.user)
 
-      await saveFormSecret(
-        id,
-        name,
-        payload.secretValue,
-        author
-      )
+      await saveFormSecret(id, name, payload.secretValue, author)
 
       return StatusCodes.OK
     },
