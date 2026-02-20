@@ -478,7 +478,26 @@ export function modifyReorderPages(definition, order) {
 }
 
 /**
- * Reorders the pages
+ * Reorders the sections
+ * @param {FormDefinition} definition
+ * @param {string[]} order
+ * @returns {FormDefinition}
+ */
+export function modifyReorderSections(definition, order) {
+  const MAX = Number.MAX_SAFE_INTEGER
+
+  definition.sections.sort((a, b) => {
+    const posA = a.id && order.includes(a.id) ? order.indexOf(a.id) : MAX
+    const posB = b.id && order.includes(b.id) ? order.indexOf(b.id) : MAX
+
+    return posA - posB
+  })
+
+  return definition
+}
+
+/**
+ * Reorders the components
  * @param {FormDefinition} definition
  * @param {string} pageId
  * @param {string[]} order

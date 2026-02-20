@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "009a2da5-d6f8-46f3-ad9e-e2deba436450",
+    "_postman_id": "50f4a790-eb91-495b-8722-db340b242270",
     "name": "forms-manager",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "23938788"
@@ -1111,12 +1111,20 @@
               "    pm.expect(response.sections[1].title).to.eq('Address Information')",
               "    pm.expect(response.sections[0].id).to.be.a('String')",
               "    pm.expect(response.sections[1].id).to.be.a('String')",
-              "    pm.collectionVariables.set('section_id', response.sections[0].id)",
+              "    pm.collectionVariables.set('section_id1', response.sections[0].id)",
+              "    pm.collectionVariables.set('section_id2', response.sections[1].id)",
               "});"
             ],
             "type": "text/javascript",
             "packages": {},
             "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
           }
         }
       ],
@@ -1192,6 +1200,119 @@
             "definition",
             "draft",
             "sections"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition/draft/sections - Add sections Copy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.expect(response.status).to.eq('updated')",
+              "    pm.expect(response.sections).to.be.an('Array')",
+              "    pm.expect(response.sections).to.have.lengthOf(2)",
+              "    pm.expect(response.sections[0].title).to.eq('Personal Details')",
+              "    pm.expect(response.sections[1].title).to.eq('Address Information')",
+              "    pm.expect(response.sections[0].id).to.be.a('String')",
+              "    pm.expect(response.sections[1].id).to.be.a('String')",
+              "    pm.collectionVariables.set('section_id1', response.sections[0].id)",
+              "    pm.collectionVariables.set('section_id2', response.sections[1].id)",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sections\": [\n        {\n            \"title\": \"Personal Details\",\n            \"pageIds\": [\"{{page_id_2}}\"]\n        },\n        {\n            \"title\": \"Address Information\",\n            \"pageIds\": [\"{{page_id_3}}\"]\n        }\n    ],\n    \"requestType\": \"CREATE_SECTION\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/sections",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "sections"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/forms/:form_id/definition/draft/sections/order - Re-order sections",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "    pm.expect(response.sections).to.be.an('Array')",
+              "    pm.expect(response.sections).to.have.lengthOf(2)",
+              "    pm.expect(response.sections[1].title).to.eq('Personal Details')",
+              "    pm.expect(response.sections[0].title).to.eq('Address Information')",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "[\n  \"{{section_id2}}\",\n  \"{{section_id1}}\"\n]",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/definition/draft/sections/order",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "definition",
+            "draft",
+            "sections",
+            "order"
           ]
         }
       },
@@ -1777,6 +1898,7 @@
       "script": {
         "type": "text/javascript",
         "packages": {},
+        "requests": {},
         "exec": [
           "// Collection Pre-request Script",
           "",
@@ -1853,6 +1975,7 @@
       "script": {
         "type": "text/javascript",
         "packages": {},
+        "requests": {},
         "exec": [
           ""
         ]
@@ -1897,7 +2020,11 @@
       "value": ""
     },
     {
-      "key": "section_id",
+      "key": "section_id1",
+      "value": ""
+    },
+    {
+      "key": "section_id2",
       "value": ""
     }
   ]
