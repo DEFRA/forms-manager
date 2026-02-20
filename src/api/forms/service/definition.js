@@ -48,7 +48,7 @@ export async function listForms(options) {
 export async function getFormDefinition(
   formId,
   state = FormStatus.Draft,
-  session = undefined
+  session
 ) {
   return formDefinition.get(formId, state, session)
 }
@@ -170,7 +170,10 @@ export async function deleteDraftFormDefinition(formId, author) {
 /**
  * @param {FormMetadata} form
  */
-function missingPrivacyNotice(form) {
+export function missingPrivacyNotice(form) {
+  if (!form.privacyNoticeType && form.privacyNoticeUrl) {
+    return false
+  }
   return (
     !form.privacyNoticeType ||
     (form.privacyNoticeType === 'text' && !form.privacyNoticeText) ||
