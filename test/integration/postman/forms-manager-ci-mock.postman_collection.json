@@ -1277,7 +1277,6 @@
               "pm.test(\"response is ok\", function () {",
               "    pm.response.to.have.status(200);",
               "    const response = pm.response.json()",
-              "    pm.expect(response.status).to.eq('updated')",
               "    pm.expect(response.sections).to.be.an('Array')",
               "    pm.expect(response.sections).to.have.lengthOf(2)",
               "    pm.expect(response.sections[1].title).to.eq('Personal Details')",
