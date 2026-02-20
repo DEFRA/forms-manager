@@ -14,4 +14,3 @@ export function encryptSecret(secretValue) {
   const encrypted = crypto.publicEncrypt(publicKey, secretValue)
   return encrypted.toString()
 }
-

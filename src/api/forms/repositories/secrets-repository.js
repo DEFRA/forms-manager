@@ -16,19 +16,17 @@ const logger = createLogger()
  * @param {ClientSession} [session] - Optional MongoDB session for transactions
  */
 export async function get(formId, secretName, session) {
-  const coll =
-  /** @satisfies {Collection<FormSecret>} */ (
+  const coll = /** @satisfies {Collection<FormSecret>} */ (
     db.collection(SECRETS_COLLECTION_NAME)
   )
 
   try {
-    const document = await coll.findOne(
-      { formId, secretName },
-      { session }
-    )
+    const document = await coll.findOne({ formId, secretName }, { session })
 
     if (!document) {
-      throw Boom.notFound(`Form secret '${secretName}' on form ID '${formId}' not found`)
+      throw Boom.notFound(
+        `Form secret '${secretName}' on form ID '${formId}' not found`
+      )
     }
 
     return document
@@ -56,16 +54,12 @@ export async function get(formId, secretName, session) {
  * @param {ClientSession} [session] - Optional MongoDB session for transactions
  */
 export async function exists(formId, secretName, session) {
-  const coll =
-  /** @satisfies {Collection<FormSecret>} */ (
+  const coll = /** @satisfies {Collection<FormSecret>} */ (
     db.collection(SECRETS_COLLECTION_NAME)
   )
 
   try {
-    const document = await coll.findOne(
-      { formId, secretName },
-      { session }
-    )
+    const document = await coll.findOne({ formId, secretName }, { session })
 
     if (!document) {
       return false

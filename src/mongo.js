@@ -60,7 +60,10 @@ export async function prepareDb(logger) {
   await versionsCollection.createIndex({ createdAt: -1 })
 
   // Create indexes for form secrets collection
-  await secretsCollection.createIndex({ formId: 1, secretName: 1 }, { unique: true })
+  await secretsCollection.createIndex(
+    { formId: 1, secretName: 1 },
+    { unique: true }
+  )
 
   // Ensure feedback form exists, and is same as the JSON in the codebase
   await reinstateFeedbackForm(client, logger)

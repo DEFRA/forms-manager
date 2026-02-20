@@ -81,58 +81,41 @@ describe('secrets-repository', () => {
   describe('get', () => {
     it('should get the secret', async () => {
       mockCollection.findOne.mockResolvedValue(secret)
-      const result = await get(
-        formId,
-        'my-secret',
-        mockSession
-      )
+      const result = await get(formId, 'my-secret', mockSession)
       expect(result).toEqual(secret)
     })
 
     it('should fail if secret not found', async () => {
       mockCollection.findOne.mockResolvedValue(undefined)
-      await expect(
-        get(
-        formId,
-        'my-secret',
-        mockSession
-        )
-      ).rejects.toThrow(`Form secret 'my-secret' on form ID '${formId}' not found`)
+      await expect(get(formId, 'my-secret', mockSession)).rejects.toThrow(
+        `Form secret 'my-secret' on form ID '${formId}' not found`
+      )
     })
 
     it('should throw if db error', async () => {
       mockCollection.findOne.mockImplementationOnce(() => {
         throw new Error('DB error get')
       })
-      await expect(() =>
-        get(
-        formId,
-        'my-secret',
-        mockSession
-        )
-      ).rejects.toThrow('DB error get')
-      expect(mockLoggerError).toHaveBeenCalledWith(expect.anything(), '[getSecret] Getting form secret \'my-secret\' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - DB error get')
+      await expect(() => get(formId, 'my-secret', mockSession)).rejects.toThrow(
+        'DB error get'
+      )
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[getSecret] Getting form secret 'my-secret' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - DB error get"
+      )
     })
   })
 
   describe('exists', () => {
     it('should return true if the secret exists', async () => {
       mockCollection.findOne.mockResolvedValue(secret)
-      const result = await exists(
-        formId,
-        'my-secret',
-        mockSession
-      )
+      const result = await exists(formId, 'my-secret', mockSession)
       expect(result).toBe(true)
     })
 
     it('should return false if secret not found', async () => {
       mockCollection.findOne.mockResolvedValue(undefined)
-      const result = await exists(
-        formId,
-        'my-secret',
-        mockSession
-      )
+      const result = await exists(formId, 'my-secret', mockSession)
       expect(result).toBe(false)
     })
 
@@ -141,13 +124,12 @@ describe('secrets-repository', () => {
         throw new Error('DB error exists')
       })
       await expect(() =>
-        exists(
-        formId,
-        'my-secret',
-        mockSession
-        )
+        exists(formId, 'my-secret', mockSession)
       ).rejects.toThrow('DB error exists')
-      expect(mockLoggerError).toHaveBeenCalledWith(expect.anything(), '[existsSecret] Checking existence of form secret \'my-secret\' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - DB error exists')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[existsSecret] Checking existence of form secret 'my-secret' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - DB error exists"
+      )
     })
   })
 
@@ -168,14 +150,12 @@ describe('secrets-repository', () => {
         throw new MongoServerError({ message: 'DB error insert' })
       })
       await expect(() =>
-        save(
-        formId,
-        'my-secret',
-        'my secret value',
-        mockSession
-        )
+        save(formId, 'my-secret', 'my secret value', mockSession)
       ).rejects.toThrow('DB error insert')
-      expect(mockLoggerError).toHaveBeenCalledWith(expect.anything(), '[mongoError] Secret with name \'my-secret\' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to save - MongoDB error code: undefined - DB error insert')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[mongoError] Secret with name 'my-secret' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to save - MongoDB error code: undefined - DB error insert"
+      )
     })
 
     it('should throw if other error', async () => {
@@ -183,14 +163,12 @@ describe('secrets-repository', () => {
         throw new Error('DB error insert')
       })
       await expect(() =>
-        save(
-        formId,
-        'my-secret',
-        'my secret value',
-        mockSession
-        )
+        save(formId, 'my-secret', 'my secret value', mockSession)
       ).rejects.toThrow('DB error insert')
-      expect(mockLoggerError).toHaveBeenCalledWith(expect.anything(), '[updateError] Secret with name \'my-secret\' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to save - DB error insert')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[updateError] Secret with name 'my-secret' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to save - DB error insert"
+      )
     })
   })
 })

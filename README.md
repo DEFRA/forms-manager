@@ -67,6 +67,9 @@ SNS_TOPIC_ARN=
 SNS_ENDPOINT=
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
+PUBLIC_KEY_FOR_SECRETS="-----BEGIN PUBLIC KEY-----
+...multiline public key ...
+-----END PUBLIC KEY-----"
 ```
 
 For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.

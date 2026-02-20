@@ -183,7 +183,11 @@ export async function publishFormDraftReplacedEvent(
  * @param {string} secretName
  * @param {FormMetadataAuthor} author
  */
-export async function publishSavedFormSecretEvent(metadataDocument, secretName, author) {
+export async function publishSavedFormSecretEvent(
+  metadataDocument,
+  secretName,
+  author
+) {
   const metadata = mapForm(metadataDocument)
   const auditMessage = savedFormSecretMapper(metadata, secretName, author)
 

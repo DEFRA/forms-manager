@@ -276,9 +276,8 @@ describe('auth plugin', () => {
         }
       }))
 
-      const entitlementsModule = await import(
-        '~/src/api/entitlements/service.js'
-      )
+      const entitlementsModule =
+        await import('~/src/api/entitlements/service.js')
       getUserScopes =
         /** @type {jest.MockedFunction<(oid: string, authToken?: string) => Promise<string[]>>} */ (
           entitlementsModule.getUserScopes
