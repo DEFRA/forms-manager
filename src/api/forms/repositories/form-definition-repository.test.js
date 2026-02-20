@@ -41,6 +41,7 @@ import {
   insert,
   reorderComponents,
   reorderPages,
+  reorderSections,
   setEngineVersion,
   update,
   updateComponent,
@@ -79,6 +80,8 @@ const component6Id = 'bc8ec4ac-6229-4c97-8553-66f11167b159'
 const listId = 'eb68b22f-b6ba-4358-8cba-b61282fecdb1'
 const condition1Id = '6e4c2f74-5bd9-48b4-b991-f2a021dcde59'
 const condition2Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
+const section1Id = 'f07566be-dd04-49df-890f-b226b92f3907'
+const section2Id = 'cb185708-203d-4560-9929-ecc27750244a'
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -146,6 +149,12 @@ describe('form-definition-repository', () => {
 
   /** @type {ConditionWrapperV2[]} */
   let conditions
+
+  /** @type {Section} */
+  let section1
+
+  /** @type {Section} */
+  let section2
 
   beforeEach(() => {
     jest
@@ -239,12 +248,27 @@ describe('form-definition-repository', () => {
       ]
     })
 
+    section1 = {
+      id: section1Id,
+      name: 'section1',
+      title: 'Section One',
+      hideTitle: false
+    }
+
+    section2 = {
+      id: section2Id,
+      name: 'section2',
+      title: 'Section Two',
+      hideTitle: false
+    }
+
     conditions = [condition1, condition2]
 
     draft = buildDefinition({
       pages: [page1, page2, page3, page4, page5, summaryPage],
       lists,
-      conditions
+      conditions,
+      sections: [section1, section2]
     })
   })
 
@@ -481,6 +505,22 @@ describe('form-definition-repository', () => {
         (definition) => {
           expect(definition.pages.at(0)).toEqual(page2)
           expect(definition.pages.at(1)).toEqual(page1)
+        }
+      )
+    })
+  })
+
+  describe('reorderSections', () => {
+    it('should reorder sections', async () => {
+      const order = [section2Id, section1Id]
+
+      await helper(
+        async () => {
+          await reorderSections(formId, order, mockSession)
+        },
+        (definition) => {
+          expect(definition.sections.at(0)).toEqual(section2)
+          expect(definition.sections.at(1)).toEqual(section1)
         }
       )
     })
@@ -1123,6 +1163,6 @@ describe('form-definition-repository', () => {
 })
 
 /**
- * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List, ConditionWrapperV2, SectionAssignmentItem, Section } from '@defra/forms-model'
  * @import { UpdateFilter } from 'mongodb'
  */

@@ -110,7 +110,7 @@ describe('Pages route', () => {
             title: 'Page one'
           }),
           buildQuestionPage({
-            id: pageOneId,
+            id: pageTwoId,
             title: 'Page two'
           }),
           buildSummaryPage()
