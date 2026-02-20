@@ -23,6 +23,7 @@ import {
   modifyName,
   modifyReorderComponents,
   modifyReorderPages,
+  modifyReorderSections,
   modifyUnassignCondition,
   modifyUpdateComponent,
   modifyUpdateCondition,
@@ -302,15 +303,15 @@ export async function updatePage(formId, pageId, page, session) {
 /**
  * Reorders the pages
  * @param {string} formId
- * @param {string[]} order
+ * @param {string[]} orderOfPageIds
  * @param {ClientSession} session
  * @returns {Promise<FormDefinition>}
  */
-export async function reorderPages(formId, order, session) {
+export async function reorderPages(formId, orderOfPageIds, session) {
   logger.info(`Reordering pages on form ID ${formId}`)
 
   /** @type {UpdateCallback} */
-  const callback = (draft) => modifyReorderPages(draft, order)
+  const callback = (draft) => modifyReorderPages(draft, orderOfPageIds)
 
   const result = await modifyDraft(formId, callback, session)
 
@@ -320,18 +321,44 @@ export async function reorderPages(formId, order, session) {
 }
 
 /**
- * Reorders the components on a page
+ * Reorders the sections
  * @param {string} formId
- * @param {string} pageId
- * @param {string[]} order
+ * @param {string[]} orderOfSectionIds
  * @param {ClientSession} session
  * @returns {Promise<FormDefinition>}
  */
-export async function reorderComponents(formId, pageId, order, session) {
+export async function reorderSections(formId, orderOfSectionIds, session) {
+  logger.info(`Reordering sections on form ID ${formId}`)
+
+  /** @type {UpdateCallback} */
+  const callback = (draft) => modifyReorderSections(draft, orderOfSectionIds)
+
+  const result = await modifyDraft(formId, callback, session)
+
+  logger.info(`Reordered sections on form ID ${formId}`)
+
+  return result.draft
+}
+
+/**
+ * Reorders the components on a page
+ * @param {string} formId
+ * @param {string} pageId
+ * @param {string[]} orderOfComponentIds
+ * @param {ClientSession} session
+ * @returns {Promise<FormDefinition>}
+ */
+export async function reorderComponents(
+  formId,
+  pageId,
+  orderOfComponentIds,
+  session
+) {
   logger.info(`Reordering components on form ID ${formId} page ID ${pageId}`)
 
   /** @type {UpdateCallback} */
-  const callback = (draft) => modifyReorderComponents(draft, pageId, order)
+  const callback = (draft) =>
+    modifyReorderComponents(draft, pageId, orderOfComponentIds)
 
   const result = await modifyDraft(formId, callback, session)
 
