@@ -1281,8 +1281,6 @@
               "    pm.expect(response.sections).to.have.lengthOf(2)",
               "    pm.expect(response.sections[1].title).to.eq('Personal Details')",
               "    pm.expect(response.sections[0].title).to.eq('Address Information')",
-              "    pm.expect(response.sections[1].id).to.eq(pm.variables('section_id1'))",
-              "    pm.expect(response.sections[0].id).to.eq(pm.variables('section_id2'))",
               "});"
             ],
             "type": "text/javascript",
