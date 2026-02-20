@@ -104,7 +104,7 @@ export async function save(formId, secretName, secretValue, session) {
   }
 
   try {
-    const result = await coll.insertOne(document, { session })
+    const result = await coll.updateOne(document, { upsert: true, session })
 
     logger.info(`Secret saved with name '${secretName}' for form ID ${formId}`)
 

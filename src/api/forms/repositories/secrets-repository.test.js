@@ -135,7 +135,7 @@ describe('secrets-repository', () => {
 
   describe('save', () => {
     it('should return true if the secret exists', async () => {
-      mockCollection.insertOne.mockResolvedValue(secret)
+      mockCollection.updateOne.mockResolvedValue(secret)
       const result = await save(
         formId,
         'my-secret',
@@ -146,7 +146,7 @@ describe('secrets-repository', () => {
     })
 
     it('should throw if db error', async () => {
-      mockCollection.insertOne.mockImplementationOnce(() => {
+      mockCollection.updateOne.mockImplementationOnce(() => {
         throw new MongoServerError({ message: 'DB error insert' })
       })
       await expect(() =>
@@ -159,7 +159,7 @@ describe('secrets-repository', () => {
     })
 
     it('should throw if other error', async () => {
-      mockCollection.insertOne.mockImplementationOnce(() => {
+      mockCollection.updateOne.mockImplementationOnce(() => {
         throw new Error('DB error insert')
       })
       await expect(() =>
