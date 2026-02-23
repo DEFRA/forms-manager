@@ -97,14 +97,15 @@ export async function save(formId, secretName, secretValue, session) {
     db.collection(SECRETS_COLLECTION_NAME)
   )
 
-  const document = {
-    formId,
-    secretName,
-    secretValue
-  }
-
   try {
-    const result = await coll.updateOne(document, { upsert: true, session })
+    const result = await coll.findOneAndUpdate(
+      {
+        formId,
+        secretName
+      },
+      { $set: { formId, secretName, secretValue } },
+      { upsert: true, session }
+    )
 
     logger.info(`Secret saved with name '${secretName}' for form ID ${formId}`)
 
