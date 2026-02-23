@@ -61,11 +61,7 @@ export async function exists(formId, secretName, session) {
   try {
     const document = await coll.findOne({ formId, secretName }, { session })
 
-    if (!document) {
-      return false
-    }
-
-    return true
+    return !!document
   } catch (err) {
     logger.error(
       err,
