@@ -43,7 +43,7 @@ services:
 
   oidc:
     image: ghcr.io/soluto/oidc-server-mock:0.6.0
-    container_name: oidc-mock-test
+    container_name: oidc-integration-test
     ports:
       - '5556:80'
     environment:
@@ -83,6 +83,7 @@ services:
       start_period: 90s
 
   app_test:
+    image: app-test
     build:
       context: .
       target: production

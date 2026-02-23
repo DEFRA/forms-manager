@@ -50,6 +50,7 @@ import {
   modifyName,
   modifyReorderComponents,
   modifyReorderPages,
+  modifyReorderSections,
   modifyUnassignCondition,
   modifyUpdateComponent,
   modifyUpdateList,
@@ -162,6 +163,31 @@ describe('repository helpers', () => {
   })
 
   const conditions = [condition]
+
+  const section1Id = 'f07566be-dd04-49df-890f-b226b92f3907'
+  const section2Id = 'cb185708-203d-4560-9929-ecc27750244a'
+  const section3Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
+
+  const section1 = {
+    id: section1Id,
+    name: 'section1',
+    title: 'Section One',
+    hideTitle: false
+  }
+
+  const section2 = {
+    id: section2Id,
+    name: 'section2',
+    title: 'Section Two',
+    hideTitle: false
+  }
+
+  const section3 = {
+    id: section3Id,
+    name: 'section3',
+    title: 'Section Three',
+    hideTitle: false
+  }
 
   describe('findPage', () => {
     it('should find page if page exists in definition', () => {
@@ -653,7 +679,42 @@ describe('repository helpers', () => {
     })
   })
 
-  describe('modifyReorderComponentss', () => {
+  describe('modifyReorderSections', () => {
+    it('should update the section order', () => {
+      const definition = buildDefinition({
+        pages: [summaryPage],
+        sections: [section1, section2, section3]
+      })
+
+      const modified = modifyReorderSections(definition, [
+        section3Id,
+        section1Id,
+        section2Id
+      ])
+
+      expect(modified.sections.at(0)?.id).toEqual(section3Id)
+      expect(modified.sections.at(1)?.id).toEqual(section1Id)
+      expect(modified.sections.at(2)?.id).toEqual(section2Id)
+    })
+
+    it('should put unordered sections to the end order', () => {
+      const definition = buildDefinition({
+        pages: [summaryPage],
+        sections: [section1, section2, section3]
+      })
+
+      const modified = modifyReorderSections(definition, [
+        section3Id,
+        section2Id
+      ])
+
+      expect(modified.sections.at(0)?.id).toEqual(section3Id)
+      expect(modified.sections.at(1)?.id).toEqual(section2Id)
+      expect(modified.sections.at(2)?.id).toEqual(section1Id)
+    })
+  })
+
+  describe('modifyReorderComponents', () => {
     const componentId1 = 'fadeb416-2869-48b5-9292-ba45c01da52c'
     const componentId2 = 'd7981cfe-ea1d-49fe-9303-dc4465d3a776'
     const componentId3 = '57b5bd21-521d-467e-ab8a-1cd13eec984d'
