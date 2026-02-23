@@ -23,6 +23,7 @@ export const formMetadataInput = {
   privacyNoticeText: '',
   privacyNoticeType: 'link',
   privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice',
+  termsAndConditionsAgreed: true,
   notificationEmail: 'defraforms@defra.gov.uk'
 }
 
