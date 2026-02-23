@@ -22,6 +22,7 @@ jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/repositories/secrets-repository.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
+jest.mock('src/api/forms/service/helpers/crypto.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
