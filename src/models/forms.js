@@ -145,7 +145,8 @@ export const sectionAssignmentPayloadSchema = Joi.object()
         FormDefinitionRequestType.CREATE_SECTION,
         FormDefinitionRequestType.DELETE_SECTION,
         FormDefinitionRequestType.ASSIGN_SECTIONS,
-        FormDefinitionRequestType.UNASSIGN_SECTIONS
+        FormDefinitionRequestType.UNASSIGN_SECTIONS,
+        FormDefinitionRequestType.RENAME_SECTION
       )
       .required()
   })
