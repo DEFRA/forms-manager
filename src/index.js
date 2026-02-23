@@ -16,7 +16,7 @@ try {
   logger.info('Server failed to start :(')
   logger.error(
     err,
-    `[serverStartup] Server failed to start - ${getErrorMessage(err)}`
+    `[serverStartup] Server failed to start test message - ${getErrorMessage(err)}`
   )
   throw err
 }
