@@ -701,8 +701,9 @@ describe('Forms service', () => {
       const updatedForm = { updatedAt: dateUsedInFakeTime }
       const mockSession = /** @type {ClientSession} */ ({})
 
-      const { handleTitleUpdate } =
-        await import('~/src/api/forms/service/index.js')
+      const { handleTitleUpdate } = await import(
+        '~/src/api/forms/service/index.js'
+      )
 
       await expect(
         handleTitleUpdate(
@@ -723,8 +724,9 @@ describe('Forms service', () => {
 
       jest.clearAllMocks()
 
-      const { handleMetadataVersioning } =
-        await import('~/src/api/forms/service/index.js')
+      const { handleMetadataVersioning } = await import(
+        '~/src/api/forms/service/index.js'
+      )
 
       await handleMetadataVersioning(id, formUpdate, mockSession)
 

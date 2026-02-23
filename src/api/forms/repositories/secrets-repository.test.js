@@ -1,3 +1,4 @@
+import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
@@ -104,6 +105,19 @@ describe('secrets-repository', () => {
         "[getSecret] Getting form secret 'my-secret' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - DB error get"
       )
     })
+
+    it('should throw if Boom error', async () => {
+      mockCollection.findOne.mockImplementationOnce(() => {
+        throw Boom.badRequest('Boom error')
+      })
+      await expect(() => get(formId, 'my-secret', mockSession)).rejects.toThrow(
+        'Boom error'
+      )
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[getSecret] Getting form secret 'my-secret' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - Boom error"
+      )
+    })
   })
 
   describe('exists', () => {
@@ -129,6 +143,19 @@ describe('secrets-repository', () => {
       expect(mockLoggerError).toHaveBeenCalledWith(
         expect.anything(),
         "[existsSecret] Checking existence of form secret 'my-secret' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - DB error exists"
+      )
+    })
+
+    it('should throw if Boom error', async () => {
+      mockCollection.findOne.mockImplementationOnce(() => {
+        throw Boom.badRequest('Boom error')
+      })
+      await expect(() =>
+        exists(formId, 'my-secret', mockSession)
+      ).rejects.toThrow('Boom error')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[existsSecret] Checking existence of form secret 'my-secret' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - Boom error"
       )
     })
   })
