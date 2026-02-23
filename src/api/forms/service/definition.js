@@ -182,6 +182,13 @@ export function missingPrivacyNotice(form) {
 }
 
 /**
+ * @param {FormMetadata} form
+ */
+function missingTermsAndConditions(form) {
+  return !form.termsAndConditionsAgreed
+}
+
+/**
  * Validates form and form definition for publishing to live
  * @param {string} formId - ID of the form
  * @param {FormMetadata} form - Form metadata
@@ -208,6 +215,13 @@ function validateFormForPublishing(formId, form, draftFormDefinition) {
       `[missingPrivacyNotice] Form ${formId} missing privacy notice - validation failed, cannot publish`
     )
     throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
+  }
+
+  if (missingTermsAndConditions(form)) {
+    logger.info(
+      `[missingTermsAndConditions] Form ${formId} missing terms and conditions acceptance - validation failed, cannot publish`
+    )
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingTermsAndConditions)
   }
 
   if (

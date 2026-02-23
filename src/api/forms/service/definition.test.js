@@ -303,6 +303,25 @@ describe('Forms service', () => {
       )
     })
 
+    it('should fail to create a live state from existing draft form when terms and conditions not accepted', async () => {
+      const metadataNoTermsAndConditions = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+
+      delete metadataNoTermsAndConditions.termsAndConditionsAgreed
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValue(metadataNoTermsAndConditions)
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(/** @type {FormDefinition} */ (definition))
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingTermsAndConditions)
+      )
+    })
+
     it('should fail to create a live state when there is no draft state', async () => {
       /** @type {WithId<FormMetadataDocument>} */
       const formMetadataWithoutDraft = {

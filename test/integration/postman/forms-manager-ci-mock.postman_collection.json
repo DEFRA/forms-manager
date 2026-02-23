@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "50f4a790-eb91-495b-8722-db340b242270",
+    "_postman_id": "25fad961-499a-4c75-8728-4d076cd26d45",
     "name": "forms-manager",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "23938788"
@@ -1556,7 +1556,8 @@
               "});"
             ],
             "type": "text/javascript",
-            "packages": {}
+            "packages": {},
+            "requests": {}
           }
         },
         {
@@ -1566,7 +1567,8 @@
               ""
             ],
             "type": "text/javascript",
-            "packages": {}
+            "packages": {},
+            "requests": {}
           }
         }
       ],
@@ -1575,7 +1577,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"contact\": {\n    \"phone\": \"01234567890\",\n    \"email\": {\n        \"address\": \"{{email}}\",\n        \"responseTime\": \"1 day\"\n    },\n    \"online\": {\n        \"url\": \"http://localhost:3000\",\n        \"text\": \"Some text\"\n    }\n  },\n  \"submissionGuidance\": \"Here is some guidance\",\n  \"privacyNoticeUrl\": \"https://www.gov.uk/help/privacy-notice\",\n  \"notificationEmail\": \"{{email}}\"\n}",
+          "raw": "{\n  \"contact\": {\n    \"phone\": \"01234567890\",\n    \"email\": {\n        \"address\": \"{{email}}\",\n        \"responseTime\": \"1 day\"\n    },\n    \"online\": {\n        \"url\": \"http://localhost:3000\",\n        \"text\": \"Some text\"\n    }\n  },\n  \"submissionGuidance\": \"Here is some guidance\",\n  \"privacyNoticeUrl\": \"https://www.gov.uk/help/privacy-notice\",\n  \"notificationEmail\": \"{{email}}\",\n  \"termsAndConditionsAgreed\": true\n}",
           "options": {
             "raw": {
               "language": "json"
