@@ -11,6 +11,7 @@ export function encryptSecret(secretValue) {
   if (!publicKey) {
     throw new Error('Public key is missing')
   }
-  const encrypted = crypto.publicEncrypt(publicKey, secretValue)
-  return encrypted.toString()
+  const buffer = Buffer.from(secretValue)
+  const encrypted = crypto.publicEncrypt(publicKey, buffer)
+  return encrypted.toString('base64')
 }

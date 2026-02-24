@@ -44,9 +44,7 @@ export default [
       return getFormSecret(id, name)
     },
     options: {
-      auth: {
-        scope: [`+${Scopes.FormEdit}`]
-      },
+      auth: false,
       validate: {
         params: formSecretSchema
       }
