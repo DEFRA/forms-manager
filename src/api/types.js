@@ -24,6 +24,8 @@
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput & {conditionId: string} }>} DeleteConditionDraftFormPagesRequest
  * @typedef {Request<{ Server: { db: Db }, Params: {id: string, versionNumber: string} }>} RequestFormVersionById
  * @typedef {Request<{ Server: { db: Db }, Params: FormByIdInput, Payload: SectionAssignmentPayload }>} RequestSectionAssignment
+ * @typedef {Request<{ Server: { db: Db }, Params: {id: string, name: string} }>} RequestGetFormSecret
+ * @typedef {Request<{ Server: { db: Db }, Params: {id: string, name: string}, Payload: { secretValue: string } }>} RequestSaveFormSecret
  */
 
 /**

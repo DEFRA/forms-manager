@@ -17,6 +17,7 @@ export let client
 export const METADATA_COLLECTION_NAME = 'form-metadata'
 export const DEFINITION_COLLECTION_NAME = 'form-definition'
 export const VERSIONS_COLLECTION_NAME = 'form-versions'
+export const SECRETS_COLLECTION_NAME = 'form-secrets'
 
 /**
  * Connects to mongo database
@@ -44,6 +45,7 @@ export async function prepareDb(logger) {
   // Ensure db indexes
   const metadataCollection = db.collection(METADATA_COLLECTION_NAME)
   const versionsCollection = db.collection(VERSIONS_COLLECTION_NAME)
+  const secretsCollection = db.collection(SECRETS_COLLECTION_NAME)
 
   await metadataCollection.createIndex({ title: 1 })
   await metadataCollection.createIndex({ slug: 1 }, { unique: true })
@@ -56,6 +58,12 @@ export async function prepareDb(logger) {
   )
   await versionsCollection.createIndex({ formId: 1, versionNumber: -1 })
   await versionsCollection.createIndex({ createdAt: -1 })
+
+  // Create indexes for form secrets collection
+  await secretsCollection.createIndex(
+    { formId: 1, secretName: 1 },
+    { unique: true }
+  )
 
   // Ensure feedback form exists, and is same as the JSON in the codebase
   await reinstateFeedbackForm(client, logger)
