@@ -23,9 +23,7 @@ export async function getFormSecret(formId, secretName) {
  * @param {string} secretName - name of the secret
  */
 export async function existsFormSecret(formId, secretName) {
-  return {
-    exists: await secretsRepository.exists(formId, secretName)
-  }
+  return await secretsRepository.exists(formId, secretName)
 }
 
 /**
@@ -64,5 +62,5 @@ export async function saveFormSecret(formId, secretName, secretValue, author) {
 }
 
 /**
- * @import { FormDefinitionRequestType, FormMetadataAuthor, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormMetadataAuthor } from '@defra/forms-model'
  */
