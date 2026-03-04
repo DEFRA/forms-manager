@@ -1,5 +1,6 @@
 import {
   AuditEventMessageType,
+  ComponentType,
   Engine,
   FormDefinitionRequestType,
   FormStatus,
@@ -117,13 +118,11 @@ describe('Forms service', () => {
     jest
       .mocked(versioningService.getLatestFormVersion)
       .mockResolvedValue(mockFormVersionDocument)
-    jest
-      .mocked(existsFormSecret)
-      .mockResolvedValue({
-        exists: true,
-        createdAt: undefined,
-        updatedAt: undefined
-      })
+    jest.mocked(existsFormSecret).mockResolvedValue({
+      exists: true,
+      createdAt: undefined,
+      updatedAt: undefined
+    })
   })
 
   describe('createDraftFromLive', () => {
@@ -328,6 +327,45 @@ describe('Forms service', () => {
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingTermsAndConditions)
+      )
+    })
+
+    it('should fail to create a live state from existing draft form when a payment but no live payment key', async () => {
+      const metadata = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+      jest.mocked(formMetadata.get).mockResolvedValue(metadata)
+
+      jest.mocked(existsFormSecret).mockResolvedValueOnce({
+        exists: false,
+        createdAt: undefined,
+        updatedAt: undefined
+      })
+
+      const definitionWithPayment = buildDefinition()
+      definitionWithPayment.pages.push(
+        buildQuestionPage({
+          components: [
+            {
+              title: 'Payment question',
+              type: ComponentType.PaymentField,
+              name: 'payment',
+              options: {
+                amount: 125,
+                description: 'Pay for a licence'
+              }
+            }
+          ]
+        })
+      )
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(
+          /** @type {FormDefinition} */ (definitionWithPayment)
+        )
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingLivePaymentApiKey)
       )
     })
 
@@ -1527,6 +1565,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataDocument, PageQuestion, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */
