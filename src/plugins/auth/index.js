@@ -30,7 +30,6 @@ function processGroupsClaim(groupsClaim, oid) {
   // We handle both formats for flexibility between test and production environments.
   if (typeof groupsClaim === 'string') {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- we know this is a stringified JSON array
       const parsed = JSON.parse(groupsClaim)
       if (Array.isArray(parsed)) {
         processedGroups = parsed
