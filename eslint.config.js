@@ -96,6 +96,9 @@ export default [
     rules: {
       'no-console': 'error',
 
+      // https://github.com/typescript-eslint/typescript-eslint/issues/11068
+      '@typescript-eslint/no-useless-default-assignment': 'off',
+
       // Don't show eslint warnings for types - let TS handle
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
