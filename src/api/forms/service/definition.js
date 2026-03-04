@@ -196,7 +196,7 @@ function missingTermsAndConditions(form) {
  * Validates form and form definition for publishing to live
  * @param {string} formId - ID of the form
  * @param {FormMetadata} form - Form metadata
- * @param {FormDefinition} draftFormDefinition - Draft form definition
+ * @param { FormDefinition | undefined } draftFormDefinition - Draft form definition
  * @param {boolean} paymentKeyExists - true if a payment key exists
  */
 function validateFormForPublishing(
@@ -227,10 +227,7 @@ function validateFormForPublishing(
     throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
   }
 
-  if (
-    draftFormDefinition.pages.some((pg) => isPaymentPage(pg)) &&
-    !paymentKeyExists
-  ) {
+  if (!paymentKeyExists) {
     logger.info(
       `[missingLivePaymentApiKey] Form ${formId} missing live payment API key - validation failed, cannot publish`
     )
@@ -245,8 +242,8 @@ function validateFormForPublishing(
   }
 
   if (
-    draftFormDefinition.engine !== Engine.V2 &&
-    !draftFormDefinition.startPage
+    draftFormDefinition?.engine !== Engine.V2 &&
+    !draftFormDefinition?.startPage
   ) {
     throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
   }
@@ -267,15 +264,21 @@ export async function createLiveFromDraft(formId, author) {
   try {
     // Get the form metadata and draft definition
     const form = await getForm(formId)
-    const draftFormDefinition = await formDefinition.get(
-      formId,
-      FormStatus.Draft
+    const draftFormDefinition = /** @type { FormDefinition | undefined } */ (
+      await formDefinition.get(formId, FormStatus.Draft)
     )
 
-    const { exists: paymentKeyExists } = await existsFormSecret(
-      formId,
-      PAYMENT_LIVE_API_KEY
-    )
+    const formHasPayment = draftFormDefinition
+      ? draftFormDefinition.pages.some((pg) => isPaymentPage(pg))
+      : false
+    /** @type {boolean} */
+    let paymentKeyExists
+    if (formHasPayment) {
+      const { exists } = await existsFormSecret(formId, PAYMENT_LIVE_API_KEY)
+      paymentKeyExists = exists
+    } else {
+      paymentKeyExists = true
+    }
 
     // Validate form can be published
     validateFormForPublishing(
