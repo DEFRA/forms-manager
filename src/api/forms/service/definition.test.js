@@ -53,6 +53,7 @@ import {
   getFormBySlug,
   removeForm
 } from '~/src/api/forms/service/index.js'
+import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
 import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -69,6 +70,7 @@ jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
 jest.mock('~/src/messaging/s3.js')
 jest.mock('~/src/api/forms/service/versioning.js')
+jest.mock('~/src/api/forms/service/secrets.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -115,6 +117,13 @@ describe('Forms service', () => {
     jest
       .mocked(versioningService.getLatestFormVersion)
       .mockResolvedValue(mockFormVersionDocument)
+    jest
+      .mocked(existsFormSecret)
+      .mockResolvedValue({
+        exists: true,
+        createdAt: undefined,
+        updatedAt: undefined
+      })
   })
 
   describe('createDraftFromLive', () => {

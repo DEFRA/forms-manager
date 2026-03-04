@@ -12,7 +12,9 @@ export const makeFormLiveErrorMessages = {
   missingPrivacyNotice:
     'You need to add a privacy notice before you can publish this form.',
   missingTermsAndConditions:
-    'You must confirm you meet the terms and conditions before you make this form live.'
+    'You must confirm you meet the terms and conditions before you make this form live.',
+  missingLivePaymentApiKey:
+    'You must add a valid live payment API key before you make this form live.'
 }
 
 export const removeFormErrorMessages = {
