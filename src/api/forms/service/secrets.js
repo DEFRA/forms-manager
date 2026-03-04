@@ -23,7 +23,7 @@ export async function getFormSecret(formId, secretName) {
  * @param {string} secretName - name of the secret
  */
 export async function existsFormSecret(formId, secretName) {
-  return await secretsRepository.exists(formId, secretName)
+  return secretsRepository.exists(formId, secretName)
 }
 
 /**
