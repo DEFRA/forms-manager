@@ -44,6 +44,8 @@ export default [
       return getFormSecret(id, name)
     },
     options: {
+      // No auth since this is called by forms-runner. The secret will be encrypted so of no use
+      // unless you have the private key (which only forms-runner has)
       auth: false,
       validate: {
         params: formSecretSchema
@@ -64,7 +66,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [`+${Scopes.FormEdit}`]
+        scope: [`+${Scopes.FormRead}`]
       },
       validate: {
         params: formSecretSchema
