@@ -57,12 +57,15 @@ describe('secrets', () => {
 
   describe('existsFormSecret', () => {
     it('should return true if a form secret exists', async () => {
-      jest.mocked(exists).mockResolvedValueOnce(true)
+      const now = new Date()
+      jest
+        .mocked(exists)
+        .mockResolvedValueOnce({ exists: true, createdAt: now, updatedAt: now })
 
       const secretName = 'my-secret-name'
       const res = await existsFormSecret(formId, secretName)
 
-      expect(res).toEqual({ exists: true })
+      expect(res.exists).toBe(true)
       // Verify repository was called with correct arguments
       const [formIdCalled, secretNameCalled] = jest.mocked(exists).mock.calls[0]
       expect(formId).toBe(formIdCalled)
@@ -110,7 +113,3 @@ describe('secrets', () => {
     })
   })
 })
-
-/**
- * @import { FormSecret } from '@defra/forms-model'
- */

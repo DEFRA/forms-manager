@@ -66,10 +66,13 @@ jest.mock('~/src/helpers/logging/logger.js', () => ({
 
 describe('secrets-repository', () => {
   const formId = 'fe339c6a-1f6e-4ab8-88c6-73fa1528dc90'
+  const now = new Date()
   const secret = {
     formId,
     secretName: 'my-secret',
-    secretValue: 'my secret value'
+    secretValue: 'my secret value',
+    createdAt: now,
+    updatedAt: now
   }
 
   beforeEach(() => {
@@ -135,13 +138,14 @@ describe('secrets-repository', () => {
     it('should return true if the secret exists', async () => {
       mockCollection.findOne.mockResolvedValue(secret)
       const result = await exists(formId, 'my-secret', mockSession)
-      expect(result).toBe(true)
+      expect(result.exists).toBe(true)
+      expect(result.createdAt).toBeDefined()
     })
 
     it('should return false if secret not found', async () => {
       mockCollection.findOne.mockResolvedValue(undefined)
       const result = await exists(formId, 'my-secret', mockSession)
-      expect(result).toBe(false)
+      expect(result.exists).toBe(false)
     })
 
     it('should throw if db error', async () => {

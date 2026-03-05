@@ -61,7 +61,11 @@ export async function exists(formId, secretName, session) {
   try {
     const document = await coll.findOne({ formId, secretName }, { session })
 
-    return !!document
+    return {
+      exists: !!document,
+      createdAt: document?.createdAt,
+      updatedAt: document?.updatedAt
+    }
   } catch (err) {
     logger.error(
       err,
@@ -93,13 +97,18 @@ export async function save(formId, secretName, secretValue, session) {
     db.collection(SECRETS_COLLECTION_NAME)
   )
 
+  const now = new Date()
+
   try {
     const result = await coll.findOneAndUpdate(
       {
         formId,
         secretName
       },
-      { $set: { formId, secretName, secretValue } },
+      {
+        $set: { formId, secretName, secretValue, updatedAt: now },
+        $setOnInsert: { createdAt: now }
+      },
       { upsert: true, session }
     )
 

@@ -42,7 +42,13 @@ describe('Secrets routes', () => {
     })
 
     test('Testing GET /forms/{id}/secrets/{name}/exists', async () => {
-      jest.mocked(existsFormSecret).mockResolvedValueOnce({ exists: true })
+      jest
+        .mocked(existsFormSecret)
+        .mockResolvedValueOnce({
+          exists: true,
+          createdAt: undefined,
+          updatedAt: undefined
+        })
 
       const response = await server.inject({
         method: 'GET',
