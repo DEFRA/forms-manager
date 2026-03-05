@@ -7,10 +7,11 @@ import { config } from '~/src/config/index.js'
  * @returns {string} base64-encoded result
  */
 export function encryptSecret(secretValue) {
-  const publicKey = config.get('publicKeyForSecrets')
-  if (!publicKey) {
+  const publicKeyEncoded = config.get('publicKeyForSecrets')
+  if (!publicKeyEncoded) {
     throw new Error('Public key is missing')
   }
+  const publicKey = Buffer.from(publicKeyEncoded, 'base64').toString()
   const buffer = Buffer.from(secretValue)
   const encrypted = crypto.publicEncrypt(publicKey, buffer)
   return encrypted.toString('base64')
