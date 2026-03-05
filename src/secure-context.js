@@ -28,7 +28,6 @@ export function prepareSecureContext(loggerFn) {
     const originalSecureContext = originalCreateSecureContext(options)
 
     trustStoreCerts.forEach((cert) => {
-      // eslint-disable-next-line -- Node.js API not documented
       originalSecureContext.context.addCACert(cert)
     })
 
