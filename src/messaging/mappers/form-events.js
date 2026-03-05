@@ -479,6 +479,31 @@ export function formUpdatedMapper(metadata, requestType, { payload, s3Meta }) {
 }
 
 /**
- * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {string} secretName
+ * @param {AuditUser} createdBy
+ * @returns {FormSecretSavedMessage}
+ */
+export function savedFormSecretMapper(metadata, secretName, createdBy) {
+  const baseData = createFormMessageDataBase(metadata)
+  const now = new Date()
+  return {
+    schemaVersion: AuditEventMessageSchemaVersion.V1,
+    category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
+    type: AuditEventMessageType.FORM_SECRET_SAVED,
+    entityId: metadata.id,
+    createdAt: now,
+    createdBy,
+    messageCreatedAt: now,
+    data: {
+      ...baseData,
+      secretName
+    }
+  }
+}
+
+/**
+ * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage, FormSecretSavedMessage } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

@@ -9,7 +9,8 @@ import {
   formLiveCreatedFromDraftMapper,
   formMigratedMapper,
   formTitleUpdatedMapper,
-  formUpdatedMapper
+  formUpdatedMapper,
+  savedFormSecretMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import { saveToS3 } from '~/src/messaging/s3.js'
@@ -172,6 +173,23 @@ export async function publishFormDraftReplacedEvent(
       s3Meta
     }
   )
+
+  return validateAndPublishEvent(auditMessage)
+}
+
+/**
+ * Publish saved form secret event
+ * @param {WithId<Partial<FormMetadataDocument>>} metadataDocument
+ * @param {string} secretName
+ * @param {FormMetadataAuthor} author
+ */
+export async function publishSavedFormSecretEvent(
+  metadataDocument,
+  secretName,
+  author
+) {
+  const metadata = mapForm(metadataDocument)
+  const auditMessage = savedFormSecretMapper(metadata, secretName, author)
 
   return validateAndPublishEvent(auditMessage)
 }

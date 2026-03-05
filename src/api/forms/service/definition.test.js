@@ -1,5 +1,6 @@
 import {
   AuditEventMessageType,
+  ComponentType,
   Engine,
   FormDefinitionRequestType,
   FormStatus,
@@ -53,6 +54,7 @@ import {
   getFormBySlug,
   removeForm
 } from '~/src/api/forms/service/index.js'
+import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
 import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
@@ -69,6 +71,7 @@ jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
 jest.mock('~/src/messaging/s3.js')
 jest.mock('~/src/api/forms/service/versioning.js')
+jest.mock('~/src/api/forms/service/secrets.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -115,6 +118,11 @@ describe('Forms service', () => {
     jest
       .mocked(versioningService.getLatestFormVersion)
       .mockResolvedValue(mockFormVersionDocument)
+    jest.mocked(existsFormSecret).mockResolvedValue({
+      exists: true,
+      createdAt: undefined,
+      updatedAt: undefined
+    })
   })
 
   describe('createDraftFromLive', () => {
@@ -319,6 +327,45 @@ describe('Forms service', () => {
 
       await expect(createLiveFromDraft(id, author)).rejects.toThrow(
         Boom.badRequest(makeFormLiveErrorMessages.missingTermsAndConditions)
+      )
+    })
+
+    it('should fail to create a live state from existing draft form when a payment but no live payment key', async () => {
+      const metadata = {
+        .../** @type {WithId<FormMetadataDocument>} */ (formMetadataDocument)
+      }
+      jest.mocked(formMetadata.get).mockResolvedValue(metadata)
+
+      jest.mocked(existsFormSecret).mockResolvedValueOnce({
+        exists: false,
+        createdAt: undefined,
+        updatedAt: undefined
+      })
+
+      const definitionWithPayment = buildDefinition()
+      definitionWithPayment.pages.push(
+        buildQuestionPage({
+          components: [
+            {
+              title: 'Payment question',
+              type: ComponentType.PaymentField,
+              name: 'payment',
+              options: {
+                amount: 125,
+                description: 'Pay for a licence'
+              }
+            }
+          ]
+        })
+      )
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(
+          /** @type {FormDefinition} */ (definitionWithPayment)
+        )
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingLivePaymentApiKey)
       )
     })
 
@@ -1518,6 +1565,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataDocument, PageQuestion, QueryOptions } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

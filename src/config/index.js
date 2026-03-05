@@ -209,6 +209,12 @@ export const config = convict({
     format: Boolean,
     default: false,
     env: 'FEATURE_FLAG_USE_ENTITLEMENT_API'
+  },
+  publicKeyForSecrets: {
+    doc: 'Public key for encryption of secrets',
+    format: String,
+    default: '',
+    env: 'PUBLIC_KEY_FOR_SECRETS'
   }
 })
 

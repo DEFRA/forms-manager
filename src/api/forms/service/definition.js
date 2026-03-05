@@ -2,7 +2,8 @@ import {
   Engine,
   FormDefinitionRequestType,
   FormStatus,
-  getErrorMessage
+  getErrorMessage,
+  isPaymentPage
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -12,6 +13,7 @@ import { deleteDraft } from '~/src/api/forms/repositories/form-definition-reposi
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
+import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
 import {
   logger,
   mapForm,
@@ -26,6 +28,8 @@ import {
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
+
+export const PAYMENT_LIVE_API_KEY = 'payment-live-api-key'
 
 /**
  * Retrieves a paginated list of forms with filter options
@@ -192,9 +196,15 @@ function missingTermsAndConditions(form) {
  * Validates form and form definition for publishing to live
  * @param {string} formId - ID of the form
  * @param {FormMetadata} form - Form metadata
- * @param {FormDefinition} draftFormDefinition - Draft form definition
+ * @param { FormDefinition | undefined } draftFormDefinition - Draft form definition
+ * @param {boolean} paymentKeyExists - true if a payment key exists
  */
-function validateFormForPublishing(formId, form, draftFormDefinition) {
+function validateFormForPublishing(
+  formId,
+  form,
+  draftFormDefinition,
+  paymentKeyExists
+) {
   if (!form.draft) {
     logger.info(
       `[noDraftState] Form with ID '${formId}' has no draft state so failed deployment to live - validation failed`
@@ -217,6 +227,13 @@ function validateFormForPublishing(formId, form, draftFormDefinition) {
     throw Boom.badRequest(makeFormLiveErrorMessages.missingPrivacyNotice)
   }
 
+  if (!paymentKeyExists) {
+    logger.info(
+      `[missingLivePaymentApiKey] Form ${formId} missing live payment API key - validation failed, cannot publish`
+    )
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingLivePaymentApiKey)
+  }
+
   if (missingTermsAndConditions(form)) {
     logger.info(
       `[missingTermsAndConditions] Form ${formId} missing terms and conditions acceptance - validation failed, cannot publish`
@@ -225,8 +242,8 @@ function validateFormForPublishing(formId, form, draftFormDefinition) {
   }
 
   if (
-    draftFormDefinition.engine !== Engine.V2 &&
-    !draftFormDefinition.startPage
+    draftFormDefinition?.engine !== Engine.V2 &&
+    !draftFormDefinition?.startPage
   ) {
     throw Boom.badRequest(makeFormLiveErrorMessages.missingStartPage)
   }
@@ -247,13 +264,29 @@ export async function createLiveFromDraft(formId, author) {
   try {
     // Get the form metadata and draft definition
     const form = await getForm(formId)
-    const draftFormDefinition = await formDefinition.get(
-      formId,
-      FormStatus.Draft
+    const draftFormDefinition = /** @type { FormDefinition | undefined } */ (
+      await formDefinition.get(formId, FormStatus.Draft)
     )
 
+    const formHasPayment = draftFormDefinition
+      ? draftFormDefinition.pages.some((pg) => isPaymentPage(pg))
+      : false
+    /** @type {boolean} */
+    let paymentKeyExists
+    if (formHasPayment) {
+      const { exists } = await existsFormSecret(formId, PAYMENT_LIVE_API_KEY)
+      paymentKeyExists = exists
+    } else {
+      paymentKeyExists = true
+    }
+
     // Validate form can be published
-    validateFormForPublishing(formId, form, draftFormDefinition)
+    validateFormForPublishing(
+      formId,
+      form,
+      draftFormDefinition,
+      paymentKeyExists
+    )
 
     // Build the live state
     const now = new Date()
