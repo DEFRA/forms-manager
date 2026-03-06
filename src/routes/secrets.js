@@ -3,8 +3,10 @@ import { StatusCodes } from 'http-status-codes'
 import Joi from 'joi'
 
 import {
+  deleteFormSecret,
   existsFormSecret,
   getFormSecret,
+  renameFormSecret,
   saveFormSecret
 } from '~/src/api/forms/service/secrets.js'
 import { failAction } from '~/src/helpers/fail-action.js'
@@ -18,6 +20,15 @@ export const formSecretSchema = Joi.object()
   .keys({
     id: idSchema,
     name: nameSchema
+  })
+  .required()
+
+// Schema to rename form secret by form id
+export const formSecretRenameSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    nameBefore: nameSchema,
+    nameAfter: nameSchema
   })
   .required()
 
@@ -98,10 +109,60 @@ export default [
         failAction
       }
     }
+  },
+  {
+    method: 'DELETE',
+    path: ROUTE_SECRETS,
+    /**
+     * @param {RequestDeleteFormSecret} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, name } = params
+      const author = getAuthor(auth.credentials.user)
+
+      await deleteFormSecret(id, name, author)
+
+      return StatusCodes.OK
+    },
+    options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
+      validate: {
+        params: formSecretSchema,
+        failAction
+      }
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/forms/{id}/secrets/{nameBefore}/{nameAfter}',
+    /**
+     * @param {RequestRenameFormSecret} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, nameBefore, nameAfter } = params
+      const author = getAuthor(auth.credentials.user)
+
+      await renameFormSecret(id, nameBefore, nameAfter, author)
+
+      return StatusCodes.OK
+    },
+    options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
+      validate: {
+        params: formSecretRenameSchema,
+        failAction
+      }
+    }
   }
 ]
 
 /**
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestGetFormSecret, RequestSaveFormSecret } from '~/src/api/types.js'
+ * @import { RequestDeleteFormSecret, RequestGetFormSecret, RequestRenameFormSecret, RequestSaveFormSecret } from '~/src/api/types.js'
  */

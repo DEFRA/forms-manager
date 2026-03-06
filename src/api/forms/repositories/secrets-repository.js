@@ -64,6 +64,7 @@ export async function exists(formId, secretName, session) {
     return {
       exists: !!document,
       createdAt: document?.createdAt,
+      renamedAt: document?.renamedAt,
       updatedAt: document?.updatedAt
     }
   } catch (err) {
@@ -125,6 +126,98 @@ export async function save(formId, secretName, secretValue, session) {
       )
     } else {
       logger.error(err, `[updateError] ${message} - ${getErrorMessage(err)}`)
+    }
+    throw err
+  }
+}
+
+/**
+ * Deletes a form secret from the database
+ * @param {string} formId - id of the form
+ * @param {string} secretName - name of the secret
+ * @param {ClientSession} session - mongo transaction session
+ */
+export async function deleteSecret(formId, secretName, session) {
+  logger.info(`Deleting secret '${secretName}' for form ID ${formId}`)
+
+  const coll = /** @satisfies {Collection<FormSecret>} */ (
+    db.collection(SECRETS_COLLECTION_NAME)
+  )
+
+  try {
+    const result = await coll.deleteOne(
+      {
+        formId,
+        secretName
+      },
+      { session }
+    )
+
+    logger.info(
+      `Secret deleted with name '${secretName}' for form ID ${formId}`
+    )
+
+    return result
+  } catch (err) {
+    const message = `Secret with name '${secretName}' for form ID ${formId} failed to delete`
+
+    if (err instanceof MongoServerError) {
+      logger.error(
+        err,
+        `[mongoError] ${message} - MongoDB error code: ${err.code} - ${err.message}`
+      )
+    } else {
+      logger.error(err, `[deleteError] ${message} - ${getErrorMessage(err)}`)
+    }
+    throw err
+  }
+}
+
+/**
+ * Changes the name of a form secret in the database
+ * @param {string} formId - id of the form
+ * @param {string} secretNameFrom - name of the secret to be renamed
+ * @param {string} secretNameTo - the new name of the secret
+ * @param {ClientSession} session - mongo transaction session
+ */
+export async function rename(formId, secretNameFrom, secretNameTo, session) {
+  logger.info(
+    `Renaming secret '${secretNameFrom}' to '${secretNameTo}' for form ID ${formId}`
+  )
+
+  const coll = /** @satisfies {Collection<FormSecret>} */ (
+    db.collection(SECRETS_COLLECTION_NAME)
+  )
+
+  const now = new Date()
+
+  try {
+    const result = await coll.findOneAndUpdate(
+      {
+        formId,
+        secretNameFrom
+      },
+      {
+        $set: { secretName: secretNameTo, renamedAt: now }
+      },
+      { session }
+    )
+
+    logger.info(
+      `Secret renamed from '${secretNameFrom}' to '${secretNameTo}' for form ID ${formId}`
+    )
+
+    return result
+  } catch (err) {
+    const message = `Secret with name '${secretNameFrom}' for form ID ${formId} failed to rename`
+
+    if (err instanceof MongoServerError) {
+      logger.error(
+        err,
+        `[mongoError] ${message} - MongoDB error code: ${err.code} - ${err.message}`
+      )
+    } else {
+      logger.error(err, `[renameError] ${message} - ${getErrorMessage(err)}`)
     }
     throw err
   }

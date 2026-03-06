@@ -3,8 +3,10 @@ import { MongoServerError } from 'mongodb'
 
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
+  deleteSecret,
   exists,
   get,
+  rename,
   save
 } from '~/src/api/forms/repositories/secrets-repository.js'
 import author from '~/src/api/forms/service/__stubs__/author.js'
@@ -182,6 +184,79 @@ describe('secrets-repository', () => {
       expect(mockLoggerError).toHaveBeenCalledWith(
         expect.anything(),
         "[existsSecret] Checking existence of form secret 'my-secret' with form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed - Other error"
+      )
+    })
+  })
+
+  describe('delete', () => {
+    it('should delete if the secret exists', async () => {
+      mockCollection.deleteOne.mockResolvedValue({ deletedCount: 1 })
+      const result = await deleteSecret(formId, 'my-secret', mockSession)
+      expect(result).toEqual({ deletedCount: 1 })
+    })
+
+    it('should throw if db error', async () => {
+      mockCollection.deleteOne.mockImplementationOnce(() => {
+        throw new MongoServerError({ message: 'DB error deleting' })
+      })
+      await expect(() =>
+        deleteSecret(formId, 'my-secret', mockSession)
+      ).rejects.toThrow('DB error deleting')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[mongoError] Secret with name 'my-secret' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to delete - MongoDB error code: undefined - DB error deleting"
+      )
+    })
+
+    it('should throw if other error', async () => {
+      mockCollection.deleteOne.mockImplementationOnce(() => {
+        throw new Error('DB error deleting')
+      })
+      await expect(() =>
+        deleteSecret(formId, 'my-secret', mockSession)
+      ).rejects.toThrow('DB error deleting')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[deleteError] Secret with name 'my-secret' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to delete - DB error deleting"
+      )
+    })
+  })
+
+  describe('rename', () => {
+    it('should rename if the secret exists', async () => {
+      mockCollection.findOneAndUpdate.mockResolvedValue(secret)
+      const result = await rename(
+        formId,
+        'my-secret before',
+        'my secret after',
+        mockSession
+      )
+      expect(result).toEqual(secret)
+    })
+
+    it('should throw if db error', async () => {
+      mockCollection.findOneAndUpdate.mockImplementationOnce(() => {
+        throw new MongoServerError({ message: 'DB error rename' })
+      })
+      await expect(() =>
+        rename(formId, 'my-secret before', 'my secret after', mockSession)
+      ).rejects.toThrow('DB error rename')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[mongoError] Secret with name 'my-secret before' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to rename - MongoDB error code: undefined - DB error rename"
+      )
+    })
+
+    it('should throw if other error', async () => {
+      mockCollection.findOneAndUpdate.mockImplementationOnce(() => {
+        throw new Error('DB error rename')
+      })
+      await expect(() =>
+        rename(formId, 'my-secret before', 'my secret after', mockSession)
+      ).rejects.toThrow('DB error rename')
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        expect.anything(),
+        "[renameError] Secret with name 'my-secret before' for form ID fe339c6a-1f6e-4ab8-88c6-73fa1528dc90 failed to rename - DB error rename"
       )
     })
   })
