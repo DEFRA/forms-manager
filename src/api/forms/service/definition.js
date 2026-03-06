@@ -260,6 +260,34 @@ function validateFormForPublishing(
 }
 
 /**
+ * Overwrite a live payment API key with the value of the pending live payment API key.
+ * Essentially make the pending key the live one for forms-runner to access.
+ * @param {boolean} formHasPayment - true if the form includes a payment question
+ * @param {string} formId - the id of the form
+ * @param {ClientSession} session
+ */
+export async function makePaymentKeyLive(formHasPayment, formId, session) {
+  if (!formHasPayment) {
+    return
+  }
+
+  const pendingKeyExists = await exists(
+    formId,
+    PAYMENT_LIVE_API_KEY_PENDING,
+    session
+  )
+  if (pendingKeyExists.exists) {
+    await deleteSecret(formId, PAYMENT_LIVE_API_KEY, session)
+    await rename(
+      formId,
+      PAYMENT_LIVE_API_KEY_PENDING,
+      PAYMENT_LIVE_API_KEY,
+      session
+    )
+  }
+}
+
+/**
  * Creates the live form from the current draft state
  * @param {string} formId - ID of the form
  * @param {FormMetadataAuthor} author - the author of the new live state
@@ -334,23 +362,8 @@ export async function createLiveFromDraft(formId, author) {
 
         await createFormVersion(formId, session)
 
-        // Swap over live payment keys if necessary
-        if (formHasPayment) {
-          const pendingKeyExists = await exists(
-            formId,
-            PAYMENT_LIVE_API_KEY_PENDING,
-            session
-          )
-          if (pendingKeyExists.exists) {
-            await deleteSecret(formId, PAYMENT_LIVE_API_KEY, session)
-            await rename(
-              formId,
-              PAYMENT_LIVE_API_KEY_PENDING,
-              PAYMENT_LIVE_API_KEY,
-              session
-            )
-          }
-        }
+        // Make payment key live if a pending one is stored
+        await makePaymentKeyLive(formHasPayment, formId, session)
 
         // Publish audit message
         await publishLiveCreatedFromDraftEvent(formId, now, author)
