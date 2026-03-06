@@ -195,7 +195,7 @@ export async function rename(formId, secretNameFrom, secretNameTo, session) {
     const result = await coll.findOneAndUpdate(
       {
         formId,
-        secretNameFrom
+        secretName: secretNameFrom
       },
       {
         $set: { secretName: secretNameTo, renamedAt: now }

@@ -11,6 +11,11 @@ import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import { deleteDraft } from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import {
+  deleteSecret,
+  exists,
+  rename
+} from '~/src/api/forms/repositories/secrets-repository.js'
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
@@ -30,6 +35,7 @@ import {
 import { client } from '~/src/mongo.js'
 
 export const PAYMENT_LIVE_API_KEY = 'payment-live-api-key'
+export const PAYMENT_LIVE_API_KEY_PENDING = 'payment-live-api-key-pending'
 
 /**
  * Retrieves a paginated list of forms with filter options
@@ -274,8 +280,11 @@ export async function createLiveFromDraft(formId, author) {
     /** @type {boolean} */
     let paymentKeyExists
     if (formHasPayment) {
-      const { exists } = await existsFormSecret(formId, PAYMENT_LIVE_API_KEY)
-      paymentKeyExists = exists
+      const [liveExists, pendingExists] = await Promise.all([
+        existsFormSecret(formId, PAYMENT_LIVE_API_KEY),
+        existsFormSecret(formId, PAYMENT_LIVE_API_KEY_PENDING)
+      ])
+      paymentKeyExists = liveExists.exists || pendingExists.exists
     } else {
       paymentKeyExists = true
     }
@@ -324,6 +333,24 @@ export async function createLiveFromDraft(formId, author) {
         )
 
         await createFormVersion(formId, session)
+
+        // Swap over live payment keys if necessary
+        if (formHasPayment) {
+          const pendingKeyExists = await exists(
+            formId,
+            PAYMENT_LIVE_API_KEY_PENDING,
+            session
+          )
+          if (pendingKeyExists.exists) {
+            await deleteSecret(formId, PAYMENT_LIVE_API_KEY, session)
+            await rename(
+              formId,
+              PAYMENT_LIVE_API_KEY_PENDING,
+              PAYMENT_LIVE_API_KEY,
+              session
+            )
+          }
+        }
 
         // Publish audit message
         await publishLiveCreatedFromDraftEvent(formId, now, author)
