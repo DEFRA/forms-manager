@@ -2063,7 +2063,7 @@
           }
         },
         "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret-renamed",
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-renamed-secret",
           "host": [
             "{{root}}"
           ],
