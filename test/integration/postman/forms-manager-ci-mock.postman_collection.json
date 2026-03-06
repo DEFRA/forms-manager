@@ -2015,7 +2015,7 @@
           }
         },
         "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret/my-renamed-secret",
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret/my-secret-renamed",
           "host": [
             "{{root}}"
           ],
@@ -2024,7 +2024,7 @@
             "{{go_live_form_id}}",
             "secrets",
             "my-secret",
-            "my-renamed-secret"
+            "my-secret-renamed"
           ]
         }
       },
@@ -2063,7 +2063,7 @@
           }
         },
         "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-renamed-secret",
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret-renamed",
           "host": [
             "{{root}}"
           ],
