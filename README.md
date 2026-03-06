@@ -7,6 +7,7 @@ Core delivery platform Node.js Backend Template.
     - [Node.js](#nodejs)
   - [Local development](#local-development)
     - [Setup](#setup)
+    - [Generating a public/private key pair](#generating-a-publicprivate-key-pair)
     - [Development](#development)
     - [Production](#production)
     - [Npm scripts](#npm-scripts)
@@ -71,6 +72,26 @@ PUBLIC_KEY_FOR_SECRETS="<base64-encoded-public-key>"
 ```
 
 For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.
+
+### Generating a public/private key pair
+
+The public key is used by forms-manager to encrypt secrets. The private key is used by forms-runner to decrypt secrets.
+
+```
+openssl genrsa -out private.pem 4096
+openssl rsa -pubout -in private.pem -out public.pem
+cat public.pem     #[copy the output and paste as <public-key> in the next command]
+echo -n "<public-key>" | base64
+```
+
+Copy/paste the encoded result as the env var PUBLIC_KEY_FOR_SECRETS (in forms-manager)
+
+```
+cat private.pem     #[copy the output and paste as <private-key> in the next command]
+echo -n "<private-key>" | base64
+```
+
+Copy/paste the encoded result as the env var PRIVATE_KEY_FOR_SECRETS (in forms-runner)
 
 ### Development
 
