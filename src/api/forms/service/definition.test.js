@@ -1585,40 +1585,34 @@ describe('Forms service', () => {
     const mockSession = /** @type {ClientSession} */ ({})
 
     it('should ignore if not a payment question', async () => {
-      jest
-        .mocked(exists)
-        .mockResolvedValueOnce({
-          exists: true,
-          createdAt: new Date(),
-          updatedAt: undefined,
-          renamedAt: undefined
-        })
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: true,
+        createdAt: new Date(),
+        updatedAt: undefined,
+        renamedAt: undefined
+      })
       await makePaymentKeyLive(false, formId, mockSession)
       expect(exists).not.toHaveBeenCalled()
     })
 
     it('should ignore if not exists', async () => {
-      jest
-        .mocked(exists)
-        .mockResolvedValueOnce({
-          exists: false,
-          createdAt: new Date(),
-          updatedAt: undefined,
-          renamedAt: undefined
-        })
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: false,
+        createdAt: new Date(),
+        updatedAt: undefined,
+        renamedAt: undefined
+      })
       await makePaymentKeyLive(true, formId, mockSession)
       expect(rename).not.toHaveBeenCalled()
     })
 
     it('should delete and rename if exists', async () => {
-      jest
-        .mocked(exists)
-        .mockResolvedValueOnce({
-          exists: true,
-          createdAt: new Date(),
-          updatedAt: undefined,
-          renamedAt: undefined
-        })
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: true,
+        createdAt: new Date(),
+        updatedAt: undefined,
+        renamedAt: undefined
+      })
       await makePaymentKeyLive(true, formId, mockSession)
       expect(deleteSecret).toHaveBeenCalled()
       expect(rename).toHaveBeenCalled()
