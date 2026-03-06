@@ -121,7 +121,8 @@ describe('Forms service', () => {
     jest.mocked(existsFormSecret).mockResolvedValue({
       exists: true,
       createdAt: undefined,
-      updatedAt: undefined
+      updatedAt: undefined,
+      renamedAt: undefined
     })
   })
 
@@ -339,7 +340,8 @@ describe('Forms service', () => {
       jest.mocked(existsFormSecret).mockResolvedValueOnce({
         exists: false,
         createdAt: undefined,
-        updatedAt: undefined
+        updatedAt: undefined,
+        renamedAt: undefined
       })
 
       const definitionWithPayment = buildDefinition()

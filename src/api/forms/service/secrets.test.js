@@ -62,14 +62,12 @@ describe('secrets', () => {
   describe('existsFormSecret', () => {
     it('should return true if a form secret exists', async () => {
       const now = new Date()
-      jest
-        .mocked(exists)
-        .mockResolvedValueOnce({
-          exists: true,
-          createdAt: now,
-          updatedAt: now,
-          renamedAt: undefined
-        })
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: true,
+        createdAt: now,
+        updatedAt: now,
+        renamedAt: undefined
+      })
 
       const secretName = 'my-secret-name'
       const res = await existsFormSecret(formId, secretName)
