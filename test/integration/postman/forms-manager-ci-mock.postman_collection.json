@@ -1986,99 +1986,7 @@
       "response": []
     },
     {
-      "name": "Rename secret",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"response is ok\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret/my-secret-renamed",
-          "host": [
-            "{{root}}"
-          ],
-          "path": [
-            "forms",
-            "{{go_live_form_id}}",
-            "secrets",
-            "my-secret",
-            "my-secret-renamed"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get renamed secret",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"response is ok\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "protocolProfileBehavior": {
-        "disableBodyPruning": true
-      },
-      "request": {
-        "method": "GET",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret-renamed",
-          "host": [
-            "{{root}}"
-          ],
-          "path": [
-            "forms",
-            "{{go_live_form_id}}",
-            "secrets",
-            "my-secret-renamed"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Delete renamed secret",
+      "name": "Delete secret",
       "event": [
         {
           "listen": "test",
@@ -2107,7 +2015,7 @@
           }
         },
         "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret-renamed",
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret",
           "host": [
             "{{root}}"
           ],
@@ -2115,7 +2023,7 @@
             "forms",
             "{{go_live_form_id}}",
             "secrets",
-            "my-secret-renamed"
+            "my-secret"
           ]
         }
       },
@@ -2154,7 +2062,7 @@
           }
         },
         "url": {
-          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret-renamed",
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret",
           "host": [
             "{{root}}"
           ],
@@ -2162,7 +2070,7 @@
             "forms",
             "{{go_live_form_id}}",
             "secrets",
-            "my-secret-renamed"
+            "my-secret"
           ]
         }
       },
