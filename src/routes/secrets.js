@@ -6,7 +6,6 @@ import {
   deleteFormSecret,
   existsFormSecret,
   getFormSecret,
-  renameFormSecret,
   saveFormSecret
 } from '~/src/api/forms/service/secrets.js'
 import { failAction } from '~/src/helpers/fail-action.js'
@@ -131,31 +130,6 @@ export default [
       },
       validate: {
         params: formSecretSchema,
-        failAction
-      }
-    }
-  },
-  {
-    method: 'PUT',
-    path: '/forms/{id}/secrets/{nameBefore}/{nameAfter}',
-    /**
-     * @param {RequestRenameFormSecret} request
-     */
-    async handler(request) {
-      const { auth, params } = request
-      const { id, nameBefore, nameAfter } = params
-      const author = getAuthor(auth.credentials.user)
-
-      await renameFormSecret(id, nameBefore, nameAfter, author)
-
-      return StatusCodes.OK
-    },
-    options: {
-      auth: {
-        scope: [`+${Scopes.FormEdit}`]
-      },
-      validate: {
-        params: formSecretRenameSchema,
         failAction
       }
     }

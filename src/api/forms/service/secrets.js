@@ -6,7 +6,6 @@ import { encryptSecret } from '~/src/api/forms/service/helpers/crypto.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import {
   publishDeletedFormSecretEvent,
-  publishRenamedFormSecretEvent,
   publishSavedFormSecretEvent
 } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
@@ -88,64 +87,6 @@ export async function deleteFormSecret(formId, secretName, author) {
     logger.error(
       err,
       `[assignSections] Failed to delete secret '${secretName}' to form ID ${formId} - ${getErrorMessage(err)}`
-    )
-
-    throw err
-  } finally {
-    await session.endSession()
-  }
-}
-
-/**
- * Changes the name of a secret.
- * @param {string} formId - id of the form
- * @param {string} secretNameFrom - name of the secret to be changed
- * @param {string} secretNameTo - name of the secret after the change
- * @param {FormMetadataAuthor} author
- */
-export async function renameFormSecret(
-  formId,
-  secretNameFrom,
-  secretNameTo,
-  author
-) {
-  const session = client.startSession()
-
-  try {
-    await session.withTransaction(async () => {
-      const metadata = await formMetadata.get(formId, session)
-
-      logger.info(
-        `1. About to rename secret '${secretNameFrom}' to '${secretNameTo}' on form ID ${formId}`
-      )
-      await secretsRepository.rename(
-        formId,
-        secretNameFrom,
-        secretNameTo,
-        session
-      )
-      logger.info(
-        `2. Renamed secret '${secretNameFrom}' to '${secretNameTo}' on form ID ${formId}`
-      )
-
-      await publishRenamedFormSecretEvent(
-        metadata,
-        secretNameFrom,
-        secretNameTo,
-        author
-      )
-      logger.info(
-        `3. Sent audit secret '${secretNameFrom}' to '${secretNameTo}' on form ID ${formId}`
-      )
-    })
-
-    logger.info(
-      `Renamed secret '${secretNameFrom}' to '${secretNameTo}' on form ID ${formId}`
-    )
-  } catch (err) {
-    logger.error(
-      err,
-      `[assignSections] Failed to rename secret '${secretNameFrom}' '${secretNameTo}' on form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err

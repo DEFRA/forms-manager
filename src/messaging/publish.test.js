@@ -30,7 +30,6 @@ import {
   publishFormTitleUpdatedEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent,
-  publishRenamedFormSecretEvent,
   publishSavedFormSecretEvent
 } from '~/src/messaging/publish.js'
 import { saveToS3 } from '~/src/messaging/s3.js'
@@ -347,29 +346,6 @@ describe('publish', () => {
       expect(publishEventCall.data).toMatchObject({
         slug: formMetadataDocument.slug,
         secretName: 'my-new-secret'
-      })
-    })
-  })
-
-  describe('publishRenamedFormSecretEvent', () => {
-    it('should publish a FORM_SECRET_RENAMED event', async () => {
-      await publishRenamedFormSecretEvent(
-        formMetadataDocument,
-        'my-new-secret-before',
-        'my-new-secret-after',
-        author
-      )
-
-      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
-      expect(publishEventCall).toMatchObject({
-        schemaVersion: AuditEventMessageSchemaVersion.V1,
-        category: AuditEventMessageCategory.FORM,
-        type: AuditEventMessageType.FORM_SECRET_RENAMED,
-        createdBy: author
-      })
-      expect(publishEventCall.data).toMatchObject({
-        slug: formMetadataDocument.slug,
-        secretName: 'my-new-secret-before'
       })
     })
   })

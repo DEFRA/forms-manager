@@ -11,7 +11,6 @@ import {
   formMigratedMapper,
   formTitleUpdatedMapper,
   formUpdatedMapper,
-  renamedFormSecretMapper,
   savedFormSecretMapper
 } from '~/src/messaging/mappers/form-events.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
@@ -209,30 +208,6 @@ export async function publishDeletedFormSecretEvent(
 ) {
   const metadata = mapForm(metadataDocument)
   const auditMessage = deletedFormSecretMapper(metadata, secretName, author)
-
-  return validateAndPublishEvent(auditMessage)
-}
-
-/**
- * Publish renamed form secret event
- * @param {WithId<Partial<FormMetadataDocument>>} metadataDocument
- * @param {string} secretNameFrom
- * @param {string} secretNameTo
- * @param {FormMetadataAuthor} author
- */
-export async function publishRenamedFormSecretEvent(
-  metadataDocument,
-  secretNameFrom,
-  secretNameTo,
-  author
-) {
-  const metadata = mapForm(metadataDocument)
-  const auditMessage = renamedFormSecretMapper(
-    metadata,
-    secretNameFrom,
-    secretNameTo,
-    author
-  )
 
   return validateAndPublishEvent(auditMessage)
 }
