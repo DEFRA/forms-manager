@@ -3,12 +3,14 @@ import { pino } from 'pino'
 
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import {
+  deleteSecret,
   exists,
   get,
   save
 } from '~/src/api/forms/repositories/secrets-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
 import {
+  deleteFormSecret,
   existsFormSecret,
   getFormSecret,
   saveFormSecret
@@ -58,9 +60,12 @@ describe('secrets', () => {
   describe('existsFormSecret', () => {
     it('should return true if a form secret exists', async () => {
       const now = new Date()
-      jest
-        .mocked(exists)
-        .mockResolvedValueOnce({ exists: true, createdAt: now, updatedAt: now })
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: true,
+        createdAt: now,
+        updatedAt: now,
+        renamedAt: undefined
+      })
 
       const secretName = 'my-secret-name'
       const res = await existsFormSecret(formId, secretName)
@@ -70,6 +75,44 @@ describe('secrets', () => {
       const [formIdCalled, secretNameCalled] = jest.mocked(exists).mock.calls[0]
       expect(formId).toBe(formIdCalled)
       expect(secretName).toBe(secretNameCalled)
+    })
+  })
+
+  describe('deleteFormSecret', () => {
+    it('should delete form secret and publish audit event', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+      const secretName = 'my-secret-name'
+      await deleteFormSecret(formId, secretName, defaultAuthor)
+
+      // Verify repository was called with correct arguments
+      const [formIdCalled, secretNameCalled] =
+        jest.mocked(deleteSecret).mock.calls[0]
+      expect(formId).toBe(formIdCalled)
+      expect(secretName).toBe(secretNameCalled)
+
+      // Verify audit event was published
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage).toMatchObject({
+        type: AuditEventMessageType.FORM_SECRET_DELETED
+      })
+      expect(auditMessage.data).toMatchObject({
+        formId,
+        secretName: 'my-secret-name'
+      })
+    })
+
+    it('should throw when error', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+      jest.mocked(deleteSecret).mockImplementationOnce(() => {
+        throw new Error('Deleting error')
+      })
+
+      const secretName = 'my-secret-name'
+      await expect(() =>
+        deleteFormSecret(formId, secretName, defaultAuthor)
+      ).rejects.toThrow('Deleting error')
     })
   })
 

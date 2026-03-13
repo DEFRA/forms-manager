@@ -1,4 +1,5 @@
 import {
+  deleteFormSecret,
   existsFormSecret,
   getFormSecret,
   saveFormSecret
@@ -45,7 +46,8 @@ describe('Secrets routes', () => {
       jest.mocked(existsFormSecret).mockResolvedValueOnce({
         exists: true,
         createdAt: undefined,
-        updatedAt: undefined
+        updatedAt: undefined,
+        renamedAt: undefined
       })
 
       const response = await server.inject({
@@ -78,6 +80,22 @@ describe('Secrets routes', () => {
       const [, calledName, calledValue] = saveSecret.mock.calls[0]
       expect(calledName).toBe('my-new-secret')
       expect(calledValue).toBe('My new secret value')
+    })
+
+    test('Testing DELETE /forms/{id}/secrets/{name}', async () => {
+      const deleteSecret = jest.mocked(deleteFormSecret)
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/forms/${id}/secrets/my-secret`,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toBe(okStatusCode)
+      const [, calledName] = deleteSecret.mock.calls[0]
+      expect(calledName).toBe('my-secret')
     })
   })
 

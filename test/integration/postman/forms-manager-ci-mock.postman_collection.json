@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "25fad961-499a-4c75-8728-4d076cd26d45",
+    "_postman_id": "bdcca91c-fac2-4df3-aaae-2afb359a65e1",
     "name": "forms-manager",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "23938788"
@@ -1878,6 +1878,199 @@
             "{{go_live_form_id}}",
             "definition",
             "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Save secret",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"secretValue\": \"my-secret-value\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "secrets",
+            "my-secret"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get secret 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "secrets",
+            "my-secret"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete secret",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "secrets",
+            "my-secret"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get deleted secret",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is not found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/secrets/my-secret",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "secrets",
+            "my-secret"
           ]
         }
       },

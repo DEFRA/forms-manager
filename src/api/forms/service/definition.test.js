@@ -30,6 +30,11 @@ import {
   modifyReorderSections
 } from '~/src/api/forms/repositories/helpers.js'
 import {
+  deleteSecret,
+  exists,
+  rename
+} from '~/src/api/forms/repositories/secrets-repository.js'
+import {
   formMetadataDocument,
   formMetadataInput,
   formMetadataOutput,
@@ -43,6 +48,7 @@ import {
   deleteDraftFormDefinition,
   getFormDefinition,
   listForms,
+  makePaymentKeyLive,
   missingPrivacyNotice,
   reorderDraftFormDefinitionComponents,
   reorderDraftFormDefinitionPages,
@@ -66,6 +72,7 @@ jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
 jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
+jest.mock('~/src/api/forms/repositories/secrets-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
@@ -121,7 +128,8 @@ describe('Forms service', () => {
     jest.mocked(existsFormSecret).mockResolvedValue({
       exists: true,
       createdAt: undefined,
-      updatedAt: undefined
+      updatedAt: undefined,
+      renamedAt: undefined
     })
   })
 
@@ -336,11 +344,20 @@ describe('Forms service', () => {
       }
       jest.mocked(formMetadata.get).mockResolvedValue(metadata)
 
-      jest.mocked(existsFormSecret).mockResolvedValueOnce({
-        exists: false,
-        createdAt: undefined,
-        updatedAt: undefined
-      })
+      jest
+        .mocked(existsFormSecret)
+        .mockResolvedValueOnce({
+          exists: false,
+          createdAt: undefined,
+          updatedAt: undefined,
+          renamedAt: undefined
+        })
+        .mockResolvedValueOnce({
+          exists: false,
+          createdAt: undefined,
+          updatedAt: undefined,
+          renamedAt: undefined
+        })
 
       const definitionWithPayment = buildDefinition()
       definitionWithPayment.pages.push(
@@ -1562,9 +1579,48 @@ describe('Forms service', () => {
       expect(missingPrivacyNotice(metadata)).toBe(false)
     })
   })
+
+  describe('makePaymentKeyLive', () => {
+    const formId = 'ea8154b9-e724-4bb4-a9cb-46f4159a53fa'
+    const mockSession = /** @type {ClientSession} */ ({})
+
+    it('should ignore if not a payment question', async () => {
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: true,
+        createdAt: new Date(),
+        updatedAt: undefined,
+        renamedAt: undefined
+      })
+      await makePaymentKeyLive(false, formId, mockSession)
+      expect(exists).not.toHaveBeenCalled()
+    })
+
+    it('should ignore if not exists', async () => {
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: false,
+        createdAt: new Date(),
+        updatedAt: undefined,
+        renamedAt: undefined
+      })
+      await makePaymentKeyLive(true, formId, mockSession)
+      expect(rename).not.toHaveBeenCalled()
+    })
+
+    it('should delete and rename if exists', async () => {
+      jest.mocked(exists).mockResolvedValueOnce({
+        exists: true,
+        createdAt: new Date(),
+        updatedAt: undefined,
+        renamedAt: undefined
+      })
+      await makePaymentKeyLive(true, formId, mockSession)
+      expect(deleteSecret).toHaveBeenCalled()
+      expect(rename).toHaveBeenCalled()
+    })
+  })
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataDocument, PageQuestion, QueryOptions } from '@defra/forms-model'
- * @import { WithId } from 'mongodb'
+ * @import { FormDefinition, FormMetadata, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { ClientSession, WithId } from 'mongodb'
  */

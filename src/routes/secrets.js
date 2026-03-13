@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 import Joi from 'joi'
 
 import {
+  deleteFormSecret,
   existsFormSecret,
   getFormSecret,
   saveFormSecret
@@ -18,6 +19,15 @@ export const formSecretSchema = Joi.object()
   .keys({
     id: idSchema,
     name: nameSchema
+  })
+  .required()
+
+// Schema to rename form secret by form id
+export const formSecretRenameSchema = Joi.object()
+  .keys({
+    id: idSchema,
+    nameBefore: nameSchema,
+    nameAfter: nameSchema
   })
   .required()
 
@@ -98,10 +108,35 @@ export default [
         failAction
       }
     }
+  },
+  {
+    method: 'DELETE',
+    path: ROUTE_SECRETS,
+    /**
+     * @param {RequestDeleteFormSecret} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id, name } = params
+      const author = getAuthor(auth.credentials.user)
+
+      await deleteFormSecret(id, name, author)
+
+      return StatusCodes.OK
+    },
+    options: {
+      auth: {
+        scope: [`+${Scopes.FormEdit}`]
+      },
+      validate: {
+        params: formSecretSchema,
+        failAction
+      }
+    }
   }
 ]
 
 /**
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestGetFormSecret, RequestSaveFormSecret } from '~/src/api/types.js'
+ * @import { RequestDeleteFormSecret, RequestGetFormSecret, RequestRenameFormSecret, RequestSaveFormSecret } from '~/src/api/types.js'
  */

@@ -21,6 +21,7 @@ import { buildFormOrganisationUpdatedMessage } from '~/src/messaging/__stubs__/m
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import {
   bulkPublishEvents,
+  publishDeletedFormSecretEvent,
   publishDraftCreatedFromLiveEvent,
   publishFormCreatedEvent,
   publishFormDraftDeletedEvent,
@@ -323,6 +324,28 @@ describe('publish', () => {
       })
       expect(publishEventCall).toMatchSnapshot({
         messageCreatedAt: expect.any(Date)
+      })
+    })
+  })
+
+  describe('publishDeletedFormSecretEvent', () => {
+    it('should publish a FORM_SECRET_DELETED event', async () => {
+      await publishDeletedFormSecretEvent(
+        formMetadataDocument,
+        'my-new-secret',
+        author
+      )
+
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall).toMatchObject({
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_SECRET_DELETED,
+        createdBy: author
+      })
+      expect(publishEventCall.data).toMatchObject({
+        slug: formMetadataDocument.slug,
+        secretName: 'my-new-secret'
       })
     })
   })

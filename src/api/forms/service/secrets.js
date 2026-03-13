@@ -4,7 +4,10 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import * as secretsRepository from '~/src/api/forms/repositories/secrets-repository.js'
 import { encryptSecret } from '~/src/api/forms/service/helpers/crypto.js'
 import { logger } from '~/src/api/forms/service/shared.js'
-import { publishSavedFormSecretEvent } from '~/src/messaging/publish.js'
+import {
+  publishDeletedFormSecretEvent,
+  publishSavedFormSecretEvent
+} from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 
 /**
@@ -53,6 +56,37 @@ export async function saveFormSecret(formId, secretName, secretValue, author) {
     logger.error(
       err,
       `[assignSections] Failed to save secret '${secretName}' to form ID ${formId} - ${getErrorMessage(err)}`
+    )
+
+    throw err
+  } finally {
+    await session.endSession()
+  }
+}
+
+/**
+ * Deletes a secret value.
+ * @param {string} formId - id of the form
+ * @param {string} secretName - name of the secret
+ * @param {FormMetadataAuthor} author
+ */
+export async function deleteFormSecret(formId, secretName, author) {
+  const session = client.startSession()
+
+  try {
+    await session.withTransaction(async () => {
+      const metadata = await formMetadata.get(formId, session)
+
+      await secretsRepository.deleteSecret(formId, secretName, session)
+
+      await publishDeletedFormSecretEvent(metadata, secretName, author)
+    })
+
+    logger.info(`Deleted secret '${secretName}' to form ID ${formId}`)
+  } catch (err) {
+    logger.error(
+      err,
+      `[assignSections] Failed to delete secret '${secretName}' to form ID ${formId} - ${getErrorMessage(err)}`
     )
 
     throw err

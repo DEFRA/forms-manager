@@ -484,7 +484,7 @@ export function formUpdatedMapper(metadata, requestType, { payload, s3Meta }) {
  * @param {AuditUser} createdBy
  * @returns {FormSecretSavedMessage}
  */
-export function savedFormSecretMapper(metadata, secretName, createdBy) {
+export function createFormSecretBase(metadata, secretName, createdBy) {
   const baseData = createFormMessageDataBase(metadata)
   const now = new Date()
   return {
@@ -504,6 +504,61 @@ export function savedFormSecretMapper(metadata, secretName, createdBy) {
 }
 
 /**
- * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage, FormSecretSavedMessage } from '@defra/forms-model'
+ * @param {FormMetadata} metadata
+ * @param {string} secretName
+ * @param {AuditUser} createdBy
+ * @returns {FormSecretSavedMessage}
+ */
+export function savedFormSecretMapper(metadata, secretName, createdBy) {
+  const base = createFormSecretBase(metadata, secretName, createdBy)
+
+  return {
+    ...base,
+    type: AuditEventMessageType.FORM_SECRET_SAVED
+  }
+}
+
+/**
+ * @param {FormMetadata} metadata
+ * @param {string} secretName
+ * @param {AuditUser} createdBy
+ * @returns {FormSecretDeletedMessage}
+ */
+export function deletedFormSecretMapper(metadata, secretName, createdBy) {
+  const base = createFormSecretBase(metadata, secretName, createdBy)
+
+  return {
+    ...base,
+    type: AuditEventMessageType.FORM_SECRET_DELETED
+  }
+}
+
+/**
+ * @param {FormMetadata} metadata
+ * @param {string} secretNameFrom
+ * @param {string} secretNameTo
+ * @param {AuditUser} createdBy
+ * @returns {FormSecretRenamedMessage}
+ */
+export function renamedFormSecretMapper(
+  metadata,
+  secretNameFrom,
+  secretNameTo,
+  createdBy
+) {
+  const base = createFormSecretBase(metadata, secretNameFrom, createdBy)
+  base.data.payload = {
+    secretNameFrom,
+    secretNameTo
+  }
+
+  return {
+    ...base,
+    type: AuditEventMessageType.FORM_SECRET_RENAMED
+  }
+}
+
+/**
+ * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage, FormSecretDeletedMessage, FormSecretRenamedMessage, FormSecretSavedMessage } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
