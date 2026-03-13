@@ -1,4 +1,5 @@
 import { FormStatus } from '@defra/forms-model'
+import { ObjectId } from 'mongodb'
 
 import {
   addDateFieldStage,
@@ -34,6 +35,15 @@ describe('Form metadata aggregation', () => {
         const result = buildFilterConditions({ title: 'Test Form' })
         expect(result).toEqual({
           title: { $regex: /Test Form/i }
+        })
+      })
+
+      it('should create object id filter if a form id is supplied', () => {
+        const result = buildFilterConditions({
+          title: '691db72966b1bdc98fa3e72a'
+        })
+        expect(result).toEqual({
+          _id: { $eq: new ObjectId('691db72966b1bdc98fa3e72a') }
         })
       })
     })
