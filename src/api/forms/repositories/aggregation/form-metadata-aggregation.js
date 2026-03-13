@@ -1,6 +1,17 @@
 import { FormStatus } from '@defra/forms-model'
+import { ObjectId } from 'mongodb'
 
 import { escapeRegExp } from '~/src/helpers/string-utils.js'
+
+/**
+ * @param {string} id
+ */
+export function isValidObjectId(id) {
+  if (id.length !== 24) {
+    return false
+  }
+  return ObjectId.isValid(id)
+}
 
 /**
  * Builds the filter conditions for querying forms.
@@ -12,8 +23,12 @@ export function buildFilterConditions(options) {
   const conditions = {}
 
   if (title) {
-    const regex = new RegExp(escapeRegExp(title), 'i')
-    conditions.title = { $regex: regex }
+    if (isValidObjectId(title)) {
+      conditions._id = { $eq: new ObjectId(title) }
+    } else {
+      const regex = new RegExp(escapeRegExp(title), 'i')
+      conditions.title = { $regex: regex }
+    }
   }
 
   if (author) {
