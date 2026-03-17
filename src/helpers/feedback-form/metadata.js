@@ -29,7 +29,9 @@ export const feedbackMetadata = /** @type {FormMetadata} */ ({
     phone: 'Telephone: 020 7946 0101\r\nMonday to Friday, 8am to 6pm'
   },
   submissionGuidance: 'Not sure yet',
+  privacyNoticeType: 'link',
   privacyNoticeUrl: 'https://www.gov.uk/help/privacy-notice',
+  privacyNoticeText: '',
   live: {
     updatedAt: createdUpdatedDate,
     updatedBy: user,
