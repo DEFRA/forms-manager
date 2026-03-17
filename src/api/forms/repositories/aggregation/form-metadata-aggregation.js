@@ -4,16 +4,6 @@ import { ObjectId } from 'mongodb'
 import { escapeRegExp } from '~/src/helpers/string-utils.js'
 
 /**
- * @param {string} id
- */
-export function isValidObjectId(id) {
-  if (id.length !== 24) {
-    return false
-  }
-  return ObjectId.isValid(id)
-}
-
-/**
  * Builds the filter conditions for querying forms.
  * @param {FilterQuery} options - The filter query options
  * @returns {FilterConditions} The filter conditions for MongoDB query.
@@ -23,7 +13,7 @@ export function buildFilterConditions(options) {
   const conditions = {}
 
   if (title) {
-    if (isValidObjectId(title)) {
+    if (ObjectId.isValid(title)) {
       conditions._id = { $eq: new ObjectId(title) }
     } else {
       const regex = new RegExp(escapeRegExp(title), 'i')
