@@ -80,15 +80,13 @@ The public key is used by forms-manager to encrypt secrets. The private key is u
 ```
 openssl genrsa -out private.pem 4096
 openssl rsa -pubout -in private.pem -out public.pem
-cat public.pem     #[copy the output and paste as <public-key> in the next command]
-echo -n "<public-key>" | base64
+cat public.pem | base64
 ```
 
 Copy/paste the encoded result as the env var PUBLIC_KEY_FOR_SECRETS (in forms-manager)
 
 ```
-cat private.pem     #[copy the output and paste as <private-key> in the next command]
-echo -n "<private-key>" | base64
+cat private.pem | base64
 ```
 
 Copy/paste the encoded result as the env var PRIVATE_KEY_FOR_SECRETS (in forms-runner)
