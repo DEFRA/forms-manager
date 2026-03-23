@@ -30,6 +30,7 @@ import { prepareDb } from '~/src/mongo.js'
 jest.mock('~/src/helpers/get-author.js')
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
 jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/api/forms/service/versioning.js')
 jest.mock('~/src/mongo.js', () => {

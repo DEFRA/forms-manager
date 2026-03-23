@@ -10,7 +10,6 @@ import { MongoServerError } from 'mongodb'
 import { removeFormErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   getValidationSchema,
   validate
@@ -198,11 +197,7 @@ export async function createForm(metadataInput, author) {
 export async function getForm(formId) {
   const document = await formMetadata.get(formId)
 
-  const versions = await formVersions.getVersionSummaries(formId)
-
-  const documentWithVersions = { ...document, versions }
-
-  return mapForm(documentWithVersions)
+  return mapForm(document)
 }
 
 /**
@@ -212,12 +207,7 @@ export async function getForm(formId) {
 export async function getFormBySlug(slug) {
   const document = await formMetadata.getBySlug(slug)
 
-  const formId = document._id.toString()
-  const versions = await formVersions.getVersionSummaries(formId)
-
-  const documentWithVersions = { ...document, versions }
-
-  return mapForm(documentWithVersions)
+  return mapForm(document)
 }
 
 /**

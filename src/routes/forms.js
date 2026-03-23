@@ -12,6 +12,7 @@ import {
   createLiveFromDraft,
   deleteDraftFormDefinition,
   getFormDefinition,
+  injectFormVersion,
   listForms,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
@@ -428,7 +429,8 @@ export default [
       const { id, versionNumber } = params
 
       const version = await getFormVersion(id, parseInt(versionNumber))
-      return version.formDefinition
+
+      return injectFormVersion(version.formDefinition, version)
     },
     options: {
       auth: false,
