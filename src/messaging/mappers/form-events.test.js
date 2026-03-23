@@ -16,10 +16,81 @@ import {
   formOrganisationUpdatedMapper,
   formTeamEmailUpdatedMapper,
   formTeamNameUpdatedMapper,
+  formTitleUpdatedMapper,
   formUpdatedMapper
 } from '~/src/messaging/mappers/form-events.js'
 
 describe('form-events', () => {
+  describe('formTitleUpdatedMapper', () => {
+    it('should include draft status for draft title updates', () => {
+      const metadata = buildMetaData({
+        title: 'New title',
+        slug: 'new-title'
+      })
+      const oldMetadata = buildMetaData({
+        title: 'Old title',
+        slug: 'old-title'
+      })
+
+      expect(formTitleUpdatedMapper(metadata, oldMetadata)).toMatchObject({
+        type: AuditEventMessageType.FORM_TITLE_UPDATED,
+        data: {
+          payload: {
+            formStatus: 'draft'
+          },
+          changes: {
+            previous: {
+              title: 'Old title'
+            },
+            new: {
+              title: 'New title'
+            }
+          }
+        }
+      })
+    })
+
+    it('should include live status for live title updates', () => {
+      const metadata = buildMetaData({
+        title: 'New title',
+        slug: 'existing-slug',
+        live: {
+          createdAt: new Date('2025-08-31'),
+          createdBy: author,
+          updatedAt: new Date('2025-08-31'),
+          updatedBy: author
+        }
+      })
+      const oldMetadata = buildMetaData({
+        title: 'Old title',
+        slug: 'existing-slug',
+        live: {
+          createdAt: new Date('2025-08-31'),
+          createdBy: author,
+          updatedAt: new Date('2025-08-31'),
+          updatedBy: author
+        }
+      })
+
+      expect(formTitleUpdatedMapper(metadata, oldMetadata)).toMatchObject({
+        type: AuditEventMessageType.FORM_TITLE_UPDATED,
+        data: {
+          payload: {
+            formStatus: 'live'
+          },
+          changes: {
+            previous: {
+              title: 'Old title'
+            },
+            new: {
+              title: 'New title'
+            }
+          }
+        }
+      })
+    })
+  })
+
   describe('formOrganisationUpdatedMapper', () => {
     it('should fail if organisation is missing', () => {
       expect(() => formOrganisationUpdatedMapper(buildMetaData(), {})).toThrow()

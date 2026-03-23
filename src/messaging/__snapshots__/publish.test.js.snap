@@ -149,6 +149,9 @@ exports[`publish publishFormTitleUpdatedEvent should publish FORM_TITLE_UPDATED 
       },
     },
     "formId": "689b7ab1d0eeac9711a7fb33",
+    "payload": {
+      "formStatus": "draft",
+    },
     "slug": "audit-form",
   },
   "entityId": "689b7ab1d0eeac9711a7fb33",
