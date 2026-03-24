@@ -117,6 +117,7 @@ describe('Forms service', () => {
   beforeEach(() => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+    jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
     jest
       .mocked(formVersions.getLatestVersion)
       .mockResolvedValue(mockFormVersionDocument)
