@@ -393,9 +393,6 @@ describe('Forms service', () => {
       expect(publishEventCalls[0]).toMatchObject({
         type: AuditEventMessageType.FORM_TITLE_UPDATED,
         data: {
-          payload: {
-            formStatus: 'draft'
-          },
           changes: {
             previous: {
               title: 'Test form'
@@ -500,9 +497,6 @@ describe('Forms service', () => {
       expect(publishEventCalls[0]).toMatchObject({
         type: AuditEventMessageType.FORM_TITLE_UPDATED,
         data: {
-          payload: {
-            formStatus: 'live'
-          },
           changes: {
             previous: {
               title: 'Test form'
@@ -553,9 +547,6 @@ describe('Forms service', () => {
       expect(publishEventCalls[0]).toMatchObject({
         type: AuditEventMessageType.FORM_TITLE_UPDATED,
         data: {
-          payload: {
-            formStatus: 'live'
-          },
           changes: {
             previous: {
               title: 'Test form'
@@ -730,12 +721,7 @@ describe('Forms service', () => {
       const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
 
       expect(publishEventCalls[0]).toMatchObject({
-        type: AuditEventMessageType.FORM_TITLE_UPDATED,
-        data: {
-          payload: {
-            formStatus: 'live'
-          }
-        }
+        type: AuditEventMessageType.FORM_TITLE_UPDATED
       })
 
       expect(formDefinition.updateName).toHaveBeenCalledWith(
@@ -777,9 +763,6 @@ describe('Forms service', () => {
       expect(publishEventCalls[0]).toMatchObject({
         type: AuditEventMessageType.FORM_TITLE_UPDATED,
         data: {
-          payload: {
-            formStatus: 'live'
-          },
           changes: {
             previous: {
               title: 'Test form'

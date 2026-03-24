@@ -149,9 +149,6 @@ describe('publish', () => {
         data: {
           formId,
           slug: 'audit-form',
-          payload: {
-            formStatus: 'draft'
-          },
           changes: {
             previous: {
               title: 'Old form title'
@@ -166,35 +163,6 @@ describe('publish', () => {
       expect(publishEventCall).toMatchSnapshot({
         messageCreatedAt: expect.any(Date)
       })
-    })
-
-    it('should publish live status for live form title updates', async () => {
-      const liveMetadata = buildMetaData({
-        ...metadata,
-        live: {
-          createdAt,
-          createdBy,
-          updatedAt,
-          updatedBy
-        }
-      })
-      const oldMetadata = buildMetaData({
-        ...liveMetadata,
-        title: 'Old form title'
-      })
-
-      await publishFormTitleUpdatedEvent(liveMetadata, oldMetadata)
-
-      expect(publishEvent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: AuditEventMessageType.FORM_TITLE_UPDATED,
-          data: expect.objectContaining({
-            payload: {
-              formStatus: 'live'
-            }
-          })
-        })
-      )
     })
   })
 

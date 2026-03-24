@@ -11,10 +11,6 @@ import {
 } from '~/src/messaging/mappers/base.js'
 
 /**
- * @typedef {'draft' | 'live'} FormTitleUpdateState
- */
-
-/**
  * @param {FormMetadata} metadata
  * @returns {FormCreatedMessage}
  */
@@ -52,8 +48,6 @@ export function formCreatedEventMapper(metadata) {
 export function formTitleUpdatedMapper(metadata, oldMetadata) {
   const { title } = metadata
   const { title: oldTitle } = oldMetadata
-  /** @type {FormTitleUpdateState} */
-  const formStatus = oldMetadata.live ? 'live' : 'draft'
 
   const baseData = createFormMessageDataBase(metadata)
 
@@ -62,9 +56,6 @@ export function formTitleUpdatedMapper(metadata, oldMetadata) {
    */
   const data = {
     ...baseData,
-    payload: {
-      formStatus
-    },
     changes: {
       previous: {
         title: oldTitle
