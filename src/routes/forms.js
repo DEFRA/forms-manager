@@ -41,6 +41,30 @@ import {
 export const ROUTE_FORMS = '/forms/{id}'
 
 /**
+ * @param {FormMetadata} form
+ * @param {string[] | undefined} userScopes
+ */
+function assertCanUpdateMetadata(form, userScopes) {
+  const scopes = userScopes ?? []
+
+  if (form.live) {
+    if (!scopes.includes(Scopes.FormPublish)) {
+      throw Boom.forbidden(
+        'FormPublish scope required to update metadata of a live form'
+      )
+    }
+
+    return
+  }
+
+  if (!scopes.includes(Scopes.FormEdit)) {
+    throw Boom.forbidden(
+      'FormEdit scope required to update metadata of a draft form'
+    )
+  }
+}
+
+/**
  * @type {ServerRoute[]}
  */
 export default [
@@ -104,14 +128,7 @@ export default [
       const { id } = params
 
       const form = await getForm(id)
-      if (form.live) {
-        const userScopes = auth.credentials.scope ?? []
-        if (!userScopes.includes(Scopes.FormPublish)) {
-          throw Boom.forbidden(
-            'Form is live - FormPublish scope required to update metadata'
-          )
-        }
-      }
+      assertCanUpdateMetadata(form, auth.credentials.scope)
 
       const slug = await updateFormMetadata(id, payload, author)
 
@@ -123,7 +140,7 @@ export default [
     },
     options: {
       auth: {
-        scope: [`+${Scopes.FormEdit}`]
+        scope: [`+${Scopes.FormRead}`]
       },
       validate: {
         params: formByIdSchema,

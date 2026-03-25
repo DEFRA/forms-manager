@@ -1074,7 +1074,7 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Forbidden',
-        message: 'Form is live - FormPublish scope required to update metadata'
+        message: 'FormPublish scope required to update metadata of a live form'
       })
     })
 
@@ -1825,6 +1825,32 @@ describe('Forms route', () => {
       })
     })
 
+    test('PATCH /forms/{id} throws forbidden when form is draft without FormEdit scope', async () => {
+      jest.mocked(getForm).mockResolvedValue({
+        ...stubFormMetadataOutput,
+        live: undefined
+      })
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: `/forms/${id}`,
+        payload: { title: 'Updated Title' },
+        auth: {
+          ...auth,
+          credentials: {
+            ...auth.credentials,
+            scope: [Scopes.FormRead]
+          }
+        }
+      })
+
+      expect(response.statusCode).toBe(403)
+      expect(response.result).toMatchObject({
+        error: 'Forbidden',
+        message: 'FormEdit scope required to update metadata of a draft form'
+      })
+    })
+
     test('PATCH /forms/{id} throws forbidden when form is live without FormPublish scope', async () => {
       jest.mocked(getForm).mockResolvedValue({
         ...stubFormMetadataOutput,
@@ -1844,7 +1870,7 @@ describe('Forms route', () => {
           ...auth,
           credentials: {
             ...auth.credentials,
-            scope: [Scopes.FormEdit]
+            scope: [Scopes.FormRead, Scopes.FormEdit]
           }
         }
       })
@@ -1852,7 +1878,40 @@ describe('Forms route', () => {
       expect(response.statusCode).toBe(403)
       expect(response.result).toMatchObject({
         error: 'Forbidden',
-        message: 'Form is live - FormPublish scope required to update metadata'
+        message: 'FormPublish scope required to update metadata of a live form'
+      })
+    })
+
+    test('PATCH /forms/{id} updates metadata when form is live with FormPublish scope only', async () => {
+      jest.mocked(getForm).mockResolvedValue({
+        ...stubFormMetadataOutput,
+        live: {
+          createdAt: now,
+          createdBy: author,
+          updatedAt: now,
+          updatedBy: author
+        }
+      })
+      jest.mocked(updateFormMetadata).mockResolvedValue(slug)
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: `/forms/${id}`,
+        payload: { title: 'Updated Title' },
+        auth: {
+          ...auth,
+          credentials: {
+            ...auth.credentials,
+            scope: [Scopes.FormRead, Scopes.FormPublish]
+          }
+        }
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.result).toEqual({
+        id,
+        slug,
+        status: 'updated'
       })
     })
 
@@ -1876,7 +1935,7 @@ describe('Forms route', () => {
           ...auth,
           credentials: {
             ...auth.credentials,
-            scope: [Scopes.FormEdit, Scopes.FormPublish]
+            scope: [Scopes.FormRead, Scopes.FormEdit, Scopes.FormPublish]
           }
         }
       })

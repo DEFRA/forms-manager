@@ -14,7 +14,8 @@ import {
   formMetadataDocument,
   formMetadataInput,
   formMetadataOutput,
-  formMetadataWithLiveDocument
+  formMetadataWithLiveDocument,
+  formMetadataWithLiveOutput
 } from '~/src/api/forms/service/__stubs__/service.js'
 import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
@@ -27,8 +28,7 @@ import {
   getFormBySlug,
   prepareUpdatedFormMetadata,
   removeForm,
-  updateFormMetadata,
-  validateLiveFormTitleUpdate
+  updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
@@ -167,8 +167,8 @@ describe('Forms service', () => {
       )
     })
 
-    it('should throw an error when writing for metadata fails', async () => {
-      jest.mocked(formMetadata.create).mockRejectedValueOnce(new Error())
+    it('should throw an error when writing for metadata fails - 1', async () => {
+      jest.mocked(formMetadata.create).mockRejectedValueOnce(new Error('error'))
 
       const input = {
         ...formMetadataInput,
@@ -181,7 +181,9 @@ describe('Forms service', () => {
     })
 
     it('should throw an error when writing form def fails', async () => {
-      jest.mocked(formDefinition.update).mockRejectedValueOnce(new Error())
+      jest
+        .mocked(formDefinition.update)
+        .mockRejectedValueOnce(new Error('error'))
 
       const input = {
         ...formMetadataInput,
@@ -479,18 +481,105 @@ describe('Forms service', () => {
       ).rejects.toThrow(error)
     })
 
-    it('should throw an error if form is live and trying to update title', async () => {
-      const error = Boom.badRequest(
-        `Form with ID '123' is live so 'title' cannot be updated`
-      )
+    it('should not re-slugify or update draft audit fields when title is updated on a live form', async () => {
+      const input = {
+        title: 'new title'
+      }
 
       jest
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
-      await expect(
-        updateFormMetadata('123', { title: 'new title' }, author)
-      ).rejects.toThrow(error)
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      const updatedSlug = await updateFormMetadata('123', input, author)
+
+      expect(updatedSlug).toBe('test-form')
+
+      const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
+
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      expect(dbMetadataOperationArgs[0]).toBe('123')
+      expect(dbMetadataOperationArgs[1]).toMatchObject({
+        $set: {
+          title: input.title,
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author
+        }
+      })
+      expect(dbMetadataOperationArgs[1].$set?.slug).toBeUndefined()
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedAt']
+      ).toBeUndefined()
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedBy']
+      ).toBeUndefined()
+
+      const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
+
+      expect(publishEventCalls[0]).toMatchObject({
+        type: AuditEventMessageType.FORM_TITLE_UPDATED,
+        data: {
+          changes: {
+            previous: {
+              title: 'Test form'
+            },
+            new: {
+              title: 'new title'
+            }
+          }
+        }
+      })
+
+      expect(formDefinition.updateName).toHaveBeenCalledWith(
+        '123',
+        input.title,
+        expect.anything(),
+        expect.anything()
+      )
+      expect(versioningService.createFormVersion).toHaveBeenCalledWith(
+        '123',
+        expect.anything()
+      )
+    })
+
+    it('should publish title audit event for a live form without a draft', async () => {
+      const input = {
+        title: 'new title'
+      }
+
+      const liveOnlyFormMetadataDocument = {
+        ...formMetadataWithLiveDocument
+      }
+
+      Reflect.deleteProperty(liveOnlyFormMetadataDocument, 'draft')
+
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(liveOnlyFormMetadataDocument)
+
+      const updatedSlug = await updateFormMetadata('123', input, author)
+
+      expect(updatedSlug).toBe('test-form')
+      expect(formDefinition.get).not.toHaveBeenCalled()
+      expect(formDefinition.updateName).not.toHaveBeenCalled()
+      expect(versioningService.createFormVersion).not.toHaveBeenCalled()
+
+      const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
+
+      expect(publishEventCalls[0]).toMatchObject({
+        type: AuditEventMessageType.FORM_TITLE_UPDATED,
+        data: {
+          changes: {
+            previous: {
+              title: 'Test form'
+            },
+            new: {
+              title: 'new title'
+            }
+          }
+        }
+      })
     })
 
     it('should throw an error when title already exists', async () => {
@@ -618,18 +707,95 @@ describe('Forms service', () => {
       ).rejects.toThrow(error)
     })
 
-    it('should throw an error if form is live and trying to update title', async () => {
-      const error = Boom.badRequest(
-        `Form with ID '123' is live so 'title' cannot be updated`
-      )
+    it('should not re-slugify or update draft audit fields when title is updated on a live form', async () => {
+      const input = {
+        title: 'new title'
+      }
 
       jest
         .mocked(formMetadata.get)
         .mockResolvedValueOnce(formMetadataWithLiveDocument)
 
-      await expect(
-        updateFormMetadata('123', { title: 'new title' }, author)
-      ).rejects.toThrow(error)
+      const dbMetadataSpy = jest.spyOn(formMetadata, 'update')
+
+      const updatedSlug = await updateFormMetadata('123', input, author)
+
+      expect(updatedSlug).toBe('test-form')
+
+      const dbMetadataOperationArgs = dbMetadataSpy.mock.calls[0]
+
+      expect(dbMetadataSpy).toHaveBeenCalled()
+      expect(dbMetadataOperationArgs[0]).toBe('123')
+      expect(dbMetadataOperationArgs[1]).toMatchObject({
+        $set: {
+          title: input.title,
+          updatedAt: dateUsedInFakeTime,
+          updatedBy: author
+        }
+      })
+      expect(dbMetadataOperationArgs[1].$set?.slug).toBeUndefined()
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedAt']
+      ).toBeUndefined()
+      expect(
+        dbMetadataOperationArgs[1].$set?.['draft.updatedBy']
+      ).toBeUndefined()
+
+      const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
+
+      expect(publishEventCalls[0]).toMatchObject({
+        type: AuditEventMessageType.FORM_TITLE_UPDATED
+      })
+
+      expect(formDefinition.updateName).toHaveBeenCalledWith(
+        '123',
+        input.title,
+        expect.anything(),
+        expect.anything()
+      )
+      expect(versioningService.createFormVersion).toHaveBeenCalledWith(
+        '123',
+        expect.anything()
+      )
+    })
+
+    it('should publish title audit event for a live V2 form without a draft', async () => {
+      const input = {
+        title: 'new title'
+      }
+
+      const liveOnlyFormMetadataDocument = {
+        ...formMetadataWithLiveDocument
+      }
+
+      Reflect.deleteProperty(liveOnlyFormMetadataDocument, 'draft')
+
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(liveOnlyFormMetadataDocument)
+
+      const updatedSlug = await updateFormMetadata('123', input, author)
+
+      expect(updatedSlug).toBe('test-form')
+      expect(formDefinition.get).not.toHaveBeenCalled()
+      expect(formDefinition.updateName).not.toHaveBeenCalled()
+      expect(versioningService.createFormVersion).not.toHaveBeenCalled()
+
+      const publishEventCalls = jest.mocked(publishEvent).mock.calls[0]
+
+      expect(publishEventCalls[0]).toMatchObject({
+        type: AuditEventMessageType.FORM_TITLE_UPDATED,
+        data: {
+          changes: {
+            previous: {
+              title: 'Test form'
+            },
+            new: {
+              title: 'new title'
+            }
+          }
+        }
+      })
     })
 
     it('should throw an error when title already exists', async () => {
@@ -659,40 +825,14 @@ describe('Forms service', () => {
     })
   })
 
-  describe('validateLiveFormTitleUpdate', () => {
-    it('should not throw when form is not live', () => {
-      const form = {
-        ...formMetadataDocument,
-        id: formMetadataDocument._id.toString()
-      }
-      const formUpdate = { title: 'New Title' }
-
-      expect(() => {
-        validateLiveFormTitleUpdate(form, 'formId', formUpdate)
-      }).not.toThrow()
-    })
-
-    it('should throw Boom.badRequest when trying to update live form title', () => {
-      const form = {
-        ...formMetadataWithLiveDocument,
-        id: formMetadataWithLiveDocument._id.toString()
-      }
-      const formUpdate = { title: 'New Title' }
-
-      expect(() => {
-        validateLiveFormTitleUpdate(form, 'formId', formUpdate)
-      }).toThrow(
-        Boom.badRequest(
-          "Form with ID 'formId' is live so 'title' cannot be updated"
-        )
-      )
-    })
-  })
-
   describe('prepareUpdatedFormMetadata', () => {
     it('should return form update with audit fields', () => {
       const formUpdate = { organisation: 'New Org' }
-      const result = prepareUpdatedFormMetadata(formUpdate, author)
+      const result = prepareUpdatedFormMetadata(
+        formMetadataOutput,
+        formUpdate,
+        author
+      )
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -705,7 +845,11 @@ describe('Forms service', () => {
 
     it('should add slug when title is provided', () => {
       const formUpdate = { title: 'New Title' }
-      const result = prepareUpdatedFormMetadata(formUpdate, author)
+      const result = prepareUpdatedFormMetadata(
+        formMetadataOutput,
+        formUpdate,
+        author
+      )
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -715,6 +859,26 @@ describe('Forms service', () => {
           updatedAt: expect.any(Date)
         })
       )
+    })
+
+    it('should not add a slug or draft audit fields when title is provided for a live form', () => {
+      const formUpdate = { title: 'New Title' }
+      const result = prepareUpdatedFormMetadata(
+        formMetadataWithLiveOutput,
+        formUpdate,
+        author
+      )
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          title: 'New Title',
+          updatedBy: author,
+          updatedAt: expect.any(Date)
+        })
+      )
+      expect(result.slug).toBeUndefined()
+      expect(result['draft.updatedAt']).toBeUndefined()
+      expect(result['draft.updatedBy']).toBeUndefined()
     })
   })
 
