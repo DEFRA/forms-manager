@@ -36,31 +36,19 @@ import {
 import { client } from '~/src/mongo.js'
 
 /**
- * Validates that a live form title cannot be updated
- * @param {FormMetadata} form - The form metadata
- * @param {string} formId - The form ID
- * @param {Partial<FormMetadataInput>} formUpdate - The update payload
- */
-export function validateLiveFormTitleUpdate(form, formId, formUpdate) {
-  if (form.live && 'title' in formUpdate) {
-    throw Boom.badRequest(
-      `Form with ID '${formId}' is live so 'title' cannot be updated`
-    )
-  }
-}
-
-/**
  * Prepares the updated form metadata with audit fields
+ * @param {FormMetadata} form - The current form metadata
  * @param {Partial<FormMetadataInput>} formUpdate - The update payload
  * @param {FormMetadataAuthor} author - The author details
  * @returns {PartialFormMetadataDocument}
  */
-export function prepareUpdatedFormMetadata(formUpdate, author) {
+export function prepareUpdatedFormMetadata(form, formUpdate, author) {
   const now = new Date()
   const { updatedAt, updatedBy, ...draftAuditFields } = partialAuditFields(
     now,
     author
   )
+  const isDraftTitleUpdate = Boolean(formUpdate.title && !form.live)
 
   let updatedForm = {
     ...formUpdate,
@@ -71,8 +59,12 @@ export function prepareUpdatedFormMetadata(formUpdate, author) {
   if (formUpdate.title) {
     updatedForm = {
       ...updatedForm,
-      slug: slugify(formUpdate.title),
-      ...draftAuditFields
+      ...(isDraftTitleUpdate
+        ? {
+            slug: slugify(formUpdate.title),
+            ...draftAuditFields
+          }
+        : {})
     }
   }
 
@@ -98,12 +90,20 @@ export async function handleTitleUpdate(
     throw new Error('Title is required for title update')
   }
 
-  const definition = await formDefinition.get(formId, FormStatus.Draft, session)
-  const schema = getValidationSchema(definition)
+  const hasDraft = Boolean(form.draft)
 
-  await formDefinition.updateName(formId, formUpdate.title, session, schema)
+  if (hasDraft) {
+    const definition = await formDefinition.get(
+      formId,
+      FormStatus.Draft,
+      session
+    )
+    const schema = getValidationSchema(definition)
 
-  await createFormVersion(formId, session)
+    await formDefinition.updateName(formId, formUpdate.title, session, schema)
+
+    await createFormVersion(formId, session)
+  }
 
   await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
 }
@@ -233,9 +233,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
   try {
     const form = await getForm(formId)
-    validateLiveFormTitleUpdate(form, formId, formUpdate)
-
-    const updatedForm = prepareUpdatedFormMetadata(formUpdate, author)
+    const updatedForm = prepareUpdatedFormMetadata(form, formUpdate, author)
     const session = client.startSession()
 
     await session.withTransaction(async () => {
