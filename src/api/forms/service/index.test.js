@@ -82,6 +82,9 @@ describe('Forms service', () => {
     jest
       .mocked(versioningService.getLatestFormVersion)
       .mockResolvedValue(mockFormVersionDocument)
+    jest
+      .mocked(formVersions.getLatestVersion)
+      .mockResolvedValue(mockFormVersionDocument)
   })
 
   const slugExamples = [
@@ -259,6 +262,17 @@ describe('Forms service', () => {
   })
 
   describe('getFormBySlug', () => {
+    it('should return form metadata when form exists', async () => {
+      jest
+        .mocked(formMetadata.getBySlug)
+        .mockResolvedValue(formMetadataDocument)
+
+      const result = await getFormBySlug(slug)
+
+      expect(result).toEqual(formMetadataOutput)
+      expect(formMetadata.getBySlug).toHaveBeenCalledWith(slug)
+    })
+
     it('should return form metadata with versions when form exists', async () => {
       const mockVersions = [
         { versionNumber: 1, createdAt: new Date('2023-01-01') },
@@ -291,6 +305,15 @@ describe('Forms service', () => {
   })
 
   describe('getForm', () => {
+    it('should return form metadata when form exists', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+
+      const result = await getForm(id)
+
+      expect(result).toEqual(formMetadataOutput)
+      expect(formMetadata.get).toHaveBeenCalledWith(id)
+    })
+
     it('should return form metadata with versions when form exists', async () => {
       const mockVersions = [
         { versionNumber: 1, createdAt: new Date('2023-01-01') },
@@ -312,13 +335,6 @@ describe('Forms service', () => {
       expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
     })
 
-    it('should throw an error if form does not exist', async () => {
-      const error = Boom.notFound(`Form with ID '${id}' not found`)
-      jest.mocked(formMetadata.get).mockRejectedValue(error)
-
-      await expect(getForm(id)).rejects.toThrow(error)
-    })
-
     it('should handle empty versions array', async () => {
       jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
       jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
@@ -330,6 +346,13 @@ describe('Forms service', () => {
         versions: []
       })
       expect(formVersions.getVersionSummaries).toHaveBeenCalledWith(id)
+    })
+
+    it('should throw an error if form does not exist', async () => {
+      const error = Boom.notFound(`Form with ID '${id}' not found`)
+      jest.mocked(formMetadata.get).mockRejectedValue(error)
+
+      await expect(getForm(id)).rejects.toThrow(error)
     })
   })
 

@@ -43,6 +43,7 @@ import {
 } from '~/src/api/forms/service/__stubs__/service.js'
 import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
+  FORM_VERSION_METADATA_KEY,
   createDraftFromLive,
   createLiveFromDraft,
   deleteDraftFormDefinition,
@@ -78,6 +79,7 @@ jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
 jest.mock('~/src/messaging/s3.js')
 jest.mock('~/src/api/forms/service/versioning.js')
+
 jest.mock('~/src/api/forms/service/secrets.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
@@ -116,6 +118,9 @@ describe('Forms service', () => {
     definition = emptyFormWithSummary()
     jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
     jest.mocked(formVersions.getVersionSummaries).mockResolvedValue([])
+    jest
+      .mocked(formVersions.getLatestVersion)
+      .mockResolvedValue(mockFormVersionDocument)
     jest
       .mocked(formMetadata.updateAudit)
       .mockResolvedValue(formMetadataDocument)
@@ -509,10 +514,29 @@ describe('Forms service', () => {
       await expect(createForm(input, author)).rejects.toThrow()
     })
 
-    it('should return the form definition', async () => {
+    it('should return the form definition with $$__formVersion injected', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
 
-      await expect(getFormDefinition('123')).resolves.toMatchObject(definition)
+      const result = await getFormDefinition('123')
+
+      expect(result).toEqual({
+        ...definition,
+        metadata: {
+          [FORM_VERSION_METADATA_KEY]: {
+            versionNumber: mockFormVersionDocument.versionNumber,
+            createdAt: mockFormVersionDocument.createdAt
+          }
+        }
+      })
+    })
+
+    it('should return the form definition without $$__formVersion when no versions exist', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+      jest.mocked(formVersions.getLatestVersion).mockResolvedValueOnce(null)
+
+      const result = await getFormDefinition('123')
+
+      expect(result).toEqual(definition)
     })
 
     it('should throw an error if the form associated with the definition does not exist', async () => {
@@ -1255,7 +1279,7 @@ describe('Forms service', () => {
         [],
         author
       )
-      expect(returnedDefinition).toEqual(definition)
+      expect(returnedDefinition).toEqual(expect.objectContaining(definition))
       expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })
@@ -1342,7 +1366,7 @@ describe('Forms service', () => {
         [],
         author
       )
-      expect(returnedDefinition).toEqual(definition)
+      expect(returnedDefinition).toEqual(expect.objectContaining(definition))
       expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })
@@ -1460,7 +1484,7 @@ describe('Forms service', () => {
         [],
         author
       )
-      expect(returnedDefinition).toEqual(definition)
+      expect(returnedDefinition).toEqual(expect.objectContaining(definition))
       expect(formDefinition.update).not.toHaveBeenCalled()
       expect(formMetadata.update).not.toHaveBeenCalled()
     })

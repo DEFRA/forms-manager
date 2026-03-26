@@ -11,6 +11,7 @@ import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import { deleteDraft } from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   deleteSecret,
   exists,
@@ -36,6 +37,26 @@ import { client } from '~/src/mongo.js'
 
 export const PAYMENT_LIVE_API_KEY = 'payment-live-api-key'
 export const PAYMENT_LIVE_API_KEY_PENDING = 'payment-live-api-key-pending'
+export const FORM_VERSION_METADATA_KEY = '$$__formVersion'
+
+/**
+ * Returns a new definition with version metadata injected into definition.metadata.
+ * @param {FormDefinition} definition
+ * @param {{ versionNumber: number, createdAt: Date }} version
+ * @returns {FormDefinition}
+ */
+export function injectFormVersion(definition, version) {
+  return {
+    ...definition,
+    metadata: {
+      ...definition.metadata,
+      [FORM_VERSION_METADATA_KEY]: {
+        versionNumber: version.versionNumber,
+        createdAt: version.createdAt
+      }
+    }
+  }
+}
 
 /**
  * Retrieves a paginated list of forms with filter options
@@ -50,7 +71,8 @@ export async function listForms(options) {
 }
 
 /**
- * Retrieves the form definition content for a given form ID
+ * Retrieves the form definition content for a given form ID.
+ * Injects the latest version metadata into definition.metadata.$$__formVersion.
  * @param {string} formId - the ID of the form
  * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
@@ -60,7 +82,16 @@ export async function getFormDefinition(
   state = FormStatus.Draft,
   session
 ) {
-  return formDefinition.get(formId, state, session)
+  const [definition, latestVersion] = await Promise.all([
+    formDefinition.get(formId, state, session),
+    formVersions.getLatestVersion(formId, session)
+  ])
+
+  if (!latestVersion) {
+    return definition
+  }
+
+  return injectFormVersion(definition, latestVersion)
 }
 
 /**

@@ -38,7 +38,15 @@ import { auth } from '~/test/fixtures/auth.js'
 
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/api/forms/service/index.js')
-jest.mock('~/src/api/forms/service/definition.js')
+jest.mock('~/src/api/forms/service/definition.js', () => ({
+  ...jest.requireActual('~/src/api/forms/service/definition.js'),
+  getFormDefinition: jest.fn(),
+  listForms: jest.fn(),
+  updateDraftFormDefinition: jest.fn(),
+  createLiveFromDraft: jest.fn(),
+  createDraftFromLive: jest.fn(),
+  deleteDraftFormDefinition: jest.fn()
+}))
 jest.mock('~/src/api/forms/service/page.js')
 jest.mock('~/src/api/forms/service/component.js')
 jest.mock('~/src/api/forms/service/migration.js')
@@ -1579,7 +1587,16 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual(stubFormDefinition)
+      expect(response.result).toEqual({
+        ...stubFormDefinition,
+        metadata: {
+          ...stubFormDefinition.metadata,
+          $$__formVersion: {
+            versionNumber: mockVersion.versionNumber,
+            createdAt: mockVersion.createdAt
+          }
+        }
+      })
     })
 
     test('GET /forms/{id}/versions handles error', async () => {

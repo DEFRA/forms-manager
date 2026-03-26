@@ -1643,6 +1643,109 @@
       "response": []
     },
     {
+      "name": "GET /forms/:form_id/definition - has $$__formVersion after create-live",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"live definition contains $$__formVersion metadata\", function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.metadata).to.be.an('object');",
+              "    pm.expect(response.metadata.$$__formVersion).to.be.an('object');",
+              "    pm.expect(response.metadata.$$__formVersion.versionNumber).to.be.a('number');",
+              "    pm.expect(response.metadata.$$__formVersion.createdAt).to.be.a('string');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /forms/:form_id/definition/draft - has $$__formVersion after create-live",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"draft definition contains $$__formVersion metadata\", function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.metadata).to.be.an('object');",
+              "    pm.expect(response.metadata.$$__formVersion).to.be.an('object');",
+              "    pm.expect(response.metadata.$$__formVersion.versionNumber).to.be.a('number');",
+              "    pm.expect(response.metadata.$$__formVersion.createdAt).to.be.a('string');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Get form option - undefined reference number",
       "event": [
         {
