@@ -221,6 +221,7 @@ export const config = convict({
     default: null,
     env: 'ENTITLEMENT_URL'
   },
+  /** @type {SchemaObj<string>} */
   publicKeyForSecrets: {
     doc: 'Public key for encryption of secrets',
     format: String,
