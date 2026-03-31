@@ -1,57 +1,14 @@
-import { getErrorMessage } from '@defra/forms-model'
 import Jwt from '@hapi/jwt'
 
-import {
-  getDefaultScopes,
-  getUserScopes
-} from '~/src/api/entitlements/service.js'
+import { getUserScopes } from '~/src/api/entitlements/service.js'
 import { config } from '~/src/config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 
 const oidcJwksUri = config.get('oidcJwksUri')
 const oidcVerifyAud = config.get('oidcVerifyAud')
 const oidcVerifyIss = config.get('oidcVerifyIss')
-const roleEditorGroupId = config.get('roleEditorGroupId')
-const useEntitlementApi = config.get('useEntitlementApi')
 
 const logger = createLogger()
-
-/**
- * Processes the groups claim from the token payload
- * @param {unknown} groupsClaim - The groups claim from the token
- * @param {string} oid - User OID for logging purposes
- * @returns {string[]} Processed groups array
- */
-function processGroupsClaim(groupsClaim, oid) {
-  let processedGroups = []
-
-  // For the integration tests, the OIDC mock server sends the 'groups' claim as a stringified JSON array which
-  // requires parsing, while a real Azure AD would typically provide 'groups' as a proper array.
-  // We handle both formats for flexibility between test and production environments.
-  if (typeof groupsClaim === 'string') {
-    try {
-      const parsed = JSON.parse(groupsClaim)
-      if (Array.isArray(parsed)) {
-        processedGroups = parsed
-      } else {
-        logger.warn(
-          `[authGroupsInvalid] Auth: User ${oid}: 'groups' claim was string but not valid JSON array: '${groupsClaim}'`
-        )
-      }
-    } catch (err) {
-      logger.error(
-        err,
-        `[authGroupsParseError] Auth: User ${oid}: Failed to parse 'groups' claim - ${getErrorMessage(err)}`
-      )
-    }
-  } else if (Array.isArray(groupsClaim)) {
-    processedGroups = groupsClaim
-  } else {
-    processedGroups = []
-  }
-
-  return processedGroups
-}
 
 /**
  * Validates user credentials from JWT token
@@ -69,8 +26,6 @@ async function validateUserCredentials(artifacts) {
   }
 
   const { oid } = user
-  const groupsClaim = user.groups
-
   if (!oid) {
     logger.info('[authMissingOID] Auth: User OID is missing in token payload.')
     return {
@@ -78,33 +33,12 @@ async function validateUserCredentials(artifacts) {
     }
   }
 
-  const processedGroups = processGroupsClaim(groupsClaim, oid)
-
-  if (!useEntitlementApi && !processedGroups.includes(roleEditorGroupId)) {
-    logger.warn(
-      `[authGroupNotFound] Auth: User ${oid}: Authorisation failed. Required group "${roleEditorGroupId}" not found`
-    )
-    return {
-      isValid: false
-    }
-  }
-
-  let userScopes = []
-
-  if (useEntitlementApi) {
-    const authToken = artifacts.token
-    userScopes = await getUserScopes(oid, authToken)
-  } else {
-    userScopes = getDefaultScopes()
-  }
+  const userScopes = await getUserScopes(oid, artifacts.token)
 
   return {
     isValid: true,
     credentials: {
-      user: {
-        ...user,
-        groups: processedGroups
-      },
+      user,
       scope: userScopes
     }
   }

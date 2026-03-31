@@ -162,13 +162,6 @@ export const config = convict({
     default: null,
     env: 'OIDC_VERIFY_ISS'
   },
-  /** @type {SchemaObj<string>} */
-  roleEditorGroupId: {
-    doc: 'The AD security group the access token needs to claim membership of',
-    format: String,
-    default: null,
-    env: 'ROLE_EDITOR_GROUP_ID'
-  },
   tracing: {
     /** @type {SchemaObj<string>} */
 
@@ -227,13 +220,6 @@ export const config = convict({
     format: String,
     default: null,
     env: 'ENTITLEMENT_URL'
-  },
-  /** @type {SchemaObj<boolean>} */
-  useEntitlementApi: {
-    doc: 'Feature flag to enable entitlement API for fetching scopes',
-    format: Boolean,
-    default: null,
-    env: 'FEATURE_FLAG_USE_ENTITLEMENT_API'
   },
   /** @type {SchemaObj<string>} */
   publicKeyForSecrets: {

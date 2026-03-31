@@ -13,8 +13,6 @@ jest.mock('~/src/helpers/logging/logger.js', () => ({
 jest.mock('~/src/config/index.js', () => ({
   config: {
     get: jest.fn((key) => {
-      if (key === 'roleEditorGroupId') return 'editor-group-id'
-      if (key === 'useEntitlementApi') return false
       if (key === 'oidcJwksUri') return 'mock-jwks-uri'
       if (key === 'oidcVerifyAud') return 'mock-aud'
       if (key === 'oidcVerifyIss') return 'mock-iss'
@@ -121,131 +119,13 @@ describe('auth plugin', () => {
     test('should return isValid: false when oid is missing', async () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
-          payload: {
-            groups: ['some-group']
-          }
+          payload: {}
         }
       })
       const result = await validateFn(artifacts)
       expect(result).toEqual({ isValid: false })
       expect(mockActualTestInfoFn).toHaveBeenCalledWith(
         '[authMissingOID] Auth: User OID is missing in token payload.'
-      )
-    })
-
-    test('should handle string groups claim that is valid JSON array', async () => {
-      const artifacts = /** @type {any} */ ({
-        decoded: {
-          payload: {
-            oid: 'test-oid',
-            groups: JSON.stringify(['editor-group-id'])
-          }
-        }
-      })
-      const result = await validateFn(artifacts)
-      expect(result).toEqual({
-        isValid: true,
-        credentials: {
-          user: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
-          },
-          scope: ['form-delete', 'form-edit', 'form-read', 'form-publish']
-        }
-      })
-    })
-
-    test('should handle string groups claim that is not a valid JSON array', async () => {
-      const artifacts = /** @type {any} */ ({
-        decoded: {
-          payload: {
-            oid: 'test-oid',
-            groups: JSON.stringify({ notAnArray: true })
-          }
-        }
-      })
-      const result = await validateFn(artifacts)
-      expect(result).toEqual({ isValid: false })
-      expect(mockActualTestWarnFn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          "[authGroupsInvalid] Auth: User test-oid: 'groups' claim was string but not valid JSON array"
-        )
-      )
-    })
-
-    test('should handle parsing error for string groups claim', async () => {
-      const artifacts = /** @type {any} */ ({
-        decoded: {
-          payload: {
-            oid: 'test-oid',
-            groups: '{invalid-json'
-          }
-        }
-      })
-      const result = await validateFn(artifacts)
-      expect(result).toEqual({ isValid: false })
-      expect(mockActualTestErrorFn).toHaveBeenCalledWith(
-        expect.any(Error),
-        expect.stringContaining(
-          "[authGroupsParseError] Auth: User test-oid: Failed to parse 'groups' claim"
-        )
-      )
-    })
-
-    test('should handle array groups claim directly', async () => {
-      const artifacts = /** @type {any} */ ({
-        decoded: {
-          payload: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
-          }
-        }
-      })
-      const result = await validateFn(artifacts)
-      expect(result).toEqual({
-        isValid: true,
-        credentials: {
-          user: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
-          },
-          scope: ['form-delete', 'form-edit', 'form-read', 'form-publish']
-        }
-      })
-    })
-
-    test('should handle missing groups claim by setting an empty array', async () => {
-      const artifacts = /** @type {any} */ ({
-        decoded: {
-          payload: {
-            oid: 'test-oid'
-          }
-        }
-      })
-      const result = await validateFn(artifacts)
-      expect(result).toEqual({ isValid: false })
-      expect(mockActualTestWarnFn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '[authGroupNotFound] Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
-        )
-      )
-    })
-
-    test('should return isValid: false when required group is not in groups array', async () => {
-      const artifacts = /** @type {any} */ ({
-        decoded: {
-          payload: {
-            oid: 'test-oid',
-            groups: ['some-other-group']
-          }
-        }
-      })
-      const result = await validateFn(artifacts)
-      expect(result).toEqual({ isValid: false })
-      expect(mockActualTestWarnFn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '[authGroupNotFound] Auth: User test-oid: Authorisation failed. Required group "editor-group-id" not found'
-        )
       )
     })
   })
@@ -255,8 +135,6 @@ describe('auth plugin', () => {
     let validateFn
     /** @type {jest.MockedFunction<(oid: string, authToken?: string) => Promise<string[]>>} */
     let getUserScopes
-    /** @type {jest.MockedFunction<() => string[]>} */
-    let getDefaultScopes
 
     beforeEach(async () => {
       jest.resetModules()
@@ -265,8 +143,6 @@ describe('auth plugin', () => {
       jest.doMock('~/src/config/index.js', () => ({
         config: {
           get: jest.fn((key) => {
-            if (key === 'roleEditorGroupId') return 'editor-group-id'
-            if (key === 'useEntitlementApi') return true
             if (key === 'oidcJwksUri') return 'mock-jwks-uri'
             if (key === 'oidcVerifyAud') return 'mock-aud'
             if (key === 'oidcVerifyIss') return 'mock-iss'
@@ -281,9 +157,6 @@ describe('auth plugin', () => {
         /** @type {jest.MockedFunction<(oid: string, authToken?: string) => Promise<string[]>>} */ (
           entitlementsModule.getUserScopes
         )
-      getDefaultScopes = /** @type {jest.MockedFunction<() => string[]>} */ (
-        entitlementsModule.getDefaultScopes
-      )
 
       const authModule = await import('~/src/plugins/auth/index.js')
       const auth = authModule.auth
@@ -306,8 +179,7 @@ describe('auth plugin', () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
+            oid: 'test-oid'
           }
         },
         token: 'test-jwt-token'
@@ -316,13 +188,11 @@ describe('auth plugin', () => {
       const result = await validateFn(artifacts)
 
       expect(getUserScopes).toHaveBeenCalledWith('test-oid', 'test-jwt-token')
-      expect(getDefaultScopes).not.toHaveBeenCalled()
       expect(result).toEqual({
         isValid: true,
         credentials: {
           user: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
+            oid: 'test-oid'
           },
           scope: ['form-delete', 'form-edit', 'form-read']
         }
@@ -333,8 +203,7 @@ describe('auth plugin', () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
+            oid: 'test-oid'
           }
         }
         // No token property
@@ -347,8 +216,7 @@ describe('auth plugin', () => {
         isValid: true,
         credentials: {
           user: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
+            oid: 'test-oid'
           },
           scope: ['form-delete', 'form-edit', 'form-read']
         }
@@ -361,8 +229,7 @@ describe('auth plugin', () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
+            oid: 'test-oid'
           }
         },
         token: 'test-jwt-token'
@@ -375,8 +242,7 @@ describe('auth plugin', () => {
         isValid: true,
         credentials: {
           user: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
+            oid: 'test-oid'
           },
           scope: []
         }
@@ -389,8 +255,7 @@ describe('auth plugin', () => {
       const artifacts = /** @type {any} */ ({
         decoded: {
           payload: {
-            oid: 'test-oid',
-            groups: ['editor-group-id']
+            oid: 'test-oid'
           }
         },
         token: 'test-jwt-token'
@@ -398,35 +263,6 @@ describe('auth plugin', () => {
 
       await expect(validateFn(artifacts)).rejects.toThrow('API Error')
       expect(getUserScopes).toHaveBeenCalledWith('test-oid', 'test-jwt-token')
-    })
-
-    test('should not check groups when useEntitlementApi is true', async () => {
-      const artifacts = /** @type {any} */ ({
-        decoded: {
-          payload: {
-            oid: 'test-oid',
-            groups: ['some-other-group'] // Not editor-group-id
-          }
-        },
-        token: 'test-jwt-token'
-      })
-
-      const result = await validateFn(artifacts)
-
-      expect(getUserScopes).toHaveBeenCalledWith('test-oid', 'test-jwt-token')
-      expect(mockActualTestWarnFn).not.toHaveBeenCalledWith(
-        expect.stringContaining('[authGroupNotFound]')
-      )
-      expect(result).toEqual({
-        isValid: true,
-        credentials: {
-          user: {
-            oid: 'test-oid',
-            groups: ['some-other-group']
-          },
-          scope: ['form-delete', 'form-edit', 'form-read']
-        }
-      })
     })
   })
 })
