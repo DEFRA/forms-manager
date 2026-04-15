@@ -29,6 +29,7 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
+import { generateReport } from '~/src/api/forms/service/report.js'
 import {
   getFormVersion,
   getFormVersions
@@ -53,6 +54,7 @@ jest.mock('~/src/api/forms/service/migration.js')
 jest.mock('~/src/api/forms/service/conditions.js')
 jest.mock('~/src/api/forms/service/versioning.js')
 jest.mock('~/src/messaging/publish.js')
+jest.mock('~/src/api/forms/service/report.js')
 
 describe('Forms route', () => {
   /** @type {Server} */
@@ -1945,6 +1947,28 @@ describe('Forms route', () => {
         id,
         slug,
         status: 'updated'
+      })
+    })
+
+    test('GET /report returns data', async () => {
+      jest.mocked(generateReport).mockResolvedValue({
+        headline: [],
+        draft: [],
+        live: [],
+        timeline: []
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/report'
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.result).toEqual({
+        headline: [],
+        draft: [],
+        live: [],
+        timeline: []
       })
     })
   })
