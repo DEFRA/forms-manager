@@ -36,37 +36,28 @@ export async function generateReport(date) {
 
       for (const metadata of metadatas) {
         const formId = metadata._id.toString()
+        const strictMetadata = /** @type {FormMetadata} */ ({
+          ...metadata,
+          id: formId
+        })
 
         // Only process forms that have been updated since the last check
         if (!date || (metadata.updatedAt && metadata.updatedAt > date)) {
-          const draft = await getDefinitionIfExists(
+          await processDefinition(
             formId,
             FormStatus.Draft,
+            strictMetadata,
+            metrics.draftMetrics,
             session
           )
-          if (draft) {
-            metrics.draftMetrics.set(
-              formId,
-              collectOverviewMetrics(metadata, draft)
-            )
-          }
 
-          const live = await getDefinitionIfExists(
+          await processDefinition(
             formId,
             FormStatus.Live,
+            strictMetadata,
+            metrics.liveMetrics,
             session
           )
-          if (live) {
-            metrics.liveMetrics.set(
-              formId,
-              collectOverviewMetrics(metadata, live)
-            )
-          }
-
-          const strictMetadata = /** @type {FormMetadata} */ ({
-            ...metadata,
-            id: formId
-          })
 
           collectTimelineMetrics(metrics.timelineMetrics, strictMetadata, date)
         }
@@ -89,6 +80,26 @@ export async function generateReport(date) {
     live: Object.fromEntries(metrics.liveMetrics),
     draft: Object.fromEntries(metrics.draftMetrics),
     timeline: metrics.timelineMetrics
+  }
+}
+
+/**
+ * @param {string} formId
+ * @param {FormStatus} status
+ * @param {FormMetadata} metadata
+ * @param {Map<string, any>} metrics
+ * @param {ClientSession} session
+ */
+export async function processDefinition(
+  formId,
+  status,
+  metadata,
+  metrics,
+  session
+) {
+  const definition = await getDefinitionIfExists(formId, status, session)
+  if (definition) {
+    metrics.set(formId, collectOverviewMetrics(metadata, definition))
   }
 }
 
