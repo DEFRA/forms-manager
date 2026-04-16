@@ -3,7 +3,6 @@ import {
   ControllerType,
   FormMetricType,
   FormStatus,
-  FormTimelineMetricType,
   getErrorMessage,
   hasComponentsEvenIfNoNext,
   hasPaymentQuestionInForm,
@@ -18,7 +17,7 @@ import { client } from '~/src/mongo.js'
 
 /**
  * Adds or updates an option
- * @param {Date} [date]
+ * @param {Date} [date] - optional date on which to gather the metrics for
  */
 export async function generateReport(date) {
   logger.info(`Generating report for date ${date?.toString()}`)
@@ -27,7 +26,6 @@ export async function generateReport(date) {
 
   const metrics = {
     timelineMetrics: /** @type {FormTimelineMetric[]} */ ([]),
-    headlineMetrics: new Map(),
     draftMetrics: new Map(),
     liveMetrics: new Map()
   }
@@ -88,7 +86,6 @@ export async function generateReport(date) {
   logger.info(`Generated report for date ${date?.toString()}`)
 
   return {
-    headline: Object.fromEntries(metrics.headlineMetrics),
     live: Object.fromEntries(metrics.liveMetrics),
     draft: Object.fromEntries(metrics.draftMetrics),
     timeline: metrics.timelineMetrics
@@ -137,15 +134,30 @@ export function collectOverviewMetrics(metadata, definition) {
  * @param { Date | undefined } date
  */
 export function collectTimelineMetrics(timelineMetrics, metadata, date) {
-  if (!date || isSameDay(date, metadata.createdAt)) {
+  // NewFormsCreated
+  if (!date || isSameDay(date, metadata.draft?.createdAt)) {
     timelineMetrics.push(
       /** @type {FormTimelineMetric} */ ({
         type: FormMetricType.TimelineMetric,
         formId: metadata.id,
-        formStatus: metadata.live ? FormStatus.Live : FormStatus.Draft,
-        metricName: FormTimelineMetricType.NewFormsCreated,
+        formStatus: FormStatus.Draft,
+        metricName: 'NewFormsCreated',
         metricValue: 1,
-        createdAt: metadata.createdAt
+        createdAt: metadata.draft?.createdAt
+      })
+    )
+  }
+
+  // FormsPublished
+  if (!date || isSameDay(date, metadata.live?.createdAt)) {
+    timelineMetrics.push(
+      /** @type {FormTimelineMetric} */ ({
+        type: FormMetricType.TimelineMetric,
+        formId: metadata.id,
+        formStatus: FormStatus.Live,
+        metricName: 'FormsPublished',
+        metricValue: 1,
+        createdAt: metadata.live?.createdAt
       })
     )
   }

@@ -1952,7 +1952,6 @@ describe('Forms route', () => {
 
     test('GET /report returns data', async () => {
       jest.mocked(generateReport).mockResolvedValue({
-        headline: [],
         draft: [],
         live: [],
         timeline: []
@@ -1965,7 +1964,6 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.result).toEqual({
-        headline: [],
         draft: [],
         live: [],
         timeline: []
