@@ -87,6 +87,8 @@ services:
     container_name: forms-entitlement-api-test
     platform: linux/amd64
     environment:
+      HOST: 0.0.0.0
+      ENVIRONMENT: local
       NODE_ENV: production
       PORT: 3004
       # Mongo
@@ -96,12 +98,24 @@ services:
       OIDC_JWKS_URI: 'http://oidc:80/.well-known/openid-configuration/jwks'
       OIDC_VERIFY_AUD: 'newman-test-client'
       OIDC_VERIFY_ISS: 'http://oidc:80'
-      SYNC_ADMIN_USERS_ENABLED: false
-      TRACE_HEADER: x-trace-id
-      LOG_LEVEL: info
       AWS_REGION: eu-west-2
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+      SYNC_ADMIN_USERS_ENABLED: false
+      SYNC_ADMIN_USERS_CRON: '0 3 * * *'
+      TRACING_HEADER: x-trace-id
+      LOG_ENABLED: true
+      LOG_FORMAT: pino-pretty
+      LOG_LEVEL: info
+      CDP_HTTPS_PROXY: ''
+      ENABLE_METRICS: false
+      ENABLE_SECURE_CONTEXT: false
+      SNS_ENDPOINT: http://host.docker.internal:4566
+      SNS_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_entitlement_events"
+      ROLE_EDITOR_GROUP_ID: dummy
+      AZURE_CLIENT_ID: dummy
+      AZURE_CLIENT_SECRET: dummy
+      AZURE_TENANT_ID: dummy
     networks:
       - forms_test_net
     ports:
