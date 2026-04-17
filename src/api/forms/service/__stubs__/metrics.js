@@ -10,7 +10,7 @@ const expectedBaseSummaryMetrics = {
 /**
  * @param {Date} timestamp
  */
-function getExpectedOverviewMetrics(timestamp) {
+export function getExpectedOverviewMetrics(timestamp) {
   return {
     draft: {
       '449a699bcc9946a6a6d925de': {
@@ -76,56 +76,10 @@ function getExpectedOverviewMetrics(timestamp) {
 }
 
 /**
- * Generate exported metrics for all days
- * @param {Date} timestamp
+ * Generate expected metrics for 8th August 2025
  */
-export function getExpectedAllDaysMetrics(timestamp) {
+export function getExpectedTimelineMetrics1() {
   return {
-    ...getExpectedOverviewMetrics(timestamp),
-    timeline: [
-      {
-        type: 'timeline-metric',
-        formId: '449a699bcc9946a6a6d925de',
-        formStatus: 'draft',
-        metricName: 'NewFormsCreated',
-        metricValue: 1,
-        createdAt: new Date('2025-05-07T08:22:28.035Z')
-      },
-      {
-        type: 'timeline-metric',
-        formId: '0dae1c832b8e4a89963a7825',
-        formStatus: 'draft',
-        metricName: 'NewFormsCreated',
-        metricValue: 1,
-        createdAt: new Date('2025-05-07T08:22:28.035Z')
-      },
-      {
-        type: 'timeline-metric',
-        formId: '0dae1c832b8e4a89963a7825',
-        formStatus: 'live',
-        metricName: 'FormsPublished',
-        metricValue: 1,
-        createdAt: new Date('2025-08-08T09:10:21.035Z')
-      },
-      {
-        type: 'timeline-metric',
-        formId: '9fb48bd350a64e908c9ea92e',
-        formStatus: 'draft',
-        metricName: 'NewFormsCreated',
-        metricValue: 1,
-        createdAt: new Date('2025-05-07T08:22:28.035Z')
-      }
-    ]
-  }
-}
-
-/**
- * Generate exported metrics for single day
- * @param {Date} timestamp
- */
-export function getExpectedSingleDayMetrics(timestamp) {
-  return {
-    ...getExpectedOverviewMetrics(timestamp),
     timeline: [
       {
         type: 'timeline-metric',
@@ -158,6 +112,24 @@ export function getExpectedSingleDayMetrics(timestamp) {
         metricName: 'NewFormsCreated',
         metricValue: 1,
         createdAt: new Date('2025-05-07T08:22:28.035Z')
+      }
+    ]
+  }
+}
+
+/**
+ * Generate expected metrics for 7th May 2025
+ */
+export function getExpectedTimelineMetrics2() {
+  return {
+    timeline: [
+      {
+        type: 'timeline-metric',
+        formId: '0dae1c832b8e4a89963a7825',
+        formStatus: 'live',
+        metricName: 'FormsPublished',
+        metricValue: 1,
+        createdAt: new Date('2025-08-08T09:10:21.035Z')
       }
     ]
   }

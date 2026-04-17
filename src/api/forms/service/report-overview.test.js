@@ -18,18 +18,13 @@ import {
 import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import { getMetadataOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { getExpectedOverviewMetrics } from '~/src/api/forms/service/__stubs__/metrics.js'
 import {
-  getExpectedAllDaysMetrics,
-  getExpectedSingleDayMetrics
-} from '~/src/api/forms/service/__stubs__/metrics.js'
-import {
-  daysBetween,
-  generateReport,
+  generateReportOverview,
   getDefinitionIfExists,
   getFeatureList,
-  getUniqueComponentTypes,
-  isSameDay
-} from '~/src/api/forms/service/report.js'
+  getUniqueComponentTypes
+} from '~/src/api/forms/service/report-overview.js'
 import { client } from '~/src/mongo.js'
 
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
@@ -44,8 +39,8 @@ jest.mock('~/src/mongo.js', () => ({
   DEFINITION_COLLECTION_NAME: 'form-definition'
 }))
 
-describe('report', () => {
-  describe('generateReport', () => {
+describe('report-overview', () => {
+  describe('generateReportOverview', () => {
     /** @type {any} */
     const mockSession = {
       withTransaction: jest.fn(),
@@ -75,7 +70,7 @@ describe('report', () => {
     const form2Id = '0dae1c832b8e4a89963a7825'
     const form3Id = '9fb48bd350a64e908c9ea92e'
 
-    it('should gather metrics for all forms, for all dates', async () => {
+    it('should gather metrics for all forms', async () => {
       const allMetadata = [
         buildMetadataDocument({
           title: 'Form 1 title',
@@ -130,71 +125,9 @@ describe('report', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      const metrics = await generateReport()
+      const metrics = await generateReportOverview()
 
-      expect(metrics).toEqual(getExpectedAllDaysMetrics(new Date()))
-    })
-
-    it('should gather metrics for all forms, for a specific date', async () => {
-      const allMetadata = [
-        buildMetadataDocument({
-          title: 'Form 1 title',
-          slug: 'form-1-title',
-          _id: new ObjectId(form1Id),
-          updatedAt: new Date('2025-05-20T09:10:21.035Z')
-        }),
-        buildMetadataDocument({
-          title: 'Form 2 title',
-          slug: 'form-2-title',
-          _id: new ObjectId(form2Id),
-          live: {
-            createdAt: new Date('2025-05-07T09:10:21.035Z'),
-            createdBy: {
-              id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
-              displayName: 'Internal User'
-            },
-            updatedAt: new Date('2025-05-07T09:10:21.035Z'),
-            updatedBy: {
-              id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
-              displayName: 'Internal User'
-            }
-          },
-          updatedAt: new Date('2025-05-07T09:10:21.035Z')
-        }),
-        buildMetadataDocument({
-          title: 'Form 3 title',
-          slug: 'form-3-title',
-          _id: new ObjectId(form3Id),
-          updatedAt: new Date('2025-05-20T09:10:21.035Z')
-        })
-      ]
-      jest.mocked(getMetadataOfAllForms).mockResolvedValueOnce(allMetadata)
-
-      // Form 1 - draft and no live
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      // @ts-expect-error - force not def to be returned
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(undefined)
-
-      // Form 2 - draft and live
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-
-      // Form 3 - draft and no live
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      // @ts-expect-error - force not def to be returned
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(undefined)
-
-      const mockNewSession = /** @type {any} */ ({
-        withTransaction: jest.fn().mockImplementation(async (callback) => {
-          return await callback()
-        }),
-        endSession: jest.fn().mockResolvedValue(undefined)
-      })
-      jest.mocked(client.startSession).mockReturnValue(mockNewSession)
-
-      const metrics = await generateReport(new Date(2025, 4, 7))
-
-      expect(metrics).toEqual(getExpectedSingleDayMetrics(new Date()))
+      expect(metrics).toEqual(getExpectedOverviewMetrics(new Date()))
     })
 
     it('should handle error and still close session', async () => {
@@ -211,39 +144,11 @@ describe('report', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      await expect(() => generateReport()).rejects.toThrow('report error')
+      await expect(() => generateReportOverview()).rejects.toThrow(
+        'report error'
+      )
 
       expect(mockEndSession).toHaveBeenCalled()
-    })
-  })
-  describe('daysBetween', () => {
-    it('should calc the days between', () => {
-      expect(daysBetween(new Date(2025, 1, 1), new Date(2025, 2, 2))).toBe(29)
-    })
-  })
-
-  describe('isSameDay', () => {
-    it('should return true if dates are the same day irrespective of time', () => {
-      expect(
-        isSameDay(
-          new Date(2025, 10, 24, 11, 5, 3),
-          new Date(2025, 10, 24, 3, 7, 9)
-        )
-      ).toBe(true)
-    })
-
-    it('should return false if dates are different days irrespective of time', () => {
-      expect(
-        isSameDay(
-          new Date(2025, 10, 23, 11, 5, 3),
-          new Date(2025, 10, 24, 3, 7, 9)
-        )
-      ).toBe(false)
-    })
-
-    it('should return false if either date is undefined', () => {
-      expect(isSameDay(undefined, new Date(2025, 10, 24, 3, 7, 9))).toBe(false)
-      expect(isSameDay(new Date(2025, 10, 24, 3, 7, 9), undefined)).toBe(false)
     })
   })
 

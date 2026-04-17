@@ -29,7 +29,8 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
-import { generateReport } from '~/src/api/forms/service/report.js'
+import { generateReportOverview } from '~/src/api/forms/service/report-overview.js'
+import { generateReportTimeline } from '~/src/api/forms/service/report-timeline.js'
 import {
   getFormVersion,
   getFormVersions
@@ -54,7 +55,8 @@ jest.mock('~/src/api/forms/service/migration.js')
 jest.mock('~/src/api/forms/service/conditions.js')
 jest.mock('~/src/api/forms/service/versioning.js')
 jest.mock('~/src/messaging/publish.js')
-jest.mock('~/src/api/forms/service/report.js')
+jest.mock('~/src/api/forms/service/report-overview.js')
+jest.mock('~/src/api/forms/service/report-timeline.js')
 
 describe('Forms route', () => {
   /** @type {Server} */
@@ -1950,22 +1952,36 @@ describe('Forms route', () => {
       })
     })
 
-    test('GET /report returns data', async () => {
-      jest.mocked(generateReport).mockResolvedValue({
+    test('GET /report-overview returns data', async () => {
+      jest.mocked(generateReportOverview).mockResolvedValue({
         draft: [],
-        live: [],
-        timeline: []
+        live: []
       })
 
       const response = await server.inject({
         method: 'GET',
-        url: '/report'
+        url: '/report/overview'
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.result).toEqual({
         draft: [],
-        live: [],
+        live: []
+      })
+    })
+
+    test('GET /report-timeline returns data', async () => {
+      jest.mocked(generateReportTimeline).mockResolvedValue({
+        timeline: []
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/report/timeline?date=2025-10-10'
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.result).toEqual({
         timeline: []
       })
     })

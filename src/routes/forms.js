@@ -24,7 +24,8 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
-import { generateReport } from '~/src/api/forms/service/report.js'
+import { generateReportOverview } from '~/src/api/forms/service/report-overview.js'
+import { generateReportTimeline } from '~/src/api/forms/service/report-timeline.js'
 import {
   getFormVersion,
   getFormVersions
@@ -460,7 +461,17 @@ export default [
   },
   {
     method: 'GET',
-    path: '/report',
+    path: '/report/overview',
+    handler() {
+      return generateReportOverview()
+    },
+    options: {
+      auth: false
+    }
+  },
+  {
+    method: 'GET',
+    path: '/report/timeline',
     /**
      * @param {RequestReport} request
      */
@@ -468,7 +479,7 @@ export default [
       const { query } = request
       const { date } = query
 
-      return generateReport(date)
+      return generateReportTimeline(date)
     },
     options: {
       auth: false,

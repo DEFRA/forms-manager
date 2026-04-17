@@ -16,23 +16,16 @@ import { logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
- * Adds or updates an option
- * @param {Date} [date] - optional date on which to gather the metrics for
+ * Generates a set of overview metrics for each form
  */
-export async function generateReport(date) {
-  logger.info(`Generating report for date ${date?.toString()}`)
+export async function generateReportOverview() {
+  logger.info('Generating overview report')
 
   const session = client.startSession()
 
   const metrics = {
-    timelineMetrics: /** @type {FormTimelineMetric[]} */ ([]),
     draftMetrics: new Map(),
     liveMetrics: new Map()
-  }
-
-  // Add time element so outside of BST shift
-  if (date) {
-    date.setHours(4)
   }
 
   try {
@@ -63,15 +56,12 @@ export async function generateReport(date) {
           metrics.liveMetrics,
           session
         )
-
-        // Gather timeline metrics for all time, or just a specific day
-        collectTimelineMetrics(metrics.timelineMetrics, strictMetadata, date)
       }
     })
   } catch (err) {
     logger.error(
       err,
-      `[report] Failed to generate report for date ${date?.toString()} - ${getErrorMessage(err)}`
+      `[report] Failed to generate overview report - ${getErrorMessage(err)}`
     )
 
     throw err
@@ -79,12 +69,11 @@ export async function generateReport(date) {
     await session.endSession()
   }
 
-  logger.info(`Generated report for date ${date?.toString()}`)
+  logger.info('Generated overview report')
 
   return {
     live: Object.fromEntries(metrics.liveMetrics),
-    draft: Object.fromEntries(metrics.draftMetrics),
-    timeline: metrics.timelineMetrics
+    draft: Object.fromEntries(metrics.draftMetrics)
   }
 }
 
@@ -152,48 +141,6 @@ export function collectOverviewMetrics(metadata, definition, definitionType) {
 }
 
 /**
- * Collect timeline metrics
- * @param {FormTimelineMetric[]} timelineMetrics
- * @param {FormMetadata} metadata
- * @param { Date | undefined } date
- */
-export function collectTimelineMetrics(timelineMetrics, metadata, date) {
-  // NewFormsCreated - draft only
-  if (
-    metadata.draft?.createdAt &&
-    (!date || isSameDay(date, metadata.draft.createdAt))
-  ) {
-    timelineMetrics.push(
-      /** @type {FormTimelineMetric} */ ({
-        type: FormMetricType.TimelineMetric,
-        formId: metadata.id,
-        formStatus: FormStatus.Draft,
-        metricName: 'NewFormsCreated',
-        metricValue: 1,
-        createdAt: metadata.draft.createdAt
-      })
-    )
-  }
-
-  // FormsPublished - live only
-  if (
-    metadata.live?.createdAt &&
-    (!date || isSameDay(date, metadata.live.createdAt))
-  ) {
-    timelineMetrics.push(
-      /** @type {FormTimelineMetric} */ ({
-        type: FormMetricType.TimelineMetric,
-        formId: metadata.id,
-        formStatus: FormStatus.Live,
-        metricName: 'FormsPublished',
-        metricValue: 1,
-        createdAt: metadata.live.createdAt
-      })
-    )
-  }
-}
-
-/**
  *
  * @param {Partial<FormMetadata>} metadata
  * @param {FormDefinition} definition
@@ -214,33 +161,6 @@ export function calcSummaryMetrics(metadata, definition, definitionType) {
 }
 
 /**
- * Take the difference between the dates and divide by milliseconds per day.
- * Round to nearest whole number.
- * @param {Date} first
- * @param {Date} second
- */
-export function daysBetween(first, second) {
-  return Math.round(
-    (second.getTime() - first.getTime()) / (1000 * 60 * 60 * 24)
-  )
-}
-
-/**
- * Check if two dates are for the same date (i.e. compare without any time element)
- * @param { Date | undefined } first
- * @param { Date | undefined } second
- */
-export function isSameDay(first, second) {
-  if (!first || !second) {
-    return false
-  }
-  const firstStr = first.toISOString().substring(0, 10)
-  const secondStr = second.toISOString().substring(0, 10)
-  return firstStr === secondStr
-}
-
-/**
- *
  * @param {FormDefinition} definition
  */
 export function getFeatureList(definition) {
@@ -284,5 +204,5 @@ export function getUniqueComponentTypes(definition) {
 
 /**
  * @import { ClientSession } from 'mongodb'
- * @import { FormDefinition, FormMetadata, FormTimelineMetric } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata } from '@defra/forms-model'
  */
