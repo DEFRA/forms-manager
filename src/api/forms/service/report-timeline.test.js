@@ -6,7 +6,6 @@ import {
   buildPaymentComponent,
   buildRadioComponent
 } from '@defra/forms-model/stubs'
-import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
@@ -121,9 +120,6 @@ describe('report-timeline', () => {
 
       // Form 1 - draft and no live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      jest.mocked(formDefinition.get).mockImplementationOnce(() => {
-        throw Boom.notFound()
-      })
 
       // Form 2 - draft and live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
@@ -131,8 +127,6 @@ describe('report-timeline', () => {
 
       // Form 3 - draft and no live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      // @ts-expect-error - force not def to be returned
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(undefined)
 
       const mockNewSession = /** @type {any} */ ({
         withTransaction: jest.fn().mockImplementation(async (callback) => {

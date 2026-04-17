@@ -115,9 +115,6 @@ describe('report-overview', () => {
 
       // Form 1 - draft and no live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      jest.mocked(formDefinition.get).mockImplementationOnce(() => {
-        throw Boom.notFound()
-      })
 
       // Form 2 - draft and live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
@@ -125,8 +122,6 @@ describe('report-overview', () => {
 
       // Form 3 - draft and no live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      // @ts-expect-error - force not def to be returned
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(undefined)
 
       const mockNewSession = /** @type {any} */ ({
         withTransaction: jest.fn().mockImplementation(async (callback) => {
@@ -251,6 +246,17 @@ describe('report-overview', () => {
   })
 
   describe('getDefinitionIfExists', () => {
+    it('should not throw if error is NOT_FOUND', async () => {
+      jest.mocked(formDefinition.get).mockImplementationOnce(() => {
+        throw Boom.notFound()
+      })
+
+      // @ts-expect-error - mock session not implemented
+      const res = await getDefinitionIfExists('formId', FormStatus.Draft, {})
+
+      expect(res).toBeUndefined()
+    })
+
     it('should throw if error is not NOT_FOUND', async () => {
       jest.mocked(formDefinition.get).mockImplementationOnce(() => {
         throw new Error('Not a boom NOT FOUND')

@@ -37,20 +37,24 @@ export async function generateReportOverview() {
         const strictMetadata = mapMetadata(metadata)
 
         // Gather overview metrics for draft form
-        await processDefinition(
-          FormStatus.Draft,
-          strictMetadata,
-          metrics.draftMetrics,
-          session
-        )
+        if (strictMetadata.draft) {
+          await processDefinition(
+            FormStatus.Draft,
+            strictMetadata,
+            metrics.draftMetrics,
+            session
+          )
+        }
 
         // Gather overview metrics for live form
-        await processDefinition(
-          FormStatus.Live,
-          strictMetadata,
-          metrics.liveMetrics,
-          session
-        )
+        if (strictMetadata.live) {
+          await processDefinition(
+            FormStatus.Live,
+            strictMetadata,
+            metrics.liveMetrics,
+            session
+          )
+        }
       }
     })
   } catch (err) {
