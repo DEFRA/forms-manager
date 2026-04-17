@@ -175,6 +175,20 @@ export async function listWithVersions(options) {
 }
 
 /**
+ * Retrieves a list of all forms' metadata using a cursor
+ * @param {ClientSession} session - MongoDB session for transactions
+ */
+export function getMetadataCursorOfAllForms(session) {
+  logger.info('Getting metadata of all forms')
+
+  const coll = /** @satisfies {Collection<Partial<FormMetadataDocument>>} */ (
+    db.collection(METADATA_COLLECTION_NAME)
+  )
+
+  return coll.find({}, { session })
+}
+
+/**
  * Retrieves a form metadata by ID
  * @param {string} formId - ID of the form
  * @param {ClientSession} [session] - Optional MongoDB session for transactions

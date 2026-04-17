@@ -24,6 +24,8 @@ import {
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
+import { generateReportOverview } from '~/src/api/forms/service/report-overview.js'
+import { generateReportTimeline } from '~/src/api/forms/service/report-timeline.js'
 import {
   getFormVersion,
   getFormVersions
@@ -35,6 +37,7 @@ import {
   formByIdSchema,
   formBySlugSchema,
   migrateDefinitionParamSchema,
+  reportQuerySchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
@@ -455,12 +458,41 @@ export default [
         params: formVersionByIdSchema
       }
     }
+  },
+  {
+    method: 'GET',
+    path: '/report/overview',
+    handler() {
+      return generateReportOverview()
+    },
+    options: {
+      auth: false
+    }
+  },
+  {
+    method: 'GET',
+    path: '/report/timeline',
+    /**
+     * @param {RequestReport} request
+     */
+    handler(request) {
+      const { query } = request
+      const { date } = query
+
+      return generateReportTimeline(date)
+    },
+    options: {
+      auth: false,
+      validate: {
+        query: reportQuerySchema
+      }
+    }
   }
 ]
 
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, MigrateDraftFormRequest, RequestFormVersionById } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestReport, MigrateDraftFormRequest, RequestFormVersionById } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */
