@@ -107,9 +107,10 @@ describe('report-overview', () => {
           }
         }
       }
-      // @ts-expect-error - resolves to an async iterator like FindCursor<FormMetadataDocument>
+
       jest
         .mocked(getMetadataCursorOfAllForms)
+        // @ts-expect-error - resolves to an async iterator like FindCursor<FormMetadataDocument>
         .mockReturnValueOnce(mockAsyncIterator)
 
       // Form 1 - draft and no live
