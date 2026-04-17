@@ -187,7 +187,9 @@ export async function getMetadataOfAllForms(session) {
 
   const documents = coll.find({}, { session })
 
-  return await documents.toArray()
+  const docArray = await documents.toArray()
+
+  return docArray
 }
 
 /**

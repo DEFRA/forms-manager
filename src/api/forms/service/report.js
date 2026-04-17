@@ -30,6 +30,11 @@ export async function generateReport(date) {
     liveMetrics: new Map()
   }
 
+  // Add time element so outside of BST shift
+  if (date) {
+    date.setHours(4)
+  }
+
   try {
     await session.withTransaction(async () => {
       const metadatas = await getMetadataOfAllForms(session)
@@ -42,7 +47,10 @@ export async function generateReport(date) {
         })
 
         // Only process forms that have been updated since the last check
-        if (!date || (metadata.updatedAt && metadata.updatedAt > date)) {
+        if (
+          !date ||
+          (metadata.updatedAt && isSameDay(metadata.updatedAt, date))
+        ) {
           await processDefinition(
             formId,
             FormStatus.Draft,
@@ -58,9 +66,8 @@ export async function generateReport(date) {
             metrics.liveMetrics,
             session
           )
-
-          collectTimelineMetrics(metrics.timelineMetrics, strictMetadata, date)
         }
+        collectTimelineMetrics(metrics.timelineMetrics, strictMetadata, date)
       }
     })
   } catch (err) {
@@ -85,21 +92,28 @@ export async function generateReport(date) {
 
 /**
  * @param {string} formId
- * @param {FormStatus} status
+ * @param {FormStatus} definitionType
  * @param {FormMetadata} metadata
  * @param {Map<string, any>} metrics
  * @param {ClientSession} session
  */
 export async function processDefinition(
   formId,
-  status,
+  definitionType,
   metadata,
   metrics,
   session
 ) {
-  const definition = await getDefinitionIfExists(formId, status, session)
+  const definition = await getDefinitionIfExists(
+    formId,
+    definitionType,
+    session
+  )
   if (definition) {
-    metrics.set(formId, collectOverviewMetrics(metadata, definition))
+    metrics.set(
+      formId,
+      collectOverviewMetrics(metadata, definition, definitionType)
+    )
   }
 }
 
@@ -125,14 +139,15 @@ export async function getDefinitionIfExists(formId, status, session) {
  * Collect overview metrics
  * @param {Partial<FormMetadata>} metadata
  * @param {FormDefinition} definition
+ * @param {FormStatus} definitionType
  */
-export function collectOverviewMetrics(metadata, definition) {
+export function collectOverviewMetrics(metadata, definition, definitionType) {
   return {
     type: FormMetricType.OverviewMetric,
     formId: metadata.id,
     formStatus: metadata.live ? FormStatus.Live : FormStatus.Draft,
-    summaryMetrics: calcSummaryMetrics(metadata, definition),
-    featureCounts: undefined, // TODO - calcFeatureCounts(definition),
+    summaryMetrics: calcSummaryMetrics(metadata, definition, definitionType),
+    featureCounts: {},
     submissionsCount: 0,
     updatedAt: new Date()
   }
@@ -145,8 +160,11 @@ export function collectOverviewMetrics(metadata, definition) {
  * @param { Date | undefined } date
  */
 export function collectTimelineMetrics(timelineMetrics, metadata, date) {
-  // NewFormsCreated
-  if (!date || isSameDay(date, metadata.draft?.createdAt)) {
+  // NewFormsCreated - draft only
+  if (
+    metadata.draft?.createdAt &&
+    (!date || isSameDay(date, metadata.draft.createdAt))
+  ) {
     timelineMetrics.push(
       /** @type {FormTimelineMetric} */ ({
         type: FormMetricType.TimelineMetric,
@@ -154,13 +172,16 @@ export function collectTimelineMetrics(timelineMetrics, metadata, date) {
         formStatus: FormStatus.Draft,
         metricName: 'NewFormsCreated',
         metricValue: 1,
-        createdAt: metadata.draft?.createdAt
+        createdAt: metadata.draft.createdAt
       })
     )
   }
 
-  // FormsPublished
-  if (!date || isSameDay(date, metadata.live?.createdAt)) {
+  // FormsPublished - live only
+  if (
+    metadata.live?.createdAt &&
+    (!date || isSameDay(date, metadata.live.createdAt))
+  ) {
     timelineMetrics.push(
       /** @type {FormTimelineMetric} */ ({
         type: FormMetricType.TimelineMetric,
@@ -168,7 +189,7 @@ export function collectTimelineMetrics(timelineMetrics, metadata, date) {
         formStatus: FormStatus.Live,
         metricName: 'FormsPublished',
         metricValue: 1,
-        createdAt: metadata.live?.createdAt
+        createdAt: metadata.live.createdAt
       })
     )
   }
@@ -178,22 +199,18 @@ export function collectTimelineMetrics(timelineMetrics, metadata, date) {
  *
  * @param {Partial<FormMetadata>} metadata
  * @param {FormDefinition} definition
+ * @param {FormStatus} definitionType
  */
-export function calcSummaryMetrics(metadata, definition) {
+export function calcSummaryMetrics(metadata, definition, definitionType) {
   return /** @type { Record<string, number | string | string[]> } */ ({
     name: metadata.title,
     slug: metadata.slug,
     organisation: metadata.organisation,
-    status: metadata.live ? 'live' : 'draft',
+    status: definitionType,
     pages: definition.pages.length,
     questionTypes: getUniqueComponentTypes(definition).size,
     conditions: definition.conditions.length,
     sections: definition.sections.length,
-    // TODO - needs to handle if draft got deleted when form went live - probably by querying audit
-    daysToPublish:
-      metadata.live?.createdAt && metadata.draft?.createdAt
-        ? daysBetween(metadata.live.createdAt, metadata.draft.createdAt)
-        : undefined,
     features: getFeatureList(definition)
   })
 }
