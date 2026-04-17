@@ -1,4 +1,4 @@
-import { ControllerType } from '@defra/forms-model'
+import { ControllerType, FormStatus } from '@defra/forms-model'
 import {
   buildCheckboxComponent,
   buildDeclarationFieldComponent,
@@ -25,6 +25,7 @@ import {
 import {
   daysBetween,
   generateReport,
+  getDefinitionIfExists,
   getFeatureList,
   getUniqueComponentTypes,
   isSameDay
@@ -330,6 +331,18 @@ describe('report', () => {
         'GOV.UK Pay',
         'Declarations'
       ])
+    })
+  })
+
+  describe('getDefinitionIfExists', () => {
+    it('should throw if error is not NOT_FOUND', async () => {
+      jest.mocked(formDefinition.get).mockImplementationOnce(() => {
+        throw new Error('Not a boom NOT FOUND')
+      })
+      // @ts-expect-error - mock session not implemented
+      await expect(() =>
+        getDefinitionIfExists('formId', FormStatus.Draft, {})
+      ).rejects.toThrow('Not a boom NOT FOUND')
     })
   })
 })

@@ -464,11 +464,11 @@ export default [
     /**
      * @param {RequestReport} request
      */
-    async handler(request) {
+    handler(request) {
       const { query } = request
       const { date } = query
 
-      return await generateReport(date)
+      return generateReport(date)
     },
     options: {
       auth: false,
