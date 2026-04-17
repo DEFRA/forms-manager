@@ -8,10 +8,9 @@ const expectedBaseSummaryMetrics = {
 }
 
 /**
- * Generate exported metrics for all days
  * @param {Date} timestamp
  */
-export function getExpectedAllDaysMetrics(timestamp) {
+function getExpectedOverviewMetrics(timestamp) {
   return {
     draft: {
       '449a699bcc9946a6a6d925de': {
@@ -72,7 +71,17 @@ export function getExpectedAllDaysMetrics(timestamp) {
         submissionsCount: 0,
         updatedAt: timestamp
       }
-    },
+    }
+  }
+}
+
+/**
+ * Generate exported metrics for all days
+ * @param {Date} timestamp
+ */
+export function getExpectedAllDaysMetrics(timestamp) {
+  return {
+    ...getExpectedOverviewMetrics(timestamp),
     timeline: [
       {
         type: 'timeline-metric',
@@ -116,23 +125,7 @@ export function getExpectedAllDaysMetrics(timestamp) {
  */
 export function getExpectedSingleDayMetrics(timestamp) {
   return {
-    live: {},
-    draft: {
-      '0dae1c832b8e4a89963a7825': {
-        type: 'overview-metric',
-        formId: '0dae1c832b8e4a89963a7825',
-        formStatus: 'live',
-        summaryMetrics: {
-          ...expectedBaseSummaryMetrics,
-          name: 'Form 2 title',
-          slug: 'form-2-title',
-          status: 'draft'
-        },
-        featureCounts: {},
-        submissionsCount: 0,
-        updatedAt: timestamp
-      }
-    },
+    ...getExpectedOverviewMetrics(timestamp),
     timeline: [
       {
         type: 'timeline-metric',

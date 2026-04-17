@@ -46,27 +46,25 @@ export async function generateReport(date) {
           id: formId
         })
 
-        // Only process forms that have been updated since the last check
-        if (
-          !date ||
-          (metadata.updatedAt && isSameDay(metadata.updatedAt, date))
-        ) {
-          await processDefinition(
-            formId,
-            FormStatus.Draft,
-            strictMetadata,
-            metrics.draftMetrics,
-            session
-          )
+        // Gather overview metrics for draft form
+        await processDefinition(
+          formId,
+          FormStatus.Draft,
+          strictMetadata,
+          metrics.draftMetrics,
+          session
+        )
 
-          await processDefinition(
-            formId,
-            FormStatus.Live,
-            strictMetadata,
-            metrics.liveMetrics,
-            session
-          )
-        }
+        // Gather overview metrics for live form
+        await processDefinition(
+          formId,
+          FormStatus.Live,
+          strictMetadata,
+          metrics.liveMetrics,
+          session
+        )
+
+        // Gather timeline metrics for all time, or just a specific day
         collectTimelineMetrics(metrics.timelineMetrics, strictMetadata, date)
       }
     })
