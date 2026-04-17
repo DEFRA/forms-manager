@@ -339,8 +339,8 @@ describe('report', () => {
       jest.mocked(formDefinition.get).mockImplementationOnce(() => {
         throw new Error('Not a boom NOT FOUND')
       })
-      // @ts-expect-error - mock session not implemented
       await expect(() =>
+        // @ts-expect-error - mock session not implemented
         getDefinitionIfExists('formId', FormStatus.Draft, {})
       ).rejects.toThrow('Not a boom NOT FOUND')
     })
