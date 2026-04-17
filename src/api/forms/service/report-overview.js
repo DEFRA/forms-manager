@@ -11,7 +11,8 @@ import {
 import { StatusCodes } from 'http-status-codes'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import { getMetadataOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { mapMetadata } from '~/src/api/forms/service/helpers/mapper.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
@@ -30,18 +31,13 @@ export async function generateReportOverview() {
 
   try {
     await session.withTransaction(async () => {
-      const metadatas = await getMetadataOfAllForms(session)
+      const metadataCursor = getMetadataCursorOfAllForms(session)
 
-      for (const metadata of metadatas) {
-        const formId = metadata._id.toString()
-        const strictMetadata = /** @type {FormMetadata} */ ({
-          ...metadata,
-          id: formId
-        })
+      for await (const metadata of metadataCursor) {
+        const strictMetadata = mapMetadata(metadata)
 
         // Gather overview metrics for draft form
         await processDefinition(
-          formId,
           FormStatus.Draft,
           strictMetadata,
           metrics.draftMetrics,
@@ -50,7 +46,6 @@ export async function generateReportOverview() {
 
         // Gather overview metrics for live form
         await processDefinition(
-          formId,
           FormStatus.Live,
           strictMetadata,
           metrics.liveMetrics,
@@ -78,27 +73,25 @@ export async function generateReportOverview() {
 }
 
 /**
- * @param {string} formId
  * @param {FormStatus} definitionType
  * @param {FormMetadata} metadata
  * @param {Map<string, any>} metrics
  * @param {ClientSession} session
  */
 export async function processDefinition(
-  formId,
   definitionType,
   metadata,
   metrics,
   session
 ) {
   const definition = await getDefinitionIfExists(
-    formId,
+    metadata.id,
     definitionType,
     session
   )
   if (definition) {
     metrics.set(
-      formId,
+      metadata.id,
       collectOverviewMetrics(metadata, definition, definitionType)
     )
   }

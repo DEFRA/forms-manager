@@ -15,7 +15,7 @@ import {
   get,
   getAndIncrementVersionNumber,
   getBySlug,
-  getMetadataOfAllForms,
+  getMetadataCursorOfAllForms,
   getVersionMetadata,
   list,
   listAll,
@@ -994,8 +994,8 @@ describe('form-metadata-repository', () => {
     })
   })
 
-  describe('getMetadataOfAllForms', () => {
-    it('should retrieve metedata array', async () => {
+  describe('getMetadataCursorOfAllForms', () => {
+    it('should retrieve metedata array', () => {
       const metadataList = [
         buildMetadataDocument({
           title: 'Form 1 title',
@@ -1010,11 +1010,9 @@ describe('form-metadata-repository', () => {
           slug: 'form-3-title'
         })
       ]
-      mockCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(metadataList)
-      })
+      mockCollection.find.mockReturnValue(metadataList)
 
-      const result = await getMetadataOfAllForms(mockSession)
+      const result = getMetadataCursorOfAllForms(mockSession)
 
       expect(result).toEqual(metadataList)
     })

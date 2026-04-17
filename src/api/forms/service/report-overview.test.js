@@ -17,7 +17,7 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import { getMetadataOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { getExpectedOverviewMetrics } from '~/src/api/forms/service/__stubs__/metrics.js'
 import {
   generateReportOverview,
@@ -100,7 +100,17 @@ describe('report-overview', () => {
           _id: new ObjectId(form3Id)
         })
       ]
-      jest.mocked(getMetadataOfAllForms).mockResolvedValueOnce(allMetadata)
+      const mockAsyncIterator = {
+        [Symbol.asyncIterator]: function* () {
+          for (const metadata of allMetadata) {
+            yield metadata
+          }
+        }
+      }
+      // @ts-expect-error - resolves to an async iterator like FindCursor<FormMetadataDocument>
+      jest
+        .mocked(getMetadataCursorOfAllForms)
+        .mockReturnValueOnce(mockAsyncIterator)
 
       // Form 1 - draft and no live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
@@ -131,7 +141,7 @@ describe('report-overview', () => {
     })
 
     it('should handle error and still close session', async () => {
-      jest.mocked(getMetadataOfAllForms).mockImplementationOnce(() => {
+      jest.mocked(getMetadataCursorOfAllForms).mockImplementationOnce(() => {
         throw new Error('report error')
       })
 

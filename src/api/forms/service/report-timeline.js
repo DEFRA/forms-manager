@@ -1,7 +1,8 @@
 import { FormMetricType, FormStatus, getErrorMessage } from '@defra/forms-model'
 import { isSameDay } from 'date-fns'
 
-import { getMetadataOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { mapMetadata } from '~/src/api/forms/service/helpers/mapper.js'
 import { logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
@@ -18,14 +19,10 @@ export async function generateReportTimeline(date) {
 
   try {
     await session.withTransaction(async () => {
-      const metadatas = await getMetadataOfAllForms(session)
+      const metadataCursor = getMetadataCursorOfAllForms(session)
 
-      for (const metadata of metadatas) {
-        const formId = metadata._id.toString()
-        const strictMetadata = /** @type {FormMetadata} */ ({
-          ...metadata,
-          id: formId
-        })
+      for await (const metadata of metadataCursor) {
+        const strictMetadata = mapMetadata(metadata)
 
         // Gather timeline metrics for all time, or just a specific day
         collectTimelineMetrics(timelineMetrics, strictMetadata, date)
