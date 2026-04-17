@@ -6,6 +6,7 @@ import {
   buildPaymentComponent,
   buildRadioComponent
 } from '@defra/forms-model/stubs'
+import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
@@ -107,8 +108,9 @@ describe('report', () => {
 
       // Form 1 - draft and no live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      // @ts-expect-error - force not def to be returned
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(undefined)
+      jest.mocked(formDefinition.get).mockImplementationOnce(() => {
+        throw Boom.notFound()
+      })
 
       // Form 2 - draft and live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
@@ -192,6 +194,25 @@ describe('report', () => {
       const metrics = await generateReport(new Date(2025, 4, 7))
 
       expect(metrics).toEqual(getExpectedSingleDayMetrics(new Date()))
+    })
+
+    it('should handle error and still close session', async () => {
+      jest.mocked(getMetadataOfAllForms).mockImplementationOnce(() => {
+        throw new Error('report error')
+      })
+
+      const mockEndSession = jest.fn().mockResolvedValue(undefined)
+      const mockNewSession = /** @type {any} */ ({
+        withTransaction: jest.fn().mockImplementation(async (callback) => {
+          return await callback()
+        }),
+        endSession: mockEndSession
+      })
+      jest.mocked(client.startSession).mockReturnValue(mockNewSession)
+
+      await expect(() => generateReport()).rejects.toThrow('report error')
+
+      expect(mockEndSession).toHaveBeenCalled()
     })
   })
   describe('daysBetween', () => {
