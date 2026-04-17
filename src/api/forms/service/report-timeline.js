@@ -7,7 +7,7 @@ import { logger } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 /**
- * Adds or updates an option
+ * Generates a set of timeline metrics for each form
  * @param {Date} date - date on which to gather the metrics for
  */
 export async function generateReportTimeline(date) {
