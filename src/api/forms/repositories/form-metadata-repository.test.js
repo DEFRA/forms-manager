@@ -15,6 +15,7 @@ import {
   get,
   getAndIncrementVersionNumber,
   getBySlug,
+  getMetadataCursorOfAllForms,
   getVersionMetadata,
   list,
   listAll,
@@ -990,6 +991,30 @@ describe('form-metadata-repository', () => {
       mockCollection.updateOne.mockRejectedValue(error)
 
       await expect(upsert(document, mockSession)).rejects.toThrow(error)
+    })
+  })
+
+  describe('getMetadataCursorOfAllForms', () => {
+    it('should retrieve metedata array', () => {
+      const metadataList = [
+        buildMetadataDocument({
+          title: 'Form 1 title',
+          slug: 'form-1-title'
+        }),
+        buildMetadataDocument({
+          title: 'Form 2 title',
+          slug: 'form-2-title'
+        }),
+        buildMetadataDocument({
+          title: 'Form 3 title',
+          slug: 'form-3-title'
+        })
+      ]
+      mockCollection.find.mockReturnValue(metadataList)
+
+      const result = getMetadataCursorOfAllForms(mockSession)
+
+      expect(result).toEqual(metadataList)
     })
   })
 })

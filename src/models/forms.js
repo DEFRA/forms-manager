@@ -151,3 +151,7 @@ export const sectionAssignmentPayloadSchema = Joi.object()
       .required()
   })
   .required()
+
+export const reportQuerySchema = Joi.object().keys({
+  date: Joi.date().required()
+})
