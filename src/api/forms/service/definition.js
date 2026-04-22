@@ -71,8 +71,8 @@ export async function listForms(options) {
 }
 
 /**
- * Retrieves the form definition content for a given form ID.
- * Injects the latest version metadata into definition.metadata.$$__formVersion.
+ * Retrieves the form definition for a given form ID, with $$__formVersion
+ * injected: form.live.version for Live, latest for Draft.
  * @param {string} formId - the ID of the form
  * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
@@ -82,16 +82,34 @@ export async function getFormDefinition(
   state = FormStatus.Draft,
   session
 ) {
-  const [definition, latestVersion] = await Promise.all([
+  if (state === FormStatus.Live) {
+    const [definition, form] = await Promise.all([
+      formDefinition.get(formId, state, session),
+      formMetadata.get(formId, session)
+    ])
+
+    const live =
+      /** @type {(FormMetadataState & { version?: FormVersionMetadata }) | undefined} */ (
+        form.live
+      )
+
+    if (!live?.version) {
+      return definition
+    }
+
+    return injectFormVersion(definition, live.version)
+  }
+
+  const [draftDefinition, latestVersion] = await Promise.all([
     formDefinition.get(formId, state, session),
     formVersions.getLatestVersion(formId, session)
   ])
 
   if (!latestVersion) {
-    return definition
+    return draftDefinition
   }
 
-  return injectFormVersion(definition, latestVersion)
+  return injectFormVersion(draftDefinition, latestVersion)
 }
 
 /**
@@ -319,6 +337,35 @@ export async function makePaymentKeyLive(formHasPayment, formId, session) {
 }
 
 /**
+ * Builds the $set payload for updating form metadata when publishing to live.
+ * Pins the new version metadata onto form.live so subsequent live reads can
+ * inject the correct $$__formVersion.
+ * @param {FormMetadataState | undefined} existingLive
+ * @param {Date} now
+ * @param {FormMetadataAuthor} author
+ * @param {FormVersionMetadata} pinnedVersion
+ */
+function buildPublishLiveSet(existingLive, now, author, pinnedVersion) {
+  if (!existingLive) {
+    return {
+      live: {
+        updatedAt: now,
+        updatedBy: author,
+        createdAt: now,
+        createdBy: author,
+        version: pinnedVersion
+      },
+      updatedAt: now,
+      updatedBy: author
+    }
+  }
+  return {
+    ...partialAuditFields(now, author, FormStatus.Live),
+    'live.version': pinnedVersion
+  }
+}
+
+/**
  * Creates the live form from the current draft state
  * @param {string} formId - ID of the form
  * @param {FormMetadataAuthor} author - the author of the new live state
@@ -356,28 +403,25 @@ export async function createLiveFromDraft(formId, author) {
       paymentKeyExists
     )
 
-    // Build the live state
     const now = new Date()
-    const set = !form.live
-      ? {
-          // Initialise the live state
-          live: {
-            updatedAt: now,
-            updatedBy: author,
-            createdAt: now,
-            createdBy: author
-          },
-          updatedAt: now,
-          updatedBy: author
-        }
-      : partialAuditFields(now, author, FormStatus.Live) // Partially update the live state fields
-
     const session = client.startSession()
 
     try {
       await session.withTransaction(async () => {
         // Copy the draft form definition
         await formDefinition.createLiveFromDraft(formId, session)
+
+        const newVersion = await createFormVersion(formId, session)
+        const pinnedVersion = {
+          versionNumber: newVersion.versionNumber,
+          createdAt: newVersion.createdAt
+        }
+
+        logger.info(
+          `Pinning version ${newVersion.versionNumber} onto form.live for form ID ${formId}`
+        )
+
+        const set = buildPublishLiveSet(form.live, now, author, pinnedVersion)
 
         logger.info(`Removing form metadata (draft) for form ID ${formId}`)
 
@@ -390,8 +434,6 @@ export async function createLiveFromDraft(formId, author) {
           },
           session
         )
-
-        await createFormVersion(formId, session)
 
         // Make payment key live if a pending one is stored
         await makePaymentKeyLive(formHasPayment, formId, session)
@@ -675,6 +717,6 @@ export async function reorderDraftFormDefinitionComponents(
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataState, FormVersionMetadata, FormMetadata, FilterOptions, QueryOptions } from '@defra/forms-model'
  * @import { ClientSession } from 'mongodb'
  */
