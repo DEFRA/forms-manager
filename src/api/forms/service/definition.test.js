@@ -41,7 +41,10 @@ import {
   formMetadataWithLiveDocument,
   mockFilters
 } from '~/src/api/forms/service/__stubs__/service.js'
-import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
+import {
+  buildFormVersionDocument,
+  mockFormVersionDocument
+} from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
   FORM_VERSION_METADATA_KEY,
   createDraftFromLive,
@@ -224,12 +227,73 @@ describe('Forms service', () => {
         createdAt: dateUsedInFakeTime,
         createdBy: author,
         updatedAt: dateUsedInFakeTime,
-        updatedBy: author
+        updatedBy: author,
+        version: {
+          versionNumber: mockFormVersionDocument.versionNumber,
+          createdAt: mockFormVersionDocument.createdAt
+        }
       })
       expect(dbMetadataOperationArgs[1].$set?.updatedAt).toEqual(
         dateUsedInFakeTime
       )
       expect(dbMetadataOperationArgs[1].$set?.updatedBy).toEqual(author)
+    })
+
+    it('should pin the new version on form.live when publishing for the first time', async () => {
+      const newVersion = buildFormVersionDocument({
+        versionNumber: 42,
+        createdAt: new Date('2026-04-22T11:05:19.998Z')
+      })
+      jest
+        .mocked(versioningService.createFormVersion)
+        .mockResolvedValueOnce(newVersion)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...definition,
+        outputEmail: 'test@defra.gov.uk'
+      })
+
+      const dbSpy = jest.spyOn(formMetadata, 'update')
+
+      await createLiveFromDraft('123', author)
+
+      expect(dbSpy.mock.calls[0][1].$set?.live).toEqual(
+        expect.objectContaining({
+          version: {
+            versionNumber: 42,
+            createdAt: new Date('2026-04-22T11:05:19.998Z')
+          }
+        })
+      )
+    })
+
+    it('should pin the new version via dotted notation when re-publishing an existing live form', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValue(formMetadataWithLiveDocument)
+      const newVersion = buildFormVersionDocument({
+        versionNumber: 99,
+        createdAt: new Date('2026-04-22T12:00:00Z')
+      })
+      jest
+        .mocked(versioningService.createFormVersion)
+        .mockResolvedValueOnce(newVersion)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...definition,
+        outputEmail: 'test@defra.gov.uk'
+      })
+
+      const dbSpy = jest.spyOn(formMetadata, 'update')
+
+      await createLiveFromDraft('123', author)
+
+      expect(dbSpy.mock.calls[0][1].$set).toEqual(
+        expect.objectContaining({
+          'live.version': {
+            versionNumber: 99,
+            createdAt: new Date('2026-04-22T12:00:00Z')
+          }
+        })
+      )
     })
 
     it('should fail to create a live state from existing draft form when there is no start page', async () => {
@@ -1604,6 +1668,68 @@ describe('Forms service', () => {
     })
   })
 
+  describe('getFormDefinition', () => {
+    it('should inject the pinned version from form.live when fetching the live definition', async () => {
+      const pinnedVersionNumber = 42
+      const pinnedCreatedAt = new Date('2024-03-25T10:00:00Z')
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(
+        /** @type {WithId<FormMetadataDocument>} */ ({
+          ...formMetadataWithLiveDocument,
+          live: {
+            .../** @type {FormMetadataState} */ (
+              formMetadataWithLiveDocument.live
+            ),
+            version: {
+              versionNumber: pinnedVersionNumber,
+              createdAt: pinnedCreatedAt
+            }
+          }
+        })
+      )
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+
+      const result = await getFormDefinition('123', FormStatus.Live)
+
+      expect(result).toEqual({
+        ...definition,
+        metadata: {
+          [FORM_VERSION_METADATA_KEY]: {
+            versionNumber: pinnedVersionNumber,
+            createdAt: pinnedCreatedAt
+          }
+        }
+      })
+    })
+
+    it('should not inject $$__formVersion when fetching a legacy live definition without a pinned version', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(formMetadataWithLiveDocument)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+
+      const result = await getFormDefinition('123', FormStatus.Live)
+
+      expect(result).toEqual(definition)
+    })
+
+    it('should inject the latest version when fetching the draft definition', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+
+      const result = await getFormDefinition('123', FormStatus.Draft)
+
+      expect(result).toEqual({
+        ...definition,
+        metadata: {
+          [FORM_VERSION_METADATA_KEY]: {
+            versionNumber: mockFormVersionDocument.versionNumber,
+            createdAt: mockFormVersionDocument.createdAt
+          }
+        }
+      })
+    })
+  })
+
   describe('makePaymentKeyLive', () => {
     const formId = 'ea8154b9-e724-4bb4-a9cb-46f4159a53fa'
     const mockSession = /** @type {ClientSession} */ ({})
@@ -1645,6 +1771,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataDocument, FormMetadataState, QueryOptions } from '@defra/forms-model'
  * @import { ClientSession, WithId } from 'mongodb'
  */
