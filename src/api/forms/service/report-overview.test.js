@@ -20,6 +20,7 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { getExpectedOverviewMetrics } from '~/src/api/forms/service/__stubs__/metrics.js'
 import {
+  calcFeatureMetrics,
   generateReportOverview,
   getDefinitionIfExists,
   getFeatureList,
@@ -242,6 +243,60 @@ describe('report-overview', () => {
         'GOV.UK Pay',
         'Declarations'
       ])
+    })
+
+    describe('calcFeatureMetrics', () => {
+      it('should return calculated metrics', () => {
+        const summaryPage = buildSummaryPage({
+          // @ts-expect-error - forcing the controller type
+          controller: ControllerType.SummaryWithConfirmationEmail
+        })
+        const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+        const questionPage = buildQuestionPage({
+          id: questionPageId,
+          components: [
+            buildTextFieldComponent(),
+            buildTextFieldComponent(),
+            buildCheckboxComponent(),
+            buildTextFieldComponent(),
+            buildCheckboxComponent(),
+            buildRadioComponent(),
+            buildDeclarationFieldComponent()
+          ]
+        })
+        const fileUploadPage = buildFileUploadPage()
+        const paymentPage = buildQuestionPage({
+          components: [buildPaymentComponent()]
+        })
+
+        const definition = buildDefinition({
+          pages: [questionPage, fileUploadPage, paymentPage, summaryPage]
+        })
+        expect(calcFeatureMetrics(definition)).toEqual({
+          features: [
+            'File upload',
+            'Email confirmation',
+            'GOV.UK Pay',
+            'Declarations',
+            'Sections'
+          ],
+          formStructure: {
+            conditions: 0,
+            pages: 4,
+            questionTypes: 6,
+            questions: 9,
+            sections: 1
+          },
+          questionTypes: {
+            CheckboxesField: 2,
+            DeclarationField: 1,
+            FileUploadField: 1,
+            PaymentField: 1,
+            RadiosField: 1,
+            TextField: 3
+          }
+        })
+      })
     })
   })
 

@@ -23,7 +23,17 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-1-title',
           status: 'draft'
         },
-        featureCounts: {},
+        featureCounts: {
+          features: ['Sections'],
+          formStructure: {
+            conditions: 0,
+            pages: 1,
+            questionTypes: 0,
+            questions: 0,
+            sections: 1
+          },
+          questionTypes: {}
+        },
         submissionsCount: 0,
         updatedAt: timestamp
       },
@@ -37,7 +47,17 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-2-title',
           status: 'draft'
         },
-        featureCounts: {},
+        featureCounts: {
+          features: ['Sections'],
+          formStructure: {
+            conditions: 0,
+            pages: 1,
+            questionTypes: 0,
+            questions: 0,
+            sections: 1
+          },
+          questionTypes: {}
+        },
         submissionsCount: 0,
         updatedAt: timestamp
       },
@@ -51,7 +71,17 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-3-title',
           status: 'draft'
         },
-        featureCounts: {},
+        featureCounts: {
+          features: ['Sections'],
+          formStructure: {
+            conditions: 0,
+            pages: 1,
+            questionTypes: 0,
+            questions: 0,
+            sections: 1
+          },
+          questionTypes: {}
+        },
         submissionsCount: 0,
         updatedAt: timestamp
       }
@@ -67,7 +97,17 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-2-title',
           status: 'live'
         },
-        featureCounts: {},
+        featureCounts: {
+          features: ['Sections'],
+          formStructure: {
+            conditions: 0,
+            pages: 1,
+            questionTypes: 0,
+            questions: 0,
+            sections: 1
+          },
+          questionTypes: {}
+        },
         submissionsCount: 0,
         updatedAt: timestamp
       }

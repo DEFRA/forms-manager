@@ -131,7 +131,7 @@ export function collectOverviewMetrics(metadata, definition, definitionType) {
     formId: metadata.id,
     formStatus: metadata.live ? FormStatus.Live : FormStatus.Draft,
     summaryMetrics: calcSummaryMetrics(metadata, definition, definitionType),
-    featureCounts: {},
+    featureCounts: calcFeatureMetrics(definition),
     submissionsCount: 0,
     updatedAt: new Date()
   }
@@ -155,6 +155,69 @@ export function calcSummaryMetrics(metadata, definition, definitionType) {
     sections: definition.sections.length,
     features: getFeatureList(definition)
   })
+}
+
+/**
+ * @param {FormDefinition} definition
+ */
+export function calcFeatureMetrics(definition) {
+  const allComponents = /** @type {ComponentDef[]} */ ([])
+  for (const page of definition.pages) {
+    if (hasComponentsEvenIfNoNext(page)) {
+      allComponents.push(...page.components)
+    }
+  }
+  const questionTypes = getQuestionTypeCounts(allComponents)
+  return {
+    questionTypes: Object.fromEntries(questionTypes),
+    features: getComponentUsageFeatureList(definition),
+    formStructure: getFormStructureCounts(definition, questionTypes)
+  }
+}
+
+/**
+ * @param {ComponentDef[]} components
+ */
+export function getQuestionTypeCounts(components) {
+  const componentCounts = /** @type {Map<string, number>} */ (new Map())
+  for (const component of components) {
+    const count = componentCounts.get(component.type) ?? 0
+    componentCounts.set(component.type, count + 1)
+  }
+  return componentCounts
+}
+
+/**
+ * @param {FormDefinition} definition
+ */
+export function getComponentUsageFeatureList(definition) {
+  const features = getFeatureList(definition)
+  if (definition.sections.length > 0) {
+    features.push('Sections')
+  }
+  if (definition.conditions.length > 0) {
+    features.push('Conditional logic')
+  }
+  return features
+}
+
+/**
+ * @param {FormDefinition} definition
+ * @param {Map<string, number>} questionTypes
+ */
+export function getFormStructureCounts(definition, questionTypes) {
+  let numOfQuestions = 0
+  questionTypes.forEach((value) => {
+    numOfQuestions += value
+  })
+
+  return {
+    pages: definition.pages.length,
+    questions: numOfQuestions,
+    sections: definition.sections.length,
+    conditions: definition.conditions.length,
+    questionTypes: questionTypes.size
+  }
 }
 
 /**
@@ -201,5 +264,5 @@ export function getUniqueComponentTypes(definition) {
 
 /**
  * @import { ClientSession } from 'mongodb'
- * @import { FormDefinition, FormMetadata } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, FormMetadata } from '@defra/forms-model'
  */
