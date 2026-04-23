@@ -22,8 +22,10 @@ import { getExpectedOverviewMetrics } from '~/src/api/forms/service/__stubs__/me
 import {
   calcFeatureMetrics,
   generateReportOverview,
+  getComponentUsageFeatureList,
   getDefinitionIfExists,
   getFeatureList,
+  getQuestionTypeCounts,
   getUniqueComponentTypes
 } from '~/src/api/forms/service/report-overview.js'
 import { client } from '~/src/mongo.js'
@@ -296,6 +298,70 @@ describe('report-overview', () => {
             TextField: 3
           }
         })
+      })
+    })
+
+    describe('getQuestionTypeCounts', () => {
+      it('should return counts', () => {
+        const components = [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildRadioComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildRadioComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildDeclarationFieldComponent()
+        ]
+        expect(Object.fromEntries(getQuestionTypeCounts(components))).toEqual({
+          CheckboxesField: 3,
+          DeclarationField: 1,
+          RadiosField: 2,
+          TextField: 5
+        })
+      })
+    })
+
+    describe('get component usage features', () => {
+      it('should return list of features', () => {
+        const summaryPage = buildSummaryPage({
+          // @ts-expect-error - forcing the controller type
+          controller: ControllerType.SummaryWithConfirmationEmail
+        })
+        const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+        const questionPage = buildQuestionPage({
+          id: questionPageId,
+          components: [
+            buildTextFieldComponent(),
+            buildTextFieldComponent(),
+            buildCheckboxComponent(),
+            buildTextFieldComponent(),
+            buildCheckboxComponent(),
+            buildRadioComponent(),
+            buildDeclarationFieldComponent()
+          ]
+        })
+        const fileUploadPage = buildFileUploadPage()
+        const paymentPage = buildQuestionPage({
+          components: [buildPaymentComponent()]
+        })
+
+        const definition = buildDefinition({
+          pages: [questionPage, fileUploadPage, paymentPage, summaryPage],
+          // @ts-expect-error - partial mock of a condition
+          conditions: [{}]
+        })
+        expect(getComponentUsageFeatureList(definition)).toEqual([
+          'File upload',
+          'Email confirmation',
+          'GOV.UK Pay',
+          'Declarations',
+          'Sections',
+          'Conditional logic'
+        ])
       })
     })
   })
