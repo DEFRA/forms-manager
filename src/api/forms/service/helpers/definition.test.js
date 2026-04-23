@@ -160,7 +160,7 @@ describe('definition helpers', () => {
       const definition = buildDefinition({ pages: [paymentPage] })
       const res = postSchemaValidation(definition)
       expect(res).toBeInstanceOf(Joi.ValidationError)
-      expect(res?.message).toBe('"value" must be greater than or equal to 0.3')
+      expect(res?.message).toBe('"value" must be greater than or equal to 0')
     })
 
     it('should return error if payment enabled but ref num disabled', () => {
@@ -190,8 +190,6 @@ describe('definition helpers', () => {
   describe('validatePaymentAmount', () => {
     it.each([
       { amount: -10, desc: 'negative' },
-      { amount: 0, desc: 'zero' },
-      { amount: 0.1, desc: 'below minimum (£0.30)' },
       { amount: 100_001, desc: 'above maximum (£100,000)' },
       { amount: NaN, desc: 'NaN' },
       { amount: Infinity, desc: 'Infinity' }
@@ -203,7 +201,9 @@ describe('definition helpers', () => {
     )
 
     it.each([
-      { amount: 0.3, desc: 'minimum boundary (£0.30)' },
+      { amount: 0, desc: 'zero / no payment (minimum boundary)' },
+      { amount: 0.1, desc: '£0.10' },
+      { amount: 0.3, desc: '£0.30' },
       { amount: 1, desc: '£1' },
       { amount: 100_000, desc: 'maximum boundary (£100,000)' }
     ])(
