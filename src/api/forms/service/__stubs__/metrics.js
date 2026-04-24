@@ -24,7 +24,7 @@ export function getExpectedOverviewMetrics(timestamp) {
           status: 'draft'
         },
         featureCounts: {
-          features: ['Sections'],
+          features: { Sections: 1 },
           formStructure: {
             conditions: 0,
             pages: 1,
@@ -48,7 +48,7 @@ export function getExpectedOverviewMetrics(timestamp) {
           status: 'draft'
         },
         featureCounts: {
-          features: ['Sections'],
+          features: { Sections: 1 },
           formStructure: {
             conditions: 0,
             pages: 1,
@@ -72,7 +72,7 @@ export function getExpectedOverviewMetrics(timestamp) {
           status: 'draft'
         },
         featureCounts: {
-          features: ['Sections'],
+          features: { Sections: 1 },
           formStructure: {
             conditions: 0,
             pages: 1,
@@ -98,7 +98,7 @@ export function getExpectedOverviewMetrics(timestamp) {
           status: 'live'
         },
         featureCounts: {
-          features: ['Sections'],
+          features: { Sections: 1 },
           formStructure: {
             conditions: 0,
             pages: 1,

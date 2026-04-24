@@ -22,7 +22,7 @@ import { getExpectedOverviewMetrics } from '~/src/api/forms/service/__stubs__/me
 import {
   calcFeatureMetrics,
   generateReportOverview,
-  getComponentUsageFeatureList,
+  getComponentUsageFeatureCounts,
   getDefinitionIfExists,
   getFeatureList,
   getQuestionTypeCounts,
@@ -275,13 +275,13 @@ describe('report-overview', () => {
           pages: [questionPage, fileUploadPage, paymentPage, summaryPage]
         })
         expect(calcFeatureMetrics(definition)).toEqual({
-          features: [
-            'File upload',
-            'Email confirmation',
-            'GOV.UK Pay',
-            'Declarations',
-            'Sections'
-          ],
+          features: {
+            'File upload': 1,
+            'Email confirmation': 1,
+            'GOV.UK Pay': 1,
+            Declarations: 1,
+            Sections: 1
+          },
           formStructure: {
             conditions: 0,
             pages: 4,
@@ -354,14 +354,14 @@ describe('report-overview', () => {
           // @ts-expect-error - partial mock of a condition
           conditions: [{}]
         })
-        expect(getComponentUsageFeatureList(definition)).toEqual([
-          'File upload',
-          'Email confirmation',
-          'GOV.UK Pay',
-          'Declarations',
-          'Sections',
-          'Conditional logic'
-        ])
+        expect(getComponentUsageFeatureCounts(definition)).toEqual({
+          'File upload': 1,
+          'Email confirmation': 1,
+          'GOV.UK Pay': 1,
+          Declarations: 1,
+          Sections: 1,
+          'Conditional logic': 1
+        })
       })
     })
   })

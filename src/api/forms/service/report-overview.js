@@ -170,7 +170,7 @@ export function calcFeatureMetrics(definition) {
   const questionTypes = getQuestionTypeCounts(allComponents)
   return {
     questionTypes: Object.fromEntries(questionTypes),
-    features: getComponentUsageFeatureList(definition),
+    features: getComponentUsageFeatureCounts(definition),
     formStructure: getFormStructureCounts(definition, questionTypes)
   }
 }
@@ -190,7 +190,7 @@ export function getQuestionTypeCounts(components) {
 /**
  * @param {FormDefinition} definition
  */
-export function getComponentUsageFeatureList(definition) {
+export function getComponentUsageFeatureCounts(definition) {
   const features = getFeatureList(definition)
   if (definition.sections.length > 0) {
     features.push('Sections')
@@ -198,7 +198,11 @@ export function getComponentUsageFeatureList(definition) {
   if (definition.conditions.length > 0) {
     features.push('Conditional logic')
   }
-  return features
+  const featureResult = /** @type {Record<string, number>} */ ({})
+  features.forEach((f) => {
+    featureResult[f] = 1
+  })
+  return featureResult
 }
 
 /**
