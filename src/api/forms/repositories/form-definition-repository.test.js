@@ -52,6 +52,9 @@ import {
   updatePage,
   updatePageFields
 } from '~/src/api/forms/repositories/form-definition-repository.js'
+import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
+import { FORM_VERSION_METADATA_KEY } from '~/src/api/forms/repositories/helpers.js'
 import { empty, emptyV2 } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
@@ -82,6 +85,12 @@ const condition1Id = '6e4c2f74-5bd9-48b4-b991-f2a021dcde59'
 const condition2Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
 const section1Id = 'f07566be-dd04-49df-890f-b226b92f3907'
 const section2Id = 'cb185708-203d-4560-9929-ecc27750244a'
+
+// modifyDraft/insertDraft now call into form-metadata-repository and
+// form-versions-repository for version allocation + snapshotting. Mock them so
+// their Mongo ops don't collide with the definition-repository assertions.
+jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
 
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
@@ -943,6 +952,58 @@ describe('form-definition-repository', () => {
         throw new Error('Unexpected empty draft on $setOnInsert')
       }
     })
+
+    it('should allocate a version exactly once, stamp the inserted draft, and snapshot to form-versions exactly once', async () => {
+      const definitionV1 = { ...draft, conditions: [] }
+      const createdAt = new Date('2026-04-24T10:00:00Z')
+      mockCollection.findOneAndUpdate.mockResolvedValue({ definitionV1 })
+      jest
+        .mocked(formMetadataRepository.getAndIncrementVersionNumber)
+        .mockResolvedValue(7)
+      jest.spyOn(global, 'Date').mockImplementation(() => createdAt)
+
+      await insert(formId, definitionV1, mockSession, formDefinitionSchema)
+
+      expect(
+        formMetadataRepository.getAndIncrementVersionNumber
+      ).toHaveBeenCalledTimes(1)
+      expect(
+        formMetadataRepository.getAndIncrementVersionNumber
+      ).toHaveBeenCalledWith(formId, mockSession)
+      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledTimes(1)
+      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
+        formId,
+        { versionNumber: 7, createdAt },
+        mockSession
+      )
+
+      const [, update] = mockCollection.findOneAndUpdate.mock.calls[0]
+      /** @type {UpdateFilter<{ draft: FormDefinition }>} */
+      const updateFilter = update
+      /** @type {any} */
+      const stampedDraft = updateFilter.$setOnInsert?.draft
+      expect(stampedDraft?.metadata?.[FORM_VERSION_METADATA_KEY]).toEqual({
+        versionNumber: 7,
+        createdAt
+      })
+
+      expect(formVersionsRepository.createVersion).toHaveBeenCalledTimes(1)
+      expect(formVersionsRepository.createVersion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          formId,
+          versionNumber: 7,
+          createdAt,
+          formDefinition: expect.objectContaining({
+            metadata: expect.objectContaining({
+              [FORM_VERSION_METADATA_KEY]: { versionNumber: 7, createdAt }
+            })
+          })
+        }),
+        mockSession
+      )
+
+      jest.restoreAllMocks()
+    })
   })
 
   describe('update', () => {
@@ -979,6 +1040,67 @@ describe('form-definition-repository', () => {
           expect(definition.lists).toHaveLength(0)
         }
       )
+    })
+
+    it('should allocate a version exactly once, stamp the updated draft, and snapshot to form-versions exactly once', async () => {
+      const newDefinition = emptyV2()
+      const createdAt = new Date('2026-04-24T10:00:00Z')
+      jest
+        .mocked(formMetadataRepository.getAndIncrementVersionNumber)
+        .mockResolvedValue(11)
+      jest.spyOn(global, 'Date').mockImplementation(() => createdAt)
+
+      await helper(
+        async () => {
+          await update(
+            formId,
+            newDefinition,
+            mockSession,
+            formDefinitionV2Schema
+          )
+        },
+        (persistedDraft) => {
+          expect(
+            formMetadataRepository.getAndIncrementVersionNumber
+          ).toHaveBeenCalledTimes(1)
+          expect(
+            formMetadataRepository.getAndIncrementVersionNumber
+          ).toHaveBeenCalledWith(formId, mockSession)
+          expect(
+            formMetadataRepository.addVersionMetadata
+          ).toHaveBeenCalledTimes(1)
+          expect(
+            formMetadataRepository.addVersionMetadata
+          ).toHaveBeenCalledWith(
+            formId,
+            { versionNumber: 11, createdAt },
+            mockSession
+          )
+          expect(persistedDraft.metadata?.[FORM_VERSION_METADATA_KEY]).toEqual({
+            versionNumber: 11,
+            createdAt
+          })
+          expect(formVersionsRepository.createVersion).toHaveBeenCalledTimes(1)
+          expect(formVersionsRepository.createVersion).toHaveBeenCalledWith(
+            expect.objectContaining({
+              formId,
+              versionNumber: 11,
+              createdAt,
+              formDefinition: expect.objectContaining({
+                metadata: expect.objectContaining({
+                  [FORM_VERSION_METADATA_KEY]: {
+                    versionNumber: 11,
+                    createdAt
+                  }
+                })
+              })
+            }),
+            mockSession
+          )
+        }
+      )
+
+      jest.restoreAllMocks()
     })
   })
 

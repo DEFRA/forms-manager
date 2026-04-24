@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@defra/forms-model'
+import { FormStatus, getErrorMessage } from '@defra/forms-model'
 
 import * as def from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as meta from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -53,7 +53,17 @@ export async function saveDefinition(formId, session, logger) {
  * @param {ClientSession} session
  */
 export async function saveFormVersion(formId, session) {
-  return createFormVersion(formId, session)
+  const result = await createFormVersion(formId, session)
+
+  // Mirror the stamp onto live, since upsertDraftAndLive writes both states.
+  await def.setFormVersion(
+    formId,
+    FormStatus.Live,
+    { versionNumber: result.versionNumber, createdAt: result.createdAt },
+    session
+  )
+
+  return result
 }
 
 /**

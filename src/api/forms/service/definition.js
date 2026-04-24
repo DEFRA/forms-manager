@@ -11,7 +11,6 @@ import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import { deleteDraft } from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
   deleteSecret,
   exists,
@@ -25,7 +24,6 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
-import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import {
   publishDraftCreatedFromLiveEvent,
   publishFormDraftDeletedEvent,
@@ -37,26 +35,6 @@ import { client } from '~/src/mongo.js'
 
 export const PAYMENT_LIVE_API_KEY = 'payment-live-api-key'
 export const PAYMENT_LIVE_API_KEY_PENDING = 'payment-live-api-key-pending'
-export const FORM_VERSION_METADATA_KEY = '$$__formVersion'
-
-/**
- * Returns a new definition with version metadata injected into definition.metadata.
- * @param {FormDefinition} definition
- * @param {{ versionNumber: number, createdAt: Date }} version
- * @returns {FormDefinition}
- */
-export function injectFormVersion(definition, version) {
-  return {
-    ...definition,
-    metadata: {
-      ...definition.metadata,
-      [FORM_VERSION_METADATA_KEY]: {
-        versionNumber: version.versionNumber,
-        createdAt: version.createdAt
-      }
-    }
-  }
-}
 
 /**
  * Retrieves a paginated list of forms with filter options
@@ -72,7 +50,6 @@ export async function listForms(options) {
 
 /**
  * Retrieves the form definition content for a given form ID.
- * Injects the latest version metadata into definition.metadata.$$__formVersion.
  * @param {string} formId - the ID of the form
  * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
@@ -82,16 +59,7 @@ export async function getFormDefinition(
   state = FormStatus.Draft,
   session
 ) {
-  const [definition, latestVersion] = await Promise.all([
-    formDefinition.get(formId, state, session),
-    formVersions.getLatestVersion(formId, session)
-  ])
-
-  if (!latestVersion) {
-    return definition
-  }
-
-  return injectFormVersion(definition, latestVersion)
+  return formDefinition.get(formId, state, session)
 }
 
 /**
@@ -128,8 +96,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
           author,
           session
         )
-
-        await createFormVersion(formId, session)
 
         // Publish audit message
         await publishFormDraftReplacedEvent(updatedMetadata, definition)
@@ -391,8 +357,6 @@ export async function createLiveFromDraft(formId, author) {
           session
         )
 
-        await createFormVersion(formId, session)
-
         // Make payment key live if a pending one is stored
         await makePaymentKeyLive(formHasPayment, formId, session)
 
@@ -448,14 +412,12 @@ export async function createDraftFromLive(formId, author) {
 
     try {
       await session.withTransaction(async () => {
-        // Copy the draft form definition
+        // Copy the live definition to draft
         await formDefinition.createDraftFromLive(formId, session)
 
         logger.info(`Adding form metadata (draft) for form ID ${formId}`)
 
         await formMetadata.update(formId, { $set: set }, session)
-
-        await createFormVersion(formId, session)
 
         // Publish audit message
         await publishDraftCreatedFromLiveEvent(formId, now, author)
@@ -512,8 +474,6 @@ export async function reorderDraftFormDefinitionPages(
         author,
         session
       )
-
-      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -577,8 +537,6 @@ export async function reorderDraftFormDefinitionSections(
         author,
         session
       )
-
-      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,
@@ -645,8 +603,6 @@ export async function reorderDraftFormDefinitionComponents(
         author,
         session
       )
-
-      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

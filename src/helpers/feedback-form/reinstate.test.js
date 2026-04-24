@@ -1,4 +1,6 @@
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
+import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
+import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { createdUpdatedDate } from '~/src/helpers/feedback-form/metadata.js'
 import { reinstateFeedbackForm } from '~/src/helpers/feedback-form/reinstate.js'
 import { client, db } from '~/src/mongo.js'
@@ -51,6 +53,7 @@ describe('reinstate', () => {
     jest
       .mocked(db.collection)
       .mockReturnValue(/** @type {any} */ (mockCollection))
+    jest.mocked(createFormVersion).mockResolvedValue(mockFormVersionDocument)
     jest.doMock('~/src/helpers/logging/logger.js', () => ({
       createLogger: jest.fn().mockReturnValue(mockLogger)
     }))

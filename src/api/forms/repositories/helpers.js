@@ -18,10 +18,14 @@ import {
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
+import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
+import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
 import { validate } from '~/src/api/forms/service/helpers/definition.js'
 import { repositionPaymentAndSummary } from '~/src/api/forms/service/migration-helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
+
+export const FORM_VERSION_METADATA_KEY = '$$__formVersion'
 
 const logger = createLogger()
 
@@ -275,7 +279,8 @@ export function uniquePathGate(
 }
 
 /**
- * Inserts a draft form definition
+ * Inserts a draft form definition, stamping the initial version and
+ * snapshotting to form-versions in the same transaction.
  * @param {string} formId - the form id
  * @param {FormDefinition} definition - the form definitiom
  * @param {ClientSession} session - the mongo transaction session
@@ -287,12 +292,13 @@ export async function insertDraft(
   session,
   schema = formDefinitionV2Schema
 ) {
-  // Validate form definition
-  const draft = validate(definition, schema)
+  const validated = validate(definition, schema)
+
+  const versionMetadata = await allocateDraftVersion(formId, session)
+  const draft = stampFormVersion(validated, versionMetadata)
 
   const id = { _id: new ObjectId(formId) }
 
-  // Persist the new draft
   const coll = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
   )
@@ -311,11 +317,65 @@ export async function insertDraft(
     throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
   }
 
+  await formVersionsRepository.createVersion(
+    {
+      formId,
+      versionNumber: versionMetadata.versionNumber,
+      formDefinition: draft,
+      createdAt: versionMetadata.createdAt
+    },
+    session
+  )
+
   return insertResult
 }
 
 /**
- * Updates a draft form definition
+ * Allocates the next version number for a form.
+ * @param {string} formId - the form id
+ * @param {ClientSession} session - the mongo transaction session
+ * @returns {Promise<FormVersionMetadata>}
+ */
+export async function allocateDraftVersion(formId, session) {
+  const versionNumber =
+    await formMetadataRepository.getAndIncrementVersionNumber(formId, session)
+  const createdAt = new Date()
+  const versionMetadata = /** @type {FormVersionMetadata} */ ({
+    versionNumber,
+    createdAt
+  })
+
+  await formMetadataRepository.addVersionMetadata(
+    formId,
+    versionMetadata,
+    session
+  )
+
+  return versionMetadata
+}
+
+/**
+ * Stamps a form version onto a definition's metadata.
+ * @param {FormDefinition} definition
+ * @param {{ versionNumber: number, createdAt: Date }} versionMetadata
+ * @returns {FormDefinition}
+ */
+export function stampFormVersion(definition, versionMetadata) {
+  return {
+    ...definition,
+    metadata: {
+      ...definition.metadata,
+      [FORM_VERSION_METADATA_KEY]: {
+        versionNumber: versionMetadata.versionNumber,
+        createdAt: versionMetadata.createdAt
+      }
+    }
+  }
+}
+
+/**
+ * Updates a draft form definition, stamping a new version onto it and
+ * snapshotting to form-versions in the same transaction.
  * @param {string} formId - the form id
  * @param {UpdateCallback} updateCallback - the update callback
  * @param {ClientSession} session - the mongo transaction session
@@ -332,7 +392,10 @@ export async function modifyDraft(
   )
 
   const id = { _id: new ObjectId(formId) }
-  const document = await coll.findOne(id)
+  const document = await coll.findOne(id, {
+    session,
+    projection: { draft: 1 }
+  })
 
   if (!document) {
     throw Boom.notFound(`Document not found '${formId}'`)
@@ -342,15 +405,13 @@ export async function modifyDraft(
     throw Boom.notFound(`Draft not found in document '${formId}'`)
   }
 
-  // Apply the update
   const updated = updateCallback(document.draft)
-
   const repositioned = repositionPaymentAndSummary(updated)
+  const validated = validate(repositioned, schema)
 
-  // Validate form definition
-  const draft = validate(repositioned, schema)
+  const versionMetadata = await allocateDraftVersion(formId, session)
+  const draft = stampFormVersion(validated, versionMetadata)
 
-  // Persist the updated draft
   const coll2 = /** @satisfies {Collection<{draft: FormDefinition}>} */ (
     db.collection(DEFINITION_COLLECTION_NAME)
   )
@@ -367,6 +428,16 @@ export async function modifyDraft(
   if (!updateResult) {
     throw Boom.notFound(`Unexpected empty result from 'findOneAndUpdate'`)
   }
+
+  await formVersionsRepository.createVersion(
+    {
+      formId,
+      versionNumber: versionMetadata.versionNumber,
+      formDefinition: draft,
+      createdAt: versionMetadata.createdAt
+    },
+    session
+  )
 
   return updateResult
 }
@@ -898,7 +969,7 @@ export function modifyUpdateOption(definition, optionName, optionValue) {
  */
 
 /**
- * @import { FormDefinition, FormOptions, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, FormOptions, FormVersionMetadata, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */

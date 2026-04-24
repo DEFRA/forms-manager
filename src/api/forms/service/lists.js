@@ -9,7 +9,6 @@ import Boom from '@hapi/boom'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { logger } from '~/src/api/forms/service/shared.js'
-import { createFormVersion } from '~/src/api/forms/service/versioning.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { saveToS3 } from '~/src/messaging/s3.js'
 import { client } from '~/src/mongo.js'
@@ -57,8 +56,6 @@ export async function addListToDraftFormDefinition(formId, list, author) {
         author,
         session
       )
-
-      await createFormVersion(formId, session)
 
       const filename = `${formId}_list_${returnedList.id}.json`
       const s3Meta = await saveToS3(filename, returnedList)
@@ -123,8 +120,6 @@ export async function updateListOnDraftFormDefinition(
         session
       )
 
-      await createFormVersion(formId, session)
-
       const filename = `${formId}_list_${returnedList.id}.json`
       const s3Meta = await saveToS3(filename, returnedList)
 
@@ -174,8 +169,6 @@ export async function removeListOnDraftFormDefinition(formId, listId, author) {
         author,
         session
       )
-
-      await createFormVersion(formId, session)
 
       await publishFormUpdatedEvent(
         metadataDocument,

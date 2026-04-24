@@ -113,12 +113,6 @@ describe('sections', () => {
       // Verify metadata was updated
       expectMetadataUpdate()
 
-      // Verify version was created
-      expect(versioningService.createFormVersion).toHaveBeenCalledWith(
-        id,
-        expect.anything()
-      )
-
       // Verify audit event was published
       const [auditMessage] = publishEventSpy.mock.calls[0]
       expect(auditMessage).toMatchObject({
