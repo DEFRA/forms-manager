@@ -23,7 +23,7 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-1-title',
           status: 'draft'
         },
-        featureCounts: {
+        featureMetrics: {
           features: { Sections: 1 },
           formStructure: {
             conditions: 0,
@@ -47,7 +47,7 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-2-title',
           status: 'draft'
         },
-        featureCounts: {
+        featureMetrics: {
           features: { Sections: 1 },
           formStructure: {
             conditions: 0,
@@ -71,14 +71,14 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-3-title',
           status: 'draft'
         },
-        featureCounts: {
-          features: { Sections: 1 },
+        featureMetrics: {
+          features: {},
           formStructure: {
             conditions: 0,
             pages: 1,
             questionTypes: 0,
             questions: 0,
-            sections: 1
+            sections: 0
           },
           questionTypes: {}
         },
@@ -97,7 +97,7 @@ export function getExpectedOverviewMetrics(timestamp) {
           slug: 'form-2-title',
           status: 'live'
         },
-        featureCounts: {
+        featureMetrics: {
           features: { Sections: 1 },
           formStructure: {
             conditions: 0,

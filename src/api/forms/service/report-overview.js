@@ -131,7 +131,7 @@ export function collectOverviewMetrics(metadata, definition, definitionType) {
     formId: metadata.id,
     formStatus: metadata.live ? FormStatus.Live : FormStatus.Draft,
     summaryMetrics: calcSummaryMetrics(metadata, definition, definitionType),
-    featureCounts: calcFeatureMetrics(definition),
+    featureMetrics: calcFeatureMetrics(definition),
     submissionsCount: 0,
     updatedAt: new Date()
   }
@@ -170,7 +170,7 @@ export function calcFeatureMetrics(definition) {
   const questionTypes = getQuestionTypeCounts(allComponents)
   return {
     questionTypes: Object.fromEntries(questionTypes),
-    features: getComponentUsageFeatureCounts(definition),
+    features: getComponentUsageFeatureMetrics(definition),
     formStructure: getFormStructureCounts(definition, questionTypes)
   }
 }
@@ -190,12 +190,12 @@ export function getQuestionTypeCounts(components) {
 /**
  * @param {FormDefinition} definition
  */
-export function getComponentUsageFeatureCounts(definition) {
+export function getComponentUsageFeatureMetrics(definition) {
   const features = getFeatureList(definition)
-  if (definition.sections.length > 0) {
+  if (definition.pages.some((p) => p.section)) {
     features.push('Sections')
   }
-  if (definition.conditions.length > 0) {
+  if (definition.pages.some((p) => p.condition)) {
     features.push('Conditional logic')
   }
   const featureResult = /** @type {Record<string, number>} */ ({})
@@ -218,8 +218,8 @@ export function getFormStructureCounts(definition, questionTypes) {
   return {
     pages: definition.pages.length,
     questions: numOfQuestions,
-    sections: definition.sections.length,
-    conditions: definition.conditions.length,
+    sections: definition.pages.filter((p) => p.section).length,
+    conditions: definition.pages.filter((p) => p.condition).length,
     questionTypes: questionTypes.size
   }
 }
