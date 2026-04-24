@@ -392,7 +392,10 @@ export async function modifyDraft(
   )
 
   const id = { _id: new ObjectId(formId) }
-  const document = await coll.findOne(id)
+  const document = await coll.findOne(id, {
+    session,
+    projection: { draft: 1 }
+  })
 
   if (!document) {
     throw Boom.notFound(`Document not found '${formId}'`)
