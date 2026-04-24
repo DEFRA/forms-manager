@@ -3,6 +3,7 @@ import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
 import {
+  FORM_VERSION_METADATA_KEY,
   buildSectionsResponse,
   getComponent,
   getCondition,
@@ -74,6 +75,34 @@ export async function update(id, formDefinition, session, schema) {
   logger.info(`Updated form for form ID ${id}`)
 
   return updateResult.draft
+}
+
+/**
+ * Stamps a form version onto the stored definition for the given state.
+ * No-op if the state sub-document does not exist.
+ * @param {string} formId - the form id
+ * @param {FormStatus} state - the form state (Draft or Live)
+ * @param {FormVersionMetadata} versionMetadata
+ * @param {ClientSession} session - mongo transaction session
+ */
+export async function setFormVersion(formId, state, versionMetadata, session) {
+  const coll =
+    /** @satisfies {Collection<Partial<{draft: FormDefinition, live: FormDefinition}>>} */ (
+      db.collection(DEFINITION_COLLECTION_NAME)
+    )
+
+  await coll.updateOne(
+    {
+      _id: new ObjectId(formId),
+      [state]: { $exists: true }
+    },
+    {
+      $set: {
+        [`${state}.metadata.${FORM_VERSION_METADATA_KEY}`]: versionMetadata
+      }
+    },
+    { session }
+  )
 }
 
 /**
@@ -727,7 +756,7 @@ export async function updateOption(formId, optionName, optionValue, session) {
 }
 
 /**
- * @import { FormDefinition, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, FormVersionMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'

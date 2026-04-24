@@ -7,12 +7,12 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
+import { stampFormVersion } from '~/src/api/forms/repositories/helpers.js'
 import {
   createDraftFromLive,
   createLiveFromDraft,
   deleteDraftFormDefinition,
   getFormDefinition,
-  injectFormVersion,
   listForms,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
@@ -450,7 +450,7 @@ export default [
 
       const version = await getFormVersion(id, parseInt(versionNumber))
 
-      return injectFormVersion(version.formDefinition, version)
+      return stampFormVersion(version.formDefinition, version)
     },
     options: {
       auth: false,

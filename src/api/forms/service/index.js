@@ -100,8 +100,6 @@ export async function handleTitleUpdate(
     const schema = getValidationSchema(definition)
 
     await formDefinition.updateName(formId, formUpdate.title, session, schema)
-
-    await createFormVersion(formId, session)
   }
 
   await publishFormTitleUpdatedEvent({ ...form, ...updatedForm }, form)
@@ -173,9 +171,6 @@ export async function createForm(metadataInput, author) {
       // Create the draft form definition
       // prettier-ignore
       await formDefinition.insert(metadata.id, definition, session, formDefinitionV2Schema)
-
-      // Create the first version of the form
-      await createFormVersion(metadata.id, session)
 
       await publishFormCreatedEvent(metadata)
     })

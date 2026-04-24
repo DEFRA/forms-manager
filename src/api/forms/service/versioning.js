@@ -1,9 +1,12 @@
 import { FormStatus, getErrorMessage } from '@defra/forms-model'
 
 import * as formDefinitionRepository from '~/src/api/forms/repositories/form-definition-repository.js'
-import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
 import { MAX_VERSIONS } from '~/src/api/forms/repositories/form-versions-repository.js'
+import {
+  allocateDraftVersion,
+  stampFormVersion
+} from '~/src/api/forms/repositories/helpers.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
@@ -27,7 +30,8 @@ export async function createFormVersionAndSession(formId) {
 }
 
 /**
- * Creates a new version of a form definition
+ * Creates a new version for paths that don't go through modifyDraft —
+ * non-title metadata edits and the feedback form reinstate flow.
  * @param {string} formId - The form ID
  * @param {ClientSession} session - Existing MongoDB session (if called within a transaction)
  * @returns {Promise<FormVersionDocument>}
@@ -50,39 +54,33 @@ export async function createFormVersion(formId, session) {
 }
 
 /**
- * Internal function to create version within a transaction
  * @private
  * @param {string} formId
  * @param {ClientSession} session
  */
 async function createVersionInTransaction(formId, session) {
-  const nextVersionNumber =
-    await formMetadataRepository.getAndIncrementVersionNumber(formId, session)
-
-  const formDefinition = await formDefinitionRepository.get(
+  const draft = await formDefinitionRepository.get(
     formId,
     FormStatus.Draft,
     session
   )
 
-  const createdAt = new Date()
+  const versionMetadata = await allocateDraftVersion(formId, session)
 
-  const versionMetadata = /** @type {FormVersionMetadata} */ ({
-    versionNumber: nextVersionNumber,
-    createdAt
-  })
-
-  await formMetadataRepository.addVersionMetadata(
+  await formDefinitionRepository.setFormVersion(
     formId,
+    FormStatus.Draft,
     versionMetadata,
     session
   )
 
+  const formDefinition = stampFormVersion(draft, versionMetadata)
+
   const versionDocument = /** @type {FormVersionDocument} */ ({
     formId,
-    versionNumber: nextVersionNumber,
+    versionNumber: versionMetadata.versionNumber,
     formDefinition,
-    createdAt
+    createdAt: versionMetadata.createdAt
   })
 
   try {
@@ -90,7 +88,7 @@ async function createVersionInTransaction(formId, session) {
   } catch (err) {
     logger.error(
       err,
-      `Unexpected error creating version ${nextVersionNumber} for form ID ${formId} after atomic increment`
+      `Unexpected error creating version ${versionMetadata.versionNumber} for form ID ${formId}`
     )
     throw err
   }

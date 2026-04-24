@@ -25,6 +25,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { MAX_RESULTS } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersions from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
+  FORM_VERSION_METADATA_KEY,
   modifyReorderComponents,
   modifyReorderPages,
   modifyReorderSections
@@ -43,7 +44,6 @@ import {
 } from '~/src/api/forms/service/__stubs__/service.js'
 import { mockFormVersionDocument } from '~/src/api/forms/service/__stubs__/versioning.js'
 import {
-  FORM_VERSION_METADATA_KEY,
   createDraftFromLive,
   createLiveFromDraft,
   deleteDraftFormDefinition,
@@ -514,29 +514,30 @@ describe('Forms service', () => {
       await expect(createForm(input, author)).rejects.toThrow()
     })
 
-    it('should return the form definition with $$__formVersion injected', async () => {
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
-
-      const result = await getFormDefinition('123')
-
-      expect(result).toEqual({
+    it('should return the stored definition verbatim (the $$__formVersion stamp is persisted at write time)', async () => {
+      const stampedDefinition = {
         ...definition,
         metadata: {
           [FORM_VERSION_METADATA_KEY]: {
-            versionNumber: mockFormVersionDocument.versionNumber,
-            createdAt: mockFormVersionDocument.createdAt
+            versionNumber: 7,
+            createdAt: new Date('2026-04-01')
           }
         }
-      })
+      }
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(stampedDefinition)
+
+      const result = await getFormDefinition('123')
+
+      expect(result).toEqual(stampedDefinition)
     })
 
-    it('should return the form definition without $$__formVersion when no versions exist', async () => {
+    it('should return the definition unchanged when no stamp is present (legacy forms)', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
-      jest.mocked(formVersions.getLatestVersion).mockResolvedValueOnce(null)
 
       const result = await getFormDefinition('123')
 
       expect(result).toEqual(definition)
+      expect(result.metadata?.[FORM_VERSION_METADATA_KEY]).toBeUndefined()
     })
 
     it('should throw an error if the form associated with the definition does not exist', async () => {

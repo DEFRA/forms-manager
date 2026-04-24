@@ -83,6 +83,12 @@ const condition2Id = '91c10139-a0dd-46a4-a2c5-4d7a02fdf923'
 const section1Id = 'f07566be-dd04-49df-890f-b226b92f3907'
 const section2Id = 'cb185708-203d-4560-9929-ecc27750244a'
 
+// modifyDraft/insertDraft now call into form-metadata-repository and
+// form-versions-repository for version allocation + snapshotting. Mock them so
+// their Mongo ops don't collide with the definition-repository assertions.
+jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/repositories/form-versions-repository.js')
+
 jest.mock('~/src/mongo.js', () => {
   let isPrepared = false
   const collection =
