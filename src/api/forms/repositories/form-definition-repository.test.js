@@ -953,7 +953,7 @@ describe('form-definition-repository', () => {
       }
     })
 
-    it('should allocate a version, stamp the inserted draft, and snapshot to form-versions', async () => {
+    it('should allocate a version exactly once, stamp the inserted draft, and snapshot to form-versions exactly once', async () => {
       const definitionV1 = { ...draft, conditions: [] }
       const createdAt = new Date('2026-04-24T10:00:00Z')
       mockCollection.findOneAndUpdate.mockResolvedValue({ definitionV1 })
@@ -966,7 +966,11 @@ describe('form-definition-repository', () => {
 
       expect(
         formMetadataRepository.getAndIncrementVersionNumber
+      ).toHaveBeenCalledTimes(1)
+      expect(
+        formMetadataRepository.getAndIncrementVersionNumber
       ).toHaveBeenCalledWith(formId, mockSession)
+      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledTimes(1)
       expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
         formId,
         { versionNumber: 7, createdAt },
@@ -983,6 +987,7 @@ describe('form-definition-repository', () => {
         createdAt
       })
 
+      expect(formVersionsRepository.createVersion).toHaveBeenCalledTimes(1)
       expect(formVersionsRepository.createVersion).toHaveBeenCalledWith(
         expect.objectContaining({
           formId,
@@ -1037,7 +1042,7 @@ describe('form-definition-repository', () => {
       )
     })
 
-    it('should allocate a version, stamp the updated draft, and snapshot to form-versions', async () => {
+    it('should allocate a version exactly once, stamp the updated draft, and snapshot to form-versions exactly once', async () => {
       const newDefinition = emptyV2()
       const createdAt = new Date('2026-04-24T10:00:00Z')
       jest
@@ -1057,7 +1062,13 @@ describe('form-definition-repository', () => {
         (persistedDraft) => {
           expect(
             formMetadataRepository.getAndIncrementVersionNumber
+          ).toHaveBeenCalledTimes(1)
+          expect(
+            formMetadataRepository.getAndIncrementVersionNumber
           ).toHaveBeenCalledWith(formId, mockSession)
+          expect(
+            formMetadataRepository.addVersionMetadata
+          ).toHaveBeenCalledTimes(1)
           expect(
             formMetadataRepository.addVersionMetadata
           ).toHaveBeenCalledWith(
@@ -1069,6 +1080,7 @@ describe('form-definition-repository', () => {
             versionNumber: 11,
             createdAt
           })
+          expect(formVersionsRepository.createVersion).toHaveBeenCalledTimes(1)
           expect(formVersionsRepository.createVersion).toHaveBeenCalledWith(
             expect.objectContaining({
               formId,
