@@ -20,9 +20,12 @@ import * as formDefinition from '~/src/api/forms/repositories/form-definition-re
 import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { getExpectedOverviewMetrics } from '~/src/api/forms/service/__stubs__/metrics.js'
 import {
+  calcFeatureMetrics,
   generateReportOverview,
+  getComponentUsageFeatureMetrics,
   getDefinitionIfExists,
   getFeatureList,
+  getQuestionTypeCounts,
   getUniqueComponentTypes
 } from '~/src/api/forms/service/report-overview.js'
 import { client } from '~/src/mongo.js'
@@ -113,12 +116,22 @@ describe('report-overview', () => {
         // @ts-expect-error - resolves to an async iterator like FindCursor<FormMetadataDocument>
         .mockReturnValueOnce(mockAsyncIterator)
 
+      const pageWithSection = /** @type {FormDefinition} */ ({
+        pages: [{ section: 'abc' }]
+      })
+
       // Form 1 - draft and no live
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(buildDefinition(pageWithSection))
 
       // Form 2 - draft and live
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
-      jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(buildDefinition(pageWithSection))
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValueOnce(buildDefinition(pageWithSection))
 
       // Form 3 - draft and no live
       jest.mocked(formDefinition.get).mockResolvedValueOnce(buildDefinition({}))
@@ -245,6 +258,148 @@ describe('report-overview', () => {
     })
   })
 
+  describe('calcFeatureMetrics', () => {
+    it('should return calculated metrics', () => {
+      const summaryPage = buildSummaryPage({
+        // @ts-expect-error - forcing the controller type
+        controller: ControllerType.SummaryWithConfirmationEmail
+      })
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent(),
+          buildDeclarationFieldComponent()
+        ]
+      })
+      const fileUploadPage = buildFileUploadPage()
+      const paymentPage = buildQuestionPage({
+        components: [buildPaymentComponent()]
+      })
+      const sectionPage1 = buildQuestionPage({
+        section: 'some-section-id1'
+      })
+      const sectionPage2 = buildQuestionPage({
+        section: 'some-section-id2'
+      })
+
+      const definition = buildDefinition({
+        pages: [
+          questionPage,
+          fileUploadPage,
+          sectionPage1,
+          sectionPage2,
+          paymentPage,
+          summaryPage
+        ]
+      })
+      expect(calcFeatureMetrics(definition)).toEqual({
+        features: {
+          'File upload': 1,
+          'Email confirmation': 1,
+          'GOV.UK Pay': 1,
+          Declarations: 1,
+          Sections: 1
+        },
+        formStructure: {
+          conditions: 0,
+          pages: 6,
+          questionTypes: 6,
+          questions: 9,
+          sections: 2
+        },
+        questionTypes: {
+          CheckboxesField: 2,
+          DeclarationField: 1,
+          FileUploadField: 1,
+          PaymentField: 1,
+          RadiosField: 1,
+          TextField: 3
+        }
+      })
+    })
+  })
+
+  describe('getQuestionTypeCounts', () => {
+    it('should return counts', () => {
+      const components = [
+        buildTextFieldComponent(),
+        buildTextFieldComponent(),
+        buildCheckboxComponent(),
+        buildTextFieldComponent(),
+        buildRadioComponent(),
+        buildCheckboxComponent(),
+        buildTextFieldComponent(),
+        buildRadioComponent(),
+        buildCheckboxComponent(),
+        buildTextFieldComponent(),
+        buildDeclarationFieldComponent()
+      ]
+      expect(Object.fromEntries(getQuestionTypeCounts(components))).toEqual({
+        CheckboxesField: 3,
+        DeclarationField: 1,
+        RadiosField: 2,
+        TextField: 5
+      })
+    })
+  })
+
+  describe('get component usage features', () => {
+    it('should return list of features', () => {
+      const summaryPage = buildSummaryPage({
+        // @ts-expect-error - forcing the controller type
+        controller: ControllerType.SummaryWithConfirmationEmail
+      })
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent(),
+          buildDeclarationFieldComponent()
+        ]
+      })
+      const fileUploadPage = buildFileUploadPage()
+      const paymentPage = buildQuestionPage({
+        components: [buildPaymentComponent()]
+      })
+      const conditionPage = buildQuestionPage({
+        condition: 'some-condition-id'
+      })
+      const sectionPage = buildQuestionPage({
+        section: 'some-section-id'
+      })
+
+      const definition = buildDefinition({
+        pages: [
+          questionPage,
+          fileUploadPage,
+          paymentPage,
+          conditionPage,
+          sectionPage,
+          summaryPage
+        ]
+      })
+      expect(getComponentUsageFeatureMetrics(definition)).toEqual({
+        'File upload': 1,
+        'Email confirmation': 1,
+        'GOV.UK Pay': 1,
+        Declarations: 1,
+        Sections: 1,
+        'Conditional logic': 1
+      })
+    })
+  })
+
   describe('getDefinitionIfExists', () => {
     it('should not throw if error is NOT_FOUND', async () => {
       jest.mocked(formDefinition.get).mockImplementationOnce(() => {
@@ -268,3 +423,7 @@ describe('report-overview', () => {
     })
   })
 })
+
+/**
+ * @import { FormDefinition } from '@defra/forms-model'
+ */
