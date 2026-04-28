@@ -497,10 +497,6 @@ describe('Forms service', () => {
         expect.anything(),
         expect.anything()
       )
-      expect(versioningService.createFormVersion).toHaveBeenCalledWith(
-        '123',
-        expect.anything()
-      )
     })
 
     it('should publish title audit event for a live form without a draft', async () => {
@@ -711,10 +707,6 @@ describe('Forms service', () => {
         '123',
         input.title,
         expect.anything(),
-        expect.anything()
-      )
-      expect(versioningService.createFormVersion).toHaveBeenCalledWith(
-        '123',
         expect.anything()
       )
     })

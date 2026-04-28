@@ -57,11 +57,17 @@ describe('versioning service', () => {
   })
 
   describe('createFormVersion', () => {
+    const stampedFormDefinition = {
+      ...mockFormDefinition,
+      metadata: {
+        $$__formVersion: { versionNumber: 1, createdAt: now }
+      }
+    }
     const mockVersionDocument = buildFormVersionDocument({
       _id: undefined,
       formId,
       versionNumber: 1,
-      formDefinition: mockFormDefinition,
+      formDefinition: stampedFormDefinition,
       createdAt: now
     })
 
@@ -94,6 +100,12 @@ describe('versioning service', () => {
       )
       expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
         formId,
+        { versionNumber: 1, createdAt: now },
+        expect.any(Object)
+      )
+      expect(formDefinitionRepository.setFormVersion).toHaveBeenCalledWith(
+        formId,
+        FormStatus.Draft,
         { versionNumber: 1, createdAt: now },
         expect.any(Object)
       )
