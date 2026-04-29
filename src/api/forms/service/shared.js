@@ -1,9 +1,6 @@
 import { FormStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
-import { createLogger } from '~/src/helpers/logging/logger.js'
-
-export const logger = createLogger()
 export const defaultAuthor = {
   displayName: 'Unknown',
   id: '-1'

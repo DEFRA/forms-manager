@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { mapMetadata } from '~/src/api/forms/service/helpers/mapper.js'
-import { logger } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
 /**

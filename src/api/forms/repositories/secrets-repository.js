@@ -2,12 +2,10 @@ import { getErrorMessage } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError } from 'mongodb'
 
-import { createLogger } from '~/src/helpers/logging/logger.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { SECRETS_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 export const MAX_RESULTS = 100
-
-const logger = createLogger()
 
 /**
  * Retrieves a form secret by form id and secret name

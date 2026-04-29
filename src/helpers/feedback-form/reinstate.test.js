@@ -41,10 +41,10 @@ jest.mock('~/src/mongo.js', () => {
 jest.mock('~/src/api/forms/service/versioning.js')
 
 jest.mock('~/src/helpers/logging/logger.js', () => ({
-  createLogger: () => ({
+  logger: {
     error: jest.fn(),
     info: jest.fn()
-  })
+  }
 }))
 
 describe('reinstate', () => {
@@ -55,7 +55,7 @@ describe('reinstate', () => {
       .mockReturnValue(/** @type {any} */ (mockCollection))
     jest.mocked(createFormVersion).mockResolvedValue(mockFormVersionDocument)
     jest.doMock('~/src/helpers/logging/logger.js', () => ({
-      createLogger: jest.fn().mockReturnValue(mockLogger)
+      logger: mockLogger
     }))
   })
 

@@ -1,7 +1,7 @@
 import { PublishCommand } from '@aws-sdk/client-sns'
 
-import { logger } from '~/src/api/forms/service/shared.js'
 import { config } from '~/src/config/index.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { getSNSClient } from '~/src/messaging/sns.js'
 
 const snsTopicArn = config.get('snsTopicArn')

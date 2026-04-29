@@ -7,10 +7,8 @@ import {
   allocateDraftVersion,
   stampFormVersion
 } from '~/src/api/forms/repositories/helpers.js'
-import { createLogger } from '~/src/helpers/logging/logger.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
-
-const logger = createLogger()
 
 /**
  * Wrapper function to instantiate new session and create form version

@@ -3,7 +3,7 @@ import { getErrorMessage } from '@defra/forms-model'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as secretsRepository from '~/src/api/forms/repositories/secrets-repository.js'
 import { encryptSecret } from '~/src/api/forms/service/helpers/crypto.js'
-import { logger } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import {
   publishDeletedFormSecretEvent,
   publishSavedFormSecretEvent

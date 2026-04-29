@@ -10,7 +10,7 @@ import * as formMetadata from '~/src/api/forms/repositories/form-metadata-reposi
 import { findComponent } from '~/src/api/forms/repositories/helpers.js'
 import { getFormDefinition } from '~/src/api/forms/service/definition.js'
 import { getFormDefinitionPage } from '~/src/api/forms/service/page.js'
-import { logger } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 

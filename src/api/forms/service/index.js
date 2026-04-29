@@ -16,7 +16,6 @@ import {
 } from '~/src/api/forms/service/helpers/definition.js'
 import {
   MongoError,
-  logger,
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
@@ -25,6 +24,7 @@ import {
   removeFormVersions
 } from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
 import {
   bulkPublishEvents,

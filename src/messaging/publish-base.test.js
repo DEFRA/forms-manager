@@ -11,7 +11,13 @@ jest.mock('~/src/config/index.js', () => {
     awsRegion: 'eu-west-2',
     snsEndpoint: 'http://localhost',
     snsTopicArn: 'arn:aws:sns:eu-west-2:000000000000:forms_manager_events',
-    publishAuditEvents: true
+    publishAuditEvents: true,
+    log: {
+      enabled: true,
+      redact: ['req', 'res', 'responseTime'],
+      format: 'pino-pretty',
+      level: 'debug'
+    }
   }
   return {
     config: {

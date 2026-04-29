@@ -15,12 +15,10 @@ import {
   MongoError,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
-import { createLogger } from '~/src/helpers/logging/logger.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 export const MAX_RESULTS = 100
-
-const logger = createLogger()
 
 /**
  * Retrieves the list of documents from the database

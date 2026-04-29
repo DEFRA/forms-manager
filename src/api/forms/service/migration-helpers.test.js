@@ -55,6 +55,14 @@ jest.mock('~/src/api/forms/service/condition-migration-helpers.js', () => ({
   isConditionData: jest.fn(() => true)
 }))
 
+jest.mock('~/src/helpers/logging/logger.js', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn()
+  }
+}))
+
 describe('migration helpers', () => {
   const summaryPageId = '449a45f6-4541-4a46-91bd-8b8931b07b50'
 
