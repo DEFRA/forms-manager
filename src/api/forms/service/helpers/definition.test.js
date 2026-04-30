@@ -20,6 +20,14 @@ import {
   validatePaymentAmount
 } from '~/src/api/forms/service/helpers/definition.js'
 
+jest.mock('~/src/helpers/logging/logger.js', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn()
+  }
+}))
+
 describe('definition helpers', () => {
   describe('getValidationSchema', () => {
     it('should return V1 schema when schema is V1', () => {

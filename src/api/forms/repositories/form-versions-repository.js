@@ -1,12 +1,10 @@
 import { getErrorMessage } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { createLogger } from '~/src/helpers/logging/logger.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { VERSIONS_COLLECTION_NAME, db } from '~/src/mongo.js'
 
 export const MAX_VERSIONS = 100
-
-const logger = createLogger()
 
 /**
  * Creates a new form version in the database

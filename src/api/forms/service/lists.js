@@ -8,7 +8,7 @@ import Boom from '@hapi/boom'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { logger } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { publishFormUpdatedEvent } from '~/src/messaging/publish.js'
 import { saveToS3 } from '~/src/messaging/s3.js'
 import { client } from '~/src/mongo.js'

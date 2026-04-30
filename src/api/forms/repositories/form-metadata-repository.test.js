@@ -70,10 +70,10 @@ jest.mock('~/src/mongo.js', () => {
 })
 
 jest.mock('~/src/helpers/logging/logger.js', () => ({
-  createLogger: () => ({
+  logger: {
     error: jest.fn(),
     info: jest.fn()
-  })
+  }
 }))
 
 describe('form-metadata-repository', () => {

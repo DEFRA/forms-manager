@@ -8,7 +8,7 @@ import {
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { migrateToV2 } from '~/src/api/forms/service/migration-helpers.js'
-import { logger } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { publishFormMigratedEvent } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
 /**

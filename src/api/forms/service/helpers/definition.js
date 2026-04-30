@@ -9,7 +9,7 @@ import {
 import Joi from 'joi'
 
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
-import { logger } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 
 /**
  * Determines the correct validation schema based on the form definition's schema property

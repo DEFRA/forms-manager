@@ -58,12 +58,12 @@ const mockLoggerInfo = jest.fn()
 const mockLoggerWarn = jest.fn()
 
 jest.mock('~/src/helpers/logging/logger.js', () => ({
-  createLogger: jest.fn().mockReturnValue({
+  logger: {
     // @ts-expect-error - error handling uses any type
     error: (err, message) => mockLoggerError(err, message),
     warn: () => mockLoggerWarn(),
     info: () => mockLoggerInfo()
-  })
+  }
 }))
 
 describe('secrets-repository', () => {

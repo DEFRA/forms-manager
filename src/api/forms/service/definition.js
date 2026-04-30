@@ -19,11 +19,8 @@ import {
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
-import {
-  logger,
-  mapForm,
-  partialAuditFields
-} from '~/src/api/forms/service/shared.js'
+import { mapForm, partialAuditFields } from '~/src/api/forms/service/shared.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import {
   publishDraftCreatedFromLiveEvent,
   publishFormDraftDeletedEvent,

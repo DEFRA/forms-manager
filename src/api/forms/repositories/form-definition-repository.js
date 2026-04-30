@@ -34,10 +34,8 @@ import {
   modifyUpdatePageFields,
   removeById
 } from '~/src/api/forms/repositories/helpers.js'
-import { createLogger } from '~/src/helpers/logging/logger.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
-
-const logger = createLogger()
 
 /**
  * Adds a form to the Form Store
