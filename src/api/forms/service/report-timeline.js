@@ -62,7 +62,9 @@ export function collectTimelineMetrics(timelineMetrics, metadata, date) {
         formStatus: FormStatus.Draft,
         metricName: 'NewFormsCreated',
         metricValue: 1,
-        createdAt: metadata.draft.createdAt
+        // Original created date of record, not draft.createdAt
+        // since draft.createdAt can get regenerated if the user creates a draft from the live form
+        createdAt: metadata.createdAt
       })
     )
   }
