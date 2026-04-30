@@ -30,7 +30,6 @@ import {
 } from '~/src/api/forms/service/index.js'
 import { migrateDefinitionToV2 } from '~/src/api/forms/service/migration.js'
 import { generateReportOverview } from '~/src/api/forms/service/report-overview.js'
-import { generateReportTimeline } from '~/src/api/forms/service/report-timeline.js'
 import {
   getFormVersion,
   getFormVersions
@@ -56,7 +55,6 @@ jest.mock('~/src/api/forms/service/conditions.js')
 jest.mock('~/src/api/forms/service/versioning.js')
 jest.mock('~/src/messaging/publish.js')
 jest.mock('~/src/api/forms/service/report-overview.js')
-jest.mock('~/src/api/forms/service/report-timeline.js')
 
 describe('Forms route', () => {
   /** @type {Server} */
@@ -1967,22 +1965,6 @@ describe('Forms route', () => {
       expect(response.result).toEqual({
         draft: [],
         live: []
-      })
-    })
-
-    test('GET /report-timeline returns data', async () => {
-      jest.mocked(generateReportTimeline).mockResolvedValue({
-        timeline: []
-      })
-
-      const response = await server.inject({
-        method: 'GET',
-        url: '/report/timeline?date=2025-10-10'
-      })
-
-      expect(response.statusCode).toEqual(okStatusCode)
-      expect(response.result).toEqual({
-        timeline: []
       })
     })
   })
