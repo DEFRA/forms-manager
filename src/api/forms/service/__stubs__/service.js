@@ -33,6 +33,7 @@ export const formMetadataOutput = {
   ...formMetadataInput,
   id,
   slug,
+  offline: false,
   draft: {
     createdAt: BASE_CREATED_DATE,
     createdBy: author,
@@ -54,6 +55,7 @@ export const formMetadataWithLiveOutput = {
   ...formMetadataInput,
   id,
   slug,
+  offline: false,
   draft: {
     createdAt: BASE_CREATED_DATE,
     createdBy: author,
