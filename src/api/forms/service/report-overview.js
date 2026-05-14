@@ -170,17 +170,15 @@ export function calcFeatureMetrics(definition) {
     }
     // Special case - if declaration in CYA page, remove the Markdown component,
     // and add 'Declaration in CYA' component to totals
-    if (isSummaryPage(page)) {
-      if (hasDeclarationInCYA(definition)) {
-        const markdownPos = allComponents.findIndex(
-          (comp) => comp.type === ComponentType.Markdown
-        )
-        if (markdownPos > -1) {
-          allComponents.splice(markdownPos, 1)
-          // @ts-expect-error - 'DeclarationInCYA' is not strictly in the enum of ComponentType
-          // but we want a separate value for metrics display purposes
-          allComponents.push({ type: 'DeclarationInCYA' })
-        }
+    if (isSummaryPage(page) && hasDeclarationInCYA(definition)) {
+      const markdownPos = allComponents.findIndex(
+        (comp) => comp.type === ComponentType.Markdown
+      )
+      if (markdownPos > -1) {
+        allComponents.splice(markdownPos, 1)
+        // @ts-expect-error - 'DeclarationInCYA' is not strictly in the enum of ComponentType
+        // but we want a separate value for metrics display purposes
+        allComponents.push({ type: 'DeclarationInCYA' })
       }
     }
   }
@@ -309,22 +307,18 @@ export function getUniqueComponentTypes(definition) {
  * @param {FormDefinition} definition
  */
 export function getUniqueAssignedConditions(definition) {
-  const conditions = new Set()
-  definition.pages
-    .filter((p) => p.condition)
-    .forEach((p2) => conditions.add(p2.condition))
-  return conditions
+  return new Set(
+    definition.pages.filter((p) => p.condition).map((p2) => p2.condition)
+  )
 }
 
 /**
  * @param {FormDefinition} definition
  */
 export function getUniqueAssignedSections(definition) {
-  const sections = new Set()
-  definition.pages
-    .filter((p) => p.section)
-    .forEach((p2) => sections.add(p2.section))
-  return sections
+  return new Set(
+    definition.pages.filter((p) => p.section).map((p2) => p2.section)
+  )
 }
 
 /**
