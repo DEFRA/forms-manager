@@ -69,7 +69,8 @@ export function getExpectedOverviewMetrics(timestamp) {
           ...expectedBaseSummaryMetrics,
           name: 'Form 3 title',
           slug: 'form-3-title',
-          status: 'draft'
+          status: 'draft',
+          sections: 0
         },
         featureMetrics: {
           features: {},

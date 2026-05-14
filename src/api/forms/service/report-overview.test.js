@@ -1,10 +1,12 @@
-import { ControllerType, FormStatus } from '@defra/forms-model'
+import { ComponentType, ControllerType, FormStatus } from '@defra/forms-model'
 import {
   buildCheckboxComponent,
   buildDeclarationFieldComponent,
   buildFileUploadPage,
+  buildMarkdownComponent,
   buildPaymentComponent,
-  buildRadioComponent
+  buildRadioComponent,
+  buildUkAddressFieldComponent
 } from '@defra/forms-model/stubs'
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
@@ -26,6 +28,8 @@ import {
   getDefinitionIfExists,
   getFeatureList,
   getQuestionTypeCounts,
+  getUniqueAssignedConditions,
+  getUniqueAssignedSections,
   getUniqueComponentTypes
 } from '~/src/api/forms/service/report-overview.js'
 import { client } from '~/src/mongo.js'
@@ -209,6 +213,118 @@ describe('report-overview', () => {
     })
   })
 
+  describe('getUniqueAssignedConditions', () => {
+    it('should return empty list', () => {
+      const summaryPage = buildSummaryPage()
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage = buildQuestionPage({
+        id: questionPageId
+      })
+
+      const definition = buildDefinition({
+        pages: [questionPage, summaryPage]
+      })
+      expect(getUniqueAssignedConditions(definition)).toEqual(new Set())
+    })
+
+    it('should return unique list', () => {
+      const summaryPage = buildSummaryPage()
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage1 = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent()
+        ],
+        condition: 'cond1'
+      })
+      const questionPage2 = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent()
+        ],
+        condition: 'cond1'
+      })
+      const questionPage3 = buildQuestionPage({
+        id: questionPageId,
+        components: [buildTextFieldComponent(), buildTextFieldComponent()],
+        condition: 'cond2'
+      })
+
+      const definition = buildDefinition({
+        pages: [questionPage1, questionPage2, questionPage3, summaryPage]
+      })
+      expect(getUniqueAssignedConditions(definition)).toEqual(
+        new Set(['cond1', 'cond2'])
+      )
+    })
+  })
+
+  describe('getUniqueAssignedSections', () => {
+    it('should return empty list', () => {
+      const summaryPage = buildSummaryPage()
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage = buildQuestionPage({
+        id: questionPageId
+      })
+
+      const definition = buildDefinition({
+        pages: [questionPage, summaryPage]
+      })
+      expect(getUniqueAssignedSections(definition)).toEqual(new Set())
+    })
+
+    it('should return unique list', () => {
+      const summaryPage = buildSummaryPage()
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage1 = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent()
+        ],
+        section: 'sect1'
+      })
+      const questionPage2 = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent()
+        ],
+        section: 'sect2'
+      })
+      const questionPage3 = buildQuestionPage({
+        id: questionPageId,
+        components: [buildTextFieldComponent(), buildTextFieldComponent()],
+        section: 'sect2'
+      })
+
+      const definition = buildDefinition({
+        pages: [questionPage1, questionPage2, questionPage3, summaryPage]
+      })
+      expect(getUniqueAssignedSections(definition)).toEqual(
+        new Set(['sect1', 'sect2'])
+      )
+    })
+  })
+
   describe('getFeatureList', () => {
     it('should return empty list', () => {
       const summaryPage = buildSummaryPage()
@@ -226,7 +342,8 @@ describe('report-overview', () => {
     it('should return unique list', () => {
       const summaryPage = buildSummaryPage({
         // @ts-expect-error - forcing the controller type
-        controller: ControllerType.SummaryWithConfirmationEmail
+        controller: ControllerType.SummaryWithConfirmationEmail,
+        components: [buildMarkdownComponent()]
       })
       const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
       const questionPage = buildQuestionPage({
@@ -247,13 +364,16 @@ describe('report-overview', () => {
       })
 
       const definition = buildDefinition({
-        pages: [questionPage, fileUploadPage, paymentPage, summaryPage]
+        pages: [questionPage, fileUploadPage, paymentPage, summaryPage],
+        options: { showReferenceNumber: true }
       })
       expect(getFeatureList(definition)).toEqual([
         'File upload',
         'Email confirmation',
         'GOV.UK Pay',
-        'Declarations'
+        'Declaration field',
+        'Declaration in CYA',
+        'Reference number'
       ])
     })
   })
@@ -303,7 +423,7 @@ describe('report-overview', () => {
           'File upload': 1,
           'Email confirmation': 1,
           'GOV.UK Pay': 1,
-          Declarations: 1,
+          'Declaration field': 1,
           Sections: 1
         },
         formStructure: {
@@ -317,6 +437,85 @@ describe('report-overview', () => {
           CheckboxesField: 2,
           DeclarationField: 1,
           FileUploadField: 1,
+          PaymentField: 1,
+          RadiosField: 1,
+          TextField: 3
+        }
+      })
+    })
+
+    it('should handle declaration in CYA page', () => {
+      const summaryPage = buildSummaryPage({
+        // @ts-expect-error - forcing the controller type
+        controller: ControllerType.SummaryWithConfirmationEmail,
+        components: [
+          {
+            type: ComponentType.Markdown,
+            content: 'My declaration',
+            title: 'Declaration',
+            name: 'decl',
+            options: {}
+          }
+        ]
+      })
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildMarkdownComponent(),
+          buildMarkdownComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent(),
+          buildDeclarationFieldComponent()
+        ]
+      })
+      const fileUploadPage = buildFileUploadPage()
+      const paymentPage = buildQuestionPage({
+        components: [buildPaymentComponent()]
+      })
+      const sectionPage1 = buildQuestionPage({
+        section: 'some-section-id1'
+      })
+      const sectionPage2 = buildQuestionPage({
+        section: 'some-section-id2'
+      })
+
+      const definition = buildDefinition({
+        pages: [
+          questionPage,
+          fileUploadPage,
+          sectionPage1,
+          sectionPage2,
+          paymentPage,
+          summaryPage
+        ]
+      })
+      expect(calcFeatureMetrics(definition)).toEqual({
+        features: {
+          'File upload': 1,
+          'Email confirmation': 1,
+          'GOV.UK Pay': 1,
+          'Declaration field': 1,
+          'Declaration in CYA': 1,
+          Sections: 1
+        },
+        formStructure: {
+          conditions: 0,
+          pages: 6,
+          questionTypes: 8,
+          questions: 12,
+          sections: 2
+        },
+        questionTypes: {
+          CheckboxesField: 2,
+          DeclarationField: 1,
+          DeclarationInCYA: 1,
+          FileUploadField: 1,
+          Markdown: 2,
           PaymentField: 1,
           RadiosField: 1,
           TextField: 3
@@ -378,12 +577,18 @@ describe('report-overview', () => {
       const sectionPage = buildQuestionPage({
         section: 'some-section-id'
       })
+      const postcodeLookupPage = buildQuestionPage({
+        components: [
+          buildUkAddressFieldComponent({ options: { usePostcodeLookup: true } })
+        ]
+      })
 
       const definition = buildDefinition({
         pages: [
           questionPage,
           fileUploadPage,
           paymentPage,
+          postcodeLookupPage,
           conditionPage,
           sectionPage,
           summaryPage
@@ -393,9 +598,10 @@ describe('report-overview', () => {
         'File upload': 1,
         'Email confirmation': 1,
         'GOV.UK Pay': 1,
-        Declarations: 1,
+        'Declaration field': 1,
         Sections: 1,
-        'Conditional logic': 1
+        'Conditional logic': 1,
+        'Postcode lookup': 1
       })
     })
   })

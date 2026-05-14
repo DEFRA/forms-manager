@@ -6,7 +6,9 @@ import {
   getErrorMessage,
   hasComponentsEvenIfNoNext,
   hasPaymentQuestionInForm,
-  hasSpecificQuestionTypeInForm
+  hasPostcodeLookupInForm,
+  hasSpecificQuestionTypeInForm,
+  isSummaryPage
 } from '@defra/forms-model'
 import { StatusCodes } from 'http-status-codes'
 
@@ -151,8 +153,8 @@ export function calcSummaryMetrics(metadata, definition, definitionType) {
     status: definitionType,
     pages: definition.pages.length,
     questionTypes: getUniqueComponentTypes(definition).size,
-    conditions: definition.conditions.length,
-    sections: definition.sections.length,
+    conditions: getUniqueAssignedConditions(definition).size,
+    sections: getUniqueAssignedSections(definition).size,
     features: getFeatureList(definition)
   })
 }
@@ -166,7 +168,21 @@ export function calcFeatureMetrics(definition) {
     if (hasComponentsEvenIfNoNext(page)) {
       allComponents.push(...page.components)
     }
+    // Special case - if declaration in CYA page, remove the Markdown component,
+    // and add 'Declaration in CYA' component to totals
+    if (isSummaryPage(page) && hasDeclarationInCYA(definition)) {
+      const markdownPos = allComponents.findIndex(
+        (comp) => comp.type === ComponentType.Markdown
+      )
+      if (markdownPos > -1) {
+        allComponents.splice(markdownPos, 1)
+        // @ts-expect-error - 'DeclarationInCYA' is not strictly in the enum of ComponentType
+        // but we want a separate value for metrics display purposes
+        allComponents.push({ type: 'DeclarationInCYA' })
+      }
+    }
   }
+
   const questionTypes = getQuestionTypeCounts(allComponents)
   return {
     questionTypes: Object.fromEntries(questionTypes),
@@ -192,10 +208,10 @@ export function getQuestionTypeCounts(components) {
  */
 export function getComponentUsageFeatureMetrics(definition) {
   const features = getFeatureList(definition)
-  if (definition.pages.some((p) => p.section)) {
+  if (getUniqueAssignedSections(definition).size) {
     features.push('Sections')
   }
-  if (definition.pages.some((p) => p.condition)) {
+  if (getUniqueAssignedConditions(definition).size) {
     features.push('Conditional logic')
   }
   const featureResult = /** @type {Record<string, number>} */ ({})
@@ -218,10 +234,23 @@ export function getFormStructureCounts(definition, questionTypes) {
   return {
     pages: definition.pages.length,
     questions: numOfQuestions,
-    sections: definition.pages.filter((p) => p.section).length,
-    conditions: definition.pages.filter((p) => p.condition).length,
+    sections: getUniqueAssignedSections(definition).size,
+    conditions: getUniqueAssignedConditions(definition).size,
     questionTypes: questionTypes.size
   }
+}
+
+/**
+ * @param {FormDefinition} definition
+ */
+export function hasDeclarationInCYA(definition) {
+  const summaryPage = definition.pages.find((pg) => isSummaryPage(pg))
+  const markdown = hasComponentsEvenIfNoNext(summaryPage)
+    ? summaryPage.components.find(
+        (comp, idx) => comp.type === ComponentType.Markdown && idx === 0
+      )
+    : undefined
+  return markdown !== undefined
 }
 
 /**
@@ -247,13 +276,21 @@ export function getFeatureList(definition) {
   if (
     hasSpecificQuestionTypeInForm(definition, ComponentType.DeclarationField)
   ) {
-    features.push('Declarations')
+    features.push('Declaration field')
+  }
+  if (hasDeclarationInCYA(definition)) {
+    features.push('Declaration in CYA')
+  }
+  if (hasPostcodeLookupInForm(definition)) {
+    features.push('Postcode lookup')
+  }
+  if (definition.options?.showReferenceNumber) {
+    features.push('Reference number')
   }
   return features
 }
 
 /**
- *
  * @param {FormDefinition} definition
  */
 export function getUniqueComponentTypes(definition) {
@@ -264,6 +301,24 @@ export function getUniqueComponentTypes(definition) {
     }
   }
   return componentTypes
+}
+
+/**
+ * @param {FormDefinition} definition
+ */
+export function getUniqueAssignedConditions(definition) {
+  return new Set(
+    definition.pages.filter((p) => p.condition).map((p2) => p2.condition)
+  )
+}
+
+/**
+ * @param {FormDefinition} definition
+ */
+export function getUniqueAssignedSections(definition) {
+  return new Set(
+    definition.pages.filter((p) => p.section).map((p2) => p2.section)
+  )
 }
 
 /**
