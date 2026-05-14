@@ -1,4 +1,4 @@
-import { ControllerType, FormStatus } from '@defra/forms-model'
+import { ComponentType, ControllerType, FormStatus } from '@defra/forms-model'
 import {
   buildCheckboxComponent,
   buildDeclarationFieldComponent,
@@ -437,6 +437,85 @@ describe('report-overview', () => {
           CheckboxesField: 2,
           DeclarationField: 1,
           FileUploadField: 1,
+          PaymentField: 1,
+          RadiosField: 1,
+          TextField: 3
+        }
+      })
+    })
+
+    it('should handle declaration in CYA page', () => {
+      const summaryPage = buildSummaryPage({
+        // @ts-expect-error - forcing the controller type
+        controller: ControllerType.SummaryWithConfirmationEmail,
+        components: [
+          {
+            type: ComponentType.Markdown,
+            content: 'My declaration',
+            title: 'Declaration',
+            name: 'decl',
+            options: {}
+          }
+        ]
+      })
+      const questionPageId = 'd9c99072-d25d-4688-ab7d-3822cffe802b'
+      const questionPage = buildQuestionPage({
+        id: questionPageId,
+        components: [
+          buildTextFieldComponent(),
+          buildTextFieldComponent(),
+          buildMarkdownComponent(),
+          buildMarkdownComponent(),
+          buildCheckboxComponent(),
+          buildTextFieldComponent(),
+          buildCheckboxComponent(),
+          buildRadioComponent(),
+          buildDeclarationFieldComponent()
+        ]
+      })
+      const fileUploadPage = buildFileUploadPage()
+      const paymentPage = buildQuestionPage({
+        components: [buildPaymentComponent()]
+      })
+      const sectionPage1 = buildQuestionPage({
+        section: 'some-section-id1'
+      })
+      const sectionPage2 = buildQuestionPage({
+        section: 'some-section-id2'
+      })
+
+      const definition = buildDefinition({
+        pages: [
+          questionPage,
+          fileUploadPage,
+          sectionPage1,
+          sectionPage2,
+          paymentPage,
+          summaryPage
+        ]
+      })
+      expect(calcFeatureMetrics(definition)).toEqual({
+        features: {
+          'File upload': 1,
+          'Email confirmation': 1,
+          'GOV.UK Pay': 1,
+          'Declaration field': 1,
+          'Declaration in CYA': 1,
+          Sections: 1
+        },
+        formStructure: {
+          conditions: 0,
+          pages: 6,
+          questionTypes: 8,
+          questions: 12,
+          sections: 2
+        },
+        questionTypes: {
+          CheckboxesField: 2,
+          DeclarationField: 1,
+          DeclarationInCYA: 1,
+          FileUploadField: 1,
+          Markdown: 2,
           PaymentField: 1,
           RadiosField: 1,
           TextField: 3
