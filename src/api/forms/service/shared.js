@@ -68,6 +68,7 @@ export function mapForm(document) {
     privacyNoticeUrl: document.privacyNoticeUrl,
     termsAndConditionsAgreed: document.termsAndConditionsAgreed ?? false,
     notificationEmail: document.notificationEmail,
+    offline: document.offline ?? false,
     ...draft,
     ...live,
     createdBy: created.createdBy,

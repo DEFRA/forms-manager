@@ -25,6 +25,8 @@ const mapperLookup = {
   contact: formSupportUpdatedMapper
 }
 
+// TODO(DF-789-followup): add `offline` here alongside a FORM_OFFLINE_UPDATED
+// audit event when the Designer admin UI for toggling the flag lands.
 const validFields = /** @type {(keyof PartialFormMetadataDocument)[]} */ ([
   'organisation',
   'teamName',
