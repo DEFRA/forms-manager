@@ -3,7 +3,7 @@
  * @property {{ $regex: RegExp }} [title] - Optional MongoDB regex query for title matching
  * @property {{ displayName: { $regex: RegExp } }} [createdBy] - Optional MongoDB regex query for author matching
  * @property {{ $in: string[] }} [organisation] - Optional MongoDB $in query for organisation matching
- * @property {{ live: { $exists: boolean } }[]} [$or] - Optional MongoDB $or query for status matching
+ * @property {{ live?: { $exists: boolean }, offline?: boolean }[]} [$or] - Optional MongoDB $or query for status matching
  * @property {object} [$expr] - Optional MongoDB $expr for expression queries
  */
 
@@ -15,7 +15,7 @@
  * @typedef {object} FilterAggregationResult
  * @property {{ name: string }[]} authors - Array of author names
  * @property {{ name: string }[]} organisations - Array of organisation names
- * @property {[{ statuses: FormStatus[] }]} status - Array containing status values
+ * @property {[{ statuses: FormFilterStatus[] }]} status - Array containing status values
  */
 
 /**
@@ -79,5 +79,5 @@
  */
 
 /**
- * @import { SearchOptions, FormStatus } from '@defra/forms-model'
+ * @import { SearchOptions, FormStatus, FormFilterStatus } from '@defra/forms-model'
  */

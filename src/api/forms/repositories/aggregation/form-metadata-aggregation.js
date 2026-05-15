@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormFilterStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import { escapeRegExp } from '~/src/helpers/string-utils.js'
@@ -31,11 +31,15 @@ export function buildFilterConditions(options) {
   }
 
   if (status && status.length > 0) {
-    conditions.$or = status.map((s) =>
-      s === FormStatus.Live
-        ? { live: { $exists: true } }
-        : { live: { $exists: false } }
-    )
+    conditions.$or = status.map((s) => {
+      if (s === FormFilterStatus.Live) {
+        return { live: { $exists: true } }
+      } else if (s === FormFilterStatus.Offline) {
+        return { offline: true }
+      } else {
+        return { live: { $exists: false } }
+      }
+    })
   }
 
   return conditions
@@ -74,7 +78,16 @@ export function buildFiltersFacet() {
             _id: null, // Single group for all documents
             statuses: {
               $addToSet: {
-                $cond: [{ $ifNull: ['$live', false] }, 'live', 'draft'] // If live field exists, status is 'live', else 'draft'
+                $switch: {
+                  // If offline === true, status is 'offline'
+                  // If live field exists, status is 'live'
+                  // Otherwise 'draft'
+                  branches: [
+                    { case: { $eq: ['$offline', true] }, then: 'offline' },
+                    { case: { $ifNull: ['$live', false] }, then: 'live' }
+                  ],
+                  default: 'draft'
+                }
               }
             }
           }
@@ -92,7 +105,7 @@ export function buildFiltersFacet() {
  * @param {string} title - The title to filter by.
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
- * @param {FormStatus[]} status - The status values to filter by.
+ * @param {FormFilterStatus[]} status - The status values to filter by.
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipeline(
@@ -134,7 +147,7 @@ export function buildAggregationPipeline(
  * @param {string} title - The title to filter by.
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
- * @param {FormStatus[]} status - The status values to filter by.
+ * @param {FormFilterStatus[]} status - The status values to filter by.
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipelineWithVersions(
