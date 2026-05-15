@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormExtendedStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import {
@@ -70,14 +70,18 @@ describe('Form metadata aggregation', () => {
 
     describe('with status filter', () => {
       it('should create status filter for live forms', () => {
-        const result = buildFilterConditions({ status: [FormStatus.Live] })
+        const result = buildFilterConditions({
+          status: [FormExtendedStatus.Live]
+        })
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }]
         })
       })
 
       it('should create status filter for draft forms', () => {
-        const result = buildFilterConditions({ status: [FormStatus.Draft] })
+        const result = buildFilterConditions({
+          status: [FormExtendedStatus.Draft]
+        })
         expect(result).toEqual({
           $or: [{ live: { $exists: false } }]
         })
@@ -87,7 +91,7 @@ describe('Form metadata aggregation', () => {
     describe('with multiple status values', () => {
       it('should create combined status filter', () => {
         const result = buildFilterConditions({
-          status: [FormStatus.Live, FormStatus.Draft]
+          status: [FormExtendedStatus.Live, FormExtendedStatus.Draft]
         })
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }, { live: { $exists: false } }]
@@ -101,7 +105,7 @@ describe('Form metadata aggregation', () => {
           title: 'Wildlife Permit Application',
           author: 'Henrique Silva',
           organisations: ['Natural England', 'Defra'],
-          status: [FormStatus.Live]
+          status: [FormExtendedStatus.Live]
         })
 
         expect(result).toEqual({
@@ -141,7 +145,7 @@ describe('Form metadata aggregation', () => {
           'Wildlife Permit Application',
           'Henrique',
           ['Defra'],
-          [FormStatus.Live]
+          [FormExtendedStatus.Live]
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
@@ -208,7 +212,7 @@ describe('Form metadata aggregation', () => {
           'Wildlife Permit Application',
           'Henrique',
           ['Defra'],
-          [FormStatus.Live]
+          [FormExtendedStatus.Live]
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
@@ -455,7 +459,13 @@ describe('Form metadata aggregation', () => {
                 _id: null,
                 statuses: {
                   $addToSet: {
-                    $cond: [{ $ifNull: ['$live', false] }, 'live', 'draft']
+                    $switch: {
+                      branches: [
+                        { case: { $eq: ['$offline', true] }, then: 'offline' },
+                        { case: { $ifNull: ['$live', false] }, then: 'live' }
+                      ],
+                      default: 'draft'
+                    }
                   }
                 }
               }
@@ -498,7 +508,9 @@ describe('Form metadata aggregation', () => {
           { name: 'Sarah Wilson (Natural England)' }
         ],
         organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
-        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }]
+        status: [
+          { statuses: [FormExtendedStatus.Live, FormExtendedStatus.Draft] }
+        ]
       }
 
       const result = processFilterResults(filterResults)
