@@ -15,7 +15,7 @@
  * @typedef {object} FilterAggregationResult
  * @property {{ name: string }[]} authors - Array of author names
  * @property {{ name: string }[]} organisations - Array of organisation names
- * @property {[{ statuses: FormExtendedStatus[] }]} status - Array containing status values
+ * @property {[{ statuses: FormFilterStatus[] }]} status - Array containing status values
  */
 
 /**
@@ -79,5 +79,5 @@
  */
 
 /**
- * @import { SearchOptions, FormStatus, FormExtendedStatus } from '@defra/forms-model'
+ * @import { SearchOptions, FormStatus, FormFilterStatus } from '@defra/forms-model'
  */

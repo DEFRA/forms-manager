@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormFilterStatus } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 import { MongoServerError, ObjectId } from 'mongodb'
 
@@ -249,7 +249,7 @@ describe('form-metadata-repository', () => {
         title: 'test',
         author: 'John',
         organisations: ['Defra'],
-        status: [FormStatus.Draft]
+        status: [FormFilterStatus.Draft]
       }
 
       const result = await list(options)
@@ -328,7 +328,7 @@ describe('form-metadata-repository', () => {
         title: 'test form',
         author: 'Jane Doe',
         organisations: ['Defra', 'DWP'],
-        status: [FormStatus.Draft, FormStatus.Live]
+        status: [FormFilterStatus.Draft, FormFilterStatus.Live]
       }
 
       const result = await listWithVersions(options)

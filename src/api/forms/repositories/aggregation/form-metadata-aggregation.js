@@ -1,4 +1,4 @@
-import { FormExtendedStatus } from '@defra/forms-model'
+import { FormFilterStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import { escapeRegExp } from '~/src/helpers/string-utils.js'
@@ -32,9 +32,9 @@ export function buildFilterConditions(options) {
 
   if (status && status.length > 0) {
     conditions.$or = status.map((s) => {
-      if (s === FormExtendedStatus.Live) {
+      if (s === FormFilterStatus.Live) {
         return { live: { $exists: true } }
-      } else if (s === FormExtendedStatus.Offline) {
+      } else if (s === FormFilterStatus.Offline) {
         return { offline: true }
       } else {
         return { live: { $exists: false } }
@@ -105,7 +105,7 @@ export function buildFiltersFacet() {
  * @param {string} title - The title to filter by.
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
- * @param {FormExtendedStatus[]} status - The status values to filter by.
+ * @param {FormFilterStatus[]} status - The status values to filter by.
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipeline(
@@ -147,7 +147,7 @@ export function buildAggregationPipeline(
  * @param {string} title - The title to filter by.
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
- * @param {FormExtendedStatus[]} status - The status values to filter by.
+ * @param {FormFilterStatus[]} status - The status values to filter by.
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipelineWithVersions(
