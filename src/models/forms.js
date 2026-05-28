@@ -151,3 +151,7 @@ export const sectionAssignmentPayloadSchema = Joi.object()
       .required()
   })
   .required()
+
+export const reportOverviewQuerySchema = Joi.object({
+  ids: Joi.array().single().items(Joi.string()).required()
+})

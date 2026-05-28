@@ -21,20 +21,22 @@ import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 export const MAX_RESULTS = 100
 
 /**
- * Retrieves the list of documents from the database
+ * Retrieves the list of all form ids from the database
+ * @returns {Promise<string[]>}
  */
-export async function listAll() {
+export async function listAllIds() {
   const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
     db.collection(METADATA_COLLECTION_NAME)
   )
 
-  return coll
+  const documents = await coll
     .find()
     .sort({
       updatedAt: -1
     })
-    .limit(MAX_RESULTS)
+    .project({ _id: 1 })
     .toArray()
+  return documents.map((doc) => doc._id)
 }
 
 /**
@@ -173,17 +175,19 @@ export async function listWithVersions(options) {
 }
 
 /**
- * Retrieves a list of all forms' metadata using a cursor
+ * Retrieves a list of specified forms' metadata using a cursor
+ * @param {string[]} formIds - array of form ids
  * @param {ClientSession} session - MongoDB session for transactions
  */
-export function getMetadataCursorOfAllForms(session) {
-  logger.info('Getting metadata of all forms')
+export function getMetadataCursorOfForms(formIds, session) {
+  logger.info('Getting metadata of forms in list')
 
   const coll = /** @satisfies {Collection<Partial<FormMetadataDocument>>} */ (
     db.collection(METADATA_COLLECTION_NAME)
   )
 
-  return coll.find({}, { session })
+  const formObjectIds = formIds.map((id) => new ObjectId(id))
+  return coll.find({ _id: { $in: formObjectIds } }, { session })
 }
 
 /**

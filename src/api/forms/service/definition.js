@@ -46,6 +46,15 @@ export async function listForms(options) {
 }
 
 /**
+ * Retrieves a full list of forms
+ * @returns {Promise<string[]>}
+ */
+export async function listAllFormIds() {
+  const ids = await formMetadata.listAllIds()
+  return ids
+}
+
+/**
  * Retrieves the form definition content for a given form ID.
  * @param {string} formId - the ID of the form
  * @param {FormStatus} state - the form state

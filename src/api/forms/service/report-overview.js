@@ -13,15 +13,16 @@ import {
 import { StatusCodes } from 'http-status-codes'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
+import { getMetadataCursorOfForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { mapMetadata } from '~/src/api/forms/service/helpers/mapper.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
 /**
- * Generates a set of overview metrics for each form
+ * Generates a set of overview metrics for the given list of forms
+ * @param {string[]} formIds
  */
-export async function generateReportOverview() {
+export async function generateReportOverview(formIds) {
   logger.info('Generating overview report')
 
   const session = client.startSession()
@@ -33,7 +34,7 @@ export async function generateReportOverview() {
 
   try {
     await session.withTransaction(async () => {
-      const metadataCursor = getMetadataCursorOfAllForms(session)
+      const metadataCursor = getMetadataCursorOfForms(formIds, session)
 
       for await (const metadata of metadataCursor) {
         const strictMetadata = mapMetadata(metadata)
@@ -323,5 +324,5 @@ export function getUniqueAssignedSections(definition) {
 
 /**
  * @import { ClientSession } from 'mongodb'
- * @import { ComponentDef, FormDefinition, FormMetadata } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, FormMetadata, FormOverviewMetric } from '@defra/forms-model'
  */

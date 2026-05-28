@@ -9,16 +9,15 @@ import {
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
-  MAX_RESULTS,
   addVersionMetadata,
   create,
   get,
   getAndIncrementVersionNumber,
   getBySlug,
-  getMetadataCursorOfAllForms,
+  getMetadataCursorOfForms,
   getVersionMetadata,
   list,
-  listAll,
+  listAllIds,
   listWithVersions,
   remove,
   update,
@@ -161,31 +160,33 @@ describe('form-metadata-repository', () => {
     })
   })
 
-  describe('listAll', () => {
-    it('should retrieve all documents with limit', async () => {
+  describe('listAllIds', () => {
+    it('should retrieve all document ids', async () => {
       const mockDocuments = [metadataBefore, metadataAfter]
       mockCollection.find.mockReturnValue({
         sort: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
+        project: jest.fn().mockReturnThis(),
         toArray: jest.fn().mockResolvedValue(mockDocuments)
       })
 
-      const result = await listAll()
+      const result = await listAllIds()
 
       expect(mockCollection.find).toHaveBeenCalledWith()
       expect(mockCollection.find().sort).toHaveBeenCalledWith({ updatedAt: -1 })
-      expect(mockCollection.find().limit).toHaveBeenCalledWith(MAX_RESULTS)
-      expect(result).toEqual(mockDocuments)
+      expect(result).toEqual([
+        new ObjectId('681b184463c68bf6b99e2c62'),
+        new ObjectId('681b184463c68bf6b99e2c62')
+      ])
     })
 
     it('should handle empty results', async () => {
       mockCollection.find.mockReturnValue({
         sort: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
+        project: jest.fn().mockReturnThis(),
         toArray: jest.fn().mockResolvedValue([])
       })
 
-      const result = await listAll()
+      const result = await listAllIds()
 
       expect(result).toEqual([])
     })
@@ -994,8 +995,8 @@ describe('form-metadata-repository', () => {
     })
   })
 
-  describe('getMetadataCursorOfAllForms', () => {
-    it('should retrieve metedata array', () => {
+  describe('getMetadataCursorOfForms', () => {
+    it('should retrieve metadata array', () => {
       const metadataList = [
         buildMetadataDocument({
           title: 'Form 1 title',
@@ -1012,7 +1013,14 @@ describe('form-metadata-repository', () => {
       ]
       mockCollection.find.mockReturnValue(metadataList)
 
-      const result = getMetadataCursorOfAllForms(mockSession)
+      const result = getMetadataCursorOfForms(
+        [
+          '681b184463c68bf6b99e2c62',
+          '681b184463c68bf6b99e2c63',
+          '681b184463c68bf6b99e2c64'
+        ],
+        mockSession
+      )
 
       expect(result).toEqual(metadataList)
     })
