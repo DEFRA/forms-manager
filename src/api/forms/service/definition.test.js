@@ -48,7 +48,6 @@ import {
   createLiveFromDraft,
   deleteDraftFormDefinition,
   getFormDefinition,
-  listAllFormIds,
   listForms,
   makePaymentKeyLive,
   missingPrivacyNotice,
@@ -136,14 +135,6 @@ describe('Forms service', () => {
       createdAt: undefined,
       updatedAt: undefined,
       renamedAt: undefined
-    })
-  })
-
-  describe('listAllFormIds', () => {
-    it('should call the repo method', async () => {
-      jest.mocked(formMetadata.listAllIds).mockResolvedValue(['id1', 'id2'])
-      const res = await listAllFormIds()
-      expect(res).toEqual(['id1', 'id2'])
     })
   })
 

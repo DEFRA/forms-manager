@@ -14,10 +14,8 @@ import {
   get,
   getAndIncrementVersionNumber,
   getBySlug,
-  getMetadataCursorOfForms,
   getVersionMetadata,
   list,
-  listAllIds,
   listWithVersions,
   remove,
   update,
@@ -157,38 +155,6 @@ describe('form-metadata-repository', () => {
       await expect(updateAudit(metadataId, author, mockSession)).rejects.toBe(
         error
       )
-    })
-  })
-
-  describe('listAllIds', () => {
-    it('should retrieve all document ids', async () => {
-      const mockDocuments = [metadataBefore, metadataAfter]
-      mockCollection.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        project: jest.fn().mockReturnThis(),
-        toArray: jest.fn().mockResolvedValue(mockDocuments)
-      })
-
-      const result = await listAllIds()
-
-      expect(mockCollection.find).toHaveBeenCalledWith()
-      expect(mockCollection.find().sort).toHaveBeenCalledWith({ updatedAt: -1 })
-      expect(result).toEqual([
-        new ObjectId('681b184463c68bf6b99e2c62'),
-        new ObjectId('681b184463c68bf6b99e2c62')
-      ])
-    })
-
-    it('should handle empty results', async () => {
-      mockCollection.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        project: jest.fn().mockReturnThis(),
-        toArray: jest.fn().mockResolvedValue([])
-      })
-
-      const result = await listAllIds()
-
-      expect(result).toEqual([])
     })
   })
 
@@ -992,37 +958,6 @@ describe('form-metadata-repository', () => {
       mockCollection.updateOne.mockRejectedValue(error)
 
       await expect(upsert(document, mockSession)).rejects.toThrow(error)
-    })
-  })
-
-  describe('getMetadataCursorOfForms', () => {
-    it('should retrieve metadata array', () => {
-      const metadataList = [
-        buildMetadataDocument({
-          title: 'Form 1 title',
-          slug: 'form-1-title'
-        }),
-        buildMetadataDocument({
-          title: 'Form 2 title',
-          slug: 'form-2-title'
-        }),
-        buildMetadataDocument({
-          title: 'Form 3 title',
-          slug: 'form-3-title'
-        })
-      ]
-      mockCollection.find.mockReturnValue(metadataList)
-
-      const result = getMetadataCursorOfForms(
-        [
-          '681b184463c68bf6b99e2c62',
-          '681b184463c68bf6b99e2c63',
-          '681b184463c68bf6b99e2c64'
-        ],
-        mockSession
-      )
-
-      expect(result).toEqual(metadataList)
     })
   })
 })

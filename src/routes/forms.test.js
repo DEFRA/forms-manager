@@ -18,7 +18,6 @@ import {
   createLiveFromDraft,
   deleteDraftFormDefinition,
   getFormDefinition,
-  listAllFormIds,
   listForms,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
@@ -1956,8 +1955,12 @@ describe('Forms route', () => {
   describe('report-overview', () => {
     test('GET /report-overview returns data', async () => {
       jest.mocked(generateReportOverview).mockResolvedValue({
-        draft: [],
-        live: []
+        data: {
+          draft: [],
+          live: []
+        },
+        totalItems: 0,
+        filters: {}
       })
 
       const response = await server.inject({
@@ -1967,23 +1970,13 @@ describe('Forms route', () => {
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.result).toEqual({
-        draft: [],
-        live: []
+        data: {
+          draft: [],
+          live: []
+        },
+        totalItems: 0,
+        filters: {}
       })
-    })
-  })
-
-  describe('all-form-ids', () => {
-    test('GET /all-form-ids returns data', async () => {
-      jest.mocked(listAllFormIds).mockResolvedValue(['id1', 'id2'])
-
-      const response = await server.inject({
-        method: 'GET',
-        url: '/all-form-ids'
-      })
-
-      expect(response.statusCode).toEqual(okStatusCode)
-      expect(response.result).toEqual(['id1', 'id2'])
     })
   })
 })

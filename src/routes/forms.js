@@ -13,7 +13,6 @@ import {
   createLiveFromDraft,
   deleteDraftFormDefinition,
   getFormDefinition,
-  listAllFormIds,
   listForms,
   updateDraftFormDefinition
 } from '~/src/api/forms/service/definition.js'
@@ -90,18 +89,6 @@ export default [
       validate: {
         query: queryOptionsSchema
       }
-    }
-  },
-  {
-    method: 'GET',
-    path: '/all-form-ids',
-    async handler() {
-      const ids = await listAllFormIds()
-
-      return ids
-    },
-    options: {
-      auth: false
     }
   },
   {
@@ -479,7 +466,7 @@ export default [
      */
     handler(request) {
       const { query } = request
-      return generateReportOverview(query.ids)
+      return generateReportOverview(query.page ?? 1)
     },
     options: {
       auth: false,

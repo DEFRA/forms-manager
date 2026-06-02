@@ -29,7 +29,7 @@
  * @typedef {Request<{ Server: { db: Db }, Params: {id: string, nameBefore: string, nameAfter: string } }>} RequestRenameFormSecret
  * @typedef {Request<{ Server: { db: Db }, Params: {id: string, name: string}, Payload: { secretValue: string } }>} RequestSaveFormSecret
  * @typedef {Request<{ Server: { db: Db }, Query: {date: Date} }>} RequestReport
- * @typedef {Request<{ Server: { db: Db }, Query: {ids: string[]} }>} RequestOverviewReport
+ * @typedef {Request<{ Server: { db: Db }, Query: {page: number | undefined} }>} RequestOverviewReport
  */
 
 /**

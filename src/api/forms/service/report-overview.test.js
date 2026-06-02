@@ -19,8 +19,8 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMetadataDocument } from '~/src/api/forms/__stubs__/metadata.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import { getMetadataCursorOfForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { getExpectedOverviewMetrics } from '~/src/api/forms/service/__stubs__/metrics.js'
+import { listForms } from '~/src/api/forms/service/definition.js'
 import {
   calcFeatureMetrics,
   generateReportOverview,
@@ -32,10 +32,12 @@ import {
   getUniqueAssignedSections,
   getUniqueComponentTypes
 } from '~/src/api/forms/service/report-overview.js'
+import { mapForm } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
 
 jest.mock('~/src/api/forms/repositories/form-definition-repository.js')
 jest.mock('~/src/api/forms/repositories/form-metadata-repository.js')
+jest.mock('~/src/api/forms/service/definition.js')
 
 jest.mock('~/src/mongo.js', () => ({
   client: {
@@ -73,53 +75,7 @@ describe('report-overview', () => {
       jest.useRealTimers()
     })
 
-    const form1Id = '449a699bcc9946a6a6d925de'
-    const form2Id = '0dae1c832b8e4a89963a7825'
-    const form3Id = '9fb48bd350a64e908c9ea92e'
-
     it('should gather metrics for all forms', async () => {
-      const allMetadata = [
-        buildMetadataDocument({
-          title: 'Form 1 title',
-          slug: 'form-1-title',
-          _id: new ObjectId(form1Id)
-        }),
-        buildMetadataDocument({
-          title: 'Form 2 title',
-          slug: 'form-2-title',
-          _id: new ObjectId(form2Id),
-          live: {
-            createdAt: new Date('2025-08-08T09:10:21.035Z'),
-            createdBy: {
-              id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
-              displayName: 'Internal User'
-            },
-            updatedAt: new Date('2025-08-08T09:10:21.035Z'),
-            updatedBy: {
-              id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
-              displayName: 'Internal User'
-            }
-          }
-        }),
-        buildMetadataDocument({
-          title: 'Form 3 title',
-          slug: 'form-3-title',
-          _id: new ObjectId(form3Id)
-        })
-      ]
-      const mockAsyncIterator = {
-        [Symbol.asyncIterator]: function* () {
-          for (const metadata of allMetadata) {
-            yield metadata
-          }
-        }
-      }
-
-      jest
-        .mocked(getMetadataCursorOfForms)
-        // @ts-expect-error - resolves to an async iterator like FindCursor<FormMetadataDocument>
-        .mockReturnValueOnce(mockAsyncIterator)
-
       const pageWithSection = /** @type {FormDefinition} */ ({
         pages: [{ section: 'abc' }]
       })
@@ -148,13 +104,58 @@ describe('report-overview', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      const metrics = await generateReportOverview(['id1', 'id2', 'id3'])
+      const form1Id = '449a699bcc9946a6a6d925de'
+      const form2Id = '0dae1c832b8e4a89963a7825'
+      const form3Id = '9fb48bd350a64e908c9ea92e'
 
-      expect(metrics).toEqual(getExpectedOverviewMetrics(new Date()))
+      const allMetadata = [
+        mapForm(
+          buildMetadataDocument({
+            title: 'Form 1 title',
+            slug: 'form-1-title',
+            _id: new ObjectId(form1Id)
+          })
+        ),
+        mapForm(
+          buildMetadataDocument({
+            title: 'Form 2 title',
+            slug: 'form-2-title',
+            _id: new ObjectId(form2Id),
+            live: {
+              createdAt: new Date('2025-08-08T09:10:21.035Z'),
+              createdBy: {
+                id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
+                displayName: 'Internal User'
+              },
+              updatedAt: new Date('2025-08-08T09:10:21.035Z'),
+              updatedBy: {
+                id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
+                displayName: 'Internal User'
+              }
+            }
+          })
+        ),
+        mapForm(
+          buildMetadataDocument({
+            title: 'Form 3 title',
+            slug: 'form-3-title',
+            _id: new ObjectId(form3Id)
+          })
+        )
+      ]
+
+      // @ts-expect-error - partial mock of data
+      jest
+        .mocked(listForms)
+        .mockResolvedValueOnce({ forms: allMetadata, totalItems: 3 })
+
+      const metrics = await generateReportOverview(1)
+
+      expect(metrics.data).toEqual(getExpectedOverviewMetrics(new Date()))
     })
 
     it('should handle error and still close session', async () => {
-      jest.mocked(getMetadataCursorOfForms).mockImplementationOnce(() => {
+      jest.mocked(listForms).mockImplementationOnce(() => {
         throw new Error('report error')
       })
 
@@ -167,9 +168,9 @@ describe('report-overview', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      await expect(() =>
-        generateReportOverview(['id1', 'id2', 'id3'])
-      ).rejects.toThrow('report error')
+      await expect(() => generateReportOverview(1)).rejects.toThrow(
+        'report error'
+      )
 
       expect(mockEndSession).toHaveBeenCalled()
     })

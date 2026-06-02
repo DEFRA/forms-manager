@@ -13,47 +13,56 @@ import {
 import { StatusCodes } from 'http-status-codes'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import { getMetadataCursorOfForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { mapMetadata } from '~/src/api/forms/service/helpers/mapper.js'
+import { listForms } from '~/src/api/forms/service/definition.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
+const FORM_BATCH_SIZE = 20
+
 /**
- * Generates a set of overview metrics for the given list of forms
- * @param {string[]} formIds
+ * Generates a set of overview metrics for the given list of forms (batched up in pages)
+ * @param {number} pageNum
  */
-export async function generateReportOverview(formIds) {
+export async function generateReportOverview(pageNum) {
   logger.info('Generating overview report')
 
   const session = client.startSession()
 
   const metrics = {
     draftMetrics: new Map(),
-    liveMetrics: new Map()
+    liveMetrics: new Map(),
+    totalItems: 0,
+    filters: {}
   }
 
   try {
     await session.withTransaction(async () => {
-      const metadataCursor = getMetadataCursorOfForms(formIds, session)
+      const { forms, totalItems, filters } = await listForms({
+        page: pageNum,
+        perPage: FORM_BATCH_SIZE,
+        sortBy: 'updatedAt',
+        order: 'asc'
+      })
 
-      for await (const metadata of metadataCursor) {
-        const strictMetadata = mapMetadata(metadata)
+      metrics.totalItems = totalItems
+      metrics.filters = filters
 
+      for (const metadata of forms) {
         // Gather overview metrics for draft form
-        if (strictMetadata.draft) {
+        if (metadata.draft) {
           await processDefinition(
             FormStatus.Draft,
-            strictMetadata,
+            metadata,
             metrics.draftMetrics,
             session
           )
         }
 
         // Gather overview metrics for live form
-        if (strictMetadata.live) {
+        if (metadata.live) {
           await processDefinition(
             FormStatus.Live,
-            strictMetadata,
+            metadata,
             metrics.liveMetrics,
             session
           )
@@ -74,8 +83,12 @@ export async function generateReportOverview(formIds) {
   logger.info('Generated overview report')
 
   return {
-    live: Object.fromEntries(metrics.liveMetrics),
-    draft: Object.fromEntries(metrics.draftMetrics)
+    data: {
+      live: Object.fromEntries(metrics.liveMetrics),
+      draft: Object.fromEntries(metrics.draftMetrics)
+    },
+    totalItems: metrics.totalItems,
+    filters: metrics.filters
   }
 }
 
