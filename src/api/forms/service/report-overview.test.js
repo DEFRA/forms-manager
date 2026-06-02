@@ -144,9 +144,9 @@ describe('report-overview', () => {
         )
       ]
 
-      // @ts-expect-error - partial mock of data
       jest
         .mocked(listForms)
+        // @ts-expect-error - partial mock of data
         .mockResolvedValueOnce({ forms: allMetadata, totalItems: 3 })
 
       const metrics = await generateReportOverview(1)
