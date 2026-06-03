@@ -149,7 +149,7 @@ describe('report-overview', () => {
         // @ts-expect-error - partial mock of data
         .mockResolvedValueOnce({ forms: allMetadata, totalItems: 3 })
 
-      const metrics = await generateReportOverview(1)
+      const metrics = await generateReportOverview({ page: 1, perPage: 20 })
 
       expect(metrics.data).toEqual(getExpectedOverviewMetrics(new Date()))
     })
@@ -168,9 +168,9 @@ describe('report-overview', () => {
       })
       jest.mocked(client.startSession).mockReturnValue(mockNewSession)
 
-      await expect(() => generateReportOverview(1)).rejects.toThrow(
-        'report error'
-      )
+      await expect(() =>
+        generateReportOverview({ page: 1, perPage: 20 })
+      ).rejects.toThrow('report error')
 
       expect(mockEndSession).toHaveBeenCalled()
     })
