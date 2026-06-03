@@ -1965,7 +1965,7 @@ describe('Forms route', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/report/overview?ids=form-id-1&ids=form-id-2'
+        url: '/report/overview?page=1&perPage=20'
       })
 
       expect(response.statusCode).toEqual(okStatusCode)

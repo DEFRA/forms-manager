@@ -17,14 +17,14 @@ import { listForms } from '~/src/api/forms/service/definition.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
-const FORM_BATCH_SIZE = 20
-
 /**
  * Generates a set of overview metrics for the given list of forms (batched up in pages)
- * @param {number} pageNum
+ * @param {QueryOptions} options
  */
-export async function generateReportOverview(pageNum) {
-  logger.info('Generating overview report')
+export async function generateReportOverview(options) {
+  logger.info(
+    `Generating overview report page=${options.page} perPage=${options.perPage}`
+  )
 
   const session = client.startSession()
 
@@ -38,8 +38,7 @@ export async function generateReportOverview(pageNum) {
   try {
     await session.withTransaction(async () => {
       const { forms, totalItems, filters } = await listForms({
-        page: pageNum,
-        perPage: FORM_BATCH_SIZE,
+        ...options,
         sortBy: 'updatedAt',
         order: 'asc'
       })
@@ -80,7 +79,9 @@ export async function generateReportOverview(pageNum) {
     await session.endSession()
   }
 
-  logger.info('Generated overview report')
+  logger.info(
+    `Generated overview report page=${options.page} perPage=${options.perPage}`
+  )
 
   return {
     data: {
@@ -337,5 +338,5 @@ export function getUniqueAssignedSections(definition) {
 
 /**
  * @import { ClientSession } from 'mongodb'
- * @import { ComponentDef, FormDefinition, FormMetadata, FormOverviewMetric } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, FormMetadata, QueryOptions } from '@defra/forms-model'
  */

@@ -36,7 +36,6 @@ import {
   formByIdSchema,
   formBySlugSchema,
   migrateDefinitionParamSchema,
-  reportOverviewQuerySchema,
   updateFormDefinitionSchema
 } from '~/src/models/forms.js'
 
@@ -466,12 +465,12 @@ export default [
      */
     handler(request) {
       const { query } = request
-      return generateReportOverview(query.page ?? 1)
+      return generateReportOverview(query)
     },
     options: {
       auth: false,
       validate: {
-        query: reportOverviewQuerySchema
+        query: queryOptionsSchema
       }
     }
   }
