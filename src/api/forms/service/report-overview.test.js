@@ -151,7 +151,7 @@ describe('report-overview', () => {
 
       const metrics = await generateReportOverview({ page: 1, perPage: 20 })
 
-      expect(metrics.data).toEqual(getExpectedOverviewMetrics(new Date()))
+      expect(metrics).toEqual(getExpectedOverviewMetrics(new Date()))
     })
 
     it('should handle error and still close session', async () => {

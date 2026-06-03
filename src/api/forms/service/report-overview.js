@@ -29,8 +29,7 @@ export async function generateReportOverview(options) {
   const session = client.startSession()
 
   const metrics = {
-    draftMetrics: new Map(),
-    liveMetrics: new Map(),
+    data: /** @type {{ draft: any | undefined, live: any | undefined }[]} */ ([]),
     totalItems: 0,
     filters: {}
   }
@@ -47,25 +46,30 @@ export async function generateReportOverview(options) {
       metrics.filters = filters
 
       for (const metadata of forms) {
+        const dataRow =
+          /** @type {{ draft: any | undefined, live: any | undefined }} */ ({
+            draft: undefined,
+            live: undefined
+          })
         // Gather overview metrics for draft form
         if (metadata.draft) {
-          await processDefinition(
+          dataRow.draft = await processDefinition(
             FormStatus.Draft,
             metadata,
-            metrics.draftMetrics,
             session
           )
         }
 
         // Gather overview metrics for live form
         if (metadata.live) {
-          await processDefinition(
+          dataRow.live = await processDefinition(
             FormStatus.Live,
             metadata,
-            metrics.liveMetrics,
             session
           )
         }
+
+        metrics.data.push(dataRow)
       }
     })
   } catch (err) {
@@ -83,39 +87,23 @@ export async function generateReportOverview(options) {
     `Generated overview report page=${options.page} perPage=${options.perPage}`
   )
 
-  return {
-    data: {
-      live: Object.fromEntries(metrics.liveMetrics),
-      draft: Object.fromEntries(metrics.draftMetrics)
-    },
-    totalItems: metrics.totalItems,
-    filters: metrics.filters
-  }
+  return metrics
 }
 
 /**
  * @param {FormStatus} definitionType
  * @param {FormMetadata} metadata
- * @param {Map<string, any>} metrics
  * @param {ClientSession} session
  */
-export async function processDefinition(
-  definitionType,
-  metadata,
-  metrics,
-  session
-) {
+export async function processDefinition(definitionType, metadata, session) {
   const definition = await getDefinitionIfExists(
     metadata.id,
     definitionType,
     session
   )
-  if (definition) {
-    metrics.set(
-      metadata.id,
-      collectOverviewMetrics(metadata, definition, definitionType)
-    )
-  }
+  return definition
+    ? collectOverviewMetrics(metadata, definition, definitionType)
+    : undefined
 }
 
 /**
