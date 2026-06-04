@@ -43,6 +43,7 @@ jest.mock('~/src/api/forms/service/definition.js', () => ({
   ...jest.requireActual('~/src/api/forms/service/definition.js'),
   getFormDefinition: jest.fn(),
   listForms: jest.fn(),
+  listAllFormIds: jest.fn(),
   updateDraftFormDefinition: jest.fn(),
   createLiveFromDraft: jest.fn(),
   createDraftFromLive: jest.fn(),
@@ -1949,22 +1950,26 @@ describe('Forms route', () => {
         status: 'updated'
       })
     })
+  })
 
+  describe('report-overview', () => {
     test('GET /report-overview returns data', async () => {
       jest.mocked(generateReportOverview).mockResolvedValue({
-        draft: [],
-        live: []
+        data: [],
+        totalItems: 0,
+        filters: {}
       })
 
       const response = await server.inject({
         method: 'GET',
-        url: '/report/overview'
+        url: '/report/overview?page=1&perPage=20'
       })
 
       expect(response.statusCode).toEqual(okStatusCode)
       expect(response.result).toEqual({
-        draft: [],
-        live: []
+        data: [],
+        totalItems: 0,
+        filters: {}
       })
     })
   })

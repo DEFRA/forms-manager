@@ -13,50 +13,63 @@ import {
 import { StatusCodes } from 'http-status-codes'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
-import { getMetadataCursorOfAllForms } from '~/src/api/forms/repositories/form-metadata-repository.js'
-import { mapMetadata } from '~/src/api/forms/service/helpers/mapper.js'
+import { listForms } from '~/src/api/forms/service/definition.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
 /**
- * Generates a set of overview metrics for each form
+ * Generates a set of overview metrics for the given list of forms (batched up in pages)
+ * @param {QueryOptions} options
  */
-export async function generateReportOverview() {
-  logger.info('Generating overview report')
+export async function generateReportOverview(options) {
+  logger.info(
+    `Generating overview report page=${options.page} perPage=${options.perPage}`
+  )
 
   const session = client.startSession()
 
   const metrics = {
-    draftMetrics: new Map(),
-    liveMetrics: new Map()
+    data: /** @type {{ draft: any | undefined, live: any | undefined }[]} */ ([]),
+    totalItems: 0,
+    filters: {}
   }
 
   try {
     await session.withTransaction(async () => {
-      const metadataCursor = getMetadataCursorOfAllForms(session)
+      const { forms, totalItems, filters } = await listForms({
+        ...options,
+        sortBy: 'updatedAt',
+        order: 'asc'
+      })
 
-      for await (const metadata of metadataCursor) {
-        const strictMetadata = mapMetadata(metadata)
+      metrics.totalItems = totalItems
+      metrics.filters = filters
 
+      for (const metadata of forms) {
+        const dataRow =
+          /** @type {{ draft: any | undefined, live: any | undefined }} */ ({
+            draft: undefined,
+            live: undefined
+          })
         // Gather overview metrics for draft form
-        if (strictMetadata.draft) {
-          await processDefinition(
+        if (metadata.draft) {
+          dataRow.draft = await processDefinition(
             FormStatus.Draft,
-            strictMetadata,
-            metrics.draftMetrics,
+            metadata,
             session
           )
         }
 
         // Gather overview metrics for live form
-        if (strictMetadata.live) {
-          await processDefinition(
+        if (metadata.live) {
+          dataRow.live = await processDefinition(
             FormStatus.Live,
-            strictMetadata,
-            metrics.liveMetrics,
+            metadata,
             session
           )
         }
+
+        metrics.data.push(dataRow)
       }
     })
   } catch (err) {
@@ -70,37 +83,27 @@ export async function generateReportOverview() {
     await session.endSession()
   }
 
-  logger.info('Generated overview report')
+  logger.info(
+    `Generated overview report page=${options.page} perPage=${options.perPage}`
+  )
 
-  return {
-    live: Object.fromEntries(metrics.liveMetrics),
-    draft: Object.fromEntries(metrics.draftMetrics)
-  }
+  return metrics
 }
 
 /**
  * @param {FormStatus} definitionType
  * @param {FormMetadata} metadata
- * @param {Map<string, any>} metrics
  * @param {ClientSession} session
  */
-export async function processDefinition(
-  definitionType,
-  metadata,
-  metrics,
-  session
-) {
+export async function processDefinition(definitionType, metadata, session) {
   const definition = await getDefinitionIfExists(
     metadata.id,
     definitionType,
     session
   )
-  if (definition) {
-    metrics.set(
-      metadata.id,
-      collectOverviewMetrics(metadata, definition, definitionType)
-    )
-  }
+  return definition
+    ? collectOverviewMetrics(metadata, definition, definitionType)
+    : undefined
 }
 
 /**
@@ -323,5 +326,5 @@ export function getUniqueAssignedSections(definition) {
 
 /**
  * @import { ClientSession } from 'mongodb'
- * @import { ComponentDef, FormDefinition, FormMetadata } from '@defra/forms-model'
+ * @import { ComponentDef, FormDefinition, FormMetadata, QueryOptions } from '@defra/forms-model'
  */

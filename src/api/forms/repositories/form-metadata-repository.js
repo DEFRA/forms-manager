@@ -21,23 +21,6 @@ import { METADATA_COLLECTION_NAME, db } from '~/src/mongo.js'
 export const MAX_RESULTS = 100
 
 /**
- * Retrieves the list of documents from the database
- */
-export async function listAll() {
-  const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
-    db.collection(METADATA_COLLECTION_NAME)
-  )
-
-  return coll
-    .find()
-    .sort({
-      updatedAt: -1
-    })
-    .limit(MAX_RESULTS)
-    .toArray()
-}
-
-/**
  * Retrieves the list of documents from the database with pagination and sorting.
  * Applies ranking to the search results based on match type and sorts them accordingly.
  * @param {QueryOptions} options - Pagination, sorting, and filtering options.
@@ -170,20 +153,6 @@ export async function listWithVersions(options) {
     )
     throw err
   }
-}
-
-/**
- * Retrieves a list of all forms' metadata using a cursor
- * @param {ClientSession} session - MongoDB session for transactions
- */
-export function getMetadataCursorOfAllForms(session) {
-  logger.info('Getting metadata of all forms')
-
-  const coll = /** @satisfies {Collection<Partial<FormMetadataDocument>>} */ (
-    db.collection(METADATA_COLLECTION_NAME)
-  )
-
-  return coll.find({}, { session })
 }
 
 /**
