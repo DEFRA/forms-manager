@@ -32,6 +32,7 @@ RUN apk update && \
 USER node
 
 COPY --from=development /home/node/package*.json ./
+COPY --from=development /home/node/.npmrc ./
 COPY --from=development /home/node/.server ./.server/
 COPY --from=development /home/node/migrate-mongo-config.js ./
 # config/index.js and secure-context.js are dependencies for migrate-mongo-config.js
