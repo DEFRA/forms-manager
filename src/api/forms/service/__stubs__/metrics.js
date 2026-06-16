@@ -12,107 +12,115 @@ const expectedBaseSummaryMetrics = {
  */
 export function getExpectedOverviewMetrics(timestamp) {
   return {
-    draft: {
-      '449a699bcc9946a6a6d925de': {
-        type: 'overview-metric',
-        formId: '449a699bcc9946a6a6d925de',
-        formStatus: 'draft',
-        summaryMetrics: {
-          ...expectedBaseSummaryMetrics,
-          name: 'Form 1 title',
-          slug: 'form-1-title',
-          status: 'draft'
-        },
-        featureMetrics: {
-          features: { Sections: 1 },
-          formStructure: {
-            conditions: 0,
-            pages: 1,
-            questionTypes: 0,
-            questions: 0,
-            sections: 1
+    data: [
+      {
+        draft: {
+          type: 'overview-metric',
+          formId: '449a699bcc9946a6a6d925de',
+          formStatus: 'draft',
+          summaryMetrics: {
+            ...expectedBaseSummaryMetrics,
+            name: 'Form 1 title',
+            slug: 'form-1-title',
+            status: 'draft'
           },
-          questionTypes: {}
-        },
-        submissionsCount: 0,
-        updatedAt: timestamp
-      },
-      '0dae1c832b8e4a89963a7825': {
-        type: 'overview-metric',
-        formId: '0dae1c832b8e4a89963a7825',
-        formStatus: 'live',
-        summaryMetrics: {
-          ...expectedBaseSummaryMetrics,
-          name: 'Form 2 title',
-          slug: 'form-2-title',
-          status: 'draft'
-        },
-        featureMetrics: {
-          features: { Sections: 1 },
-          formStructure: {
-            conditions: 0,
-            pages: 1,
-            questionTypes: 0,
-            questions: 0,
-            sections: 1
+          featureMetrics: {
+            features: { Sections: 1 },
+            formStructure: {
+              conditions: 0,
+              pages: 1,
+              questionTypes: 0,
+              questions: 0,
+              sections: 1
+            },
+            questionTypes: {}
           },
-          questionTypes: {}
+          submissionsCount: 0,
+          updatedAt: timestamp
         },
-        submissionsCount: 0,
-        updatedAt: timestamp
+        live: undefined
       },
-      '9fb48bd350a64e908c9ea92e': {
-        type: 'overview-metric',
-        formId: '9fb48bd350a64e908c9ea92e',
-        formStatus: 'draft',
-        summaryMetrics: {
-          ...expectedBaseSummaryMetrics,
-          name: 'Form 3 title',
-          slug: 'form-3-title',
-          status: 'draft',
-          sections: 0
+      {
+        draft: {
+          type: 'overview-metric',
+          formId: '0dae1c832b8e4a89963a7825',
+          formStatus: 'live',
+          summaryMetrics: {
+            ...expectedBaseSummaryMetrics,
+            name: 'Form 2 title',
+            slug: 'form-2-title',
+            status: 'draft'
+          },
+          featureMetrics: {
+            features: { Sections: 1 },
+            formStructure: {
+              conditions: 0,
+              pages: 1,
+              questionTypes: 0,
+              questions: 0,
+              sections: 1
+            },
+            questionTypes: {}
+          },
+          submissionsCount: 0,
+          updatedAt: timestamp
         },
-        featureMetrics: {
-          features: {},
-          formStructure: {
-            conditions: 0,
-            pages: 1,
-            questionTypes: 0,
-            questions: 0,
+        live: {
+          type: 'overview-metric',
+          formId: '0dae1c832b8e4a89963a7825',
+          formStatus: 'live',
+          summaryMetrics: {
+            ...expectedBaseSummaryMetrics,
+            name: 'Form 2 title',
+            slug: 'form-2-title',
+            status: 'live'
+          },
+          featureMetrics: {
+            features: { Sections: 1 },
+            formStructure: {
+              conditions: 0,
+              pages: 1,
+              questionTypes: 0,
+              questions: 0,
+              sections: 1
+            },
+            questionTypes: {}
+          },
+          submissionsCount: 0,
+          updatedAt: timestamp
+        }
+      },
+      {
+        draft: {
+          type: 'overview-metric',
+          formId: '9fb48bd350a64e908c9ea92e',
+          formStatus: 'draft',
+          summaryMetrics: {
+            ...expectedBaseSummaryMetrics,
+            name: 'Form 3 title',
+            slug: 'form-3-title',
+            status: 'draft',
             sections: 0
           },
-          questionTypes: {}
-        },
-        submissionsCount: 0,
-        updatedAt: timestamp
-      }
-    },
-    live: {
-      '0dae1c832b8e4a89963a7825': {
-        type: 'overview-metric',
-        formId: '0dae1c832b8e4a89963a7825',
-        formStatus: 'live',
-        summaryMetrics: {
-          ...expectedBaseSummaryMetrics,
-          name: 'Form 2 title',
-          slug: 'form-2-title',
-          status: 'live'
-        },
-        featureMetrics: {
-          features: { Sections: 1 },
-          formStructure: {
-            conditions: 0,
-            pages: 1,
-            questionTypes: 0,
-            questions: 0,
-            sections: 1
+          featureMetrics: {
+            features: {},
+            formStructure: {
+              conditions: 0,
+              pages: 1,
+              questionTypes: 0,
+              questions: 0,
+              sections: 0
+            },
+            questionTypes: {}
           },
-          questionTypes: {}
+          submissionsCount: 0,
+          updatedAt: timestamp
         },
-        submissionsCount: 0,
-        updatedAt: timestamp
+        live: undefined
       }
-    }
+    ],
+    totalItems: 3,
+    filters: undefined
   }
 }
 

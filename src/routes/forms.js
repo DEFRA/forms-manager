@@ -460,11 +460,18 @@ export default [
   {
     method: 'GET',
     path: '/report/overview',
-    handler() {
-      return generateReportOverview()
+    /**
+     * @param {RequestOverviewReport} request
+     */
+    handler(request) {
+      const { query } = request
+      return generateReportOverview(query)
     },
     options: {
-      auth: false
+      auth: false,
+      validate: {
+        query: queryOptionsSchema
+      }
     }
   }
 ]
@@ -472,6 +479,6 @@ export default [
 /**
  * @import { FormMetadata } from '@defra/forms-model'
  * @import { ServerRoute } from '@hapi/hapi'
- * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestReport, MigrateDraftFormRequest, RequestFormVersionById } from '~/src/api/types.js'
+ * @import { RequestFormById, RequestFormBySlug, RequestFormDefinition, RequestFormMetadataCreate, RequestFormMetadataUpdateById, RequestListForms, RequestOverviewReport, MigrateDraftFormRequest, RequestFormVersionById } from '~/src/api/types.js'
  * @import { ExtendedResponseToolkit } from '~/src/plugins/query-handler/types.js'
  */

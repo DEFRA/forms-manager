@@ -9,16 +9,13 @@ import {
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
-  MAX_RESULTS,
   addVersionMetadata,
   create,
   get,
   getAndIncrementVersionNumber,
   getBySlug,
-  getMetadataCursorOfAllForms,
   getVersionMetadata,
   list,
-  listAll,
   listWithVersions,
   remove,
   update,
@@ -158,36 +155,6 @@ describe('form-metadata-repository', () => {
       await expect(updateAudit(metadataId, author, mockSession)).rejects.toBe(
         error
       )
-    })
-  })
-
-  describe('listAll', () => {
-    it('should retrieve all documents with limit', async () => {
-      const mockDocuments = [metadataBefore, metadataAfter]
-      mockCollection.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        toArray: jest.fn().mockResolvedValue(mockDocuments)
-      })
-
-      const result = await listAll()
-
-      expect(mockCollection.find).toHaveBeenCalledWith()
-      expect(mockCollection.find().sort).toHaveBeenCalledWith({ updatedAt: -1 })
-      expect(mockCollection.find().limit).toHaveBeenCalledWith(MAX_RESULTS)
-      expect(result).toEqual(mockDocuments)
-    })
-
-    it('should handle empty results', async () => {
-      mockCollection.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        toArray: jest.fn().mockResolvedValue([])
-      })
-
-      const result = await listAll()
-
-      expect(result).toEqual([])
     })
   })
 
@@ -991,30 +958,6 @@ describe('form-metadata-repository', () => {
       mockCollection.updateOne.mockRejectedValue(error)
 
       await expect(upsert(document, mockSession)).rejects.toThrow(error)
-    })
-  })
-
-  describe('getMetadataCursorOfAllForms', () => {
-    it('should retrieve metedata array', () => {
-      const metadataList = [
-        buildMetadataDocument({
-          title: 'Form 1 title',
-          slug: 'form-1-title'
-        }),
-        buildMetadataDocument({
-          title: 'Form 2 title',
-          slug: 'form-2-title'
-        }),
-        buildMetadataDocument({
-          title: 'Form 3 title',
-          slug: 'form-3-title'
-        })
-      ]
-      mockCollection.find.mockReturnValue(metadataList)
-
-      const result = getMetadataCursorOfAllForms(mockSession)
-
-      expect(result).toEqual(metadataList)
     })
   })
 })
