@@ -3,7 +3,7 @@ import {
   ComponentType,
   Engine,
   FormDefinitionRequestType,
-  FormFilterStatus,
+  FormStatus,
   formDefinitionSchema,
   formDefinitionV2Schema
 } from '@defra/forms-model'
@@ -1009,7 +1009,7 @@ describe('Forms service', () => {
           perPage: 10,
           author: 'Henrique Chase',
           organisations: ['Defra'],
-          status: [FormFilterStatus.Live]
+          status: [FormStatus.Live]
         }
 
         jest.mocked(formMetadata.list).mockResolvedValue({
@@ -1035,7 +1035,7 @@ describe('Forms service', () => {
           perPage: 10,
           author: 'Henrique Chase',
           organisations: ['Defra', 'Natural England'],
-          status: [FormFilterStatus.Live, FormFilterStatus.Draft]
+          status: [FormStatus.Live, FormStatus.Draft]
         }
 
         jest.mocked(formMetadata.list).mockResolvedValue({

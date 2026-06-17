@@ -1,4 +1,4 @@
-import { FormFilterStatus } from '@defra/forms-model'
+import { FormStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import {
@@ -71,7 +71,7 @@ describe('Form metadata aggregation', () => {
     describe('with status filter', () => {
       it('should create status filter for live forms', () => {
         const result = buildFilterConditions({
-          status: [FormFilterStatus.Live]
+          status: [FormStatus.Live]
         })
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }]
@@ -80,7 +80,7 @@ describe('Form metadata aggregation', () => {
 
       it('should create status filter for draft forms', () => {
         const result = buildFilterConditions({
-          status: [FormFilterStatus.Draft]
+          status: [FormStatus.Draft]
         })
         expect(result).toEqual({
           $or: [{ live: { $exists: false } }]
@@ -91,10 +91,30 @@ describe('Form metadata aggregation', () => {
     describe('with multiple status values', () => {
       it('should create combined status filter', () => {
         const result = buildFilterConditions({
-          status: [FormFilterStatus.Live, FormFilterStatus.Draft]
+          status: [FormStatus.Live, FormStatus.Draft]
         })
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }, { live: { $exists: false } }]
+        })
+      })
+    })
+
+    describe('with offline flag', () => {
+      it('should create filter for offline forms', () => {
+        const result = buildFilterConditions({
+          offline: true
+        })
+        expect(result).toEqual({
+          offline: { $eq: true }
+        })
+      })
+
+      it('should create filter for online forms', () => {
+        const result = buildFilterConditions({
+          offline: false
+        })
+        expect(result).toEqual({
+          offline: { $ne: true }
         })
       })
     })
@@ -105,7 +125,7 @@ describe('Form metadata aggregation', () => {
           title: 'Wildlife Permit Application',
           author: 'Henrique Silva',
           organisations: ['Natural England', 'Defra'],
-          status: [FormFilterStatus.Live]
+          status: [FormStatus.Live]
         })
 
         expect(result).toEqual({
@@ -127,7 +147,8 @@ describe('Form metadata aggregation', () => {
           '',
           '',
           [],
-          []
+          [],
+          undefined
         )
 
         expect(pipeline).toHaveLength(3) // ranking, date, and sort stages
@@ -145,7 +166,8 @@ describe('Form metadata aggregation', () => {
           'Wildlife Permit Application',
           'Henrique',
           ['Defra'],
-          [FormFilterStatus.Live]
+          [FormStatus.Live],
+          true
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
@@ -153,7 +175,8 @@ describe('Form metadata aggregation', () => {
           title: { $regex: /Wildlife Permit Application/i },
           'createdBy.displayName': { $regex: /Henrique/i },
           organisation: { $in: ['Defra'] },
-          $or: [{ live: { $exists: true } }]
+          $or: [{ live: { $exists: true } }],
+          offline: { $eq: true }
         })
         expect(pipeline).toHaveLength(4) // match, ranking, date, and sort stages
       })
@@ -169,7 +192,8 @@ describe('Form metadata aggregation', () => {
           '',
           '',
           [],
-          []
+          [],
+          undefined
         )
 
         expect(pipeline).toHaveLength(4) // ranking, date, sort, and versions lookup stages
@@ -212,7 +236,8 @@ describe('Form metadata aggregation', () => {
           'Wildlife Permit Application',
           'Henrique',
           ['Defra'],
-          [FormFilterStatus.Live]
+          [FormStatus.Live],
+          undefined
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
@@ -238,7 +263,8 @@ describe('Form metadata aggregation', () => {
           'Test Form',
           '',
           [],
-          []
+          [],
+          undefined
         )
 
         expect(pipeline).toHaveLength(5) // match, ranking, date, sort, and versions lookup stages
@@ -508,7 +534,7 @@ describe('Form metadata aggregation', () => {
           { name: 'Sarah Wilson (Natural England)' }
         ],
         organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
-        status: [{ statuses: [FormFilterStatus.Live, FormFilterStatus.Draft] }]
+        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }]
       }
 
       const result = processFilterResults(filterResults)

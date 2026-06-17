@@ -1,4 +1,4 @@
-import { FormFilterStatus } from '@defra/forms-model'
+import { FormStatus } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 import { escapeRegExp } from '~/src/helpers/string-utils.js'
@@ -9,7 +9,7 @@ import { escapeRegExp } from '~/src/helpers/string-utils.js'
  * @returns {FilterConditions} The filter conditions for MongoDB query.
  */
 export function buildFilterConditions(options) {
-  const { title, author, organisations, status } = options
+  const { title, author, organisations, status, offline } = options
   const conditions = {}
 
   if (title) {
@@ -31,15 +31,19 @@ export function buildFilterConditions(options) {
   }
 
   if (status && status.length > 0) {
-    conditions.$or = status.map((s) => {
-      if (s === FormFilterStatus.Live) {
-        return { live: { $exists: true } }
-      } else if (s === FormFilterStatus.Offline) {
-        return { offline: true }
-      } else {
-        return { live: { $exists: false } }
-      }
-    })
+    conditions.$or = status.map((s) =>
+      s === FormStatus.Live
+        ? { live: { $exists: true } }
+        : { live: { $exists: false } }
+    )
+  }
+
+  if (offline === true) {
+    conditions.offline = { $eq: offline }
+  }
+
+  if (offline === false) {
+    conditions.offline = { $ne: true }
   }
 
   return conditions
@@ -105,7 +109,8 @@ export function buildFiltersFacet() {
  * @param {string} title - The title to filter by.
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
- * @param {FormFilterStatus[]} status - The status values to filter by.
+ * @param {FormStatus[]} status - The status values to filter by.
+ * @param { boolean | undefined } offline - The offline value to filter by
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipeline(
@@ -114,14 +119,16 @@ export function buildAggregationPipeline(
   title,
   author,
   organisations,
-  status
+  status,
+  offline
 ) {
   const pipeline = []
   const filterConditions = buildFilterConditions({
     title,
     author,
     organisations,
-    status
+    status,
+    offline
   })
 
   // Add $match stage if there are filter conditions
@@ -147,7 +154,8 @@ export function buildAggregationPipeline(
  * @param {string} title - The title to filter by.
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
- * @param {FormFilterStatus[]} status - The status values to filter by.
+ * @param {FormStatus[]} status - The status values to filter by.
+ * @param { boolean | undefined } offline - The offline value to filter by
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipelineWithVersions(
@@ -156,7 +164,8 @@ export function buildAggregationPipelineWithVersions(
   title,
   author,
   organisations,
-  status
+  status,
+  offline
 ) {
   const { pipeline, aggOptions } = buildAggregationPipeline(
     sortBy,
@@ -164,7 +173,8 @@ export function buildAggregationPipelineWithVersions(
     title,
     author,
     organisations,
-    status
+    status,
+    offline
   )
 
   addVersionsLookupStage(pipeline)

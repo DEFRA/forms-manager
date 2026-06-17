@@ -36,7 +36,8 @@ export async function list(options) {
       title = '',
       author = '',
       organisations = [],
-      status = []
+      status = [],
+      offline = undefined
     } = options
 
     const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
@@ -57,7 +58,8 @@ export async function list(options) {
       title,
       author,
       organisations,
-      status
+      status,
+      offline
     )
 
     pipeline.push(
@@ -105,7 +107,8 @@ export async function listWithVersions(options) {
       title = '',
       author = '',
       organisations = [],
-      status = []
+      status = [],
+      offline = undefined
     } = options
 
     const coll = /** @type {Collection<Partial<FormMetadataDocument>>} */ (
@@ -126,7 +129,8 @@ export async function listWithVersions(options) {
       title,
       author,
       organisations,
-      status
+      status,
+      offline
     )
 
     pipeline.push({ $skip: skip }, { $limit: perPage })
