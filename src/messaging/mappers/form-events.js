@@ -407,6 +407,44 @@ export function formDraftCreatedFromLiveMapper(formId, createdAt, createdBy) {
 }
 
 /**
+ * @param {string} formId
+ * @param {Date} createdAt
+ * @param {AuditUser} createdBy
+ * @returns {FormTakenOfflineMessage}
+ */
+export function formTakenOfflineMapper(formId, createdAt, createdBy) {
+  return {
+    schemaVersion: AuditEventMessageSchemaVersion.V1,
+    category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
+    type: AuditEventMessageType.FORM_TAKEN_OFFLINE,
+    entityId: formId,
+    createdAt,
+    createdBy,
+    messageCreatedAt: new Date()
+  }
+}
+
+/**
+ * @param {string} formId
+ * @param {Date} createdAt
+ * @param {AuditUser} createdBy
+ * @returns {FormMadeOnlineAgainMessage}
+ */
+export function formMadeOnlineAgainMapper(formId, createdAt, createdBy) {
+  return {
+    schemaVersion: AuditEventMessageSchemaVersion.V1,
+    category: AuditEventMessageCategory.FORM,
+    source: AuditEventMessageSource.FORMS_MANAGER,
+    type: AuditEventMessageType.FORM_MADE_ONLINE_AGAIN,
+    entityId: formId,
+    createdAt,
+    createdBy,
+    messageCreatedAt: new Date()
+  }
+}
+
+/**
  * @param {FormMetadata} metadata
  * @param {AuditUser} author
  * @returns {FormDraftDeletedMessage}
@@ -534,6 +572,6 @@ export function deletedFormSecretMapper(metadata, secretName, createdBy) {
 }
 
 /**
- * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage, FormSecretDeletedMessage, FormSecretSavedMessage } from '@defra/forms-model'
+ * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage, FormSecretDeletedMessage, FormSecretSavedMessage, FormTakenOfflineMessage, FormMadeOnlineAgainMessage } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */

@@ -12,6 +12,8 @@ import {
   createDraftFromLive,
   createLiveFromDraft,
   deleteDraftFormDefinition,
+  formMakeOnlineAgain,
+  formTakeOffline,
   getFormDefinition,
   listForms,
   updateDraftFormDefinition
@@ -382,6 +384,61 @@ export default [
     options: {
       auth: {
         scope: [`+${Scopes.FormEdit}`]
+      },
+      validate: {
+        params: formByIdSchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/take-offline',
+    /**
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id } = params
+      const author = getAuthor(auth.credentials.user)
+
+      await formTakeOffline(id, author)
+
+      return {
+        id,
+        status: 'taken-offline'
+      }
+    },
+    options: {
+      auth: {
+        scope: [`+${Scopes.FormPublish}`]
+      },
+      validate: {
+        params: formByIdSchema
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/forms/{id}/make-online-again',
+    /**
+     * @param {RequestFormById} request
+     */
+    async handler(request) {
+      const { auth, params } = request
+      const { id } = params
+      const author = getAuthor(auth.credentials.user)
+
+      // Create the live state from draft using the author in the credentials
+      await formMakeOnlineAgain(id, author)
+
+      return {
+        id,
+        status: 'made-online-again'
+      }
+    },
+    options: {
+      auth: {
+        scope: [`+${Scopes.FormPublish}`]
       },
       validate: {
         params: formByIdSchema
