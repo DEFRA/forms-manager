@@ -3,7 +3,7 @@ import Wreck from '@hapi/wreck'
 import { StatusCodes } from 'http-status-codes'
 
 /**
- * Base request function using @hapi/wreck
+ * Base request function using `@hapi/wreck`
  * @param {string} method - HTTP method
  * @param {URL} url - URL object
  * @param {object} options - Request options

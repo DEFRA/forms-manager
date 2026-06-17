@@ -47,6 +47,10 @@ const jsdocRules = /** @type {const} */ ({
     }
   ],
 
+  // Disable jsdoc v63 new rules that produce too many warnings in this codebase
+  'jsdoc/reject-any-type': 'off',
+  'jsdoc/reject-function-type': 'off',
+
   // JSDoc @param types are mandatory for JavaScript
   'jsdoc/require-param-description': 'off',
   'jsdoc/require-param-type': 'error',
