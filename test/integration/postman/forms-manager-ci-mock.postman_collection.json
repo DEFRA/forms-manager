@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "bdcca91c-fac2-4df3-aaae-2afb359a65e1",
+    "_postman_id": "3728a9fa-2317-4ea9-bba5-2385bd1b5d5d",
     "name": "forms-manager",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "23938788"
@@ -1981,6 +1981,170 @@
             "{{go_live_form_id}}",
             "definition",
             "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Make form offline",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/take-offline",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "take-offline"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check form is offline",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    const offline = response.offline;",
+              "    pm.expect(offline).to.eq(true);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Make form online again",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json()",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}/make-online-again",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}",
+            "make-online-again"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check form is online again",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    const offline = response.offline;",
+              "    pm.expect(offline).to.eq(false);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{form_id}}",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{form_id}}"
           ]
         }
       },
