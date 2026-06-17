@@ -485,13 +485,7 @@ describe('Form metadata aggregation', () => {
                 _id: null,
                 statuses: {
                   $addToSet: {
-                    $switch: {
-                      branches: [
-                        { case: { $eq: ['$offline', true] }, then: 'offline' },
-                        { case: { $ifNull: ['$live', false] }, then: 'live' }
-                      ],
-                      default: 'draft'
-                    }
+                    $cond: [{ $ifNull: ['$live', false] }, 'live', 'draft']
                   }
                 }
               }

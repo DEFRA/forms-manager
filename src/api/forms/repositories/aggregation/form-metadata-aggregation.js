@@ -82,16 +82,7 @@ export function buildFiltersFacet() {
             _id: null, // Single group for all documents
             statuses: {
               $addToSet: {
-                $switch: {
-                  // If offline === true, status is 'offline'
-                  // If live field exists, status is 'live'
-                  // Otherwise 'draft'
-                  branches: [
-                    { case: { $eq: ['$offline', true] }, then: 'offline' },
-                    { case: { $ifNull: ['$live', false] }, then: 'live' }
-                  ],
-                  default: 'draft'
-                }
+                $cond: [{ $ifNull: ['$live', false] }, 'live', 'draft'] // If live field exists, status is 'live', else 'draft'
               }
             }
           }
