@@ -131,6 +131,34 @@ exports[`publish publishFormMigratedEvent should publish FORM_MIGRATED event 1`]
 }
 `;
 
+exports[`publish publishFormOfflineUpdatedEvent should publish a FORM_UPDATED event 1`] = `
+{
+  "category": "FORM",
+  "createdAt": 2025-07-24T00:00:00.000Z,
+  "createdBy": {
+    "displayName": "Gandalf",
+    "id": "a53b4360-bdf6-4d13-8975-25032ce76312",
+  },
+  "data": {
+    "changes": {
+      "new": {
+        "offline": true,
+      },
+      "previous": {
+        "offline": false,
+      },
+    },
+    "formId": "689b7ab1d0eeac9711a7fb33",
+    "slug": "audit-form",
+  },
+  "entityId": "689b7ab1d0eeac9711a7fb33",
+  "messageCreatedAt": Any<Date>,
+  "schemaVersion": 1,
+  "source": "FORMS_MANAGER",
+  "type": "FORM_OFFLINE_UPDATED",
+}
+`;
+
 exports[`publish publishFormTitleUpdatedEvent should publish FORM_TITLE_UPDATED event 1`] = `
 {
   "category": "FORM",

@@ -42,8 +42,6 @@ jest.mock('~/src/api/forms/service/index.js')
 jest.mock('~/src/api/forms/service/definition.js', () => ({
   ...jest.requireActual('~/src/api/forms/service/definition.js'),
   getFormDefinition: jest.fn(),
-  formTakeOffline: jest.fn(),
-  formMakeOnlineAgain: jest.fn(),
   listForms: jest.fn(),
   listAllFormIds: jest.fn(),
   updateDraftFormDefinition: jest.fn(),

@@ -8,9 +8,8 @@ import {
   formDraftCreatedFromLiveMapper,
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
-  formMadeOnlineAgainMapper,
   formMigratedMapper,
-  formTakenOfflineMapper,
+  formOfflineUpdatedMapper,
   formTitleUpdatedMapper,
   formUpdatedMapper,
   savedFormSecretMapper
@@ -92,33 +91,15 @@ export async function publishDraftCreatedFromLiveEvent(
 }
 
 /**
- * Publishes a 'form taken offline' event
- * @param {string} formId
- * @param {Date} createdAt
- * @param {AuditUser} createdBy
+ * Publishes a 'form offline updated' event
+ * @param {FormMetadata} metadata
+ * @param {FormMetadata} oldMetadata
  */
-export async function publishFormTakenOfflineEvent(
-  formId,
-  createdAt,
-  createdBy
+export async function publishFormOfflineUpdatedEvent(
+  metadata,
+  oldMetadata
 ) {
-  const auditMessage = formTakenOfflineMapper(formId, createdAt, createdBy)
-
-  return validateAndPublishEvent(auditMessage)
-}
-
-/**
- * Publishes a 'form made online again' event
- * @param {string} formId
- * @param {Date} createdAt
- * @param {AuditUser} createdBy
- */
-export async function publishFormMadeOnlineAgainEvent(
-  formId,
-  createdAt,
-  createdBy
-) {
-  const auditMessage = formMadeOnlineAgainMapper(formId, createdAt, createdBy)
+  const auditMessage = formOfflineUpdatedMapper(oldMetadata, metadata)
 
   return validateAndPublishEvent(auditMessage)
 }

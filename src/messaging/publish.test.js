@@ -27,6 +27,7 @@ import {
   publishFormDraftDeletedEvent,
   publishFormDraftReplacedEvent,
   publishFormMigratedEvent,
+  publishFormOfflineUpdatedEvent,
   publishFormTitleUpdatedEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent,
@@ -290,6 +291,43 @@ describe('publish', () => {
         slug: formMetadataDocument.slug,
         payload
       })
+      expect(publishEventCall).toMatchSnapshot({
+        messageCreatedAt: expect.any(Date)
+      })
+    })
+  })
+
+  describe('publishFormOfflineUpdatedEvent', () => {
+    it('should publish a FORM_UPDATED event', async () => {
+      const newMetadata = buildMetaData({
+        ...metadata,
+        offline: true
+      })
+      const response = await publishFormOfflineUpdatedEvent(newMetadata, metadata)
+      expect(response?.MessageId).toBe(messageId)
+      expect(publishEvent).toHaveBeenCalledWith({
+        entityId: formId,
+        messageCreatedAt: expect.any(Date),
+        source: AuditEventMessageSource.FORMS_MANAGER,
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_OFFLINE_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug,
+          changes: {
+            previous: {
+              offline: false
+            },
+            new: {
+              offline: true
+            }
+          }
+        }
+      })
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
       expect(publishEventCall).toMatchSnapshot({
         messageCreatedAt: expect.any(Date)
       })

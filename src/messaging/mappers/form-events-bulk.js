@@ -1,5 +1,6 @@
 import {
   formNotificationEmailUpdatedMapper,
+  formOfflineUpdatedMapper,
   formOrganisationUpdatedMapper,
   formPrivacyNoticeUpdatedMapper,
   formSubmissionGuidanceUpdatedMapper,
@@ -22,11 +23,10 @@ const mapperLookup = {
   privacyNoticeText: formPrivacyNoticeUpdatedMapper,
   privacyNoticeUrl: formPrivacyNoticeUpdatedMapper,
   termsAndConditionsAgreed: formTermsAndConditionsAgreedMapper,
-  contact: formSupportUpdatedMapper
+  contact: formSupportUpdatedMapper,
+  offline: formOfflineUpdatedMapper
 }
 
-// TODO(DF-789-followup): add `offline` here alongside a FORM_OFFLINE_UPDATED
-// audit event when the Designer admin UI for toggling the flag lands.
 const validFields = /** @type {(keyof PartialFormMetadataDocument)[]} */ ([
   'organisation',
   'teamName',
@@ -35,7 +35,8 @@ const validFields = /** @type {(keyof PartialFormMetadataDocument)[]} */ ([
   'submissionGuidance',
   'privacyNoticeUrl',
   'termsAndConditionsAgreed',
-  'contact'
+  'contact',
+  'offline'
 ])
 
 const validKeys = /** @type {string[]} */ (validFields)
