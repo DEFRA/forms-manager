@@ -4,7 +4,7 @@
  * @property {{ displayName: { $regex: RegExp } }} [createdBy] - Optional MongoDB regex query for author matching
  * @property {{ $in: string[] }} [organisation] - Optional MongoDB $in query for organisation matching
  * @property {{ live?: { $exists: boolean }}[]} [$or] - Optional MongoDB $or query for status matching
- * @property {{ $eq?: boolean, $ne?: boolean }} [offline] - Optional MongoDB $in query for organisation matching
+ * @property {{ $eq?: boolean }} [offline] - Optional MongoDB $in query for organisation matching
  * @property {object} [$expr] - Optional MongoDB $expr for expression queries
  */
 
