@@ -1434,7 +1434,7 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Bad Request',
-        message: '"status" must be one of [draft, live, offline]',
+        message: '"status" must be one of [draft, live]',
         validation: {
           keys: ['status'],
           source: 'query'
@@ -1454,7 +1454,7 @@ describe('Forms route', () => {
       expect(response.result).toMatchObject({
         error: 'Bad Request',
         message:
-          '"organisations" must be one of [Animal and Plant Health Agency – APHA, Centre for Environment, Fisheries and Aquaculture Science – Cefas, Defra, Environment Agency, Forestry Commission, Marine Management Organisation – MMO, Natural England, Rural Payments Agency – RPA, Veterinary Medicines Directorate – VMD]. "status" must be one of [draft, live, offline]',
+          '"organisations" must be one of [Animal and Plant Health Agency – APHA, Centre for Environment, Fisheries and Aquaculture Science – Cefas, Defra, Environment Agency, Forestry Commission, Marine Management Organisation – MMO, Natural England, Rural Payments Agency – RPA, Veterinary Medicines Directorate – VMD]. "status" must be one of [draft, live]',
         validation: {
           keys: ['organisations', 'status'],
           source: 'query'

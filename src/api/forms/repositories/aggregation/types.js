@@ -17,6 +17,7 @@
  * @property {{ name: string }[]} authors - Array of author names
  * @property {{ name: string }[]} organisations - Array of organisation names
  * @property {[{ statuses: FormStatus[] }]} status - Array containing status values
+ * @property {[{ offline: boolean }]} offline - offline flag
  */
 
 /**

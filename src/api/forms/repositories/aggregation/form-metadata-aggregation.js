@@ -42,17 +42,13 @@ export function buildFilterConditions(options) {
     conditions.offline = { $eq: offline }
   }
 
-  if (offline === false) {
-    conditions.offline = { $ne: true }
-  }
-
   return conditions
 }
 
 /**
  * Builds the filters facet pipeline stage
  * @see {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation/facet/}
- * @returns {{ $facet: { authors: PipelineStage[], organisations: PipelineStage[], status: PipelineStage[] } }} The facet pipeline stage for getting filter options
+ * @returns {{ $facet: { authors: PipelineStage[], organisations: PipelineStage[], status: PipelineStage[], offline: PipelineStage[] } }} The facet pipeline stage for getting filter options
  */
 export function buildFiltersFacet() {
   return {
@@ -88,6 +84,18 @@ export function buildFiltersFacet() {
           }
         },
         { $project: { statuses: 1, _id: 0 } }
+      ],
+      offline: [
+        {
+          $group: {
+            _id: null, // Single group for all documents
+            offline: {
+              $addToSet: {
+                $ifNull: ['$offline', false]
+              }
+            }
+          }
+        }
       ]
     }
   }
@@ -350,12 +358,14 @@ export function processAuthorNames(authors) {
 /**
  * Processes filter results from aggregation into a structured FilterOptions object
  * @param {FilterAggregationResult} filterResults - Raw filter results from aggregation
+ * @param { QueryOptions | undefined } options
  */
-export function processFilterResults(filterResults) {
+export function processFilterResults(filterResults, options) {
   return {
     authors: processAuthorNames(filterResults.authors),
     organisations: filterResults.organisations.map((org) => org.name),
-    statuses: filterResults.status.at(0)?.statuses ?? []
+    statuses: filterResults.status.at(0)?.statuses ?? [],
+    offline: options?.offline
   }
 }
 
@@ -364,7 +374,7 @@ export function processFilterResults(filterResults) {
  */
 
 /**
- * @import { FilterOptions } from '@defra/forms-model'
+ * @import { QueryOptions } from '@defra/forms-model'
  */
 
 /**

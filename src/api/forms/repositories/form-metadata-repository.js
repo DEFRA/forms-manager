@@ -50,7 +50,7 @@ export async function list(options) {
       await coll.aggregate([buildFiltersFacet()]).toArray()
     )
 
-    const filters = processFilterResults(filterResults)
+    const filters = processFilterResults(filterResults, options)
 
     const { pipeline, aggOptions } = buildAggregationPipeline(
       sortBy,
@@ -77,7 +77,8 @@ export async function list(options) {
           title,
           author,
           organisations,
-          status
+          status,
+          offline
         })
       )
     ])
@@ -121,7 +122,7 @@ export async function listWithVersions(options) {
       await coll.aggregate([buildFiltersFacet()]).toArray()
     )
 
-    const filters = processFilterResults(filterResults)
+    const filters = processFilterResults(filterResults, options)
 
     const { pipeline, aggOptions } = buildAggregationPipelineWithVersions(
       sortBy,

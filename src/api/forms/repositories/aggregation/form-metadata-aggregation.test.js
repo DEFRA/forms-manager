@@ -113,9 +113,7 @@ describe('Form metadata aggregation', () => {
         const result = buildFilterConditions({
           offline: false
         })
-        expect(result).toEqual({
-          offline: { $ne: true }
-        })
+        expect(result).toEqual({})
       })
     })
 
@@ -491,6 +489,18 @@ describe('Form metadata aggregation', () => {
               }
             },
             { $project: { statuses: 1, _id: 0 } }
+          ],
+          offline: [
+            {
+              $group: {
+                _id: null,
+                offline: {
+                  $addToSet: {
+                    $ifNull: ['$offline', false]
+                  }
+                }
+              }
+            }
           ]
         }
       })
@@ -528,10 +538,17 @@ describe('Form metadata aggregation', () => {
           { name: 'Sarah Wilson (Natural England)' }
         ],
         organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
-        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }]
+        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }],
+        offline: [{ offline: false }]
       }
 
-      const result = processFilterResults(filterResults)
+      /** @type {QueryOptions} */
+      const options = {
+        page: 1,
+        perPage: 25
+      }
+
+      const result = processFilterResults(filterResults, options)
 
       expect(result).toEqual({
         authors: ['Enrique Chase (Defra)', 'Sarah Wilson (Natural England)'],
@@ -545,10 +562,17 @@ describe('Form metadata aggregation', () => {
       const filterResults = {
         authors: [],
         organisations: [],
-        status: [{ statuses: [] }]
+        status: [{ statuses: [] }],
+        offline: [{ offline: false }]
       }
 
-      const result = processFilterResults(filterResults)
+      /** @type {QueryOptions} */
+      const options = {
+        page: 1,
+        perPage: 25
+      }
+
+      const result = processFilterResults(filterResults, options)
 
       expect(result).toEqual({
         authors: [],
@@ -556,9 +580,40 @@ describe('Form metadata aggregation', () => {
         statuses: []
       })
     })
+
+    it('should process filter results with offline selected', () => {
+      /** @type {FilterAggregationResult} */
+      const filterResults = {
+        authors: [
+          { name: 'Enrique Chase (Defra)' },
+          { name: 'undefined undefined' },
+          { name: 'Sarah Wilson (Natural England)' }
+        ],
+        organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
+        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }],
+        offline: [{ offline: true }]
+      }
+
+      /** @type {QueryOptions} */
+      const options = {
+        page: 1,
+        perPage: 25,
+        offline: true
+      }
+
+      const result = processFilterResults(filterResults, options)
+
+      expect(result).toEqual({
+        authors: ['Enrique Chase (Defra)', 'Sarah Wilson (Natural England)'],
+        organisations: ['Defra', 'Natural England'],
+        statuses: ['live', 'draft'],
+        offline: true
+      })
+    })
   })
 })
 
 /**
+ * @import { QueryOptions } from '@defra/forms-model'
  * @import { AddFieldsSwitch, PipelineStage, FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'
  */
