@@ -47,8 +47,6 @@ import {
   createDraftFromLive,
   createLiveFromDraft,
   deleteDraftFormDefinition,
-  formMakeOnlineAgain,
-  formTakeOffline,
   getFormDefinition,
   listForms,
   makePaymentKeyLive,
@@ -438,78 +436,6 @@ describe('Forms service', () => {
         .mockResolvedValueOnce(draftV2DefinitionNoStartPage)
 
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
-    })
-  })
-
-  describe('formTakeOffline', () => {
-    beforeEach(() => {
-      jest
-        .mocked(formMetadata.update)
-        .mockResolvedValueOnce(buildMetadataDocument())
-    })
-
-    it("should throw bad request if there's no live definition", async () => {
-      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
-
-      await expect(formTakeOffline(id, author)).rejects.toThrow(
-        Boom.badRequest(
-          `Form with ID '${formMetadataWithLiveDocument._id.toString()}' has no live state`
-        )
-      )
-    })
-
-    it('should update the form state when creating', async () => {
-      jest
-        .mocked(formMetadata.get)
-        .mockResolvedValue(formMetadataWithLiveDocument)
-
-      const dbSpy = jest.spyOn(formMetadata, 'update')
-
-      await formTakeOffline(id, author)
-
-      const dbMetadataOperationArgs = dbSpy.mock.calls[0]
-
-      expect(dbSpy).toHaveBeenCalled()
-      expect(dbMetadataOperationArgs[0]).toBe(id)
-      expect(dbMetadataOperationArgs[1].$set).toMatchObject({
-        offline: true
-      })
-    })
-  })
-
-  describe('formMakeOnlineAgain', () => {
-    beforeEach(() => {
-      jest
-        .mocked(formMetadata.update)
-        .mockResolvedValueOnce(buildMetadataDocument())
-    })
-
-    it("should throw bad request if there's no live definition", async () => {
-      jest.mocked(formMetadata.get).mockResolvedValueOnce(formMetadataDocument)
-
-      await expect(formMakeOnlineAgain(id, author)).rejects.toThrow(
-        Boom.badRequest(
-          `Form with ID '${formMetadataWithLiveDocument._id.toString()}' has no live state`
-        )
-      )
-    })
-
-    it('should update the form state when creating', async () => {
-      jest
-        .mocked(formMetadata.get)
-        .mockResolvedValue(formMetadataWithLiveDocument)
-
-      const dbSpy = jest.spyOn(formMetadata, 'update')
-
-      await formMakeOnlineAgain(id, author)
-
-      const dbMetadataOperationArgs = dbSpy.mock.calls[0]
-
-      expect(dbSpy).toHaveBeenCalled()
-      expect(dbMetadataOperationArgs[0]).toBe(id)
-      expect(dbMetadataOperationArgs[1].$set).toMatchObject({
-        offline: false
-      })
     })
   })
 

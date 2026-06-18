@@ -25,8 +25,6 @@ import {
   publishDraftCreatedFromLiveEvent,
   publishFormDraftDeletedEvent,
   publishFormDraftReplacedEvent,
-  publishFormMadeOnlineAgainEvent,
-  publishFormTakenOfflineEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
@@ -436,90 +434,6 @@ export async function createDraftFromLive(formId, author) {
     logger.error(
       err,
       `[createDraftFromLive] Create draft to edit for form ID ${formId} failed - ${getErrorMessage(err)}`
-    )
-
-    throw err
-  }
-}
-
-/**
- * Takes a form offline
- * @param {string} formId - ID of the form
- * @param {FormMetadataAuthor} author - the author of the operation
- */
-export async function formTakeOffline(formId, author) {
-  logger.info(`Take form offline for form ID ${formId}`)
-
-  try {
-    // Get the form metadata from the db
-    const form = await getForm(formId)
-
-    if (!form.live) {
-      throw Boom.badRequest(`Form with ID '${formId}' has no live state`)
-    }
-
-    const now = new Date()
-
-    const session = client.startSession()
-
-    try {
-      await session.withTransaction(async () => {
-        await formMetadata.update(formId, { $set: { offline: true } }, session)
-
-        // Publish audit message
-        await publishFormTakenOfflineEvent(formId, now, author)
-      })
-    } finally {
-      await session.endSession()
-    }
-
-    logger.info(`Took form offline for form ID ${formId}`)
-  } catch (err) {
-    logger.error(
-      err,
-      `[takeFormOffline] Take form offline for form ID ${formId} failed - ${getErrorMessage(err)}`
-    )
-
-    throw err
-  }
-}
-
-/**
- * Makes an offline form online again
- * @param {string} formId - ID of the form
- * @param {FormMetadataAuthor} author - the author of the operation
- */
-export async function formMakeOnlineAgain(formId, author) {
-  logger.info(`Make form online again for form ID ${formId}`)
-
-  try {
-    // Get the form metadata from the db
-    const form = await getForm(formId)
-
-    if (!form.live) {
-      throw Boom.badRequest(`Form with ID '${formId}' has no live state`)
-    }
-
-    const now = new Date()
-
-    const session = client.startSession()
-
-    try {
-      await session.withTransaction(async () => {
-        await formMetadata.update(formId, { $set: { offline: false } }, session)
-
-        // Publish audit message
-        await publishFormMadeOnlineAgainEvent(formId, now, author)
-      })
-    } finally {
-      await session.endSession()
-    }
-
-    logger.info(`Made offline form online again for form ID ${formId}`)
-  } catch (err) {
-    logger.error(
-      err,
-      `[makeFormOnlineAgain] Made offline form online again for form ID ${formId} failed - ${getErrorMessage(err)}`
     )
 
     throw err

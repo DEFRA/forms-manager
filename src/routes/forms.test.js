@@ -17,8 +17,6 @@ import {
   createDraftFromLive,
   createLiveFromDraft,
   deleteDraftFormDefinition,
-  formMakeOnlineAgain,
-  formTakeOffline,
   getFormDefinition,
   listForms,
   updateDraftFormDefinition
@@ -1706,46 +1704,6 @@ describe('Forms route', () => {
         error: 'Bad Request',
         message: 'No live version to copy'
       })
-    })
-  })
-
-  describe('Take form offline endpoint', () => {
-    test('POST /forms/{id}/take-offline takes form offline', async () => {
-      jest.mocked(formTakeOffline).mockResolvedValue()
-
-      const response = await server.inject({
-        method: 'POST',
-        url: `/forms/${id}/take-offline`,
-        auth
-      })
-
-      expect(response.statusCode).toEqual(okStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        id,
-        status: 'taken-offline'
-      })
-      expect(formTakeOffline).toHaveBeenCalledWith(id, author)
-    })
-  })
-
-  describe('Make form online again endpoint', () => {
-    test('POST /forms/{id}/make-online-again puts form online', async () => {
-      jest.mocked(formMakeOnlineAgain).mockResolvedValue()
-
-      const response = await server.inject({
-        method: 'POST',
-        url: `/forms/${id}/make-online-again`,
-        auth
-      })
-
-      expect(response.statusCode).toEqual(okStatusCode)
-      expect(response.headers['content-type']).toContain(jsonContentType)
-      expect(response.result).toEqual({
-        id,
-        status: 'made-online-again'
-      })
-      expect(formMakeOnlineAgain).toHaveBeenCalledWith(id, author)
     })
   })
 
