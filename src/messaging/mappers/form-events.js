@@ -549,10 +549,10 @@ export function formOfflineUpdatedMapper(metadata, updatedForm) {
     ...baseData,
     changes: {
       previous: {
-        offline: oldOffline
+        offline: oldOffline ?? false
       },
       new: {
-        offline
+        offline: offline ?? false
       }
     }
   }
