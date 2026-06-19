@@ -14,7 +14,8 @@ export const defaultConfig = {
     title: '',
     author: '',
     organisations: [],
-    status: []
+    status: [],
+    offline: undefined
   }
 }
 

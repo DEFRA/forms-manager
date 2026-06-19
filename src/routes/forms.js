@@ -3,7 +3,7 @@ import {
   Scopes,
   formMetadataInputKeys,
   formMetadataInputSchema,
-  queryOptionsSchema
+  queryOptionsSchemaManager
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
@@ -86,7 +86,7 @@ export default [
     options: {
       auth: false,
       validate: {
-        query: queryOptionsSchema
+        query: queryOptionsSchemaManager
       }
     }
   },
@@ -470,7 +470,7 @@ export default [
     options: {
       auth: false,
       validate: {
-        query: queryOptionsSchema
+        query: queryOptionsSchemaManager
       }
     }
   }

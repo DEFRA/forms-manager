@@ -9,7 +9,7 @@ import { escapeRegExp } from '~/src/helpers/string-utils.js'
  * @returns {FilterConditions} The filter conditions for MongoDB query.
  */
 export function buildFilterConditions(options) {
-  const { title, author, organisations, status } = options
+  const { title, author, organisations, status, offline } = options
   const conditions = {}
 
   if (title) {
@@ -38,13 +38,17 @@ export function buildFilterConditions(options) {
     )
   }
 
+  if (offline === true) {
+    conditions.offline = { $eq: offline }
+  }
+
   return conditions
 }
 
 /**
  * Builds the filters facet pipeline stage
  * @see {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation/facet/}
- * @returns {{ $facet: { authors: PipelineStage[], organisations: PipelineStage[], status: PipelineStage[] } }} The facet pipeline stage for getting filter options
+ * @returns {{ $facet: { authors: PipelineStage[], organisations: PipelineStage[], status: PipelineStage[], offline: PipelineStage[] } }} The facet pipeline stage for getting filter options
  */
 export function buildFiltersFacet() {
   return {
@@ -80,6 +84,18 @@ export function buildFiltersFacet() {
           }
         },
         { $project: { statuses: 1, _id: 0 } }
+      ],
+      offline: [
+        {
+          $group: {
+            _id: null, // Single group for all documents
+            offline: {
+              $addToSet: {
+                $ifNull: ['$offline', false]
+              }
+            }
+          }
+        }
       ]
     }
   }
@@ -93,6 +109,7 @@ export function buildFiltersFacet() {
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
  * @param {FormStatus[]} status - The status values to filter by.
+ * @param { boolean | undefined } offline - The offline value to filter by
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipeline(
@@ -101,14 +118,16 @@ export function buildAggregationPipeline(
   title,
   author,
   organisations,
-  status
+  status,
+  offline
 ) {
   const pipeline = []
   const filterConditions = buildFilterConditions({
     title,
     author,
     organisations,
-    status
+    status,
+    offline
   })
 
   // Add $match stage if there are filter conditions
@@ -135,6 +154,7 @@ export function buildAggregationPipeline(
  * @param {string} author - The author to filter by.
  * @param {string[]} organisations - The organisations to filter by.
  * @param {FormStatus[]} status - The status values to filter by.
+ * @param { boolean | undefined } offline - The offline value to filter by
  * @returns {{ pipeline: PipelineStage[], aggOptions: AggregateOptions }}
  */
 export function buildAggregationPipelineWithVersions(
@@ -143,7 +163,8 @@ export function buildAggregationPipelineWithVersions(
   title,
   author,
   organisations,
-  status
+  status,
+  offline
 ) {
   const { pipeline, aggOptions } = buildAggregationPipeline(
     sortBy,
@@ -151,7 +172,8 @@ export function buildAggregationPipelineWithVersions(
     title,
     author,
     organisations,
-    status
+    status,
+    offline
   )
 
   addVersionsLookupStage(pipeline)
@@ -336,12 +358,14 @@ export function processAuthorNames(authors) {
 /**
  * Processes filter results from aggregation into a structured FilterOptions object
  * @param {FilterAggregationResult} filterResults - Raw filter results from aggregation
+ * @param { QueryOptions | undefined } options
  */
-export function processFilterResults(filterResults) {
+export function processFilterResults(filterResults, options) {
   return {
     authors: processAuthorNames(filterResults.authors),
     organisations: filterResults.organisations.map((org) => org.name),
-    statuses: filterResults.status.at(0)?.statuses ?? []
+    statuses: filterResults.status.at(0)?.statuses ?? [],
+    offline: options?.offline
   }
 }
 
@@ -350,7 +374,7 @@ export function processFilterResults(filterResults) {
  */
 
 /**
- * @import { FilterOptions } from '@defra/forms-model'
+ * @import { QueryOptions } from '@defra/forms-model'
  */
 
 /**
