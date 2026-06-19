@@ -74,7 +74,7 @@ describe('Form metadata aggregation', () => {
           status: [FormStatus.Live]
         })
         expect(result).toEqual({
-          $or: [{ live: { $exists: true } }]
+          $or: [{ live: { $exists: true }, offline: { $ne: true } }]
         })
       })
 
@@ -94,7 +94,10 @@ describe('Form metadata aggregation', () => {
           status: [FormStatus.Live, FormStatus.Draft]
         })
         expect(result).toEqual({
-          $or: [{ live: { $exists: true } }, { live: { $exists: false } }]
+          $or: [
+            { live: { $exists: true }, offline: { $ne: true } },
+            { live: { $exists: false } }
+          ]
         })
       })
     })
@@ -105,7 +108,7 @@ describe('Form metadata aggregation', () => {
           offline: true
         })
         expect(result).toEqual({
-          offline: { $eq: true }
+          $or: [{ offline: { $eq: true } }]
         })
       })
 
@@ -130,7 +133,7 @@ describe('Form metadata aggregation', () => {
           title: { $regex: /Wildlife Permit Application/i },
           'createdBy.displayName': { $regex: /Henrique Silva/i },
           organisation: { $in: ['Natural England', 'Defra'] },
-          $or: [{ live: { $exists: true } }]
+          $or: [{ live: { $exists: true }, offline: { $ne: true } }]
         })
       })
     })
@@ -173,8 +176,10 @@ describe('Form metadata aggregation', () => {
           title: { $regex: /Wildlife Permit Application/i },
           'createdBy.displayName': { $regex: /Henrique/i },
           organisation: { $in: ['Defra'] },
-          $or: [{ live: { $exists: true } }],
-          offline: { $eq: true }
+          $or: [
+            { live: { $exists: true }, offline: { $ne: true } },
+            { offline: { $eq: true } }
+          ]
         })
         expect(pipeline).toHaveLength(4) // match, ranking, date, and sort stages
       })
@@ -243,7 +248,7 @@ describe('Form metadata aggregation', () => {
           title: { $regex: /Wildlife Permit Application/i },
           'createdBy.displayName': { $regex: /Henrique/i },
           organisation: { $in: ['Defra'] },
-          $or: [{ live: { $exists: true } }]
+          $or: [{ live: { $exists: true }, offline: { $ne: true } }]
         })
         expect(pipeline).toHaveLength(5) // match, ranking, date, sort, and versions lookup stages
 
