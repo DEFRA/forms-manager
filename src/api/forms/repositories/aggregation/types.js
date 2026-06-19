@@ -3,7 +3,8 @@
  * @property {{ $regex: RegExp }} [title] - Optional MongoDB regex query for title matching
  * @property {{ displayName: { $regex: RegExp } }} [createdBy] - Optional MongoDB regex query for author matching
  * @property {{ $in: string[] }} [organisation] - Optional MongoDB $in query for organisation matching
- * @property {{ live: { $exists: boolean } }[]} [$or] - Optional MongoDB $or query for status matching
+ * @property {{ live?: { $exists: boolean }}[]} [$or] - Optional MongoDB $or query for status matching
+ * @property {{ $eq?: boolean }} [offline] - Optional MongoDB $in query for organisation matching
  * @property {object} [$expr] - Optional MongoDB $expr for expression queries
  */
 
@@ -16,6 +17,7 @@
  * @property {{ name: string }[]} authors - Array of author names
  * @property {{ name: string }[]} organisations - Array of organisation names
  * @property {[{ statuses: FormStatus[] }]} status - Array containing status values
+ * @property {[{ offline: boolean }]} offline - offline flag
  */
 
 /**

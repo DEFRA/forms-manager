@@ -25,7 +25,8 @@ export const queryHandler = {
             title: defaultConfig.search.title,
             author: defaultConfig.search.author,
             organisations: defaultConfig.search.organisations,
-            status: defaultConfig.search.status
+            status: defaultConfig.search.status,
+            offline: defaultConfig.search.offline
           }
 
           const {
@@ -36,7 +37,8 @@ export const queryHandler = {
             title,
             author,
             organisations,
-            status
+            status,
+            offline
           } = {
             ...defaults,
             ...options
@@ -59,7 +61,8 @@ export const queryHandler = {
                 title,
                 author,
                 organisations,
-                status
+                status,
+                offline
               },
               filters
             }

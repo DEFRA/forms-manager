@@ -70,14 +70,18 @@ describe('Form metadata aggregation', () => {
 
     describe('with status filter', () => {
       it('should create status filter for live forms', () => {
-        const result = buildFilterConditions({ status: [FormStatus.Live] })
+        const result = buildFilterConditions({
+          status: [FormStatus.Live]
+        })
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }]
         })
       })
 
       it('should create status filter for draft forms', () => {
-        const result = buildFilterConditions({ status: [FormStatus.Draft] })
+        const result = buildFilterConditions({
+          status: [FormStatus.Draft]
+        })
         expect(result).toEqual({
           $or: [{ live: { $exists: false } }]
         })
@@ -92,6 +96,24 @@ describe('Form metadata aggregation', () => {
         expect(result).toEqual({
           $or: [{ live: { $exists: true } }, { live: { $exists: false } }]
         })
+      })
+    })
+
+    describe('with offline flag', () => {
+      it('should create filter for offline forms', () => {
+        const result = buildFilterConditions({
+          offline: true
+        })
+        expect(result).toEqual({
+          offline: { $eq: true }
+        })
+      })
+
+      it('should create filter for online forms', () => {
+        const result = buildFilterConditions({
+          offline: false
+        })
+        expect(result).toEqual({})
       })
     })
 
@@ -123,7 +145,8 @@ describe('Form metadata aggregation', () => {
           '',
           '',
           [],
-          []
+          [],
+          undefined
         )
 
         expect(pipeline).toHaveLength(3) // ranking, date, and sort stages
@@ -141,7 +164,8 @@ describe('Form metadata aggregation', () => {
           'Wildlife Permit Application',
           'Henrique',
           ['Defra'],
-          [FormStatus.Live]
+          [FormStatus.Live],
+          true
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
@@ -149,7 +173,8 @@ describe('Form metadata aggregation', () => {
           title: { $regex: /Wildlife Permit Application/i },
           'createdBy.displayName': { $regex: /Henrique/i },
           organisation: { $in: ['Defra'] },
-          $or: [{ live: { $exists: true } }]
+          $or: [{ live: { $exists: true } }],
+          offline: { $eq: true }
         })
         expect(pipeline).toHaveLength(4) // match, ranking, date, and sort stages
       })
@@ -165,7 +190,8 @@ describe('Form metadata aggregation', () => {
           '',
           '',
           [],
-          []
+          [],
+          undefined
         )
 
         expect(pipeline).toHaveLength(4) // ranking, date, sort, and versions lookup stages
@@ -208,7 +234,8 @@ describe('Form metadata aggregation', () => {
           'Wildlife Permit Application',
           'Henrique',
           ['Defra'],
-          [FormStatus.Live]
+          [FormStatus.Live],
+          undefined
         )
 
         expect(pipeline[0]).toHaveProperty('$match')
@@ -234,7 +261,8 @@ describe('Form metadata aggregation', () => {
           'Test Form',
           '',
           [],
-          []
+          [],
+          undefined
         )
 
         expect(pipeline).toHaveLength(5) // match, ranking, date, sort, and versions lookup stages
@@ -461,6 +489,18 @@ describe('Form metadata aggregation', () => {
               }
             },
             { $project: { statuses: 1, _id: 0 } }
+          ],
+          offline: [
+            {
+              $group: {
+                _id: null,
+                offline: {
+                  $addToSet: {
+                    $ifNull: ['$offline', false]
+                  }
+                }
+              }
+            }
           ]
         }
       })
@@ -498,10 +538,17 @@ describe('Form metadata aggregation', () => {
           { name: 'Sarah Wilson (Natural England)' }
         ],
         organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
-        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }]
+        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }],
+        offline: [{ offline: false }]
       }
 
-      const result = processFilterResults(filterResults)
+      /** @type {QueryOptions} */
+      const options = {
+        page: 1,
+        perPage: 25
+      }
+
+      const result = processFilterResults(filterResults, options)
 
       expect(result).toEqual({
         authors: ['Enrique Chase (Defra)', 'Sarah Wilson (Natural England)'],
@@ -515,10 +562,17 @@ describe('Form metadata aggregation', () => {
       const filterResults = {
         authors: [],
         organisations: [],
-        status: [{ statuses: [] }]
+        status: [{ statuses: [] }],
+        offline: [{ offline: false }]
       }
 
-      const result = processFilterResults(filterResults)
+      /** @type {QueryOptions} */
+      const options = {
+        page: 1,
+        perPage: 25
+      }
+
+      const result = processFilterResults(filterResults, options)
 
       expect(result).toEqual({
         authors: [],
@@ -526,9 +580,40 @@ describe('Form metadata aggregation', () => {
         statuses: []
       })
     })
+
+    it('should process filter results with offline selected', () => {
+      /** @type {FilterAggregationResult} */
+      const filterResults = {
+        authors: [
+          { name: 'Enrique Chase (Defra)' },
+          { name: 'undefined undefined' },
+          { name: 'Sarah Wilson (Natural England)' }
+        ],
+        organisations: [{ name: 'Defra' }, { name: 'Natural England' }],
+        status: [{ statuses: [FormStatus.Live, FormStatus.Draft] }],
+        offline: [{ offline: true }]
+      }
+
+      /** @type {QueryOptions} */
+      const options = {
+        page: 1,
+        perPage: 25,
+        offline: true
+      }
+
+      const result = processFilterResults(filterResults, options)
+
+      expect(result).toEqual({
+        authors: ['Enrique Chase (Defra)', 'Sarah Wilson (Natural England)'],
+        organisations: ['Defra', 'Natural England'],
+        statuses: ['live', 'draft'],
+        offline: true
+      })
+    })
   })
 })
 
 /**
+ * @import { QueryOptions } from '@defra/forms-model'
  * @import { AddFieldsSwitch, PipelineStage, FilterAggregationResult } from '~/src/api/forms/repositories/aggregation/types.js'
  */
