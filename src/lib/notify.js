@@ -103,8 +103,8 @@ export function escapeContent(str) {
   result = result.replaceAll(/&rsqb;(&lpar;)/gi, '&rsqb; &lpar;')
 
   // Rule: Single and double quotes are escaped with a backslash, but escape backslashes that would be escape characters first.
-  result = result.replaceAll("\\'", String.raw`\\\\'`)
-  result = result.replaceAll('\\"', String.raw`\\\\"`)
+  result = result.replaceAll(String.raw`\'`, String.raw`\\\\'`)
+  result = result.replaceAll(String.raw`\"`, String.raw`\\\\"`)
   result = result.replaceAll("'", String.raw`\'`)
   result = result.replaceAll('"', String.raw`\"`)
 

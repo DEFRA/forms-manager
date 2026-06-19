@@ -875,10 +875,10 @@ describe('Forms service', () => {
   })
 
   describe('sendEmailIfRequired', () => {
-    it('should not send if no notification email setup', async () => {
+    it('should not send if no team email setup', async () => {
       const metadata = /** @type {FormMetadata} */ ({
         ...formMetadataInput,
-        notificationEmail: ''
+        teamEmail: ''
       })
       await sendEmailIfRequired(metadata, { offline: true })
       expect(sendNotification).not.toHaveBeenCalled()

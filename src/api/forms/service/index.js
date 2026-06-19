@@ -300,7 +300,7 @@ export async function removeForm(formId, author) {
 export async function sendEmailIfRequired(form, updated) {
   const keys = new Set(Object.keys(updated))
 
-  if (!form.notificationEmail) {
+  if (!form.teamEmail) {
     return
   }
 
@@ -310,7 +310,7 @@ export async function sendEmailIfRequired(form, updated) {
     const longDate = `${format(now, 'eeee d LLLL')} at ${format(now, 'h:mmaaa')}`
     await sendNotification({
       templateId,
-      emailAddress: form.notificationEmail,
+      emailAddress: form.teamEmail,
       personalisation: {
         subject: 'Your form is offline',
         body: `'${form.title}' was removed from GOV.UK and replaced with a service unavailable page on ${longDate}.
