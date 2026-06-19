@@ -18,7 +18,6 @@ export async function request(method, url, options) {
   const statusCode = response.statusCode
 
   if (!statusCode || statusCode < MIN_OK_STATUS || statusCode > MAX_OK_STATUS) {
-    const statusCode = response.statusCode
     let err
 
     if ('message' in body && typeof body.message === 'string' && body.message) {

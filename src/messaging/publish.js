@@ -95,10 +95,7 @@ export async function publishDraftCreatedFromLiveEvent(
  * @param {FormMetadata} metadata
  * @param {FormMetadata} oldMetadata
  */
-export async function publishFormOfflineUpdatedEvent(
-  metadata,
-  oldMetadata
-) {
+export async function publishFormOfflineUpdatedEvent(metadata, oldMetadata) {
   const auditMessage = formOfflineUpdatedMapper(oldMetadata, metadata)
 
   return validateAndPublishEvent(auditMessage)

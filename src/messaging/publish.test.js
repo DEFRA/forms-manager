@@ -303,7 +303,10 @@ describe('publish', () => {
         ...metadata,
         offline: true
       })
-      const response = await publishFormOfflineUpdatedEvent(newMetadata, metadata)
+      const response = await publishFormOfflineUpdatedEvent(
+        newMetadata,
+        metadata
+      )
       expect(response?.MessageId).toBe(messageId)
       expect(publishEvent).toHaveBeenCalledWith({
         entityId: formId,

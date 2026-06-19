@@ -50,6 +50,9 @@ const serviceId = /** @type {string} */ (
  *
  * NOTE: When escaping the backslash in `\'` for Notify, it needs to be escaped with an additional two backslashes, because Notify treats `\\'` the same as `\'` which results
  * in no backslash in the final output.
+ */
+
+/**
  * @param {string} str - Gracefully handles null, undefined and non-string values.
  * @returns {string}
  */
