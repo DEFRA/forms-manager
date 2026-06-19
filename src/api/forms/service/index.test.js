@@ -28,10 +28,12 @@ import {
   getFormBySlug,
   prepareUpdatedFormMetadata,
   removeForm,
+  sendEmailIfRequired,
   updateFormMetadata
 } from '~/src/api/forms/service/index.js'
 import * as versioningService from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { sendNotification } from '~/src/lib/notify.js'
 import { publishEvent } from '~/src/messaging/publish-base.js'
 import { prepareDb } from '~/src/mongo.js'
 
@@ -43,6 +45,7 @@ jest.mock('~/src/api/forms/templates.js')
 jest.mock('~/src/mongo.js')
 jest.mock('~/src/messaging/publish-base.js')
 jest.mock('~/src/api/forms/service/versioning.js')
+jest.mock('~/src/lib/notify.js')
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -870,8 +873,38 @@ describe('Forms service', () => {
       expect(versioningService.createFormVersion).not.toHaveBeenCalled()
     })
   })
+
+  describe('sendEmailIfRequired', () => {
+    it('should not send if no notification email setup', async () => {
+      const metadata = /** @type {FormMetadata} */ ({
+        ...formMetadataInput,
+        notificationEmail: ''
+      })
+      await sendEmailIfRequired(metadata, { offline: true })
+      expect(sendNotification).not.toHaveBeenCalled()
+    })
+
+    it('should not send if offline attribute missing', async () => {
+      const metadata = /** @type {FormMetadata} */ (formMetadataInput)
+      await sendEmailIfRequired(metadata, {})
+      expect(sendNotification).not.toHaveBeenCalled()
+    })
+
+    it('should not send if offline attribute is false', async () => {
+      const metadata = /** @type {FormMetadata} */ (formMetadataInput)
+      await sendEmailIfRequired(metadata, { offline: false })
+      expect(sendNotification).not.toHaveBeenCalled()
+    })
+
+    it('should send if offline attribute is true', async () => {
+      const metadata = /** @type {FormMetadata} */ (formMetadataInput)
+      await sendEmailIfRequired(metadata, { offline: true })
+      expect(sendNotification).toHaveBeenCalled()
+    })
+  })
 })
 
 /**
  * @import { ClientSession } from 'mongodb'
+ * @import { FormMetadata } from '@defra/forms-model'
  */

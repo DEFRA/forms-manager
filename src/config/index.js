@@ -227,6 +227,25 @@ export const config = convict({
     format: String,
     default: null,
     env: 'PUBLIC_KEY_FOR_SECRETS'
+  },
+
+  /** @type {SchemaObj<string>} */
+  notifyTemplateId: {
+    format: String,
+    default: null,
+    env: 'NOTIFY_TEMPLATE_ID'
+  },
+  /** @type {SchemaObj<string>} */
+  notifyAPIKey: {
+    format: String,
+    default: null,
+    env: 'NOTIFY_API_KEY'
+  },
+  /** @type {SchemaObj<string>} */
+  notifyReplyToId: {
+    format: String,
+    default: null,
+    env: 'NOTIFY_REPLY_TO_ID'
   }
 })
 
