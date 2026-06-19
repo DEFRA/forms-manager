@@ -313,7 +313,7 @@ export async function sendEmailIfRequired(form, updated) {
       emailAddress: form.notificationEmail,
       personalisation: {
         subject: 'Your form is offline',
-        body: `'${form.title}' was removed from GOV.UK and replaced with a service unavalable page on ${longDate}.
+        body: `'${form.title}' was removed from GOV.UK and replaced with a service unavailable page on ${longDate}.
 
 Contact us if you were unaware of this change.
 
