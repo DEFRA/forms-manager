@@ -30,16 +30,26 @@ export function buildFilterConditions(options) {
     conditions.organisation = { $in: organisations }
   }
 
+  const orConditions =
+    /** @type {{ live?: { $exists: boolean }, offline?: { $eq?: boolean, $ne?: boolean  }}[]} */ ([])
+
+  // 'Live' and 'Offline' are mutally exclusive
   if (status && status.length > 0) {
-    conditions.$or = status.map((s) =>
-      s === FormStatus.Live
-        ? { live: { $exists: true } }
-        : { live: { $exists: false } }
+    orConditions.push(
+      ...status.map((s) =>
+        s === FormStatus.Live
+          ? { live: { $exists: true }, offline: { $ne: true } }
+          : { live: { $exists: false } }
+      )
     )
   }
 
   if (offline === true) {
-    conditions.offline = { $eq: offline }
+    orConditions.push({ offline: { $eq: offline } })
+  }
+
+  if (orConditions.length) {
+    conditions.$or = orConditions
   }
 
   return conditions

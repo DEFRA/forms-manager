@@ -37,3 +37,7 @@ process.env.ENTITLEMENT_URL = 'http://localhost:3004'
 process.env.FEATURE_FLAG_USE_ENTITLEMENT_API = 'false'
 
 process.env.PUBLIC_KEY_FOR_SECRETS = 'test-public-key'
+
+process.env.NOTIFY_TEMPLATE_ID = '2d48d7f9-32ae-43be-9bf1-8bf5cd7bfc17'
+process.env.NOTIFY_REPLY_TO_ID = '462e5ac0-28f1-4e51-9d8e-8d8c31f59f6a'
+process.env.NOTIFY_API_KEY = 'dummy'

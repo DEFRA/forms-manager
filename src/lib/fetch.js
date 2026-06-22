@@ -1,6 +1,8 @@
 import Boom from '@hapi/boom'
 import Wreck from '@hapi/wreck'
-import { StatusCodes } from 'http-status-codes'
+
+const MIN_OK_STATUS = 200
+const MAX_OK_STATUS = 299
 
 /**
  * Base request function using `@hapi/wreck`
@@ -13,8 +15,9 @@ export async function request(method, url, options) {
   const response = await Wreck.request(method, url.href, options)
   const body = await Wreck.read(response, options)
 
-  if (response.statusCode !== StatusCodes.OK) {
-    const statusCode = response.statusCode
+  const statusCode = response.statusCode
+
+  if (!statusCode || statusCode < MIN_OK_STATUS || statusCode > MAX_OK_STATUS) {
     let err
 
     if ('message' in body && typeof body.message === 'string' && body.message) {

@@ -5,6 +5,7 @@ import {
   slugify
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
+import { format } from 'date-fns'
 import { MongoServerError } from 'mongodb'
 
 import { removeFormErrorMessages } from '~/src/api/forms/constants.js'
@@ -24,7 +25,9 @@ import {
   removeFormVersions
 } from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
+import { config } from '~/src/config/index.js'
 import { logger } from '~/src/helpers/logging/logger.js'
+import { sendNotification } from '~/src/lib/notify.js'
 import { getFormMetadataAuditMessages } from '~/src/messaging/mappers/form-events-bulk.js'
 import {
   bulkPublishEvents,
@@ -33,6 +36,9 @@ import {
   publishFormTitleUpdatedEvent
 } from '~/src/messaging/publish.js'
 import { client } from '~/src/mongo.js'
+
+const templateId = config.get('notifyTemplateId')
+const notifyReplyToId = config.get('notifyReplyToId')
 
 /**
  * Prepares the updated form metadata with audit fields
@@ -234,6 +240,7 @@ export async function updateFormMetadata(formId, formUpdate, author) {
       if (auditMessages.length) {
         await bulkPublishEvents(auditMessages)
       }
+      await sendEmailIfRequired(form, updatedForm)
     })
 
     logger.info(`Updated form metadata for form ID ${formId}`)
@@ -284,6 +291,37 @@ export async function removeForm(formId, author) {
   }
 
   logger.info(`Removed form with ID ${formId}`)
+}
+
+/**
+ * @param {FormMetadata} form
+ * @param {Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>} updated
+ */
+export async function sendEmailIfRequired(form, updated) {
+  const keys = new Set(Object.keys(updated))
+
+  if (!form.teamEmail) {
+    return
+  }
+
+  if (keys.has('offline') && updated.offline) {
+    // Form has been taken offline
+    const now = new Date()
+    const longDate = `${format(now, 'eeee d LLLL')} at ${format(now, 'h:mmaaa')}`
+    await sendNotification({
+      templateId,
+      emailAddress: form.teamEmail,
+      personalisation: {
+        subject: 'Your form is offline',
+        body: `'${form.title}' was removed from GOV.UK and replaced with a service unavailable page on ${longDate}.
+
+Contact us if you were unaware of this change.
+
+From the Defra forms team`
+      },
+      notifyReplyToId
+    })
+  }
 }
 
 /**

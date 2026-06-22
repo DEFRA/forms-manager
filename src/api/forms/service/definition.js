@@ -335,6 +335,11 @@ export async function createLiveFromDraft(formId, author) {
         }
       : partialAuditFields(now, author, FormStatus.Live) // Partially update the live state fields
 
+    // Make online (if currently offline)
+    if (form.offline) {
+      set.offline = false
+    }
+
     const session = client.startSession()
 
     try {

@@ -206,6 +206,23 @@ describe('Forms service', () => {
       await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
     })
 
+    it('should create a live state from existing draft form V2 and set to online if previously offline', async () => {
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...definitionV2,
+        outputEmail: 'test@defra.gov.uk'
+      })
+      jest.mocked(formMetadata.get).mockResolvedValueOnce({
+        ...formMetadataWithLiveDocument,
+        offline: true
+      })
+      await expect(createLiveFromDraft(id, author)).resolves.toBeUndefined()
+      expect(
+        Object.entries(
+          /** @type {jest.Mock} */ (formMetadata.update).mock.calls[0][1].$set
+        )
+      ).toContainEqual(['offline', false])
+    })
+
     it('should check if form update DB operation is called with correct form data', async () => {
       jest.mocked(formDefinition.get).mockResolvedValueOnce({
         ...definition,
