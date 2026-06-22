@@ -148,7 +148,9 @@ describe('form-events', () => {
       const updatedMetadata = {
         ...metadata
       }
-      expect(formOfflineUpdatedMapper(metadata, updatedMetadata)).toBeUndefined()
+      expect(
+        formOfflineUpdatedMapper(metadata, updatedMetadata)
+      ).toBeUndefined()
     })
   })
 })
