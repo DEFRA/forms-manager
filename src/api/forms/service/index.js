@@ -216,11 +216,12 @@ export async function updateFormMetadata(formId, formUpdate, author) {
         await handleTitleUpdate(formId, form, formUpdate, updatedForm, session)
       }
 
+      await sendEmailIfRequired(form, updatedForm)
+
       const auditMessages = getFormMetadataAuditMessages(form, updatedForm)
       if (auditMessages.length) {
         await bulkPublishEvents(auditMessages)
       }
-      await sendEmailIfRequired(form, updatedForm)
     })
 
     logger.info(`Updated form metadata for form ID ${formId}`)
