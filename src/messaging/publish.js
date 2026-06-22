@@ -9,7 +9,6 @@ import {
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
   formMigratedMapper,
-  formOfflineUpdatedMapper,
   formTitleUpdatedMapper,
   formUpdatedMapper,
   savedFormSecretMapper
@@ -86,17 +85,6 @@ export async function publishDraftCreatedFromLiveEvent(
     createdAt,
     createdBy
   )
-
-  return validateAndPublishEvent(auditMessage)
-}
-
-/**
- * Publishes a 'form offline updated' event
- * @param {FormMetadata} metadata
- * @param {FormMetadata} oldMetadata
- */
-export async function publishFormOfflineUpdatedEvent(metadata, oldMetadata) {
-  const auditMessage = formOfflineUpdatedMapper(oldMetadata, metadata)
 
   return validateAndPublishEvent(auditMessage)
 }

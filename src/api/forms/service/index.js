@@ -20,10 +20,7 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
-import {
-  createFormVersion,
-  removeFormVersions
-} from '~/src/api/forms/service/versioning.js'
+import { removeFormVersions } from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { config } from '~/src/config/index.js'
 import { logger } from '~/src/helpers/logging/logger.js'
