@@ -337,17 +337,12 @@ export async function insertDraft(
 export async function allocateDraftVersion(formId, session) {
   const versionNumber =
     await formMetadataRepository.getAndIncrementVersionNumber(formId, session)
+  
   const createdAt = new Date()
   const versionMetadata = /** @type {FormVersionMetadata} */ ({
     versionNumber,
     createdAt
   })
-
-  await formMetadataRepository.addVersionMetadata(
-    formId,
-    versionMetadata,
-    session
-  )
 
   return versionMetadata
 }
