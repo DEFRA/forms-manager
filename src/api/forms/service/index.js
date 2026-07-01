@@ -20,10 +20,7 @@ import {
   mapForm,
   partialAuditFields
 } from '~/src/api/forms/service/shared.js'
-import {
-  createFormVersion,
-  removeFormVersions
-} from '~/src/api/forms/service/versioning.js'
+import { removeFormVersions } from '~/src/api/forms/service/versioning.js'
 import * as formTemplates from '~/src/api/forms/templates.js'
 import { config } from '~/src/config/index.js'
 import { logger } from '~/src/helpers/logging/logger.js'
@@ -112,20 +109,6 @@ export async function handleTitleUpdate(
 }
 
 /**
- * Handles versioning for non-title metadata updates
- * @param {string} formId - The form ID
- * @param {Partial<FormMetadataInput>} formUpdate - The update payload
- * @param {ClientSession} session - MongoDB session
- */
-export async function handleMetadataVersioning(formId, formUpdate, session) {
-  if (Object.keys(formUpdate).length > 0) {
-    await createFormVersion(formId, session)
-  } else {
-    logger.debug(`No metadata changes to process for form ID ${formId}`)
-  }
-}
-
-/**
  * Creates a new empty form
  * @param {FormMetadataInput} metadataInput - the form metadata to save
  * @param {FormMetadataAuthor} author - the author details
@@ -159,8 +142,7 @@ export async function createForm(metadataInput, author) {
     createdAt: now,
     createdBy: author,
     updatedAt: now,
-    updatedBy: author,
-    versions: []
+    updatedBy: author
   }
 
   const session = client.startSession()
@@ -232,8 +214,6 @@ export async function updateFormMetadata(formId, formUpdate, author) {
 
       if (formUpdate.title) {
         await handleTitleUpdate(formId, form, formUpdate, updatedForm, session)
-      } else {
-        await handleMetadataVersioning(formId, formUpdate, session)
       }
 
       await sendEmailIfRequired(form, updatedForm)

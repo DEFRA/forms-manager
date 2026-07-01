@@ -11,7 +11,7 @@ import {
 } from '~/src/messaging/mappers/form-events.js'
 
 /**
- * @type {Record<string, (function(FormMetadata, PartialFormMetadataDocument): AuditMessage)>}
+ * @type {Record<string, (function(FormMetadata, PartialFormMetadataDocument): AuditMessage | undefined )>}
  */
 const mapperLookup = {
   organisation: formOrganisationUpdatedMapper,
@@ -59,7 +59,10 @@ export function getFormMetadataAuditMessages(metadata, formUpdated) {
 
     if (hasKey) {
       const mapperFn = mapperLookup[key]
-      messages.push(mapperFn(metadata, formUpdated))
+      const message = mapperFn(metadata, formUpdated)
+      if (message) {
+        messages.push(message)
+      }
     }
   }
 

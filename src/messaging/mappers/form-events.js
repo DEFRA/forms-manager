@@ -536,11 +536,16 @@ export function deletedFormSecretMapper(metadata, secretName, createdBy) {
 /**
  * @param {FormMetadata} metadata
  * @param {PartialFormMetadataDocument} updatedForm
- * @returns {FormOfflineUpdatedMessage}
+ * @returns { FormOfflineUpdatedMessage | undefined }
  */
 export function formOfflineUpdatedMapper(metadata, updatedForm) {
   const { offline: oldOffline } = metadata
   const { offline } = updatedForm
+
+  // Ignore if no change
+  if (oldOffline === offline) {
+    return undefined
+  }
 
   const baseData = createFormMessageDataBase(metadata)
 

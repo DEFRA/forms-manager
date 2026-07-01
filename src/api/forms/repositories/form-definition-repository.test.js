@@ -953,7 +953,7 @@ describe('form-definition-repository', () => {
       }
     })
 
-    it('should allocate a version exactly once, stamp the inserted draft, and snapshot to form-versions exactly once', async () => {
+    it('should allocate a version exactly once, stamp the inserted draft', async () => {
       const definitionV1 = { ...draft, conditions: [] }
       const createdAt = new Date('2026-04-24T10:00:00Z')
       mockCollection.findOneAndUpdate.mockResolvedValue({ definitionV1 })
@@ -970,12 +970,6 @@ describe('form-definition-repository', () => {
       expect(
         formMetadataRepository.getAndIncrementVersionNumber
       ).toHaveBeenCalledWith(formId, mockSession)
-      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledTimes(1)
-      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
-        formId,
-        { versionNumber: 7, createdAt },
-        mockSession
-      )
 
       const [, update] = mockCollection.findOneAndUpdate.mock.calls[0]
       /** @type {UpdateFilter<{ draft: FormDefinition }>} */
@@ -1066,16 +1060,6 @@ describe('form-definition-repository', () => {
           expect(
             formMetadataRepository.getAndIncrementVersionNumber
           ).toHaveBeenCalledWith(formId, mockSession)
-          expect(
-            formMetadataRepository.addVersionMetadata
-          ).toHaveBeenCalledTimes(1)
-          expect(
-            formMetadataRepository.addVersionMetadata
-          ).toHaveBeenCalledWith(
-            formId,
-            { versionNumber: 11, createdAt },
-            mockSession
-          )
           expect(persistedDraft.metadata?.[FORM_VERSION_METADATA_KEY]).toEqual({
             versionNumber: 11,
             createdAt

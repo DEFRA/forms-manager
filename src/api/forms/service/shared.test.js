@@ -23,25 +23,19 @@ const baseDocument = {
 }
 
 describe('mapForm', () => {
-  it('should return versions from document when present', () => {
-    const versions = [
-      { versionNumber: 2, createdAt: new Date('2025-10-01') },
-      { versionNumber: 1, createdAt: new Date('2025-09-01') }
-    ]
-    const result = mapForm({ ...baseDocument, versions })
-
-    expect(result.versions).toEqual(versions)
-  })
-
-  it('should return undefined for versions when document has no versions field', () => {
+  it('should return document', () => {
     const result = mapForm(baseDocument)
 
-    expect(result.versions).toBeUndefined()
+    expect(result.draft).toBeDefined()
+    expect(result.id).toBe(baseDocument._id.toString())
   })
 
-  it('should return empty array for versions when document has empty versions array', () => {
-    const result = mapForm({ ...baseDocument, versions: [] })
-
-    expect(result.versions).toEqual([])
+  it('should throw if invalid', () => {
+    expect(() =>
+      mapForm({
+        ...baseDocument,
+        title: undefined
+      })
+    ).toThrow('Form is malformed in the database. Expected fields are missing.')
   })
 })

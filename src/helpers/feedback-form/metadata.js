@@ -23,7 +23,6 @@ export const feedbackMetadata = /** @type {FormMetadata} */ ({
   createdBy: user,
   updatedAt: createdUpdatedDate,
   updatedBy: user,
-  versions: [],
   notificationEmail: 'defraforms.dynamic-target@defra.gov.uk',
   contact: {
     phone: 'Telephone: 020 7946 0101\r\nMonday to Friday, 8am to 6pm'

@@ -858,22 +858,6 @@ describe('Forms service', () => {
     })
   })
 
-  describe('handleMetadataVersioning', () => {
-    it('should not create version when there are no changes', async () => {
-      const formUpdate = {}
-      const mockSession = /** @type {import('mongodb').ClientSession} */ ({})
-
-      jest.clearAllMocks()
-
-      const { handleMetadataVersioning } =
-        await import('~/src/api/forms/service/index.js')
-
-      await handleMetadataVersioning(id, formUpdate, mockSession)
-
-      expect(versioningService.createFormVersion).not.toHaveBeenCalled()
-    })
-  })
-
   describe('sendEmailIfRequired', () => {
     it('should not send if no team email setup', async () => {
       const metadata = /** @type {FormMetadata} */ ({
