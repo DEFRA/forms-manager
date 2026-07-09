@@ -418,5 +418,62 @@ describe('publish', () => {
         }
       })
     })
+
+    it('should get FORM_OFFLINE_UPDATED audit message', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        offline: true,
+        updatedBy,
+        updatedAt
+      })
+      const messages = getFormMetadataAuditMessages(metadata, formUpdated)
+      const [formUpdatedMessage] = messages
+      expect(messages).toHaveLength(1)
+      expect(formUpdatedMessage).toEqual({
+        entityId: formId,
+        source: AuditEventMessageSource.FORMS_MANAGER,
+        messageCreatedAt: expect.any(Date),
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        type: AuditEventMessageType.FORM_OFFLINE_UPDATED,
+        createdAt: updatedAt,
+        createdBy: updatedBy,
+        data: {
+          formId,
+          slug: 'audit-form',
+          changes: {
+            previous: {
+              offline: false
+            },
+            new: {
+              offline: true
+            }
+          }
+        }
+      })
+    })
+
+    it('should NOT get audit message since no change', () => {
+      const updatedAt = new Date('2025-07-27')
+      const updatedBy = {
+        displayName: 'Gandalf',
+        id: '29a8b10d-1d7a-40d4-b312-c57f74e1a606'
+      }
+      const formUpdated = buildPartialFormMetadataDocument({
+        offline: true,
+        updatedBy,
+        updatedAt
+      })
+      const origMetadata = {
+        ...metadata,
+        offline: true
+      }
+      const messages = getFormMetadataAuditMessages(origMetadata, formUpdated)
+      expect(messages).toHaveLength(0)
+    })
   })
 })

@@ -79,9 +79,6 @@ describe('versioning service', () => {
         .mocked(formDefinitionRepository.get)
         .mockResolvedValue(mockFormDefinition)
       jest
-        .mocked(formMetadataRepository.addVersionMetadata)
-        .mockResolvedValue(/** @type {any} */ ({}))
-      jest
         .mocked(formVersionsRepository.createVersion)
         .mockResolvedValue(mockVersionDocument)
     })
@@ -96,11 +93,6 @@ describe('versioning service', () => {
       expect(formDefinitionRepository.get).toHaveBeenCalledWith(
         formId,
         FormStatus.Draft,
-        expect.any(Object)
-      )
-      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
-        formId,
-        { versionNumber: 1, createdAt: now },
         expect.any(Object)
       )
       expect(formDefinitionRepository.setFormVersion).toHaveBeenCalledWith(
@@ -145,11 +137,6 @@ describe('versioning service', () => {
       expect(
         formMetadataRepository.getAndIncrementVersionNumber
       ).toHaveBeenCalledWith(formId, expect.any(Object))
-      expect(formMetadataRepository.addVersionMetadata).toHaveBeenCalledWith(
-        formId,
-        { versionNumber: 4, createdAt: now },
-        expect.any(Object)
-      )
     })
 
     it('should create its own session when none provided', async () => {

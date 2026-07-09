@@ -9,7 +9,6 @@ import {
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import { FormAlreadyExistsError } from '~/src/api/forms/errors.js'
 import {
-  addVersionMetadata,
   create,
   get,
   getAndIncrementVersionNumber,
@@ -645,40 +644,6 @@ describe('form-metadata-repository', () => {
         { _id: new ObjectId(metadataId) },
         { session: mockSession }
       )
-    })
-  })
-
-  describe('addVersionMetadata', () => {
-    const versionMetadata = {
-      versionNumber: 1,
-      createdAt: new Date()
-    }
-
-    it('should add version metadata to form', async () => {
-      mockCollection.updateOne.mockResolvedValue({
-        modifiedCount: 1
-      })
-      mockCollection.findOne.mockResolvedValue(metadataAfter)
-
-      const result = await addVersionMetadata(
-        metadataId,
-        versionMetadata,
-        mockSession
-      )
-
-      expect(mockCollection.updateOne).toHaveBeenCalledWith(
-        { _id: new ObjectId(metadataId) },
-        {
-          $push: {
-            versions: {
-              $each: [versionMetadata],
-              $sort: { versionNumber: -1 }
-            }
-          }
-        },
-        { session: mockSession }
-      )
-      expect(result).toEqual(metadataAfter)
     })
   })
 

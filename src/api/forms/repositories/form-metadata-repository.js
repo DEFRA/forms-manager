@@ -402,37 +402,6 @@ export async function remove(formId, session) {
 }
 
 /**
- * Adds version metadata to a form
- * @param {string} formId - ID of the form
- * @param {FormVersionMetadata} versionMetadata - Version metadata to add
- * @param {ClientSession} session - mongo transaction session
- */
-export async function addVersionMetadata(formId, versionMetadata, session) {
-  logger.info(
-    `Adding version metadata ${versionMetadata.versionNumber} to form ID ${formId}`
-  )
-
-  const result = await update(
-    formId,
-    {
-      $push: {
-        versions: {
-          $each: [versionMetadata],
-          $sort: { versionNumber: -1 }
-        }
-      }
-    },
-    session
-  )
-
-  logger.info(
-    `Added version metadata ${versionMetadata.versionNumber} to form ID ${formId}`
-  )
-
-  return result
-}
-
-/**
  * Gets version metadata for a form
  * @param {string} formId - ID of the form
  * @param {ClientSession} [session] - Optional MongoDB session for transactions

@@ -13,6 +13,7 @@ import {
 
 import author from '~/src/api/forms/service/__stubs__/author.js'
 import {
+  formOfflineUpdatedMapper,
   formOrganisationUpdatedMapper,
   formTeamEmailUpdatedMapper,
   formTeamNameUpdatedMapper,
@@ -100,6 +101,56 @@ describe('form-events', () => {
           payload
         }
       })
+    })
+  })
+
+  describe('formOfflineUpdatedMapper', () => {
+    const formId = '6883d8667a2a64da10af4312'
+    const updatedAt = new Date('2025-08-31')
+
+    const metadata = buildMetaData({
+      id: formId,
+      updatedAt,
+      updatedBy: author,
+      slug: 'my-form',
+      offline: false
+    })
+    it('should map a payload into a FORM_UPDATED replaced event', () => {
+      const updatedMetadata = {
+        ...metadata,
+        offline: true
+      }
+      expect(formOfflineUpdatedMapper(metadata, updatedMetadata)).toEqual({
+        schemaVersion: AuditEventMessageSchemaVersion.V1,
+        category: AuditEventMessageCategory.FORM,
+        source: AuditEventMessageSource.FORMS_MANAGER,
+        type: AuditEventMessageType.FORM_OFFLINE_UPDATED,
+        entityId: formId,
+        createdAt: updatedAt,
+        createdBy: author,
+        messageCreatedAt: expect.any(Date),
+        data: {
+          changes: {
+            new: {
+              offline: true
+            },
+            previous: {
+              offline: false
+            }
+          },
+          formId: '6883d8667a2a64da10af4312',
+          slug: 'my-form'
+        }
+      })
+    })
+
+    it('should ignore if no change', () => {
+      const updatedMetadata = {
+        ...metadata
+      }
+      expect(
+        formOfflineUpdatedMapper(metadata, updatedMetadata)
+      ).toBeUndefined()
     })
   })
 })
