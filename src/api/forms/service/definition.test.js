@@ -424,6 +424,55 @@ describe('Forms service', () => {
       )
     })
 
+    it('should fail to create a live state from existing draft form when the Welsh translations are out of sync', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        /** @type {FormDefinition} */ ({
+          ...definition,
+          metadata: {
+            translations: {
+              cy: {
+                'form.title': 'Welsh form title'
+              }
+            }
+          }
+        })
+      )
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.outOfSyncTranslations)
+      )
+    })
+
+    it('should fail to create a live state from existing draft form when the Welsh translations are not fully completed', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValue(formMetadataDocument)
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(
+        /** @type {FormDefinition} */ ({
+          ...definition,
+          metadata: {
+            translations: {
+              cy: {
+                'form.title': 'Welsh form title',
+                'form.contact.email.address': 'my-email@test.com',
+                'form.contact.email.responseTime': 'Welsh response time',
+                'form.contact.online.url': 'https://welsh-contact.org',
+                'form.contact.online.text': 'Welsh contact text',
+                'form.contact.phone': 'Welsh phone',
+                'form.submissionGuidance': 'Welsh submission guidance',
+                'form.privacyNoticeUrl': ''
+              }
+            }
+          }
+        })
+      )
+
+      await expect(createLiveFromDraft(id, author)).rejects.toThrow(
+        Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
+      )
+    })
+
     it('should succeed to create a live state from existing draft form when there is no start page when engine is V2', async () => {
       const draftV2DefinitionNoStartPage = /** @type {FormDefinition} */ ({
         ...definition,

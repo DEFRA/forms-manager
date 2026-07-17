@@ -14,7 +14,11 @@ export const makeFormLiveErrorMessages = {
   missingTermsAndConditions:
     'You must confirm you meet the terms and conditions before you make this form live.',
   missingLivePaymentApiKey:
-    'You must add a valid live payment API key before you make this form live.'
+    'You must add a valid live payment API key before you make this form live.',
+  missingTranslations:
+    'You must finish translating the whole form into Welsh before making this form live.',
+  outOfSyncTranslations:
+    'You have made changes to the form that have affected Welsh translations. You must re-save the Welsh translations.'
 }
 
 export const removeFormErrorMessages = {
