@@ -34,6 +34,12 @@ import { client } from '~/src/mongo.js'
 export const PAYMENT_LIVE_API_KEY = 'payment-live-api-key'
 export const PAYMENT_LIVE_API_KEY_PENDING = 'payment-live-api-key-pending'
 
+const CONTACT_KEY_EMAIL_ADDRESS = 'form.contact.email.address'
+const CONTACT_KEY_EMAIL_RESPONSE_TIME = 'form.contact.email.responseTime'
+const CONTACT_KEY_ONLINE_URL = 'form.contact.online.url'
+const CONTACT_KEY_ONLINE_TEXT = 'form.contact.online.text'
+const CONTACT_KEY_PHONE = 'form.contact.phone'
+
 /**
  * Retrieves a paginated list of forms with filter options
  * @param {QueryOptions} options - Pagination, sorting, and filtering options
@@ -197,7 +203,7 @@ function missingTermsAndConditions(form) {
  * @param {FormMetadata} form
  * @param {FormDefinition} definition
  */
-function checkForMissingTranslations(form, definition) {
+export function checkForMissingTranslations(form, definition) {
   // Ignore if no translations
   // @ts-expect-error - dynamic language name
   if (!definition.metadata?.translations?.cy) {
@@ -220,12 +226,57 @@ function checkForMissingTranslations(form, definition) {
     throw Boom.badRequest(makeFormLiveErrorMessages.outOfSyncTranslations)
   }
 
+  // Determine what bits of contact info have and English entry and a translation
+  // At least one piece of contact info is required (may be two fields that go together)
+  // and each field that has an English value must have a translation
+  let contactCount = 0
+  if (form.contact?.email?.address || form.contact?.email?.responseTime) {
+    if (
+      !cy[CONTACT_KEY_EMAIL_ADDRESS] ||
+      !cy[CONTACT_KEY_EMAIL_RESPONSE_TIME]
+    ) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
+    }
+    contactCount++
+  }
+
+  if (form.contact?.online?.url || form.contact?.online?.text) {
+    if (!cy[CONTACT_KEY_ONLINE_URL] || !cy[CONTACT_KEY_ONLINE_TEXT]) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
+    }
+    contactCount++
+  }
+
+  if (form.contact?.phone) {
+    if (!cy[CONTACT_KEY_PHONE]) {
+      throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
+    }
+    contactCount++
+  }
+
+  if (contactCount === 0) {
+    throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
+  }
+
+  // Use a set for faster access
+  const contactKeys = new Set([
+    CONTACT_KEY_EMAIL_ADDRESS,
+    CONTACT_KEY_EMAIL_RESPONSE_TIME,
+    CONTACT_KEY_ONLINE_URL,
+    CONTACT_KEY_ONLINE_TEXT,
+    CONTACT_KEY_PHONE
+  ])
+
   // Check for any empty translations
-  const hasEmptyValues = Object.entries(
+  // (excluding the contact info which has been checked earlier)
+  const emptyValues = Object.entries(
     // @ts-expect-error - dynamic language name
     definition.metadata.translations.cy
-  ).some(([, value]) => !value)
-  if (hasEmptyValues) {
+  )
+    .filter(([key]) => !contactKeys.has(key))
+    .filter(([, value]) => !value)
+
+  if (emptyValues.length) {
     throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
   }
 }
