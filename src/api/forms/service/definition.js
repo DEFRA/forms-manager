@@ -2,7 +2,6 @@ import {
   Engine,
   FormDefinitionRequestType,
   FormStatus,
-  buildTranslationDataRows,
   getErrorMessage,
   isPaymentPage
 } from '@defra/forms-model'
@@ -17,6 +16,7 @@ import {
   exists,
   rename
 } from '~/src/api/forms/repositories/secrets-repository.js'
+import { checkForMissingTranslations } from '~/src/api/forms/service/definition-helper.js'
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
@@ -33,12 +33,6 @@ import { client } from '~/src/mongo.js'
 
 export const PAYMENT_LIVE_API_KEY = 'payment-live-api-key'
 export const PAYMENT_LIVE_API_KEY_PENDING = 'payment-live-api-key-pending'
-
-const CONTACT_KEY_EMAIL_ADDRESS = 'form.contact.email.address'
-const CONTACT_KEY_EMAIL_RESPONSE_TIME = 'form.contact.email.responseTime'
-const CONTACT_KEY_ONLINE_URL = 'form.contact.online.url'
-const CONTACT_KEY_ONLINE_TEXT = 'form.contact.online.text'
-const CONTACT_KEY_PHONE = 'form.contact.phone'
 
 /**
  * Retrieves a paginated list of forms with filter options
@@ -197,88 +191,6 @@ export function missingPrivacyNotice(form) {
  */
 function missingTermsAndConditions(form) {
   return !form.termsAndConditionsAgreed
-}
-
-/**
- * @param {FormMetadata} form
- * @param {FormDefinition} definition
- */
-export function checkForMissingTranslations(form, definition) {
-  // Ignore if no translations
-  // @ts-expect-error - dynamic language name
-  if (!definition.metadata?.translations?.cy) {
-    return
-  }
-
-  // @ts-expect-error - dynamic language name
-  const cy = definition.metadata.translations.cy
-
-  // Check if translation entries are in sync with form definition
-  const translations = buildTranslationDataRows(form, definition)
-  const combinedRows = translations.overviewRows.concat(translations.formRows)
-  const expectedKeys = new Set(combinedRows.map((row) => row.name))
-  const foundKeys = new Set(Object.keys(cy))
-
-  const added = [...foundKeys].filter((v) => !expectedKeys.has(v))
-  const removed = [...expectedKeys].filter((v) => !foundKeys.has(v))
-
-  if (added.length || removed.length || foundKeys.size !== expectedKeys.size) {
-    throw Boom.badRequest(makeFormLiveErrorMessages.outOfSyncTranslations)
-  }
-
-  // Determine what bits of contact info have and English entry and a translation
-  // At least one piece of contact info is required (may be two fields that go together)
-  // and each field that has an English value must have a translation
-  let contactCount = 0
-  if (form.contact?.email?.address || form.contact?.email?.responseTime) {
-    if (
-      !cy[CONTACT_KEY_EMAIL_ADDRESS] ||
-      !cy[CONTACT_KEY_EMAIL_RESPONSE_TIME]
-    ) {
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
-    }
-    contactCount++
-  }
-
-  if (form.contact?.online?.url || form.contact?.online?.text) {
-    if (!cy[CONTACT_KEY_ONLINE_URL] || !cy[CONTACT_KEY_ONLINE_TEXT]) {
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
-    }
-    contactCount++
-  }
-
-  if (form.contact?.phone) {
-    if (!cy[CONTACT_KEY_PHONE]) {
-      throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
-    }
-    contactCount++
-  }
-
-  if (contactCount === 0) {
-    throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
-  }
-
-  // Use a set for faster access
-  const contactKeys = new Set([
-    CONTACT_KEY_EMAIL_ADDRESS,
-    CONTACT_KEY_EMAIL_RESPONSE_TIME,
-    CONTACT_KEY_ONLINE_URL,
-    CONTACT_KEY_ONLINE_TEXT,
-    CONTACT_KEY_PHONE
-  ])
-
-  // Check for any empty translations
-  // (excluding the contact info which has been checked earlier)
-  const emptyValues = Object.entries(
-    // @ts-expect-error - dynamic language name
-    definition.metadata.translations.cy
-  )
-    .filter(([key]) => !contactKeys.has(key))
-    .filter(([, value]) => !value)
-
-  if (emptyValues.length) {
-    throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
-  }
 }
 
 /**
