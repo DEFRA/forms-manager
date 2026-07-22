@@ -125,7 +125,7 @@ describe('definition-helper', () => {
       meta.contact = {
         email: {
           address: 'abc@def.com',
-          responseTime: 'Translated response time'
+          responseTime: 'English response time'
         }
       }
       expect(() => {
@@ -148,7 +148,7 @@ describe('definition-helper', () => {
       meta.contact = {
         online: {
           url: 'https://contact-url.com',
-          text: 'Translated text'
+          text: 'English text'
         }
       }
       expect(() => {
@@ -170,7 +170,7 @@ describe('definition-helper', () => {
       }
       const meta = structuredClone(metadata)
       meta.contact = {
-        phone: 'Translated phone'
+        phone: 'English phone'
       }
       expect(() => {
         checkForMissingTranslations(meta, def)
@@ -190,7 +190,7 @@ describe('definition-helper', () => {
       meta.contact = {
         email: {
           address: 'abc@def.com',
-          responseTime: 'Translated response time'
+          responseTime: 'English response time'
         }
       }
       expect(() => {
@@ -213,7 +213,7 @@ describe('definition-helper', () => {
       meta.contact = {
         online: {
           url: 'https://contact-url.com',
-          text: 'Translated text'
+          text: 'English text'
         }
       }
       expect(() => {
@@ -234,7 +234,31 @@ describe('definition-helper', () => {
       }
       const meta = structuredClone(metadata)
       meta.contact = {
-        phone: 'Translated phone'
+        phone: 'English phone'
+      }
+      expect(() => {
+        checkForMissingTranslations(meta, def)
+      }).toThrow(
+        'You must finish translating the whole form into Welsh before making this form live.'
+      )
+    })
+
+    it('should throw if one contact info translation completed but other missing info translations', () => {
+      const def = structuredClone(definition)
+      const translations = structuredClone(allTranslations)
+      translations['form.contact.phone'] = ''
+      def.metadata = {
+        translations: {
+          cy: translations
+        }
+      }
+      const meta = structuredClone(metadata)
+      meta.contact = {
+        email: {
+          address: 'abc@def.com',
+          responseTime: 'English response time'
+        },
+        phone: 'English phone details'
       }
       expect(() => {
         checkForMissingTranslations(meta, def)
@@ -255,13 +279,13 @@ describe('definition-helper', () => {
       meta.contact = {
         email: {
           address: 'abc@def.com',
-          responseTime: 'Translated response time'
+          responseTime: 'English response time'
         },
         online: {
           url: 'https://contact-url.com',
-          text: 'Translated text'
+          text: 'English text'
         },
-        phone: 'Translated phone'
+        phone: 'English phone'
       }
       expect(() => {
         checkForMissingTranslations(meta, def)
