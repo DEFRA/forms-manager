@@ -2,7 +2,6 @@ import {
   Engine,
   FormDefinitionRequestType,
   FormStatus,
-  buildTranslationDataRows,
   getErrorMessage,
   isPaymentPage
 } from '@defra/forms-model'
@@ -17,6 +16,7 @@ import {
   exists,
   rename
 } from '~/src/api/forms/repositories/secrets-repository.js'
+import { checkForMissingTranslations } from '~/src/api/forms/service/definition-helper.js'
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
@@ -191,43 +191,6 @@ export function missingPrivacyNotice(form) {
  */
 function missingTermsAndConditions(form) {
   return !form.termsAndConditionsAgreed
-}
-
-/**
- * @param {FormMetadata} form
- * @param {FormDefinition} definition
- */
-function checkForMissingTranslations(form, definition) {
-  // Ignore if no translations
-  // @ts-expect-error - dynamic language name
-  if (!definition.metadata?.translations?.cy) {
-    return
-  }
-
-  // @ts-expect-error - dynamic language name
-  const cy = definition.metadata.translations.cy
-
-  // Check if translation entries are in sync with form definition
-  const translations = buildTranslationDataRows(form, definition)
-  const combinedRows = translations.overviewRows.concat(translations.formRows)
-  const expectedKeys = new Set(combinedRows.map((row) => row.name))
-  const foundKeys = new Set(Object.keys(cy))
-
-  const added = [...foundKeys].filter((v) => !expectedKeys.has(v))
-  const removed = [...expectedKeys].filter((v) => !foundKeys.has(v))
-
-  if (added.length || removed.length || foundKeys.size !== expectedKeys.size) {
-    throw Boom.badRequest(makeFormLiveErrorMessages.outOfSyncTranslations)
-  }
-
-  // Check for any empty translations
-  const hasEmptyValues = Object.entries(
-    // @ts-expect-error - dynamic language name
-    definition.metadata.translations.cy
-  ).some(([, value]) => !value)
-  if (hasEmptyValues) {
-    throw Boom.badRequest(makeFormLiveErrorMessages.missingTranslations)
-  }
 }
 
 /**
