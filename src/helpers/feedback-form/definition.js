@@ -101,7 +101,29 @@ export const feedbackDefinition = /** @type {FormDefinition} */ ({
       ],
       id: '7acae132-d54d-4663-929d-04a1ed4d35d3'
     }
-  ]
+  ],
+  metadata: {
+    translations: {
+      cy: {
+        'form.title': 'Ablydiau defnyddwyr',
+        'pages.4af5213f-0373-43b9-b32f-0ee822d37860.title': 'Rhoi adborth',
+        'components.b5c525db-068e-4f05-818a-7ef57303f8b5.title':
+          "Ar y cyfan, sut rydych chi'n teimlo am y gwasanaeth a gawsoch chi heddiw?",
+        'components.b5c525db-068e-4f05-818a-7ef57303f8b5.shortDescription':
+          "Sut rydych chi'n teimlo am y gwasanaeth",
+        'components.57c2b549-e152-469f-9250-865ce5a4de23.title':
+          "Sut gallem ni wella'r gwasanaeth hwn?",
+        'components.57c2b549-e152-469f-9250-865ce5a4de23.shortDescription':
+          "Sut y gallem wella'r gwasanaeth hwn",
+        'listItems.24c89938-25e6-4cfa-99c6-f84609dd1bd2.text': 'Bodlon iawn',
+        'listItems.631bcf2f-ba78-4627-9e1b-e9f1030dc0e0.text': 'Bodlon',
+        'listItems.ee4db6ec-7246-430e-8dd2-e24cf4c34376.text':
+          'Nid yn fodlon nac yn anfodlon',
+        'listItems.3b720c19-e580-405d-81ca-189452e9d873.text': 'Anfodlon',
+        'listItems.4f4c7e11-f27a-470d-a366-48dd9a25f24c.text': 'Anfodlon iawn'
+      }
+    }
+  }
 })
 
 /**
