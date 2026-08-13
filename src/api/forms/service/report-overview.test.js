@@ -367,7 +367,8 @@ describe('report-overview', () => {
 
       const definition = buildDefinition({
         pages: [questionPage, fileUploadPage, paymentPage, summaryPage],
-        options: { showReferenceNumber: true }
+        options: { showReferenceNumber: true },
+        metadata: { translations: { cy: {} } }
       })
       expect(getFeatureList(definition)).toEqual([
         'File upload',
@@ -375,7 +376,8 @@ describe('report-overview', () => {
         'GOV.UK Pay',
         'Declaration field',
         'Declaration in CYA',
-        'Reference number'
+        'Reference number',
+        'Welsh translation'
       ])
     })
   })
