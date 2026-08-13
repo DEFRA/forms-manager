@@ -30,7 +30,8 @@ import {
   getQuestionTypeCounts,
   getUniqueAssignedConditions,
   getUniqueAssignedSections,
-  getUniqueComponentTypes
+  getUniqueComponentTypes,
+  hasWelshTranslation
 } from '~/src/api/forms/service/report-overview.js'
 import { mapForm } from '~/src/api/forms/service/shared.js'
 import { client } from '~/src/mongo.js'
@@ -627,6 +628,58 @@ describe('report-overview', () => {
         // @ts-expect-error - mock session not implemented
         getDefinitionIfExists('formId', FormStatus.Draft, {})
       ).rejects.toThrow('Not a boom NOT FOUND')
+    })
+  })
+
+  describe('hasWelshTranslation', () => {
+    it('should return true if form has welsh translations', () => {
+      const definition = /** @type {FormDefinition} */ (
+        /** @type {unknown} */ ({
+          metadata: {
+            translations: {
+              cy: {
+                example: 'Welsh text'
+              }
+            }
+          }
+        })
+      )
+      expect(hasWelshTranslation(definition)).toBe(true)
+    })
+
+    it('should return false if form has different translations', () => {
+      const definition = /** @type {FormDefinition} */ (
+        /** @type {unknown} */ ({
+          metadata: {
+            translations: {
+              ru: {
+                example: 'Other language text'
+              }
+            }
+          }
+        })
+      )
+      expect(hasWelshTranslation(definition)).toBe(false)
+    })
+
+    it('should return false if form has no translations', () => {
+      const definition = /** @type {FormDefinition} */ (
+        /** @type {unknown} */ ({
+          metadata: {}
+        })
+      )
+      expect(hasWelshTranslation(definition)).toBe(false)
+    })
+
+    it('should return false if form has no welsh translations', () => {
+      const definition = /** @type {FormDefinition} */ (
+        /** @type {unknown} */ ({
+          metadata: {
+            translations: {}
+          }
+        })
+      )
+      expect(hasWelshTranslation(definition)).toBe(false)
     })
   })
 })
