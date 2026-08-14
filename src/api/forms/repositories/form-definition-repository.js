@@ -22,6 +22,7 @@ import {
   modifyDraft,
   modifyEngineVersion,
   modifyName,
+  modifyRemoveOutputsForCondition,
   modifyReorderComponents,
   modifyReorderPages,
   modifyReorderSections,
@@ -631,27 +632,32 @@ export async function updateCondition(formId, conditionId, condition, session) {
 }
 
 /**
- * Removes a condition by id and unassigns it from any pages that use it
+ * Removes a condition by id, unassigns it from any pages that use it and
+ * removes any submission email targets that depend on it
  * @param {string} formId
  * @param {string} conditionId
  * @param {ClientSession} session
- * @returns {Promise<FormDefinition>}
+ * @returns {Promise<Output[]>} the submission email targets removed with the condition
  */
 export async function deleteCondition(formId, conditionId, session) {
   logger.info(`Deleting condition ID ${conditionId} on form ID ${formId}`)
 
+  /** @type {Output[]} */
+  let removedOutputs = []
+
   /** @type {UpdateCallback} */
   const callback = (draft) => {
     modifyUnassignCondition(draft, conditionId)
+    removedOutputs = modifyRemoveOutputsForCondition(draft, conditionId)
 
     return modifyDeleteCondition(draft, conditionId)
   }
 
-  const result = await modifyDraft(formId, callback, session)
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted condition ID ${conditionId} on form ID ${formId}`)
 
-  return result.draft
+  return removedOutputs
 }
 
 /**
@@ -754,7 +760,7 @@ export async function updateOption(formId, optionName, optionValue, session) {
 }
 
 /**
- * @import { FormDefinition, FormVersionMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, FormVersionMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, Output, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'

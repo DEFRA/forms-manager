@@ -134,8 +134,15 @@ export async function removeConditionOnDraftFormDefinition(
 
   try {
     await session.withTransaction(async () => {
-      // Update the condition on the form definition
-      await formDefinition.deleteCondition(formId, conditionId, session)
+      // Update the condition on the form definition. Any email actions that
+      // depend on the condition go with it, and are named on the audit event so
+      // the removal is held against the action that caused it rather than being
+      // inferred from a neighbouring event
+      const removedOutputs = await formDefinition.deleteCondition(
+        formId,
+        conditionId,
+        session
+      )
 
       const metadataDocument = await formMetadata.updateAudit(
         formId,
@@ -146,7 +153,9 @@ export async function removeConditionOnDraftFormDefinition(
       await publishFormUpdatedEvent(
         metadataDocument,
         { conditionId },
-        FormDefinitionRequestType.DELETE_CONDITION
+        FormDefinitionRequestType.DELETE_CONDITION,
+        undefined,
+        removedOutputs.length ? { removed: removedOutputs } : undefined
       )
     })
 

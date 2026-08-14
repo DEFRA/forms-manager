@@ -98,6 +98,7 @@ exports[`publish publishFormDraftReplacedEvent should publish a REPLACE_DRAFT ev
   },
   "data": {
     "formId": "661e4ca5039739ef2902b214",
+    "outputChanges": undefined,
     "payload": undefined,
     "requestType": "REPLACE_DRAFT",
     "s3Meta": {
@@ -169,6 +170,7 @@ exports[`publish publishFormUpdatedEvent should publish a FORM_UPDATED event 1`]
   },
   "data": {
     "formId": "661e4ca5039739ef2902b214",
+    "outputChanges": undefined,
     "payload": {
       "components": [],
       "id": "ffefd409-f3f4-49fe-882e-6e89f44631b1",

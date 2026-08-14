@@ -1192,6 +1192,51 @@ describe('Forms service', () => {
       })
     })
 
+    it('should record what the replacement did to the email actions', async () => {
+      /** @type {Output} */
+      const unchangedOutput = {
+        audience: 'human',
+        version: '1',
+        emailAddress: 'always@defra.gov.uk'
+      }
+      /** @type {Output} */
+      const previousOutput = {
+        audience: 'human',
+        version: '1',
+        emailAddress: 'before@defra.gov.uk'
+      }
+      /** @type {Output} */
+      const newOutput = {
+        audience: 'machine',
+        version: '2',
+        emailAddress: 'after@defra.gov.uk'
+      }
+
+      jest.mocked(formDefinition.get).mockResolvedValueOnce({
+        ...emptyFormWithSummary(),
+        outputs: [unchangedOutput, previousOutput]
+      })
+
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+      await updateDraftFormDefinition(
+        '123',
+        {
+          ...emptyFormWithSummary(),
+          outputs: [unchangedOutput, newOutput]
+        },
+        author
+      )
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REPLACE_DRAFT,
+        outputChanges: {
+          updated: [{ previous: previousOutput, new: newOutput }]
+        }
+      })
+    })
+
     it('should use V2 schema when form definition has schema version 2 (regardless of engine)', async () => {
       const v2FormDefinition = {
         ...emptyFormWithSummary(),
@@ -1712,6 +1757,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataDocument, Output, QueryOptions } from '@defra/forms-model'
  * @import { ClientSession, WithId } from 'mongodb'
  */

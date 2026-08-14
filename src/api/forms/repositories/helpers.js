@@ -825,6 +825,35 @@ export function modifyDeleteCondition(definition, conditionId) {
 }
 
 /**
+ * Removes every submission email target that depends on a condition.
+ *
+ * An output names the condition deciding whether submissions are sent to it, so
+ * one left pointing at a deleted condition fails validation. Unlike a page,
+ * which simply loses its condition and carries on, an output only exists to
+ * send submissions in that circumstance - so it goes with the condition.
+ * @param {FormDefinition} definition
+ * @param {string} conditionId
+ * @returns {Output[]} the outputs removed, for the caller to audit
+ */
+export function modifyRemoveOutputsForCondition(definition, conditionId) {
+  const outputs = definition.outputs ?? []
+
+  const removed = outputs.filter((output) => output.condition === conditionId)
+
+  if (removed.length) {
+    logger.info(
+      `Removing ${removed.length} email action(s) using condition ${conditionId}`
+    )
+
+    definition.outputs = outputs.filter(
+      (output) => output.condition !== conditionId
+    )
+  }
+
+  return removed
+}
+
+/**
  * Unassigns a condition from all pages that reference it
  * @param {FormDefinition} definition
  * @param {string} conditionId
@@ -962,7 +991,7 @@ export function modifyUpdateOption(definition, optionName, optionValue) {
  */
 
 /**
- * @import { FormDefinition, FormOptions, FormVersionMetadata, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, FormOptions, FormVersionMetadata, Page, ComponentDef, List, PatchPageFields, Engine, ConditionWrapperV2, PageSummary, PageSummaryWithConfirmationEmail, SectionAssignmentItem, Output } from '@defra/forms-model'
  * @import { ClientSession, Collection } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  */
