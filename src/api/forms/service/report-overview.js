@@ -131,6 +131,7 @@ export async function getDefinitionIfExists(formId, status, session) {
  * @param {FormStatus} definitionType
  */
 export function collectOverviewMetrics(metadata, definition, definitionType) {
+  const lang = hasWelshTranslation(definition) ? { language: 'cy' } : {}
   return {
     type: FormMetricType.OverviewMetric,
     formId: metadata.id,
@@ -138,7 +139,8 @@ export function collectOverviewMetrics(metadata, definition, definitionType) {
     summaryMetrics: calcSummaryMetrics(metadata, definition, definitionType),
     featureMetrics: calcFeatureMetrics(definition),
     submissionsCount: 0,
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    ...lang
   }
 }
 
@@ -290,7 +292,23 @@ export function getFeatureList(definition) {
   if (definition.options?.showReferenceNumber) {
     features.push('Reference number')
   }
+  if (hasWelshTranslation(definition)) {
+    features.push('Welsh translation')
+  }
   return features
+}
+
+/**
+ * Determines if form contains Welsh translations
+ * @param {FormDefinition} definition
+ * @returns {boolean}
+ */
+export function hasWelshTranslation(definition) {
+  if (!definition.metadata?.translations) {
+    return false
+  }
+  // @ts-expect-error - dynamic language lookup
+  return 'cy' in definition.metadata.translations
 }
 
 /**
