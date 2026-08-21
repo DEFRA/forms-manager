@@ -1,8 +1,4 @@
-import {
-  FormDefinitionRequestType,
-  getFormOutputChanges,
-  messageSchema
-} from '@defra/forms-model'
+import { FormDefinitionRequestType, messageSchema } from '@defra/forms-model'
 import Joi from 'joi'
 
 import { mapForm } from '~/src/api/forms/service/shared.js'
@@ -141,22 +137,18 @@ export async function publishFormDraftDeletedEvent(metadata, author) {
  * @param {unknown} payload
  * @param {FormDefinitionRequestType} requestType
  * @param {FormDefinitionS3Meta} [s3Meta]
- * @param {FormOutputChanges} [outputChanges] - what the update did to the form's submission email targets
  */
 export async function publishFormUpdatedEvent(
   metadataDocument,
   payload,
   requestType,
-  s3Meta,
-  outputChanges
+  s3Meta
 ) {
   const metadata = mapForm(metadataDocument)
   const auditMessage = formUpdatedMapper(
     metadata,
     requestType,
-    s3Meta === undefined
-      ? { payload, outputChanges }
-      : { s3Meta, outputChanges }
+    s3Meta === undefined ? { payload } : { s3Meta }
   )
 
   return validateAndPublishEvent(auditMessage)
@@ -170,12 +162,10 @@ export async function publishFormUpdatedEvent(
  * JSON file.
  * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
  * @param {FormDefinition} definition
- * @param {FormDefinition} [previousDefinition] - the draft as it was before this update
  */
 export async function publishFormDraftReplacedEvent(
   metadataDocument,
-  definition,
-  previousDefinition
+  definition
 ) {
   const metadata = mapForm(metadataDocument)
   const filename = `${metadata.id}.json`
@@ -184,13 +174,7 @@ export async function publishFormDraftReplacedEvent(
   const auditMessage = formUpdatedMapper(
     metadata,
     FormDefinitionRequestType.REPLACE_DRAFT,
-    {
-      s3Meta,
-      outputChanges: getFormOutputChanges(
-        previousDefinition?.outputs,
-        definition.outputs
-      )
-    }
+    { s3Meta }
   )
 
   return validateAndPublishEvent(auditMessage)
@@ -231,6 +215,6 @@ export async function publishDeletedFormSecretEvent(
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser, FormDefinitionS3Meta, FormOutputChanges } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser, FormDefinitionS3Meta } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

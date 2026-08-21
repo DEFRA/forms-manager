@@ -1481,9 +1481,7 @@ describe('Forms route', () => {
       expect(response.headers['content-type']).toContain(jsonContentType)
       expect(response.result).toMatchObject({
         error: 'Bad Request',
-        message: expect.stringContaining(
-          'does not match any of the allowed types'
-        ),
+        message: expect.stringContaining('"schema" must be one of [1, 2]'),
         validation: {
           source: 'payload'
         }

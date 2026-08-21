@@ -341,23 +341,15 @@ describe('publish', () => {
         emailAddress: 'old@defra.gov.uk'
       }
 
-      const previousDefinition = buildDefinition({
-        outputs: [removedOutput]
-      })
       const definition = buildDefinition({
         outputs: [removedOutput, addedOutput]
       })
 
-      await publishFormDraftReplacedEvent(
-        formMetadataDocument,
-        definition,
-        previousDefinition
-      )
+      await publishFormDraftReplacedEvent(formMetadataDocument, definition)
 
       const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
       expect(publishEventCall.data).toMatchObject({
-        requestType: FormDefinitionRequestType.REPLACE_DRAFT,
-        outputChanges: { added: [addedOutput] }
+        requestType: FormDefinitionRequestType.REPLACE_DRAFT
       })
     })
   })

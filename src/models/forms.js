@@ -106,7 +106,13 @@ export const updateFormDefinitionSchema = Joi.alternatives().conditional(
   {
     is: SchemaVersion.V2,
     then: formDefinitionV2Schema, // V2 forms (schema: 2)
-    otherwise: formDefinitionSchema // V1 forms (schema: 1, or absent)
+    otherwise: formDefinitionSchema.keys({
+      // list both valid versions here so an invalid schema value reports all allowed options, not just V1
+      schema: Joi.number()
+        .integer()
+        .valid(SchemaVersion.V1, SchemaVersion.V2)
+        .default(SchemaVersion.V1)
+    })
   }
 )
 

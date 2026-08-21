@@ -88,14 +88,6 @@ export async function updateDraftFormDefinition(formId, definition, author) {
       await session.withTransaction(async () => {
         logger.info(`Updating form definition (draft) for form ID ${formId}`)
 
-        // Read before overwriting so the audit message can say which submission
-        // email targets this replacement added, amended or removed
-        const previousDefinition = await formDefinition.get(
-          formId,
-          FormStatus.Draft,
-          session
-        )
-
         await formDefinition.update(formId, definition, session, schema)
         const updatedMetadata = await formMetadata.updateAudit(
           formId,
@@ -104,11 +96,7 @@ export async function updateDraftFormDefinition(formId, definition, author) {
         )
 
         // Publish audit message
-        await publishFormDraftReplacedEvent(
-          updatedMetadata,
-          definition,
-          previousDefinition
-        )
+        await publishFormDraftReplacedEvent(updatedMetadata, definition)
       })
     } finally {
       await session.endSession()
