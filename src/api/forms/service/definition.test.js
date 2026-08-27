@@ -606,6 +606,74 @@ describe('Forms service', () => {
       expect(result.metadata?.[FORM_VERSION_METADATA_KEY]).toBeUndefined()
     })
 
+    it('should throw 404 when the metadata has no draft state', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(buildMetadataDocument({ draft: undefined }))
+
+      await expect(getFormDefinition('123')).rejects.toThrow(
+        Boom.notFound("Form definition (draft) with ID '123' not found")
+      )
+      expect(formDefinition.get).not.toHaveBeenCalled()
+    })
+
+    it('should throw 404 when the metadata draft state fails the state schema', async () => {
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(
+        buildMetadataDocument({
+          draft: /** @type {FormMetadataState} */ ({
+            updatedAt: new Date('2020-01-01'),
+            updatedBy: author
+          })
+        })
+      )
+
+      await expect(getFormDefinition('123')).rejects.toThrow(
+        Boom.notFound("Form definition (draft) with ID '123' not found")
+      )
+      expect(formDefinition.get).not.toHaveBeenCalled()
+    })
+
+    /*
+     * DF-1348: This bug only affects draft forms. We're adding a test to make sure we've not
+     * altered live forms either. Technically it would be cleaner to do both, but modifying
+     * live forms introduces risk that isn't neccessary.
+     */
+    it('should always return the live definition', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(buildMetadataDocument())
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+
+      const result = await getFormDefinition('123', FormStatus.Live)
+
+      expect(result).toEqual(definition)
+    })
+
+    /*
+     * DF-1348: This bug only affects draft forms. We're adding a test to make sure we've not
+     * altered live forms either. Technically it would be cleaner to do both, but modifying
+     * live forms introduces risk that isn't neccessary.
+     */
+    it('should always return the live definition even if state is invalid', async () => {
+      const metadataDocument = buildMetadataDocument({
+        // @ts-expect-error we're intentionally malforming the 'live' field to mimic a DB issue
+        live: {
+          updatedAt: new Date('2025-05-20T13:00:54.794Z'),
+          updatedBy: {
+            id: '84305e4e-1f52-43d0-a123-9c873b0abb35',
+            displayName: 'Internal User'
+          }
+        }
+      })
+
+      jest.mocked(formMetadata.get).mockResolvedValueOnce(metadataDocument)
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+
+      const result = await getFormDefinition('123', FormStatus.Live)
+
+      expect(result).toEqual(definition)
+    })
+
     it('should throw an error if the form associated with the definition does not exist', async () => {
       const error = Boom.notFound("Form with ID '123' not found")
 
@@ -1712,6 +1780,6 @@ describe('Forms service', () => {
 })
 
 /**
- * @import { FormDefinition, FormMetadata, FormMetadataDocument, QueryOptions } from '@defra/forms-model'
+ * @import { FormDefinition, FormMetadata, FormMetadataDocument, FormMetadataState, QueryOptions } from '@defra/forms-model'
  * @import { ClientSession, WithId } from 'mongodb'
  */
