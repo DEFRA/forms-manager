@@ -10,7 +10,12 @@ const DEFINITION_COLLECTION_NAME = 'form-definition'
  * @param {Collection<FormDefinition>} definitionCollection
  * @param {{ updated: number, errors: number }} stats
  */
-async function updateRecords(draftOrLive, metadataCollection, definitionCollection, stats) {
+async function updateRecords(
+  draftOrLive,
+  metadataCollection,
+  definitionCollection,
+  stats
+) {
   const updatesCursor = definitionCollection.find({
     [`${draftOrLive}.outputs`]: { $exists: true }
   })
@@ -21,13 +26,23 @@ async function updateRecords(draftOrLive, metadataCollection, definitionCollecti
     const metadata = await metadataCollection.findOne({ _id: forUpdate._id })
 
     try {
-      const submissionEmail = /** @type {string} */ (metadata?.notificationEmail)
+      const submissionEmail = /** @type {string} */ (
+        metadata?.notificationEmail
+      )
 
       await definitionCollection.updateOne(
         {
           _id: forUpdate._id
         },
-        { $push: { [`${draftOrLive}.outputs`]: { emailAddress: submissionEmail, audience: 'human', version: '2' } } }
+        {
+          $push: {
+            [`${draftOrLive}.outputs`]: {
+              emailAddress: submissionEmail,
+              audience: 'human',
+              version: '2'
+            }
+          }
+        }
       )
       stats.updated++
     } catch (error) {
@@ -45,7 +60,11 @@ async function updateRecords(draftOrLive, metadataCollection, definitionCollecti
  * @param {Collection<FormMetadata>} metadataCollection
  * @param {Collection<FormDefinition>} definitionCollection
  */
-async function migrateOutputs(client, metadataCollection, definitionCollection) {
+async function migrateOutputs(
+  client,
+  metadataCollection,
+  definitionCollection
+) {
   const stats = {
     updated: 0,
     errors: 0
@@ -54,7 +73,12 @@ async function migrateOutputs(client, metadataCollection, definitionCollection) 
   const session = client.startSession()
 
   await session.withTransaction(async () => {
-    await updateRecords('draft', metadataCollection, definitionCollection, stats)
+    await updateRecords(
+      'draft',
+      metadataCollection,
+      definitionCollection,
+      stats
+    )
     await updateRecords('live', metadataCollection, definitionCollection, stats)
   })
 
