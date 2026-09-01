@@ -2,6 +2,7 @@ import {
   ConditionType,
   Coordinator,
   OperatorName,
+  SchemaVersion,
   formDefinitionV2Schema
 } from '@defra/forms-model'
 import { buildDefinition, buildQuestionPage } from '@defra/forms-model/stubs'
@@ -190,6 +191,7 @@ describe('Conditions route', () => {
 
       // Condition references a component that doesn't exist
       const refConditionComponentIdDefinition = buildDefinition({
+        schema: SchemaVersion.V2,
         name: 'Test form',
         pages: [
           buildQuestionPage({ id: 'cf49d84a-096a-461a-ae8c-a4c38ec1837d' })

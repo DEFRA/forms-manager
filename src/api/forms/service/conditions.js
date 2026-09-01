@@ -146,8 +146,7 @@ export async function removeConditionOnDraftFormDefinition(
       await publishFormUpdatedEvent(
         metadataDocument,
         { conditionId },
-        FormDefinitionRequestType.DELETE_CONDITION,
-        undefined
+        FormDefinitionRequestType.DELETE_CONDITION
       )
     })
 
