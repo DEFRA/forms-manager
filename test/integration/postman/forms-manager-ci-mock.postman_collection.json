@@ -1694,7 +1694,98 @@
       "response": []
     },
     {
-      "name": "GET /forms/:form_id/definition/draft - has $$__formVersion after create-live",
+      "name": "GET /forms/:form_id/definition/draft - 404 after create-live",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"draft definition no longer exists\", function () {",
+              "    pm.response.to.have.status(404);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.message).to.include('not found');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "{{root}}/forms/{{form_id}}/create-draft",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const { status } = pm.response.json()",
+              "    pm.expect(status).to.eq('created-draft')",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/create-draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "create-draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /forms/:form_id/definition/draft - has $$__formVersion after create-draft",
       "event": [
         {
           "listen": "test",
