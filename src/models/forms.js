@@ -1,6 +1,7 @@
 import {
   FormDefinitionError,
   FormDefinitionRequestType,
+  SchemaVersion,
   checkErrors,
   componentSchema,
   formDefinitionSchema,
@@ -100,9 +101,19 @@ export const createFormSchema = Joi.object().keys({
   teamEmail: formMetadataInputSchema.extract('teamEmail')
 })
 
-export const updateFormDefinitionSchema = Joi.alternatives().try(
-  formDefinitionSchema, // V1 forms (schema: 1)
-  formDefinitionV2Schema // V2 forms (schema: 2)
+export const updateFormDefinitionSchema = Joi.alternatives().conditional(
+  '.schema',
+  {
+    is: SchemaVersion.V2,
+    then: formDefinitionV2Schema, // V2 forms (schema: 2)
+    otherwise: formDefinitionSchema.keys({
+      // list both valid versions here so an invalid schema value reports all allowed options, not just V1
+      schema: Joi.number()
+        .integer()
+        .valid(SchemaVersion.V1, SchemaVersion.V2)
+        .default(SchemaVersion.V1)
+    })
+  }
 )
 
 export const migrateDefinitionParamSchema = Joi.object()

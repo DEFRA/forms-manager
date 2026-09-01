@@ -167,7 +167,7 @@ describe('forms model', () => {
         )
         expect(result.error).toBeDefined()
         expect(result.error?.message).toContain(
-          'does not match any of the allowed types'
+          '"schema" must be one of [1, 2]'
         )
       })
 

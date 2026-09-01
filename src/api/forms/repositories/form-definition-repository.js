@@ -22,6 +22,7 @@ import {
   modifyDraft,
   modifyEngineVersion,
   modifyName,
+  modifyRemoveOutputsForCondition,
   modifyReorderComponents,
   modifyReorderPages,
   modifyReorderSections,
@@ -631,7 +632,8 @@ export async function updateCondition(formId, conditionId, condition, session) {
 }
 
 /**
- * Removes a condition by id and unassigns it from any pages that use it
+ * Removes a condition by id, unassigns it from any pages that use it and
+ * removes any submission email targets that depend on it
  * @param {string} formId
  * @param {string} conditionId
  * @param {ClientSession} session
@@ -643,6 +645,7 @@ export async function deleteCondition(formId, conditionId, session) {
   /** @type {UpdateCallback} */
   const callback = (draft) => {
     modifyUnassignCondition(draft, conditionId)
+    modifyRemoveOutputsForCondition(draft, conditionId)
 
     return modifyDeleteCondition(draft, conditionId)
   }
@@ -754,7 +757,7 @@ export async function updateOption(formId, optionName, optionValue, session) {
 }
 
 /**
- * @import { FormDefinition, FormVersionMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, SectionAssignmentItem } from '@defra/forms-model'
+ * @import { FormDefinition, FormVersionMetadata, Page, ComponentDef, PatchPageFields, List, Engine, ConditionWrapperV2, Output, SectionAssignmentItem } from '@defra/forms-model'
  * @import { ClientSession, Collection, FindOptions } from 'mongodb'
  * @import { ObjectSchema } from 'joi'
  * @import { UpdateCallback, RemovePagePredicate } from '~/src/api/forms/repositories/helpers.js'

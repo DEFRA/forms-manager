@@ -5,6 +5,7 @@ import {
   Engine,
   FormStatus,
   OperatorName,
+  SchemaVersion,
   formDefinitionSchema,
   formDefinitionV2Schema,
   hasComponents,
@@ -274,6 +275,8 @@ describe('form-definition-repository', () => {
     conditions = [condition1, condition2]
 
     draft = buildDefinition({
+      schema: SchemaVersion.V2,
+      engine: Engine.V2,
       pages: [page1, page2, page3, page4, page5, summaryPage],
       lists,
       conditions,
@@ -694,6 +697,8 @@ describe('form-definition-repository', () => {
 
     it('should set controller', async () => {
       draft = buildDefinition({
+        schema: SchemaVersion.V2,
+        engine: Engine.V2,
         pages: [
           buildQuestionPage({
             ...page1,
@@ -926,11 +931,57 @@ describe('form-definition-repository', () => {
         }
       )
     })
+
+    it('should delete the email actions that depend on the condition and return them', async () => {
+      /** @type {Output} */
+      const dependentOutput = {
+        audience: 'human',
+        version: '1',
+        emailAddress: 'conditional@defra.gov.uk',
+        condition: condition1Id
+      }
+      /** @type {Output} */
+      const otherOutput = {
+        audience: 'human',
+        version: '1',
+        emailAddress: 'always@defra.gov.uk'
+      }
+
+      draft = buildDefinition({
+        ...draft,
+        outputs: [dependentOutput, otherOutput]
+      })
+
+      await helper(
+        async () => {
+          await deleteCondition(formId, condition1Id, mockSession)
+        },
+        (definition) => {
+          expect(definition.outputs).toEqual([otherOutput])
+        }
+      )
+    })
+
+    it('should return no email actions when none depend on the condition', async () => {
+      await helper(
+        async () => {
+          await deleteCondition(formId, condition1Id, mockSession)
+        },
+        (definition) => {
+          expect(definition.conditions).toHaveLength(1)
+        }
+      )
+    })
   })
 
   describe('insert', () => {
     it('should insert a new draft definition', async () => {
-      const definitionV1 = { ...draft, conditions: [] }
+      const definitionV1 = {
+        ...draft,
+        schema: SchemaVersion.V1,
+        engine: Engine.V1,
+        conditions: []
+      }
       mockCollection.findOneAndUpdate.mockResolvedValue({ definitionV1 })
 
       await insert(formId, definitionV1, mockSession, formDefinitionSchema)
@@ -954,7 +1005,12 @@ describe('form-definition-repository', () => {
     })
 
     it('should allocate a version exactly once, stamp the inserted draft', async () => {
-      const definitionV1 = { ...draft, conditions: [] }
+      const definitionV1 = {
+        ...draft,
+        schema: SchemaVersion.V1,
+        engine: Engine.V1,
+        conditions: []
+      }
       const createdAt = new Date('2026-04-24T10:00:00Z')
       mockCollection.findOneAndUpdate.mockResolvedValue({ definitionV1 })
       jest
@@ -1269,6 +1325,6 @@ describe('form-definition-repository', () => {
 })
 
 /**
- * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List, ConditionWrapperV2, SectionAssignmentItem, Section } from '@defra/forms-model'
+ * @import { FormDefinition, PatchPageFields, Page, ComponentDef, List, ConditionWrapperV2, Output, SectionAssignmentItem, Section } from '@defra/forms-model'
  * @import { UpdateFilter } from 'mongodb'
  */

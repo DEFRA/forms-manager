@@ -48,6 +48,7 @@ import {
   modifyDeletePages,
   modifyEngineVersion,
   modifyName,
+  modifyRemoveOutputsForCondition,
   modifyReorderComponents,
   modifyReorderPages,
   modifyReorderSections,
@@ -1089,6 +1090,80 @@ describe('repository helpers', () => {
     })
   })
 
+  describe('modifyRemoveOutputsForCondition', () => {
+    /** @type {Output} */
+    const outputOnCondition = {
+      audience: 'human',
+      version: '1',
+      emailAddress: 'someone@defra.gov.uk',
+      condition: conditionId
+    }
+    /** @type {Output} */
+    const outputOnOtherCondition = {
+      audience: 'machine',
+      version: '2',
+      emailAddress: 'someone-else@defra.gov.uk',
+      condition: 'different-condition-id'
+    }
+    /** @type {Output} */
+    const unconditionalOutput = {
+      audience: 'human',
+      version: '1',
+      emailAddress: 'everyone@defra.gov.uk'
+    }
+
+    it('should remove only the outputs using the condition', () => {
+      const definition = buildDefinition({
+        outputs: [
+          outputOnCondition,
+          outputOnOtherCondition,
+          unconditionalOutput
+        ]
+      })
+
+      const removed = modifyRemoveOutputsForCondition(definition, conditionId)
+
+      expect(removed).toEqual([outputOnCondition])
+      expect(definition.outputs).toEqual([
+        outputOnOtherCondition,
+        unconditionalOutput
+      ])
+    })
+
+    it('should remove every output using the condition', () => {
+      const second = { ...outputOnCondition, emailAddress: 'two@defra.gov.uk' }
+
+      const definition = buildDefinition({
+        outputs: [outputOnCondition, second]
+      })
+
+      const removed = modifyRemoveOutputsForCondition(definition, conditionId)
+
+      expect(removed).toEqual([outputOnCondition, second])
+      expect(definition.outputs).toEqual([])
+    })
+
+    it('should leave the definition alone when nothing uses the condition', () => {
+      const definition = buildDefinition({
+        outputs: [outputOnOtherCondition]
+      })
+
+      const removed = modifyRemoveOutputsForCondition(definition, conditionId)
+
+      expect(removed).toEqual([])
+      expect(definition.outputs).toEqual([outputOnOtherCondition])
+    })
+
+    it('should cope with a definition that has no outputs', () => {
+      const definition = buildDefinition({})
+
+      const removed = modifyRemoveOutputsForCondition(definition, conditionId)
+
+      expect(removed).toEqual([])
+      expect(definition.outputs).toBeUndefined()
+    })
+  })
+
   describe('modifyUnassignCondition', () => {
     it('should unassign condition from pages that reference it', () => {
       const pageWithCondition = buildQuestionPage({
@@ -1721,5 +1796,5 @@ describe('repository helpers', () => {
 })
 
 /**
- * @import { SectionAssignmentItem } from '@defra/forms-model'
+ * @import { Output, SectionAssignmentItem } from '@defra/forms-model'
  */

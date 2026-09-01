@@ -40,9 +40,6 @@ jest.mock('~/src/messaging/publish-base.js')
 jest
   .mocked(formDefinition.updatePageFields)
   .mockResolvedValue(buildDefinition({}))
-jest
-  .mocked(formDefinition.deleteCondition)
-  .mockResolvedValue(buildDefinition({}))
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -270,9 +267,6 @@ describe('conditions', () => {
         .mocked(formDefinition.get)
         .mockResolvedValue(formDefinitionWithConditions)
 
-      jest
-        .mocked(formDefinition.deleteCondition)
-        .mockResolvedValue(buildDefinition())
       const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       await removeConditionOnDraftFormDefinition(
@@ -295,6 +289,7 @@ describe('conditions', () => {
         requestType: FormDefinitionRequestType.DELETE_CONDITION,
         payload: { conditionId: expectedConditionId }
       })
+      expect(auditMessage.data).not.toHaveProperty('outputChanges.removed')
     })
 
     it('should surface errors', async () => {
@@ -320,10 +315,6 @@ describe('conditions', () => {
       })
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithPageCondition)
-
-      jest
-        .mocked(formDefinition.deleteCondition)
-        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -357,10 +348,6 @@ describe('conditions', () => {
       jest
         .mocked(formDefinition.get)
         .mockResolvedValue(formWithMultiplePageConditions)
-
-      jest
-        .mocked(formDefinition.deleteCondition)
-        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -468,10 +455,6 @@ describe('conditions', () => {
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithPageWithoutId)
 
-      jest
-        .mocked(formDefinition.deleteCondition)
-        .mockResolvedValue(buildDefinition())
-
       await removeConditionOnDraftFormDefinition(
         id,
         condition1Id,
@@ -488,10 +471,6 @@ describe('conditions', () => {
       })
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithJoinedCondition)
-
-      jest
-        .mocked(formDefinition.deleteCondition)
-        .mockResolvedValue(buildDefinition())
 
       await removeConditionOnDraftFormDefinition(
         id,

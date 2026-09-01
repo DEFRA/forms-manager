@@ -326,6 +326,32 @@ describe('publish', () => {
         messageCreatedAt: expect.any(Date)
       })
     })
+
+    it('should report how the replacement changed the email actions', async () => {
+      /** @type {Output} */
+      const addedOutput = {
+        audience: 'human',
+        version: '1',
+        emailAddress: 'new@defra.gov.uk'
+      }
+      /** @type {Output} */
+      const removedOutput = {
+        audience: 'machine',
+        version: '2',
+        emailAddress: 'old@defra.gov.uk'
+      }
+
+      const definition = buildDefinition({
+        outputs: [removedOutput, addedOutput]
+      })
+
+      await publishFormDraftReplacedEvent(formMetadataDocument, definition)
+
+      const [publishEventCall] = jest.mocked(publishEvent).mock.calls[0]
+      expect(publishEventCall.data).toMatchObject({
+        requestType: FormDefinitionRequestType.REPLACE_DRAFT
+      })
+    })
   })
 
   describe('publishDeletedFormSecretEvent', () => {
@@ -397,3 +423,7 @@ describe('publish', () => {
     })
   })
 })
+
+/**
+ * @import { Output } from '@defra/forms-model'
+ */

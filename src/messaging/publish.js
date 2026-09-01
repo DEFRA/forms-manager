@@ -155,7 +155,11 @@ export async function publishFormUpdatedEvent(
 }
 
 /**
- *
+ * Publishes a whole-draft replacement. The definition itself goes to S3 rather
+ * than onto the message, so the event says nothing about what the author
+ * actually changed - the submission email targets are singled out because an
+ * audit of who receives a form's submissions is worth more than a pointer to a
+ * JSON file.
  * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
  * @param {FormDefinition} definition
  */
@@ -170,9 +174,7 @@ export async function publishFormDraftReplacedEvent(
   const auditMessage = formUpdatedMapper(
     metadata,
     FormDefinitionRequestType.REPLACE_DRAFT,
-    {
-      s3Meta
-    }
+    { s3Meta }
   )
 
   return validateAndPublishEvent(auditMessage)
