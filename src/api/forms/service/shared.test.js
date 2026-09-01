@@ -30,6 +30,18 @@ describe('mapForm', () => {
     expect(result.id).toBe(baseDocument._id.toString())
   })
 
+  it('should omit a draft that fails the state schema', () => {
+    const result = mapForm({
+      ...baseDocument,
+      draft: /** @type {FormMetadataState} */ ({
+        updatedAt: new Date('2020-01-01'),
+        updatedBy: author
+      })
+    })
+
+    expect(result.draft).toBeUndefined()
+  })
+
   it('should throw if invalid', () => {
     expect(() =>
       mapForm({
@@ -39,3 +51,7 @@ describe('mapForm', () => {
     ).toThrow('Form is malformed in the database. Expected fields are missing.')
   })
 })
+
+/**
+ * @import { FormMetadataState } from '@defra/forms-model'
+ */

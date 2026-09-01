@@ -20,7 +20,11 @@ import { checkForMissingTranslations } from '~/src/api/forms/service/definition-
 import { getValidationSchema } from '~/src/api/forms/service/helpers/definition.js'
 import { getForm } from '~/src/api/forms/service/index.js'
 import { existsFormSecret } from '~/src/api/forms/service/secrets.js'
-import { mapForm, partialAuditFields } from '~/src/api/forms/service/shared.js'
+import {
+  isStateValid,
+  mapForm,
+  partialAuditFields
+} from '~/src/api/forms/service/shared.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import {
   publishDraftCreatedFromLiveEvent,
@@ -57,6 +61,18 @@ export async function getFormDefinition(
   state = FormStatus.Draft,
   session
 ) {
+  const metadata = await formMetadata.get(formId, session)
+
+  /*
+    A draft form might have invalid state, e.g. missing createdAt/createdBy. In this case
+    treat it though it doesn't exist as it's not valid and we can't do anything with it.
+  */
+  if (state === FormStatus.Draft && !isStateValid(metadata.draft)) {
+    throw Boom.notFound(
+      `Form definition (${state}) with ID '${formId}' not found`
+    )
+  }
+
   return formDefinition.get(formId, state, session)
 }
 

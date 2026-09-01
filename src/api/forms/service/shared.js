@@ -1,4 +1,4 @@
-import { FormStatus } from '@defra/forms-model'
+import { FormStatus, formMetadataStateSchema } from '@defra/forms-model'
 import { ObjectId } from 'mongodb'
 
 export const defaultAuthor = {
@@ -21,6 +21,15 @@ export function partialAuditFields(date, author, state = FormStatus.Draft) {
     updatedAt: date,
     updatedBy: author
   }
+}
+
+/**
+ * Checks if the state is well-formed.
+ * @param {FormMetadataState | undefined} state
+ * @returns {boolean}
+ */
+export function isStateValid(state) {
+  return !!state && !formMetadataStateSchema.validate(state).error
 }
 
 export const SUMMARY_PAGE_ID = '449a45f6-4541-4a46-91bd-8b8931b07b50'
@@ -51,7 +60,7 @@ export function mapForm(document) {
   const created = getCreated(document)
 
   // 'draft' or 'live' should be omitted from the object if they dont have content
-  const draft = document.draft ? { draft: document.draft } : {}
+  const draft = isStateValid(document.draft) ? { draft: document.draft } : {}
   const live = document.live ? { live: document.live } : {}
 
   return {
@@ -129,6 +138,6 @@ export function mapToDocument(document) {
 }
 
 /**
- * @import { FormMetadataDocument, FormMetadata } from '@defra/forms-model'
+ * @import { FormMetadataDocument, FormMetadata, FormMetadataState } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */
