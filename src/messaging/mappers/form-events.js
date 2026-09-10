@@ -455,13 +455,19 @@ export function formMigratedMapper(formId, createdAt, createdBy) {
  * @param {{
  *   payload: unknown;
  *   s3Meta?: undefined
+ *   outputChanges?: FormOutputChanges
  * } | {
  *   payload?: undefined
  *   s3Meta: FormDefinitionS3Meta
+ *   outputChanges?: FormOutputChanges
  * }} formState
  * @returns {FormUpdatedMessage}
  */
-export function formUpdatedMapper(metadata, requestType, { payload, s3Meta }) {
+export function formUpdatedMapper(
+  metadata,
+  requestType,
+  { payload, s3Meta, outputChanges }
+) {
   const baseData = createFormMessageDataBase(metadata)
   const auditMessageBase = createV1MessageBase(metadata, {})
 
@@ -473,7 +479,8 @@ export function formUpdatedMapper(metadata, requestType, { payload, s3Meta }) {
       ...baseData,
       requestType,
       s3Meta,
-      payload
+      payload,
+      outputChanges
     }
   }
 }
@@ -572,6 +579,6 @@ export function formOfflineUpdatedMapper(metadata, updatedForm) {
 }
 
 /**
- * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormOfflineUpdatedMessage, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage, FormSecretDeletedMessage, FormSecretSavedMessage, FormOfflineUpdatedMessageData } from '@defra/forms-model'
+ * @import { FormDefinitionS3Meta, FormUpdatedMessage, FormDefinitionRequestType, FormOfflineUpdatedMessage, FormDraftDeletedMessage, AuditUser, FormTitleUpdatedMessageData, FormOrganisationUpdatedMessage, FormOrganisationUpdatedMessageData, FormMetadata, FormCreatedMessage, FormCreatedMessageData, FormTitleUpdatedMessage, FormTeamNameUpdatedMessage, FormTeamNameUpdatedMessageData, FormTeamEmailUpdatedMessage, FormTeamEmailUpdatedMessageData, FormPrivacyNoticeUpdatedMessage, FormPrivacyNoticeUpdatedMessageData, FormTermsAndConditionsAgreedMessage, FormTermsAndConditionsAgreedMessageData, FormSubmissionGuidanceUpdatedMessage, FormSubmissionGuidanceUpdatedMessageData, FormNotificationEmailUpdatedMessage, FormNotificationEmailUpdatedMessageData, FormSupportContactUpdatedMessage, FormSupportContactUpdatedMessageData, FormLiveCreatedFromDraftMessage, FormDraftCreatedFromLiveMessage, FormMigratedMessage, FormSecretDeletedMessage, FormSecretSavedMessage, FormOfflineUpdatedMessageData, FormOutputChanges } from '@defra/forms-model'
  * @import { PartialFormMetadataDocument } from '~/src/api/types.js'
  */
