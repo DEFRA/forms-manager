@@ -637,24 +637,27 @@ export async function updateCondition(formId, conditionId, condition, session) {
  * @param {string} formId
  * @param {string} conditionId
  * @param {ClientSession} session
- * @returns {Promise<FormDefinition>}
+ * @returns {Promise<Output[]>} the submission email targets removed with the condition
  */
 export async function deleteCondition(formId, conditionId, session) {
   logger.info(`Deleting condition ID ${conditionId} on form ID ${formId}`)
 
+  /** @type {Output[]} */
+  let removedOutputs = []
+
   /** @type {UpdateCallback} */
   const callback = (draft) => {
     modifyUnassignCondition(draft, conditionId)
-    modifyRemoveOutputsForCondition(draft, conditionId)
+    removedOutputs = modifyRemoveOutputsForCondition(draft, conditionId)
 
     return modifyDeleteCondition(draft, conditionId)
   }
 
-  const result = await modifyDraft(formId, callback, session)
+  await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted condition ID ${conditionId} on form ID ${formId}`)
 
-  return result.draft
+  return removedOutputs
 }
 
 /**
