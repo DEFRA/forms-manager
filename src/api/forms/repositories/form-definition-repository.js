@@ -637,7 +637,7 @@ export async function updateCondition(formId, conditionId, condition, session) {
  * @param {string} formId
  * @param {string} conditionId
  * @param {ClientSession} session
- * @returns {Promise<Output[]>} the submission email targets removed with the condition
+ * @returns {Promise<{ definition: FormDefinition, removedOutputs: Output[] }>} the updated form definition and the submission email targets removed with the condition
  */
 export async function deleteCondition(formId, conditionId, session) {
   logger.info(`Deleting condition ID ${conditionId} on form ID ${formId}`)
@@ -653,11 +653,11 @@ export async function deleteCondition(formId, conditionId, session) {
     return modifyDeleteCondition(draft, conditionId)
   }
 
-  await modifyDraft(formId, callback, session)
+  const result = await modifyDraft(formId, callback, session)
 
   logger.info(`Deleted condition ID ${conditionId} on form ID ${formId}`)
 
-  return removedOutputs
+  return { definition: result.draft, removedOutputs }
 }
 
 /**

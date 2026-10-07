@@ -138,7 +138,7 @@ export async function removeConditionOnDraftFormDefinition(
       // depend on the condition go with it, and are named on the audit event so
       // the removal is held against the action that caused it rather than being
       // inferred from a neighbouring event
-      const removedOutputs = await formDefinition.deleteCondition(
+      const { removedOutputs } = await formDefinition.deleteCondition(
         formId,
         conditionId,
         session

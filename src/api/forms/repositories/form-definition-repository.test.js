@@ -957,11 +957,12 @@ describe('form-definition-repository', () => {
 
       await helper(
         async () => {
-          removedOutputs = await deleteCondition(
+          const result = await deleteCondition(
             formId,
             condition1Id,
             mockSession
           )
+          removedOutputs = result.removedOutputs
         },
         (definition) => {
           expect(definition.outputs).toEqual([otherOutput])
@@ -977,11 +978,12 @@ describe('form-definition-repository', () => {
 
       await helper(
         async () => {
-          removedOutputs = await deleteCondition(
+          const result = await deleteCondition(
             formId,
             condition1Id,
             mockSession
           )
+          removedOutputs = result.removedOutputs
         },
         (definition) => {
           expect(definition.conditions).toHaveLength(1)
