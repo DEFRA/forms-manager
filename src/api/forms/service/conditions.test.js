@@ -40,6 +40,9 @@ jest.mock('~/src/messaging/publish-base.js')
 jest
   .mocked(formDefinition.updatePageFields)
   .mockResolvedValue(buildDefinition({}))
+jest
+  .mocked(formDefinition.deleteCondition)
+  .mockResolvedValue({ definition: buildDefinition({}), removedOutputs: [] })
 
 jest.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 
@@ -267,6 +270,10 @@ describe('conditions', () => {
         .mocked(formDefinition.get)
         .mockResolvedValue(formDefinitionWithConditions)
 
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue({
+        definition: buildDefinition({}),
+        removedOutputs: []
+      })
       const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
 
       await removeConditionOnDraftFormDefinition(
@@ -292,6 +299,39 @@ describe('conditions', () => {
       expect(auditMessage.data).not.toHaveProperty('outputChanges.removed')
     })
 
+    it('should record the email actions deleted with the condition', async () => {
+      /** @type {Output} */
+      const removedOutput = {
+        audience: 'human',
+        version: '1',
+        emailAddress: 'conditional@defra.gov.uk',
+        condition: condition1Id
+      }
+
+      jest
+        .mocked(formDefinition.get)
+        .mockResolvedValue(formDefinitionWithConditions)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue({
+        definition: buildDefinition({}),
+        removedOutputs: [removedOutput]
+      })
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+      await removeConditionOnDraftFormDefinition(
+        id,
+        condition1Id,
+        defaultAuthor
+      )
+
+      const [auditMessage] = publishEventSpy.mock.calls[0]
+      expect(auditMessage.data).toMatchObject({
+        requestType: FormDefinitionRequestType.DELETE_CONDITION,
+        payload: { conditionId: condition1Id },
+        outputChanges: { removed: [removedOutput] }
+      })
+    })
+
     it('should surface errors', async () => {
       const boomInternal = Boom.internal('Something went wrong')
 
@@ -315,6 +355,11 @@ describe('conditions', () => {
       })
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithPageCondition)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue({
+        definition: buildDefinition({}),
+        removedOutputs: []
+      })
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -348,6 +393,11 @@ describe('conditions', () => {
       jest
         .mocked(formDefinition.get)
         .mockResolvedValue(formWithMultiplePageConditions)
+
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue({
+        definition: buildDefinition({}),
+        removedOutputs: []
+      })
 
       await removeConditionOnDraftFormDefinition(
         id,
@@ -455,6 +505,11 @@ describe('conditions', () => {
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithPageWithoutId)
 
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue({
+        definition: buildDefinition({}),
+        removedOutputs: []
+      })
+
       await removeConditionOnDraftFormDefinition(
         id,
         condition1Id,
@@ -472,6 +527,11 @@ describe('conditions', () => {
 
       jest.mocked(formDefinition.get).mockResolvedValue(formWithJoinedCondition)
 
+      jest.mocked(formDefinition.deleteCondition).mockResolvedValue({
+        definition: buildDefinition({}),
+        removedOutputs: []
+      })
+
       await removeConditionOnDraftFormDefinition(
         id,
         joinedConditionId,
@@ -488,5 +548,6 @@ describe('conditions', () => {
 })
 
 /**
+ * @import { Output } from '@defra/forms-model'
  * @import { ValidationError } from 'joi'
  */

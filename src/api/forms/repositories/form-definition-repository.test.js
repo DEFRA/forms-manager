@@ -952,25 +952,45 @@ describe('form-definition-repository', () => {
         outputs: [dependentOutput, otherOutput]
       })
 
+      /** @type {Output[]} */
+      let removedOutputs = []
+
       await helper(
         async () => {
-          await deleteCondition(formId, condition1Id, mockSession)
+          const result = await deleteCondition(
+            formId,
+            condition1Id,
+            mockSession
+          )
+          removedOutputs = result.removedOutputs
         },
         (definition) => {
           expect(definition.outputs).toEqual([otherOutput])
         }
       )
+
+      expect(removedOutputs).toEqual([dependentOutput])
     })
 
     it('should return no email actions when none depend on the condition', async () => {
+      /** @type {Output[]} */
+      let removedOutputs = []
+
       await helper(
         async () => {
-          await deleteCondition(formId, condition1Id, mockSession)
+          const result = await deleteCondition(
+            formId,
+            condition1Id,
+            mockSession
+          )
+          removedOutputs = result.removedOutputs
         },
         (definition) => {
           expect(definition.conditions).toHaveLength(1)
         }
       )
+
+      expect(removedOutputs).toEqual([])
     })
   })
 
