@@ -1,4 +1,5 @@
 import { PublishCommand, SNSClient } from '@aws-sdk/client-sns'
+import { createLogContext, runWithLogContext } from '@defra/forms-common'
 import { buildFormCreatedMessage } from '@defra/forms-model/stubs'
 import { mockClient } from 'aws-sdk-client-mock'
 
@@ -65,6 +66,27 @@ describe('publish-base', () => {
       expect(snsMock).toHaveReceivedCommandWith(PublishCommand, {
         TopicArn: 'arn:aws:sns:eu-west-2:000000000000:forms_manager_events',
         Message: JSON.stringify(message)
+      })
+    })
+
+    it('should send the log context with the message', async () => {
+      const context = createLogContext({
+        correlationId: 'correlation-id',
+        userId: 'user-id'
+      })
+
+      jest.mocked(config.get).mockReturnValue(true)
+      snsMock.on(PublishCommand).resolves({
+        MessageId: '00000000-0000-0000-0000-000000000000'
+      })
+
+      await runWithLogContext(context, () => publishEvent(message))
+      expect(snsMock).toHaveReceivedCommandWith(PublishCommand, {
+        Message: JSON.stringify(message),
+        MessageAttributes: {
+          correlationId: { DataType: 'String', StringValue: 'correlation-id' },
+          userId: { DataType: 'String', StringValue: 'user-id' }
+        }
       })
     })
   })
