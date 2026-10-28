@@ -292,7 +292,9 @@ export function addSortingStage(pipeline, sortBy, order) {
           // Then newest first if titles tie
           updatedDateOnly: -1,
           // Then alphabetical (case-insensitive) on displayName
-          'updatedBy.displayName': 1
+          'updatedBy.displayName': 1,
+          // Unique tiebreaker so skip/limit paging is deterministic
+          _id: 1
         }
       })
       break
@@ -301,7 +303,9 @@ export function addSortingStage(pipeline, sortBy, order) {
       pipeline.push({
         $sort: {
           updatedDateOnly: sortOrder,
-          'updatedBy.displayName': 1
+          'updatedBy.displayName': 1,
+          // Unique tiebreaker so skip/limit paging is deterministic
+          _id: 1
         }
       })
       break
@@ -310,7 +314,9 @@ export function addSortingStage(pipeline, sortBy, order) {
       pipeline.push({
         $sort: {
           updatedDateOnly: -1,
-          'updatedBy.displayName': 1
+          'updatedBy.displayName': 1,
+          // Unique tiebreaker so skip/limit paging is deterministic
+          _id: 1
         }
       })
       break

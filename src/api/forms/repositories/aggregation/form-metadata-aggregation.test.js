@@ -282,7 +282,8 @@ describe('Form metadata aggregation', () => {
         expect(sortStage.$sort).toEqual({
           title: 1,
           updatedDateOnly: -1,
-          'updatedBy.displayName': 1
+          'updatedBy.displayName': 1,
+          _id: 1
         })
       })
     })
@@ -426,7 +427,8 @@ describe('Form metadata aggregation', () => {
         expect(pipeline[0].$sort).toEqual({
           title: 1,
           updatedDateOnly: -1,
-          'updatedBy.displayName': 1
+          'updatedBy.displayName': 1,
+          _id: 1
         })
         expect(collation).toEqual({ locale: 'en', strength: 1 })
       })
@@ -438,7 +440,8 @@ describe('Form metadata aggregation', () => {
 
         expect(pipeline[0].$sort).toEqual({
           updatedDateOnly: -1,
-          'updatedBy.displayName': 1
+          'updatedBy.displayName': 1,
+          _id: 1
         })
         expect(collation).toEqual({ locale: 'en', strength: 1 })
       })
@@ -450,7 +453,8 @@ describe('Form metadata aggregation', () => {
 
         expect(pipeline[0].$sort).toEqual({
           updatedDateOnly: -1,
-          'updatedBy.displayName': 1
+          'updatedBy.displayName': 1,
+          _id: 1
         })
         expect(collation).toEqual({ locale: 'en', strength: 1 })
       })
