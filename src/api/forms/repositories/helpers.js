@@ -973,7 +973,37 @@ export function modifyUpdateOption(definition, optionName, optionValue) {
     definition.options.disableUserFeedback = optionValue === 'true'
   }
 
+  if (optionName === 'allowCopy') {
+    // Convert to boolean
+    const allowCopy = optionValue === 'true'
+
+    definition.metadata = {
+      ...definition.metadata,
+      options: { ...definition.metadata?.options, allowCopy }
+    }
+
+    // Copying answers relies on the reference number and confirmation email.
+    // Turning allowCopy off leaves both as they are
+    if (allowCopy) {
+      definition.options.showReferenceNumber = true
+      enableConfirmationEmail(definition)
+    }
+  }
+
   return definition
+}
+
+/**
+ * Turns on the confirmation email by switching any summary page to the
+ * summary with confirmation email controller
+ * @param {FormDefinition} definition
+ */
+function enableConfirmationEmail(definition) {
+  definition.pages = definition.pages.map((page) =>
+    page.controller === ControllerType.Summary
+      ? { ...page, controller: ControllerType.SummaryWithConfirmationEmail }
+      : page
+  )
 }
 
 /**

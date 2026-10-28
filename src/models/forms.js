@@ -62,7 +62,7 @@ export const optionByNameSchema = Joi.object()
   .keys({
     id: idSchema,
     optionName: Joi.string()
-      .valid('showReferenceNumber', 'disableUserFeedback')
+      .valid('showReferenceNumber', 'disableUserFeedback', 'allowCopy')
       .required()
     // If we add more options here, probably best to create an enum in forms-model that we can use here
   })

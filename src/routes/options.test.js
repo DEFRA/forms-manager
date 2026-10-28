@@ -77,6 +77,33 @@ describe('Options route', () => {
       expect(calledName).toBe('disableUserFeedback')
       expect(calledValue).toBe('true')
     })
+
+    test('Testing POST /forms/{id}/definition/draft/options/{optionName} allowCopy', async () => {
+      const payload = {
+        optionValue: 'true'
+      }
+
+      const updateOption = jest
+        .mocked(updateOptionOnDraftDefinition)
+        // @ts-expect-error - type for testing
+        .mockResolvedValueOnce({ allowCopy: true })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/options/allowCopy`,
+        payload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        allowCopy: true
+      })
+      const [, calledName, calledValue] = updateOption.mock.calls[0]
+      expect(calledName).toBe('allowCopy')
+      expect(calledValue).toBe('true')
+    })
   })
 
   describe('Error responses', () => {
@@ -97,7 +124,7 @@ describe('Options route', () => {
       expect(response.result).toMatchObject({
         error: 'Bad Request',
         message:
-          '"optionName" must be one of [showReferenceNumber, disableUserFeedback]'
+          '"optionName" must be one of [showReferenceNumber, disableUserFeedback, allowCopy]'
       })
     })
   })

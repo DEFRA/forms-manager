@@ -19,6 +19,7 @@ import {
   buildQuestionPage,
   buildStatusPage,
   buildSummaryPage,
+  buildSummaryPageWithConfirmation,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
@@ -1603,6 +1604,65 @@ describe('repository helpers', () => {
       )
 
       expect(updated.options?.disableUserFeedback).toBe(false)
+    })
+
+    it('should set metadata.options.allowCopy and keep other metadata', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPage()],
+        metadata: { translations: { cy: {} } }
+      })
+
+      const modified = modifyUpdateOption(definition, 'allowCopy', 'true')
+
+      expect(modified.metadata).toEqual({
+        translations: { cy: {} },
+        options: { allowCopy: true }
+      })
+    })
+
+    it('should turn on the reference number and confirmation email when allowCopy is enabled', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPage()],
+        options: { showReferenceNumber: false }
+      })
+
+      const modified = modifyUpdateOption(definition, 'allowCopy', 'true')
+
+      expect(modified.metadata?.options?.allowCopy).toBe(true)
+      expect(modified.options?.showReferenceNumber).toBe(true)
+      expect(modified.pages[1].controller).toBe(
+        ControllerType.SummaryWithConfirmationEmail
+      )
+      expect(modified.pages[0]).toEqual(questionPageWithComponent)
+    })
+
+    it('should not change the reference number or confirmation email when allowCopy is disabled', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPageWithConfirmation()],
+        metadata: { options: { allowCopy: true } },
+        options: { showReferenceNumber: true }
+      })
+
+      const modified = modifyUpdateOption(definition, 'allowCopy', 'false')
+
+      expect(modified.metadata?.options?.allowCopy).toBe(false)
+      expect(modified.options?.showReferenceNumber).toBe(true)
+      expect(modified.pages[1].controller).toBe(
+        ControllerType.SummaryWithConfirmationEmail
+      )
+    })
+
+    it('should leave the reference number and confirmation email off when allowCopy is disabled', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPage()],
+        options: { showReferenceNumber: false }
+      })
+
+      const modified = modifyUpdateOption(definition, 'allowCopy', 'false')
+
+      expect(modified.metadata?.options?.allowCopy).toBe(false)
+      expect(modified.options?.showReferenceNumber).toBe(false)
+      expect(modified.pages[1].controller).toBe(ControllerType.Summary)
     })
   })
 
