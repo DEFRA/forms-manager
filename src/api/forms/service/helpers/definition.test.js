@@ -10,6 +10,8 @@ import {
   buildDefinition,
   buildPaymentPage,
   buildQuestionPage,
+  buildSummaryPage,
+  buildSummaryPageWithConfirmation,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
@@ -193,6 +195,57 @@ describe('definition helpers', () => {
         'Reference number must be enabled if the form has a payment question'
       )
     })
+
+    it('should return error if allowCopy is enabled but the reference number is disabled', () => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPageWithConfirmation()],
+        options: { showReferenceNumber: false },
+        metadata: { options: { allowCopy: true } }
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        'Reference number must be enabled if the form allows answers to be reused from a previous submission'
+      )
+    })
+
+    it('should return error if allowCopy is enabled but the confirmation email is disabled', () => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPage()],
+        options: { showReferenceNumber: true },
+        metadata: { options: { allowCopy: true } }
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        'Confirmation email must be enabled if the form allows answers to be reused from a previous submission'
+      )
+    })
+
+    it.each([
+      {
+        desc: 'allowCopy is enabled and the reference number and confirmation email are enabled',
+        page: buildSummaryPageWithConfirmation(),
+        showReferenceNumber: true,
+        allowCopy: true
+      },
+      {
+        desc: 'allowCopy is disabled and the reference number and confirmation email are disabled',
+        page: buildSummaryPage(),
+        showReferenceNumber: false,
+        allowCopy: false
+      }
+    ])(
+      'should return undefined if $desc',
+      ({ page, showReferenceNumber, allowCopy }) => {
+        const definition = buildDefinition({
+          pages: [page],
+          options: { showReferenceNumber },
+          metadata: { options: { allowCopy } }
+        })
+        expect(postSchemaValidation(definition)).toBeUndefined()
+      }
+    )
   })
 
   describe('validatePaymentAmount', () => {

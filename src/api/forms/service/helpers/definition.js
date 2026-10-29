@@ -1,5 +1,6 @@
 import {
   ComponentType,
+  ControllerType,
   SchemaVersion,
   formDefinitionSchema,
   formDefinitionV2Schema,
@@ -125,6 +126,29 @@ export function postSchemaValidation(definition) {
       )
     }
   }
+
+  // Copying answers from a previous submission relies on the reference number
+  // and the confirmation email
+  if (definition.metadata?.options?.allowCopy) {
+    if (!definition.options?.showReferenceNumber) {
+      return createJoiError(
+        '/',
+        'Reference number must be enabled if the form allows answers to be reused from a previous submission'
+      )
+    }
+
+    if (
+      definition.pages.some(
+        (page) => page.controller === ControllerType.Summary
+      )
+    ) {
+      return createJoiError(
+        '/',
+        'Confirmation email must be enabled if the form allows answers to be reused from a previous submission'
+      )
+    }
+  }
+
   return undefined
 }
 
