@@ -20,7 +20,10 @@ import { ObjectId } from 'mongodb'
 
 import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
-import { validate } from '~/src/api/forms/service/helpers/definition.js'
+import {
+  getMetadataOptions,
+  validate
+} from '~/src/api/forms/service/helpers/definition.js'
 import { repositionPaymentAndSummary } from '~/src/api/forms/service/migration-helpers.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
@@ -979,7 +982,7 @@ export function modifyUpdateOption(definition, optionName, optionValue) {
 
     definition.metadata = {
       ...definition.metadata,
-      options: { ...definition.metadata?.options, allowCopy }
+      options: { ...getMetadataOptions(definition), allowCopy }
     }
 
     // Copying answers relies on the reference number and confirmation email.

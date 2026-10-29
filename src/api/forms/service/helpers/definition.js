@@ -77,11 +77,48 @@ export function createJoiError(fieldName, message) {
 }
 
 /**
+ * Returns the options held in the form definition metadata, or an empty
+ * object if there are none
+ * @param {FormDefinition} definition
+ * @returns {Record<string, unknown>}
+ */
+export function getMetadataOptions(definition) {
+  const options = definition.metadata?.options
+
+  if (
+    typeof options === 'object' &&
+    options !== null &&
+    !Array.isArray(options)
+  ) {
+    return /** @type {Record<string, unknown>} */ (options)
+  }
+
+  return {}
+}
+
+/**
+ * Checks whether the form allows answers to be copied from a previous
+ * submission, as set by the metadata.options.allowCopy flag
+ * @param {FormDefinition} definition
+ * @returns {boolean}
+ */
+export function isAllowCopyEnabled(definition) {
+  return getMetadataOptions(definition).allowCopy === true
+}
+
+/**
  * Global validation in addition to the Joi schema validation
  * @param {FormDefinition} definition
  * @returns { ValidationError | undefined }
  */
 export function postSchemaValidation(definition) {
+  // forms-model does not define metadata.options.allowCopy, so check its type here
+  const { allowCopy } = getMetadataOptions(definition)
+
+  if (allowCopy !== undefined && typeof allowCopy !== 'boolean') {
+    return createJoiError('/', '"metadata.options.allowCopy" must be a boolean')
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!definition.pages) {
     return undefined
@@ -129,7 +166,7 @@ export function postSchemaValidation(definition) {
 
   // Copying answers from a previous submission relies on the reference number
   // and the confirmation email
-  if (definition.metadata?.options?.allowCopy) {
+  if (isAllowCopyEnabled(definition)) {
     if (!definition.options?.showReferenceNumber) {
       return createJoiError(
         '/',

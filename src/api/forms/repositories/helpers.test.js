@@ -62,6 +62,10 @@ import {
   removeById,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
+import {
+  getMetadataOptions,
+  isAllowCopyEnabled
+} from '~/src/api/forms/service/helpers/definition.js'
 import { empty as emptyFormWithSummary } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
@@ -1628,7 +1632,7 @@ describe('repository helpers', () => {
 
       const modified = modifyUpdateOption(definition, 'allowCopy', 'true')
 
-      expect(modified.metadata?.options?.allowCopy).toBe(true)
+      expect(isAllowCopyEnabled(modified)).toBe(true)
       expect(modified.options?.showReferenceNumber).toBe(true)
       expect(modified.pages[1].controller).toBe(
         ControllerType.SummaryWithConfirmationEmail
@@ -1645,7 +1649,7 @@ describe('repository helpers', () => {
 
       const modified = modifyUpdateOption(definition, 'allowCopy', 'false')
 
-      expect(modified.metadata?.options?.allowCopy).toBe(false)
+      expect(getMetadataOptions(modified).allowCopy).toBe(false)
       expect(modified.options?.showReferenceNumber).toBe(true)
       expect(modified.pages[1].controller).toBe(
         ControllerType.SummaryWithConfirmationEmail
@@ -1660,7 +1664,7 @@ describe('repository helpers', () => {
 
       const modified = modifyUpdateOption(definition, 'allowCopy', 'false')
 
-      expect(modified.metadata?.options?.allowCopy).toBe(false)
+      expect(getMetadataOptions(modified).allowCopy).toBe(false)
       expect(modified.options?.showReferenceNumber).toBe(false)
       expect(modified.pages[1].controller).toBe(ControllerType.Summary)
     })

@@ -16,7 +16,9 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
+  getMetadataOptions,
   getValidationSchema,
+  isAllowCopyEnabled,
   postSchemaValidation,
   validate,
   validatePaymentAmount
@@ -107,6 +109,55 @@ describe('definition helpers', () => {
     })
   })
 
+  describe('getMetadataOptions', () => {
+    it('should return the metadata options', () => {
+      const definition = buildDefinition({
+        metadata: { options: { allowCopy: true, other: 'value' } }
+      })
+      expect(getMetadataOptions(definition)).toEqual({
+        allowCopy: true,
+        other: 'value'
+      })
+    })
+
+    it.each([
+      { desc: 'there is no metadata', metadata: undefined },
+      { desc: 'there are no metadata options', metadata: {} },
+      { desc: 'the metadata options are null', metadata: { options: null } },
+      { desc: 'the metadata options are a string', metadata: { options: 'x' } },
+      { desc: 'the metadata options are an array', metadata: { options: [] } }
+    ])('should return an empty object if $desc', ({ metadata }) => {
+      const definition = buildDefinition({ metadata })
+      expect(getMetadataOptions(definition)).toEqual({})
+    })
+  })
+
+  describe('isAllowCopyEnabled', () => {
+    it('should return true if metadata.options.allowCopy is true', () => {
+      const definition = buildDefinition({
+        metadata: { options: { allowCopy: true } }
+      })
+      expect(isAllowCopyEnabled(definition)).toBe(true)
+    })
+
+    it.each([
+      { desc: 'there is no metadata', metadata: undefined },
+      { desc: 'there are no metadata options', metadata: {} },
+      { desc: 'allowCopy is not set', metadata: { options: {} } },
+      {
+        desc: 'allowCopy is false',
+        metadata: { options: { allowCopy: false } }
+      },
+      {
+        desc: 'allowCopy is not a boolean',
+        metadata: { options: { allowCopy: 'true' } }
+      }
+    ])('should return false if $desc', ({ metadata }) => {
+      const definition = buildDefinition({ metadata })
+      expect(isAllowCopyEnabled(definition)).toBe(false)
+    })
+  })
+
   describe('postSchemaValidation', () => {
     it('should return undefined if no pages', () => {
       // @ts-expect-error - missing pages from definition
@@ -194,6 +245,32 @@ describe('definition helpers', () => {
       expect(res?.message).toBe(
         'Reference number must be enabled if the form has a payment question'
       )
+    })
+
+    it.each([
+      { desc: 'a string', allowCopy: 'true' },
+      { desc: 'a number', allowCopy: 1 },
+      { desc: 'null', allowCopy: null },
+      { desc: 'an object', allowCopy: {} }
+    ])('should return error if allowCopy is $desc', ({ allowCopy }) => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPageWithConfirmation()],
+        options: { showReferenceNumber: true },
+        metadata: { options: { allowCopy } }
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        '"metadata.options.allowCopy" must be a boolean'
+      )
+    })
+
+    it('should return undefined if allowCopy is not provided', () => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPage()],
+        metadata: { options: {} }
+      })
+      expect(postSchemaValidation(definition)).toBeUndefined()
     })
 
     it('should return error if allowCopy is enabled but the reference number is disabled', () => {
