@@ -19,9 +19,14 @@ import {
   buildQuestionPage,
   buildStatusPage,
   buildSummaryPage,
+  buildSummaryPageWithConfirmation,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
 import {
   applyReferenceNumberSetting,
   buildSectionsResponse,
@@ -61,6 +66,10 @@ import {
   removeById,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
+import {
+  getMetadataOptions,
+  isAllowCopyEnabled
+} from '~/src/api/forms/service/helpers/definition.js'
 import { empty as emptyFormWithSummary } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'
@@ -1568,7 +1577,7 @@ describe('repository helpers', () => {
 
       const modified = modifyUpdateOption(
         definition,
-        'showReferenceNumber',
+        FormOptionName.ShowReferenceNumber,
         'true'
       )
 
@@ -1576,7 +1585,7 @@ describe('repository helpers', () => {
 
       const updated = modifyUpdateOption(
         definition,
-        'showReferenceNumber',
+        FormOptionName.ShowReferenceNumber,
         'false'
       )
 
@@ -1590,7 +1599,7 @@ describe('repository helpers', () => {
 
       const modified = modifyUpdateOption(
         definition,
-        'disableUserFeedback',
+        FormOptionName.DisableUserFeedback,
         'true'
       )
 
@@ -1598,11 +1607,86 @@ describe('repository helpers', () => {
 
       const updated = modifyUpdateOption(
         definition,
-        'disableUserFeedback',
+        FormOptionName.DisableUserFeedback,
         'false'
       )
 
       expect(updated.options?.disableUserFeedback).toBe(false)
+    })
+
+    it('should set metadata.options.allowCopy and keep other metadata', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPage()],
+        metadata: { translations: { cy: {} } }
+      })
+
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'true'
+      )
+
+      expect(modified.metadata).toEqual({
+        translations: { cy: {} },
+        options: { allowCopy: true }
+      })
+    })
+
+    it('should turn on the reference number and confirmation email when allowCopy is enabled', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPage()],
+        options: { showReferenceNumber: false }
+      })
+
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'true'
+      )
+
+      expect(isAllowCopyEnabled(modified)).toBe(true)
+      expect(modified.options?.showReferenceNumber).toBe(true)
+      expect(modified.pages[1].controller).toBe(
+        ControllerType.SummaryWithConfirmationEmail
+      )
+      expect(modified.pages[0]).toEqual(questionPageWithComponent)
+    })
+
+    it('should not change the reference number or confirmation email when allowCopy is disabled', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPageWithConfirmation()],
+        metadata: { options: { allowCopy: true } },
+        options: { showReferenceNumber: true }
+      })
+
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'false'
+      )
+
+      expect(getMetadataOptions(modified).allowCopy).toBe(false)
+      expect(modified.options?.showReferenceNumber).toBe(true)
+      expect(modified.pages[1].controller).toBe(
+        ControllerType.SummaryWithConfirmationEmail
+      )
+    })
+
+    it('should leave the reference number and confirmation email off when allowCopy is disabled', () => {
+      const definition = buildDefinition({
+        pages: [questionPageWithComponent, buildSummaryPage()],
+        options: { showReferenceNumber: false }
+      })
+
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'false'
+      )
+
+      expect(getMetadataOptions(modified).allowCopy).toBe(false)
+      expect(modified.options?.showReferenceNumber).toBe(false)
+      expect(modified.pages[1].controller).toBe(ControllerType.Summary)
     })
   })
 

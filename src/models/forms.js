@@ -16,6 +16,11 @@ import {
 } from '@defra/forms-model'
 import Joi from 'joi'
 
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
+
 // Retrieve form by ID schema
 export const formByIdSchema = Joi.object()
   .keys({
@@ -62,9 +67,11 @@ export const optionByNameSchema = Joi.object()
   .keys({
     id: idSchema,
     optionName: Joi.string()
-      .valid('showReferenceNumber', 'disableUserFeedback')
+      .valid(
+        ...Object.values(FormOptionName),
+        ...Object.values(FormMetadataOptionName)
+      )
       .required()
-    // If we add more options here, probably best to create an enum in forms-model that we can use here
   })
   .required()
 

@@ -18,9 +18,16 @@ import {
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
 import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
-import { validate } from '~/src/api/forms/service/helpers/definition.js'
+import {
+  getMetadataOptions,
+  validate
+} from '~/src/api/forms/service/helpers/definition.js'
 import { repositionPaymentAndSummary } from '~/src/api/forms/service/migration-helpers.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import { DEFINITION_COLLECTION_NAME, db } from '~/src/mongo.js'
@@ -963,17 +970,47 @@ export function modifyUpdateOption(definition, optionName, optionValue) {
       showReferenceNumber: false
     })
 
-  if (optionName === 'showReferenceNumber') {
+  if (optionName === FormOptionName.ShowReferenceNumber) {
     // Convert to boolean
     definition.options.showReferenceNumber = optionValue === 'true'
   }
 
-  if (optionName === 'disableUserFeedback') {
+  if (optionName === FormOptionName.DisableUserFeedback) {
     // Convert to boolean
     definition.options.disableUserFeedback = optionValue === 'true'
   }
 
+  if (optionName === FormMetadataOptionName.AllowCopy) {
+    // Convert to boolean
+    const allowCopy = optionValue === 'true'
+
+    definition.metadata = {
+      ...definition.metadata,
+      options: { ...getMetadataOptions(definition), allowCopy }
+    }
+
+    // Copying answers relies on the reference number and confirmation email.
+    // Turning allowCopy off leaves both as they are
+    if (allowCopy) {
+      definition.options.showReferenceNumber = true
+      enableConfirmationEmail(definition)
+    }
+  }
+
   return definition
+}
+
+/**
+ * Turns on the confirmation email by switching any summary page to the
+ * summary with confirmation email controller
+ * @param {FormDefinition} definition
+ */
+function enableConfirmationEmail(definition) {
+  definition.pages = definition.pages.map((page) =>
+    page.controller === ControllerType.Summary
+      ? { ...page, controller: ControllerType.SummaryWithConfirmationEmail }
+      : page
+  )
 }
 
 /**
