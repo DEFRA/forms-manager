@@ -2,6 +2,7 @@ import {
   ComponentType,
   ControllerType,
   SchemaVersion,
+  controllerNameFromPath,
   formDefinitionSchema,
   formDefinitionV2Schema,
   hasComponentsEvenIfNoNext,
@@ -175,8 +176,10 @@ export function postSchemaValidation(definition) {
     }
 
     if (
-      definition.pages.some(
-        (page) => page.controller === ControllerType.Summary
+      !definition.pages.some(
+        (page) =>
+          controllerNameFromPath(page.controller) ===
+          ControllerType.SummaryWithConfirmationEmail
       )
     ) {
       return createJoiError(

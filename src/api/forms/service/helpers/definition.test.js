@@ -286,9 +286,28 @@ describe('definition helpers', () => {
       )
     })
 
-    it('should return error if allowCopy is enabled but the confirmation email is disabled', () => {
+    it.each([
+      {
+        desc: 'the summary page does not send a confirmation email',
+        pages: [buildSummaryPage()]
+      },
+      {
+        desc: 'the summary page uses the legacy summary controller path',
+        pages: [
+          buildSummaryPage({
+            controller: /** @type {ControllerType.Summary} */ (
+              /** @type {unknown} */ ('./pages/summary.js')
+            )
+          })
+        ]
+      },
+      {
+        desc: 'there is no summary page',
+        pages: [buildQuestionPage()]
+      }
+    ])('should return error if allowCopy is enabled but $desc', ({ pages }) => {
       const definition = buildDefinition({
-        pages: [buildSummaryPage()],
+        pages,
         options: { showReferenceNumber: true },
         metadata: { options: { allowCopy: true } }
       })
@@ -303,6 +322,19 @@ describe('definition helpers', () => {
       {
         desc: 'allowCopy is enabled and the reference number and confirmation email are enabled',
         page: buildSummaryPageWithConfirmation(),
+        showReferenceNumber: true,
+        allowCopy: true
+      },
+      {
+        desc: 'allowCopy is enabled and the confirmation email summary page uses the legacy controller path',
+        page: buildSummaryPageWithConfirmation({
+          controller:
+            /** @type {ControllerType.SummaryWithConfirmationEmail} */ (
+              /** @type {unknown} */ (
+                './pages/summary-with-confirmation-email.js'
+              )
+            )
+        }),
         showReferenceNumber: true,
         allowCopy: true
       },
@@ -352,3 +384,7 @@ describe('definition helpers', () => {
     )
   })
 })
+
+/**
+ * @import { ControllerType } from '@defra/forms-model'
+ */
