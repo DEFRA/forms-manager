@@ -1,3 +1,7 @@
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
 import { updateOptionOnDraftDefinition } from '~/src/api/forms/service/options.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -47,7 +51,7 @@ describe('Options route', () => {
         showReferenceNumber: true
       })
       const [, calledName, calledValue] = updateOption.mock.calls[0]
-      expect(calledName).toBe('showReferenceNumber')
+      expect(calledName).toBe(FormOptionName.ShowReferenceNumber)
       expect(calledValue).toBe('true')
     })
 
@@ -74,7 +78,7 @@ describe('Options route', () => {
         disableUserFeedback: true
       })
       const [, calledName, calledValue] = updateOption.mock.calls[0]
-      expect(calledName).toBe('disableUserFeedback')
+      expect(calledName).toBe(FormOptionName.DisableUserFeedback)
       expect(calledValue).toBe('true')
     })
 
@@ -101,7 +105,7 @@ describe('Options route', () => {
         allowCopy: true
       })
       const [, calledName, calledValue] = updateOption.mock.calls[0]
-      expect(calledName).toBe('allowCopy')
+      expect(calledName).toBe(FormMetadataOptionName.AllowCopy)
       expect(calledValue).toBe('true')
     })
   })

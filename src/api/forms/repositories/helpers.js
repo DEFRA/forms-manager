@@ -18,6 +18,10 @@ import {
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
 import * as formMetadataRepository from '~/src/api/forms/repositories/form-metadata-repository.js'
 import * as formVersionsRepository from '~/src/api/forms/repositories/form-versions-repository.js'
 import {
@@ -966,17 +970,17 @@ export function modifyUpdateOption(definition, optionName, optionValue) {
       showReferenceNumber: false
     })
 
-  if (optionName === 'showReferenceNumber') {
+  if (optionName === FormOptionName.ShowReferenceNumber) {
     // Convert to boolean
     definition.options.showReferenceNumber = optionValue === 'true'
   }
 
-  if (optionName === 'disableUserFeedback') {
+  if (optionName === FormOptionName.DisableUserFeedback) {
     // Convert to boolean
     definition.options.disableUserFeedback = optionValue === 'true'
   }
 
-  if (optionName === 'allowCopy') {
+  if (optionName === FormMetadataOptionName.AllowCopy) {
     // Convert to boolean
     const allowCopy = optionValue === 'true'
 

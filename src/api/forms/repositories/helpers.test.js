@@ -24,6 +24,10 @@ import {
 } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
 import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
+import {
   applyReferenceNumberSetting,
   buildSectionsResponse,
   findComponent,
@@ -1573,7 +1577,7 @@ describe('repository helpers', () => {
 
       const modified = modifyUpdateOption(
         definition,
-        'showReferenceNumber',
+        FormOptionName.ShowReferenceNumber,
         'true'
       )
 
@@ -1581,7 +1585,7 @@ describe('repository helpers', () => {
 
       const updated = modifyUpdateOption(
         definition,
-        'showReferenceNumber',
+        FormOptionName.ShowReferenceNumber,
         'false'
       )
 
@@ -1595,7 +1599,7 @@ describe('repository helpers', () => {
 
       const modified = modifyUpdateOption(
         definition,
-        'disableUserFeedback',
+        FormOptionName.DisableUserFeedback,
         'true'
       )
 
@@ -1603,7 +1607,7 @@ describe('repository helpers', () => {
 
       const updated = modifyUpdateOption(
         definition,
-        'disableUserFeedback',
+        FormOptionName.DisableUserFeedback,
         'false'
       )
 
@@ -1616,7 +1620,11 @@ describe('repository helpers', () => {
         metadata: { translations: { cy: {} } }
       })
 
-      const modified = modifyUpdateOption(definition, 'allowCopy', 'true')
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'true'
+      )
 
       expect(modified.metadata).toEqual({
         translations: { cy: {} },
@@ -1630,7 +1638,11 @@ describe('repository helpers', () => {
         options: { showReferenceNumber: false }
       })
 
-      const modified = modifyUpdateOption(definition, 'allowCopy', 'true')
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'true'
+      )
 
       expect(isAllowCopyEnabled(modified)).toBe(true)
       expect(modified.options?.showReferenceNumber).toBe(true)
@@ -1647,7 +1659,11 @@ describe('repository helpers', () => {
         options: { showReferenceNumber: true }
       })
 
-      const modified = modifyUpdateOption(definition, 'allowCopy', 'false')
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'false'
+      )
 
       expect(getMetadataOptions(modified).allowCopy).toBe(false)
       expect(modified.options?.showReferenceNumber).toBe(true)
@@ -1662,7 +1678,11 @@ describe('repository helpers', () => {
         options: { showReferenceNumber: false }
       })
 
-      const modified = modifyUpdateOption(definition, 'allowCopy', 'false')
+      const modified = modifyUpdateOption(
+        definition,
+        FormMetadataOptionName.AllowCopy,
+        'false'
+      )
 
       expect(getMetadataOptions(modified).allowCopy).toBe(false)
       expect(modified.options?.showReferenceNumber).toBe(false)
