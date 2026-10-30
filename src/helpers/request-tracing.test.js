@@ -1,6 +1,10 @@
 import {
+  REFERENCE_NUMBER_HEADER,
+  SESSION_ID_HEADER,
   createLogContext,
   getCorrelationId,
+  getReferenceNumber,
+  getSessionId,
   getUserId,
   runWithLogContext
 } from '@defra/forms-common'
@@ -99,6 +103,31 @@ describe('request-tracing', () => {
         userId
       })
       expect(responseContext).toEqual({ correlationId, userId })
+    })
+
+    it('should use the session ID and reference number of the calling service', async () => {
+      server.route({
+        method: 'GET',
+        path: '/log-context',
+        handler: () => ({
+          sessionId: getSessionId(),
+          referenceNumber: getReferenceNumber()
+        })
+      })
+
+      const { result } = await server.inject({
+        method: 'GET',
+        url: '/log-context',
+        headers: {
+          [SESSION_ID_HEADER]: 'session-id',
+          [REFERENCE_NUMBER_HEADER]: 'ABC-123-DEF'
+        }
+      })
+
+      expect(result).toEqual({
+        sessionId: 'session-id',
+        referenceNumber: 'ABC-123-DEF'
+      })
     })
   })
 

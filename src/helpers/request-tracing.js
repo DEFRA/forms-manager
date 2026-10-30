@@ -1,4 +1,5 @@
 import {
+  applyLogContextHeaders as applyLogContextHeader,
   applyTraceHeaders as applyTraceHeader,
   requestTracing as requestTracingPlugin
 } from '@defra/forms-common'
@@ -20,6 +21,26 @@ export function applyTraceHeaders(headers) {
 }
 
 /**
+ * Adds the session ID and form reference number of the current log context to
+ * the headers of an outbound HTTP request, when the request is to another
+ * forms service. They are never sent to a service outside forms, such as
+ * GOV.UK Notify.
+ * @template {Record<string, any>} Headers
+ * @param {URL} url - the URL of the request
+ * @param {Headers} [headers] - the existing headers
+ * @returns {Headers | undefined}
+ */
+export function applyLogContextHeaders(url, headers) {
+  const entitlementUrl = config.get('entitlementUrl')
+
+  if (!entitlementUrl || url.origin !== new URL(entitlementUrl).origin) {
+    return headers
+  }
+
+  return applyLogContextHeader(headers)
+}
+
+/**
  * Gets the unique ID (`oid`) of the authenticated user
  * @param {Request} request
  * @returns {string | undefined}
@@ -36,8 +57,10 @@ export function getRequestUserId(request) {
 
 /**
  * Starts a log context for every request, holding the correlation ID from the
- * tracing header (or a new ID when the caller sent none) and the ID of the
- * authenticated user. The logger writes both on every log line.
+ * tracing header (or a new ID when the caller sent none), the ID of the
+ * authenticated user, and the session ID and form reference number sent by
+ * the calling forms service. The logger writes them on every log line.
+ * Messages published while the request is handled carry them on.
  * @satisfies {ServerRegisterPluginObject<RequestTracingOptions>}
  */
 export const requestTracing = {
@@ -45,7 +68,8 @@ export const requestTracing = {
   options: {
     tracingHeader,
     tracingPlugin: tracing.plugin,
-    getUserId: getRequestUserId
+    getUserId: getRequestUserId,
+    readLogContextHeaders: true
   }
 }
 
