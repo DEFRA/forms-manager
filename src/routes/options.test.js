@@ -1,3 +1,7 @@
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
 import { updateOptionOnDraftDefinition } from '~/src/api/forms/service/options.js'
 import { createServer } from '~/src/api/server.js'
 import { auth } from '~/test/fixtures/auth.js'
@@ -47,7 +51,7 @@ describe('Options route', () => {
         showReferenceNumber: true
       })
       const [, calledName, calledValue] = updateOption.mock.calls[0]
-      expect(calledName).toBe('showReferenceNumber')
+      expect(calledName).toBe(FormOptionName.ShowReferenceNumber)
       expect(calledValue).toBe('true')
     })
 
@@ -74,7 +78,34 @@ describe('Options route', () => {
         disableUserFeedback: true
       })
       const [, calledName, calledValue] = updateOption.mock.calls[0]
-      expect(calledName).toBe('disableUserFeedback')
+      expect(calledName).toBe(FormOptionName.DisableUserFeedback)
+      expect(calledValue).toBe('true')
+    })
+
+    test('Testing POST /forms/{id}/definition/draft/options/{optionName} allowCopy', async () => {
+      const payload = {
+        optionValue: 'true'
+      }
+
+      const updateOption = jest
+        .mocked(updateOptionOnDraftDefinition)
+        // @ts-expect-error - type for testing
+        .mockResolvedValueOnce({ allowCopy: true })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: `/forms/${id}/definition/draft/options/allowCopy`,
+        payload,
+        auth
+      })
+
+      expect(response.statusCode).toEqual(okStatusCode)
+      expect(response.headers['content-type']).toContain(jsonContentType)
+      expect(response.result).toEqual({
+        allowCopy: true
+      })
+      const [, calledName, calledValue] = updateOption.mock.calls[0]
+      expect(calledName).toBe(FormMetadataOptionName.AllowCopy)
       expect(calledValue).toBe('true')
     })
   })
@@ -97,7 +128,7 @@ describe('Options route', () => {
       expect(response.result).toMatchObject({
         error: 'Bad Request',
         message:
-          '"optionName" must be one of [showReferenceNumber, disableUserFeedback]'
+          '"optionName" must be one of [showReferenceNumber, disableUserFeedback, allowCopy]'
       })
     })
   })

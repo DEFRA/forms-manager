@@ -25,6 +25,7 @@ import { ObjectId } from 'mongodb'
 
 import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
+import { FormOptionName } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import {
   addComponent,
@@ -1334,7 +1335,12 @@ describe('form-definition-repository', () => {
     it('should set option', async () => {
       await helper(
         async () => {
-          await updateOption(formId, 'showReferenceNumber', 'true', mockSession)
+          await updateOption(
+            formId,
+            FormOptionName.ShowReferenceNumber,
+            'true',
+            mockSession
+          )
         },
         (definition) => {
           expect(definition.options?.showReferenceNumber).toBe(true)

@@ -24,3 +24,20 @@ export const makeFormLiveErrorMessages = {
 export const removeFormErrorMessages = {
   formIsAlreadyLive: 'This form has already gone live and cannot be deleted.'
 }
+
+/**
+ * Names of the options in the root of the form definition (definition.options)
+ * that can be updated on a draft definition
+ */
+export const FormOptionName = {
+  ShowReferenceNumber: 'showReferenceNumber',
+  DisableUserFeedback: 'disableUserFeedback'
+}
+
+/**
+ * Names of the form metadata options (definition.metadata.options)
+ * that can be updated on a draft definition
+ */
+export const FormMetadataOptionName = {
+  AllowCopy: 'allowCopy'
+}

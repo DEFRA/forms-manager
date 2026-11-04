@@ -8,6 +8,7 @@ import {
   buildDefinition,
   buildList
 } from '~/src/api/forms/__stubs__/definition.js'
+import { FormOptionName } from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
@@ -79,13 +80,13 @@ describe('options', () => {
 
       const result = await updateOptionOnDraftDefinition(
         id,
-        'showReferenceNumber',
+        FormOptionName.ShowReferenceNumber,
         'true',
         defaultAuthor
       )
       const [expectedFormId, optionName] = updateOptionMock.mock.calls[0]
       expect(expectedFormId).toBe(id)
-      expect(optionName).toBe('showReferenceNumber')
+      expect(optionName).toBe(FormOptionName.ShowReferenceNumber)
       expect(result).toEqual({ option: { showReferenceNumber: 'true' } })
       expectMetadataUpdate()
 
@@ -110,13 +111,13 @@ describe('options', () => {
 
       const result = await updateOptionOnDraftDefinition(
         id,
-        'disableUserFeedback',
+        FormOptionName.DisableUserFeedback,
         'true',
         defaultAuthor
       )
       const [expectedFormId, optionName] = updateOptionMock.mock.calls[0]
       expect(expectedFormId).toBe(id)
-      expect(optionName).toBe('disableUserFeedback')
+      expect(optionName).toBe(FormOptionName.DisableUserFeedback)
       expect(result).toEqual({ option: { disableUserFeedback: 'true' } })
       expectMetadataUpdate()
 

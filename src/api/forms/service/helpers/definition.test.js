@@ -10,11 +10,15 @@ import {
   buildDefinition,
   buildPaymentPage,
   buildQuestionPage,
+  buildSummaryPage,
+  buildSummaryPageWithConfirmation,
   buildTextFieldComponent
 } from '~/src/api/forms/__stubs__/definition.js'
 import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
+  getMetadataOptions,
   getValidationSchema,
+  isAllowCopyEnabled,
   postSchemaValidation,
   validate,
   validatePaymentAmount
@@ -102,6 +106,55 @@ describe('definition helpers', () => {
       expect(mockSchema.validate).toHaveBeenCalledWith(definition, {
         abortEarly: false
       })
+    })
+  })
+
+  describe('getMetadataOptions', () => {
+    it('should return the metadata options', () => {
+      const definition = buildDefinition({
+        metadata: { options: { allowCopy: true, other: 'value' } }
+      })
+      expect(getMetadataOptions(definition)).toEqual({
+        allowCopy: true,
+        other: 'value'
+      })
+    })
+
+    it.each([
+      { desc: 'there is no metadata', metadata: undefined },
+      { desc: 'there are no metadata options', metadata: {} },
+      { desc: 'the metadata options are null', metadata: { options: null } },
+      { desc: 'the metadata options are a string', metadata: { options: 'x' } },
+      { desc: 'the metadata options are an array', metadata: { options: [] } }
+    ])('should return an empty object if $desc', ({ metadata }) => {
+      const definition = buildDefinition({ metadata })
+      expect(getMetadataOptions(definition)).toEqual({})
+    })
+  })
+
+  describe('isAllowCopyEnabled', () => {
+    it('should return true if metadata.options.allowCopy is true', () => {
+      const definition = buildDefinition({
+        metadata: { options: { allowCopy: true } }
+      })
+      expect(isAllowCopyEnabled(definition)).toBe(true)
+    })
+
+    it.each([
+      { desc: 'there is no metadata', metadata: undefined },
+      { desc: 'there are no metadata options', metadata: {} },
+      { desc: 'allowCopy is not set', metadata: { options: {} } },
+      {
+        desc: 'allowCopy is false',
+        metadata: { options: { allowCopy: false } }
+      },
+      {
+        desc: 'allowCopy is not a boolean',
+        metadata: { options: { allowCopy: 'true' } }
+      }
+    ])('should return false if $desc', ({ metadata }) => {
+      const definition = buildDefinition({ metadata })
+      expect(isAllowCopyEnabled(definition)).toBe(false)
     })
   })
 
@@ -193,6 +246,115 @@ describe('definition helpers', () => {
         'Reference number must be enabled if the form has a payment question'
       )
     })
+
+    it.each([
+      { desc: 'a string', allowCopy: 'true' },
+      { desc: 'a number', allowCopy: 1 },
+      { desc: 'null', allowCopy: null },
+      { desc: 'an object', allowCopy: {} }
+    ])('should return error if allowCopy is $desc', ({ allowCopy }) => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPageWithConfirmation()],
+        options: { showReferenceNumber: true },
+        metadata: { options: { allowCopy } }
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        '"metadata.options.allowCopy" must be a boolean'
+      )
+    })
+
+    it('should return undefined if allowCopy is not provided', () => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPage()],
+        metadata: { options: {} }
+      })
+      expect(postSchemaValidation(definition)).toBeUndefined()
+    })
+
+    it('should return error if allowCopy is enabled but the reference number is disabled', () => {
+      const definition = buildDefinition({
+        pages: [buildSummaryPageWithConfirmation()],
+        options: { showReferenceNumber: false },
+        metadata: { options: { allowCopy: true } }
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        'Reference number must be enabled if the form allows answers to be reused from a previous submission'
+      )
+    })
+
+    it.each([
+      {
+        desc: 'the summary page does not send a confirmation email',
+        pages: [buildSummaryPage()]
+      },
+      {
+        desc: 'the summary page uses the legacy summary controller path',
+        pages: [
+          buildSummaryPage({
+            controller: /** @type {ControllerType.Summary} */ (
+              /** @type {unknown} */ ('./pages/summary.js')
+            )
+          })
+        ]
+      },
+      {
+        desc: 'there is no summary page',
+        pages: [buildQuestionPage()]
+      }
+    ])('should return error if allowCopy is enabled but $desc', ({ pages }) => {
+      const definition = buildDefinition({
+        pages,
+        options: { showReferenceNumber: true },
+        metadata: { options: { allowCopy: true } }
+      })
+      const res = postSchemaValidation(definition)
+      expect(res).toBeInstanceOf(Joi.ValidationError)
+      expect(res?.message).toBe(
+        'Confirmation email must be enabled if the form allows answers to be reused from a previous submission'
+      )
+    })
+
+    it.each([
+      {
+        desc: 'allowCopy is enabled and the reference number and confirmation email are enabled',
+        page: buildSummaryPageWithConfirmation(),
+        showReferenceNumber: true,
+        allowCopy: true
+      },
+      {
+        desc: 'allowCopy is enabled and the confirmation email summary page uses the legacy controller path',
+        page: buildSummaryPageWithConfirmation({
+          controller:
+            /** @type {ControllerType.SummaryWithConfirmationEmail} */ (
+              /** @type {unknown} */ (
+                './pages/summary-with-confirmation-email.js'
+              )
+            )
+        }),
+        showReferenceNumber: true,
+        allowCopy: true
+      },
+      {
+        desc: 'allowCopy is disabled and the reference number and confirmation email are disabled',
+        page: buildSummaryPage(),
+        showReferenceNumber: false,
+        allowCopy: false
+      }
+    ])(
+      'should return undefined if $desc',
+      ({ page, showReferenceNumber, allowCopy }) => {
+        const definition = buildDefinition({
+          pages: [page],
+          options: { showReferenceNumber },
+          metadata: { options: { allowCopy } }
+        })
+        expect(postSchemaValidation(definition)).toBeUndefined()
+      }
+    )
   })
 
   describe('validatePaymentAmount', () => {
@@ -222,3 +384,7 @@ describe('definition helpers', () => {
     )
   })
 })
+
+/**
+ * @import { ControllerType } from '@defra/forms-model'
+ */
