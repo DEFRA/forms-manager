@@ -69,6 +69,41 @@ describe('fetch utilities', () => {
       )
     })
 
+    it.each([
+      {
+        url: 'http://localhost:3004/users',
+        headers: {
+          'x-cdp-request-id': 'correlation-id',
+          'x-forms-session-id': 'session-id',
+          'x-forms-reference-number': 'ABC-123-DEF'
+        }
+      },
+      {
+        url: 'http://example.com/api',
+        headers: { 'x-cdp-request-id': 'correlation-id' }
+      }
+    ])(
+      'should only send the session ID and reference number to a forms service ($url)',
+      async ({ url, headers }) => {
+        /** @type {any} */
+        const mockResponse = { statusCode: 200, headers: {} }
+        const context = createLogContext({
+          correlationId: 'correlation-id',
+          sessionId: 'session-id',
+          referenceNumber: 'ABC-123-DEF'
+        })
+
+        jest.mocked(Wreck.request).mockResolvedValue(mockResponse)
+        jest.mocked(Wreck.read).mockResolvedValue({})
+
+        await runWithLogContext(context, () => request('get', new URL(url), {}))
+
+        expect(jest.mocked(Wreck.request)).toHaveBeenCalledWith('get', url, {
+          headers
+        })
+      }
+    )
+
     it('should throw Boom error for non-200 status with message in body', async () => {
       /** @type {any} */
       const mockResponse = { statusCode: 404 }
