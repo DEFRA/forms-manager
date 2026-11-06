@@ -23,9 +23,15 @@ import {
 import Boom from '@hapi/boom'
 import { ObjectId } from 'mongodb'
 
-import { buildCondition } from '~/src/api/forms/__stubs__/definition.js'
+import {
+  buildCondition,
+  buildSummaryPageWithConfirmation
+} from '~/src/api/forms/__stubs__/definition.js'
 import { buildMockCollection } from '~/src/api/forms/__stubs__/mongo.js'
-import { FormOptionName } from '~/src/api/forms/constants.js'
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import {
   addComponent,
@@ -1344,6 +1350,69 @@ describe('form-definition-repository', () => {
         },
         (definition) => {
           expect(definition.options?.showReferenceNumber).toBe(true)
+        }
+      )
+    })
+
+    it('should save allowCopy with the reference number and confirmation email turned on', async () => {
+      await helper(
+        async () => {
+          await updateOption(
+            formId,
+            FormMetadataOptionName.AllowCopy,
+            'true',
+            mockSession
+          )
+        },
+        (definition) => {
+          expect(definition.metadata?.options).toEqual({ allowCopy: true })
+          expect(definition.options?.showReferenceNumber).toBe(true)
+
+          const summary = definition.pages.find(
+            (page) => page.id === summaryPage.id
+          )
+          expect(summary?.controller).toBe(
+            ControllerType.SummaryWithConfirmationEmail
+          )
+
+          const questionPages = definition.pages.filter(
+            (page) => page.id !== summaryPage.id
+          )
+          expect(questionPages).toEqual([page1, page2, page3, page4, page5])
+        }
+      )
+    })
+
+    it('should save allowCopy turned off and keep the reference number and confirmation email', async () => {
+      draft = buildDefinition({
+        ...draft,
+        options: { showReferenceNumber: true },
+        metadata: { options: { allowCopy: true } },
+        pages: [
+          page1,
+          page2,
+          page3,
+          page4,
+          page5,
+          buildSummaryPageWithConfirmation({ id: summaryPage.id })
+        ]
+      })
+
+      await helper(
+        async () => {
+          await updateOption(
+            formId,
+            FormMetadataOptionName.AllowCopy,
+            'false',
+            mockSession
+          )
+        },
+        (definition) => {
+          expect(definition.metadata?.options).toEqual({ allowCopy: false })
+          expect(definition.options?.showReferenceNumber).toBe(true)
+          expect(definition.pages.at(-1)?.controller).toBe(
+            ControllerType.SummaryWithConfirmationEmail
+          )
         }
       )
     })
