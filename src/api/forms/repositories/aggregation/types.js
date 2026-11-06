@@ -1,6 +1,6 @@
 /**
  * @typedef {object} FilterConditions
- * @property {{ $regex: RegExp }} [title] - Optional MongoDB regex query for title matching
+ * @property {{ $or: ({ title: { $regex: RegExp } } | { slug: { $regex: RegExp } })[] }[]} [$and] - Optional MongoDB $and query for title or slug matching
  * @property {{ displayName: { $regex: RegExp } }} [createdBy] - Optional MongoDB regex query for author matching
  * @property {{ $in: string[] }} [organisation] - Optional MongoDB $in query for organisation matching
  * @property {{ live?: { $exists: boolean }, offline?: { $eq?: boolean, $ne?: boolean  }}[]} [$or] - Optional MongoDB $or query for status matching

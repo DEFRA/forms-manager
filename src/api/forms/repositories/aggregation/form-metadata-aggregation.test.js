@@ -31,10 +31,49 @@ describe('Form metadata aggregation', () => {
     })
 
     describe('with title filter', () => {
-      it('should create case-insensitive regex filter', () => {
+      it('should create case-insensitive regex filter on title and slug', () => {
         const result = buildFilterConditions({ title: 'Test Form' })
         expect(result).toEqual({
-          title: { $regex: /Test Form/i }
+          $and: [
+            {
+              $or: [
+                { title: { $regex: /Test Form/i } },
+                { slug: { $regex: /Test Form/i } }
+              ]
+            }
+          ]
+        })
+      })
+
+      it('should match a partial slug containing hyphens', () => {
+        const result = buildFilterConditions({ title: 'wildlife-permit' })
+        expect(result).toEqual({
+          $and: [
+            {
+              $or: [
+                { title: { $regex: /wildlife-permit/i } },
+                { slug: { $regex: /wildlife-permit/i } }
+              ]
+            }
+          ]
+        })
+      })
+
+      it('should keep the status filter when searching by slug', () => {
+        const result = buildFilterConditions({
+          title: 'wildlife-permit',
+          status: [FormStatus.Draft]
+        })
+        expect(result).toEqual({
+          $and: [
+            {
+              $or: [
+                { title: { $regex: /wildlife-permit/i } },
+                { slug: { $regex: /wildlife-permit/i } }
+              ]
+            }
+          ],
+          $or: [{ live: { $exists: false } }]
         })
       })
 
@@ -130,7 +169,14 @@ describe('Form metadata aggregation', () => {
         })
 
         expect(result).toEqual({
-          title: { $regex: /Wildlife Permit Application/i },
+          $and: [
+            {
+              $or: [
+                { title: { $regex: /Wildlife Permit Application/i } },
+                { slug: { $regex: /Wildlife Permit Application/i } }
+              ]
+            }
+          ],
           'createdBy.displayName': { $regex: /Henrique Silva/i },
           organisation: { $in: ['Natural England', 'Defra'] },
           $or: [{ live: { $exists: true }, offline: { $ne: true } }]
@@ -173,7 +219,14 @@ describe('Form metadata aggregation', () => {
 
         expect(pipeline[0]).toHaveProperty('$match')
         expect(pipeline[0].$match).toEqual({
-          title: { $regex: /Wildlife Permit Application/i },
+          $and: [
+            {
+              $or: [
+                { title: { $regex: /Wildlife Permit Application/i } },
+                { slug: { $regex: /Wildlife Permit Application/i } }
+              ]
+            }
+          ],
           'createdBy.displayName': { $regex: /Henrique/i },
           organisation: { $in: ['Defra'] },
           $or: [
@@ -245,7 +298,14 @@ describe('Form metadata aggregation', () => {
 
         expect(pipeline[0]).toHaveProperty('$match')
         expect(pipeline[0].$match).toEqual({
-          title: { $regex: /Wildlife Permit Application/i },
+          $and: [
+            {
+              $or: [
+                { title: { $regex: /Wildlife Permit Application/i } },
+                { slug: { $regex: /Wildlife Permit Application/i } }
+              ]
+            }
+          ],
           'createdBy.displayName': { $regex: /Henrique/i },
           organisation: { $in: ['Defra'] },
           $or: [{ live: { $exists: true }, offline: { $ne: true } }]
@@ -276,7 +336,14 @@ describe('Form metadata aggregation', () => {
         })
 
         expect(pipeline[0]).toHaveProperty('$match')
-        expect(pipeline[0].$match?.title).toEqual({ $regex: /Test Form/i })
+        expect(pipeline[0].$match?.$and).toEqual([
+          {
+            $or: [
+              { title: { $regex: /Test Form/i } },
+              { slug: { $regex: /Test Form/i } }
+            ]
+          }
+        ])
 
         const sortStage = pipeline[pipeline.length - 2] // Second to last stage
         expect(sortStage.$sort).toEqual({
@@ -321,7 +388,18 @@ describe('Form metadata aggregation', () => {
     })
 
     it('should add versions lookup stage to existing pipeline', () => {
-      pipeline.push({ $match: { title: { $regex: /test/i } } })
+      pipeline.push({
+        $match: {
+          $and: [
+            {
+              $or: [
+                { title: { $regex: /test/i } },
+                { slug: { $regex: /test/i } }
+              ]
+            }
+          ]
+        }
+      })
       pipeline.push({ $addFields: { testField: 1 } })
 
       addVersionsLookupStage(pipeline)
