@@ -14,6 +14,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import { listForms } from '~/src/api/forms/service/definition.js'
+import { isAllowCopyEnabled } from '~/src/api/forms/service/helpers/definition.js'
 import { logger } from '~/src/helpers/logging/logger.js'
 import { client } from '~/src/mongo.js'
 
@@ -139,6 +140,7 @@ export function collectOverviewMetrics(metadata, definition, definitionType) {
     summaryMetrics: calcSummaryMetrics(metadata, definition, definitionType),
     featureMetrics: calcFeatureMetrics(definition),
     submissionsCount: 0,
+    options: getFormOptions(definition),
     updatedAt: new Date(),
     ...lang
   }
@@ -194,6 +196,17 @@ export function calcFeatureMetrics(definition) {
     features: getComponentUsageFeatureMetrics(definition),
     formStructure: getFormStructureCounts(definition, questionTypes)
   }
+}
+
+/**
+ * @param {FormDefinition} definition
+ */
+export function getFormOptions(definition) {
+  const options = []
+  if (isAllowCopyEnabled(definition)) {
+    options.push('allowCopy')
+  }
+  return options
 }
 
 /**
@@ -294,6 +307,9 @@ export function getFeatureList(definition) {
   }
   if (hasWelshTranslation(definition)) {
     features.push('Welsh translation')
+  }
+  if (isAllowCopyEnabled(definition)) {
+    features.push('Copy answers')
   }
   return features
 }
