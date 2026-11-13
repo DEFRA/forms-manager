@@ -341,6 +341,21 @@ describe('report-overview', () => {
       expect(getFeatureList(definition)).toEqual([])
     })
 
+    it.each([
+      { allowCopy: true, expected: ['Copy answers'] },
+      { allowCopy: false, expected: [] }
+    ])(
+      'should report Copy answers only when allowCopy is $allowCopy',
+      ({ allowCopy, expected }) => {
+        const definition = buildDefinition({
+          pages: [buildQuestionPage(), buildSummaryPage()],
+          metadata: { options: { allowCopy } }
+        })
+
+        expect(getFeatureList(definition)).toEqual(expected)
+      }
+    )
+
     it('should return unique list', () => {
       const summaryPage = buildSummaryPage({
         // @ts-expect-error - forcing the controller type

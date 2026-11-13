@@ -48,6 +48,7 @@ import {
   createLiveFromDraft,
   deleteDraftFormDefinition,
   getFormDefinition,
+  getFormDefinitionIfExists,
   listForms,
   makePaymentKeyLive,
   missingPrivacyNotice,
@@ -683,6 +684,62 @@ describe('Forms service', () => {
         updateDraftFormDefinition('123', definition, author)
       ).rejects.toThrow(error)
     })
+  })
+
+  describe('getFormDefinitionIfExists', () => {
+    it('returns the definition and forwards the state and session', async () => {
+      const session = /** @type {ClientSession} */ ({})
+      jest.mocked(formDefinition.get).mockResolvedValueOnce(definition)
+
+      await expect(
+        getFormDefinitionIfExists(id, FormStatus.Live, session)
+      ).resolves.toBe(definition)
+      expect(formMetadata.get).toHaveBeenCalledWith(id, session)
+      expect(formDefinition.get).toHaveBeenCalledWith(
+        id,
+        FormStatus.Live,
+        session
+      )
+    })
+
+    it('returns undefined when the metadata is not found', async () => {
+      jest.mocked(formMetadata.get).mockRejectedValueOnce(Boom.notFound())
+
+      await expect(
+        getFormDefinitionIfExists(id, FormStatus.Live)
+      ).resolves.toBeUndefined()
+      expect(formDefinition.get).not.toHaveBeenCalled()
+    })
+
+    it('returns undefined when the definition is not found', async () => {
+      jest.mocked(formDefinition.get).mockRejectedValueOnce(Boom.notFound())
+
+      await expect(
+        getFormDefinitionIfExists(id, FormStatus.Live)
+      ).resolves.toBeUndefined()
+    })
+
+    it('returns undefined when the draft state is invalid', async () => {
+      jest
+        .mocked(formMetadata.get)
+        .mockResolvedValueOnce(buildMetadataDocument({ draft: undefined }))
+
+      await expect(
+        getFormDefinitionIfExists(id, FormStatus.Draft)
+      ).resolves.toBeUndefined()
+      expect(formDefinition.get).not.toHaveBeenCalled()
+    })
+
+    it.each([Boom.internal('Database error'), new Error('Unexpected error')])(
+      'propagates non-404 errors',
+      async (error) => {
+        jest.mocked(formDefinition.get).mockRejectedValueOnce(error)
+
+        await expect(
+          getFormDefinitionIfExists(id, FormStatus.Live)
+        ).rejects.toBe(error)
+      }
+    )
   })
 
   describe('removeForm', () => {
