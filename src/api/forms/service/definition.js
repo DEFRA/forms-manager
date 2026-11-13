@@ -7,7 +7,10 @@ import {
 } from '@defra/forms-model'
 import Boom from '@hapi/boom'
 
-import { makeFormLiveErrorMessages } from '~/src/api/forms/constants.js'
+import {
+  HTTP_NOT_FOUND,
+  makeFormLiveErrorMessages
+} from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import { deleteDraft } from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
@@ -83,15 +86,11 @@ export async function getFormDefinition(
  * @param {FormStatus} state - the form state
  * @param {ClientSession | undefined} [session]
  */
-export async function getFormDefinitionIfExists(
-  formId,
-  state = FormStatus.Draft,
-  session
-) {
+export async function getFormDefinitionIfExists(formId, state, session) {
   try {
     return await getFormDefinition(formId, state, session)
   } catch (err) {
-    if (Boom.isBoom(err) && err.output.statusCode === 404) {
+    if (Boom.isBoom(err) && err.output.statusCode === HTTP_NOT_FOUND) {
       return undefined
     }
     throw err

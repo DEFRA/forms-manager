@@ -246,6 +246,7 @@ export async function publishFormOptionsChangedEvent(
 
     return validateAndPublishEvent(auditMessage)
   }
+  return undefined
 }
 
 /**
