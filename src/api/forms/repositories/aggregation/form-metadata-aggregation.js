@@ -17,7 +17,10 @@ export function buildFilterConditions(options) {
       conditions._id = { $eq: new ObjectId(title) }
     } else {
       const regex = new RegExp(escapeRegExp(title), 'i')
-      conditions.title = { $regex: regex }
+      // Nested under $and because the top-level $or is used by the status filter
+      conditions.$and = [
+        { $or: [{ title: { $regex: regex } }, { slug: { $regex: regex } }] }
+      ]
     }
   }
 
