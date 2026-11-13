@@ -140,7 +140,6 @@ export function collectOverviewMetrics(metadata, definition, definitionType) {
     summaryMetrics: calcSummaryMetrics(metadata, definition, definitionType),
     featureMetrics: calcFeatureMetrics(definition),
     submissionsCount: 0,
-    options: getFormOptions(definition),
     updatedAt: new Date(),
     ...lang
   }
@@ -196,17 +195,6 @@ export function calcFeatureMetrics(definition) {
     features: getComponentUsageFeatureMetrics(definition),
     formStructure: getFormStructureCounts(definition, questionTypes)
   }
-}
-
-/**
- * @param {FormDefinition} definition
- */
-export function getFormOptions(definition) {
-  const options = []
-  if (isAllowCopyEnabled(definition)) {
-    options.push('allowCopy')
-  }
-  return options
 }
 
 /**
