@@ -30,6 +30,7 @@ import {
   publishDraftCreatedFromLiveEvent,
   publishFormDraftDeletedEvent,
   publishFormDraftReplacedEvent,
+  publishFormOptionsChangedEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent
 } from '~/src/messaging/publish.js'
@@ -74,6 +75,27 @@ export async function getFormDefinition(
   }
 
   return formDefinition.get(formId, state, session)
+}
+
+/**
+ * Retrieves the form definition content for a given form ID, and undefined if it doesn't exist
+ * @param {string} formId - the ID of the form
+ * @param {FormStatus} state - the form state
+ * @param {ClientSession | undefined} [session]
+ */
+export async function getFormDefinitionIfExists(
+  formId,
+  state = FormStatus.Draft,
+  session
+) {
+  try {
+    return await getFormDefinition(formId, state, session)
+  } catch (err) {
+    if (Boom.isBoom(err) && err.output.statusCode === 404) {
+      return undefined
+    }
+    throw err
+  }
 }
 
 /**
@@ -375,13 +397,19 @@ export async function createLiveFromDraft(formId, author) {
 
     try {
       await session.withTransaction(async () => {
+        const liveForm = await getFormDefinitionIfExists(
+          formId,
+          FormStatus.Live,
+          session
+        )
+
         // Copy the draft form definition
         await formDefinition.createLiveFromDraft(formId, session)
 
         logger.info(`Removing form metadata (draft) for form ID ${formId}`)
 
         // Update the form with the live state and clear the draft
-        await formMetadata.update(
+        const metadata = await formMetadata.update(
           formId,
           {
             $set: set,
@@ -395,6 +423,13 @@ export async function createLiveFromDraft(formId, author) {
 
         // Publish audit message
         await publishLiveCreatedFromDraftEvent(formId, now, author)
+
+        // Publish additional audit message, if appropriate
+        await publishFormOptionsChangedEvent(
+          metadata,
+          draftFormDefinition ?? /** @type {FormDefinition} */ ({}),
+          liveForm ?? /** @type {FormDefinition} */ ({})
+        )
       })
     } finally {
       await session.endSession()
