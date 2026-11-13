@@ -41,3 +41,5 @@ export const FormOptionName = {
 export const FormMetadataOptionName = {
   AllowCopy: 'allowCopy'
 }
+
+export const HTTP_NOT_FOUND = 404
