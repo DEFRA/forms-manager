@@ -88,7 +88,8 @@ export async function getFormDefinition(
  */
 export async function getFormDefinitionIfExists(formId, state, session) {
   try {
-    return await getFormDefinition(formId, state, session)
+    const definition = await getFormDefinition(formId, state, session)
+    return definition
   } catch (err) {
     if (Boom.isBoom(err) && err.output.statusCode === HTTP_NOT_FOUND) {
       return undefined

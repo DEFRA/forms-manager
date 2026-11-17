@@ -5,7 +5,8 @@ import {
   Engine,
   OperatorName,
   hasComponentsEvenIfNoNext,
-  hasRepeater
+  hasRepeater,
+  isAllowCopyEnabled
 } from '@defra/forms-model'
 import { buildMarkdownComponent } from '@defra/forms-model/stubs'
 import Boom from '@hapi/boom'
@@ -66,10 +67,7 @@ import {
   removeById,
   uniquePathGate
 } from '~/src/api/forms/repositories/helpers.js'
-import {
-  getMetadataOptions,
-  isAllowCopyEnabled
-} from '~/src/api/forms/service/helpers/definition.js'
+import { getMetadataOptions } from '~/src/api/forms/service/helpers/definition.js'
 import { empty as emptyFormWithSummary } from '~/src/api/forms/templates.js'
 import { getAuthor } from '~/src/helpers/get-author.js'
 import { db } from '~/src/mongo.js'

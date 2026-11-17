@@ -6,6 +6,7 @@ import {
   formDefinitionSchema,
   formDefinitionV2Schema,
   hasComponentsEvenIfNoNext,
+  isAllowCopyEnabled,
   paymentAmountSchema
 } from '@defra/forms-model'
 import Joi from 'joi'
@@ -95,16 +96,6 @@ export function getMetadataOptions(definition) {
   }
 
   return {}
-}
-
-/**
- * Checks whether the form allows answers to be copied from a previous
- * submission, as set by the metadata.options.allowCopy flag
- * @param {FormDefinition} definition
- * @returns {boolean}
- */
-export function isAllowCopyEnabled(definition) {
-  return getMetadataOptions(definition).allowCopy === true
 }
 
 /**
