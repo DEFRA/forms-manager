@@ -27,6 +27,7 @@ import {
   publishFormDraftDeletedEvent,
   publishFormDraftReplacedEvent,
   publishFormMigratedEvent,
+  publishFormOptionsChangedEvent,
   publishFormTitleUpdatedEvent,
   publishFormUpdatedEvent,
   publishLiveCreatedFromDraftEvent,
@@ -294,6 +295,43 @@ describe('publish', () => {
         messageCreatedAt: expect.any(Date)
       })
     })
+
+    it('should publish S3 metadata and output changes instead of the payload', async () => {
+      const payload = buildQuestionPage({})
+      const s3Meta = {
+        fileId: '3HL4kqtJlcpXrof3W3Zz4YBdvdz2FJ9n',
+        filename: 'definition.json',
+        s3Key: 'audit-definitions/definition.json'
+      }
+      const outputChanges = {
+        added: [
+          {
+            audience: /** @type {const} */ ('human'),
+            version: /** @type {const} */ ('1'),
+            emailAddress: 'new@defra.gov.uk'
+          }
+        ]
+      }
+
+      await publishFormUpdatedEvent(
+        formMetadataDocument,
+        payload,
+        FormDefinitionRequestType.REPLACE_DRAFT,
+        s3Meta,
+        outputChanges
+      )
+
+      expect(publishEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            requestType: FormDefinitionRequestType.REPLACE_DRAFT,
+            s3Meta,
+            outputChanges,
+            payload: undefined
+          })
+        })
+      )
+    })
   })
 
   describe('publishFormDraftReplacedEvent', () => {
@@ -322,6 +360,10 @@ describe('publish', () => {
         slug: formMetadataDocument.slug,
         payload: undefined
       })
+      expect(saveToS3).toHaveBeenCalledWith(
+        `${formMetadataDocument._id.toString()}.json`,
+        definition
+      )
       expect(publishEventCall).toMatchSnapshot({
         messageCreatedAt: expect.any(Date)
       })
@@ -359,6 +401,106 @@ describe('publish', () => {
         requestType: FormDefinitionRequestType.REPLACE_DRAFT,
         outputChanges: { added: [addedOutput] }
       })
+    })
+
+    it('should not publish if saving the definition fails', async () => {
+      const error = new Error('S3 unavailable')
+      jest.mocked(saveToS3).mockRejectedValue(error)
+
+      await expect(
+        publishFormDraftReplacedEvent(formMetadataDocument, buildDefinition())
+      ).rejects.toThrow(error)
+      expect(publishEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('publishFormOptionsChangedEvent', () => {
+    it.each([
+      { previous: undefined, current: true, expectedPrevious: false },
+      { previous: true, current: false, expectedPrevious: true },
+      { previous: false, current: true, expectedPrevious: false }
+    ])(
+      'should publish an allowCopy change from $previous to $current',
+      async ({ previous, current, expectedPrevious }) => {
+        const definition = buildDefinition({
+          metadata: { options: { allowCopy: current } }
+        })
+        const previousDefinition =
+          previous === undefined
+            ? undefined
+            : buildDefinition({
+                metadata: { options: { allowCopy: previous } }
+              })
+
+        const response = await publishFormOptionsChangedEvent(
+          formMetadataDocument,
+          definition,
+          previousDefinition
+        )
+
+        expect(response?.MessageId).toBe(messageId)
+        expect(publishEvent).toHaveBeenCalledTimes(1)
+        expect(publishEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityId: formMetadataDocument._id.toString(),
+            type: AuditEventMessageType.FORM_OPTION_UPDATED,
+            createdAt: BASE_CREATED_DATE,
+            createdBy: author,
+            data: expect.objectContaining({
+              formId: formMetadataDocument._id.toString(),
+              slug: formMetadataDocument.slug,
+              changes: {
+                previous: { allowCopy: expectedPrevious },
+                new: { allowCopy: current }
+              }
+            })
+          })
+        )
+      }
+    )
+
+    it.each([
+      { previous: undefined, current: undefined },
+      { previous: false, current: undefined },
+      { previous: undefined, current: false },
+      { previous: true, current: true }
+    ])(
+      'should not publish when allowCopy remains unchanged ($previous to $current)',
+      async ({ previous, current }) => {
+        const definition = buildDefinition({
+          metadata:
+            current === undefined
+              ? undefined
+              : { options: { allowCopy: current } }
+        })
+        const previousDefinition =
+          previous === undefined
+            ? undefined
+            : buildDefinition({
+                metadata: { options: { allowCopy: previous } }
+              })
+
+        await expect(
+          publishFormOptionsChangedEvent(
+            formMetadataDocument,
+            definition,
+            previousDefinition
+          )
+        ).resolves.toBeUndefined()
+        expect(publishEvent).not.toHaveBeenCalled()
+      }
+    )
+
+    it('should propagate publishing failures when an option changes', async () => {
+      const error = new Error('SNS unavailable')
+      jest.mocked(publishEvent).mockRejectedValue(error)
+      const definition = buildDefinition({
+        metadata: { options: { allowCopy: true } }
+      })
+
+      await expect(
+        publishFormOptionsChangedEvent(formMetadataDocument, definition)
+      ).rejects.toThrow(error)
     })
   })
 
@@ -428,6 +570,24 @@ describe('publish', () => {
       const message = buildFormOrganisationUpdatedMessage()
 
       await expect(bulkPublishEvents([message])).rejects.toThrow()
+    })
+
+    it('should preserve message order when publishing is disabled for one result', async () => {
+      const firstMessage = buildFormOrganisationUpdatedMessage()
+      const secondMessage = buildFormOrganisationUpdatedMessage()
+      jest
+        .mocked(publishEvent)
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ MessageId: messageId, $metadata: {} })
+
+      await expect(
+        bulkPublishEvents([firstMessage, secondMessage])
+      ).resolves.toEqual([
+        { type: firstMessage.type, messageId: undefined },
+        { type: secondMessage.type, messageId }
+      ])
+      expect(publishEvent).toHaveBeenNthCalledWith(1, firstMessage)
+      expect(publishEvent).toHaveBeenNthCalledWith(2, secondMessage)
     })
   })
 })

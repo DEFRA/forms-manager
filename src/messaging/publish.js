@@ -13,6 +13,7 @@ import {
   formDraftDeletedMapper,
   formLiveCreatedFromDraftMapper,
   formMigratedMapper,
+  formOptionsUpdatedMapper,
   formTitleUpdatedMapper,
   formUpdatedMapper,
   savedFormSecretMapper
@@ -197,6 +198,58 @@ export async function publishFormDraftReplacedEvent(
 }
 
 /**
+ *
+ * @param {{ allowCopy?: boolean }} prevOptions
+ * @param {{ allowCopy?: boolean }} currentOptions
+ * @returns
+ */
+function getOptionsChanges(prevOptions, currentOptions) {
+  const changes = /** @type {ChangesMessageData<FormOptionChanges>} */ ({
+    previous: {
+      allowCopy: prevOptions.allowCopy ?? false
+    },
+    new: {
+      allowCopy: currentOptions.allowCopy ?? false
+    }
+  })
+  return {
+    hasChanged: changes.previous.allowCopy !== changes.new.allowCopy,
+    changes
+  }
+}
+
+/**
+ * Publishes a whole-draft replacement. The definition itself goes to S3 rather
+ * than onto the message, so the event says nothing about what the author
+ * actually changed - the submission email targets are singled out because an
+ * audit of who receives a form's submissions is worth more than a pointer to a
+ * JSON file.
+ * @param {WithId<Partial<FormMetadataDocument & { 'draft.updatedAt': Date; 'draft.updatedBy': FormMetadataAuthor; }>>} metadataDocument
+ * @param {FormDefinition} definition
+ * @param {FormDefinition} [previousDefinition] - the draft as it was before this update
+ */
+export async function publishFormOptionsChangedEvent(
+  metadataDocument,
+  definition,
+  previousDefinition
+) {
+  const metadata = mapForm(metadataDocument)
+
+  // Compare previous options with current options and log changes if needed
+  const prevOptions = previousDefinition?.metadata?.options ?? {}
+
+  const currentOptions = definition.metadata?.options ?? {}
+  const { hasChanged, changes } = getOptionsChanges(prevOptions, currentOptions)
+
+  if (hasChanged) {
+    const auditMessage = formOptionsUpdatedMapper(metadata, { changes })
+
+    return validateAndPublishEvent(auditMessage)
+  }
+  return undefined
+}
+
+/**
  * Publish saved form secret event
  * @param {WithId<Partial<FormMetadataDocument>>} metadataDocument
  * @param {string} secretName
@@ -231,6 +284,6 @@ export async function publishDeletedFormSecretEvent(
 }
 
 /**
- * @import { FormDefinition, FormMetadataAuthor, FormMetadataDocument, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser, FormDefinitionS3Meta, FormOutputChanges } from '@defra/forms-model'
+ * @import { ChangesMessageData, FormDefinition, FormMetadataAuthor, FormMetadataDocument, FormOptionChanges, AuditEventMessageType, FormMetadata, AuditMessage, AuditUser, FormDefinitionS3Meta, FormOutputChanges } from '@defra/forms-model'
  * @import { WithId } from 'mongodb'
  */

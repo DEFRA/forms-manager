@@ -8,6 +8,7 @@ import {
   hasPaymentQuestionInForm,
   hasPostcodeLookupInForm,
   hasSpecificQuestionTypeInForm,
+  isAllowCopyEnabled,
   isSummaryPage
 } from '@defra/forms-model'
 import { StatusCodes } from 'http-status-codes'
@@ -294,6 +295,9 @@ export function getFeatureList(definition) {
   }
   if (hasWelshTranslation(definition)) {
     features.push('Welsh translation')
+  }
+  if (isAllowCopyEnabled(definition)) {
+    features.push('Copy answers')
   }
   return features
 }

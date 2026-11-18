@@ -2,7 +2,8 @@ import {
   ComponentType,
   SchemaVersion,
   formDefinitionSchema,
-  formDefinitionV2Schema
+  formDefinitionV2Schema,
+  isAllowCopyEnabled
 } from '@defra/forms-model'
 import Joi from 'joi'
 
@@ -18,7 +19,6 @@ import { InvalidFormDefinitionError } from '~/src/api/forms/errors.js'
 import {
   getMetadataOptions,
   getValidationSchema,
-  isAllowCopyEnabled,
   postSchemaValidation,
   validate,
   validatePaymentAmount
