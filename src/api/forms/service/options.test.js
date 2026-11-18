@@ -8,7 +8,10 @@ import {
   buildDefinition,
   buildList
 } from '~/src/api/forms/__stubs__/definition.js'
-import { FormOptionName } from '~/src/api/forms/constants.js'
+import {
+  FormMetadataOptionName,
+  FormOptionName
+} from '~/src/api/forms/constants.js'
 import * as formDefinition from '~/src/api/forms/repositories/form-definition-repository.js'
 import * as formMetadata from '~/src/api/forms/repositories/form-metadata-repository.js'
 import { formMetadataDocument } from '~/src/api/forms/service/__stubs__/service.js'
@@ -129,6 +132,58 @@ describe('options', () => {
         requestType: FormDefinitionRequestType.UPDATE_OPTION,
         payload: { option: { disableUserFeedback: 'true' } }
       })
+    })
+
+    it.each(['true', 'false'])(
+      'should update allowCopy to %s and publish it in the audit event',
+      async (optionValue) => {
+        const updateOptionMock = jest
+          .mocked(formDefinition.updateOption)
+          .mockResolvedValueOnce(formDefinitionWithList)
+        const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+        const result = await updateOptionOnDraftDefinition(
+          id,
+          FormMetadataOptionName.AllowCopy,
+          optionValue,
+          defaultAuthor
+        )
+
+        const [expectedFormId, optionName, calledValue] =
+          updateOptionMock.mock.calls[0]
+        expect(expectedFormId).toBe(id)
+        expect(optionName).toBe(FormMetadataOptionName.AllowCopy)
+        expect(calledValue).toBe(optionValue)
+        expect(result).toEqual({ option: { allowCopy: optionValue } })
+        expectMetadataUpdate()
+
+        const [auditMessage] = publishEventSpy.mock.calls[0]
+        expect(auditMessage).toMatchObject({
+          type: AuditEventMessageType.FORM_UPDATED
+        })
+        expect(auditMessage.data).toMatchObject({
+          requestType: FormDefinitionRequestType.UPDATE_OPTION,
+          payload: { option: { allowCopy: optionValue } }
+        })
+      }
+    )
+
+    it('should not update the audit or publish an event if saving allowCopy fails', async () => {
+      const error = new Error('Confirmation email must be enabled')
+      jest.mocked(formDefinition.updateOption).mockRejectedValueOnce(error)
+      const publishEventSpy = jest.spyOn(publishBase, 'publishEvent')
+
+      await expect(
+        updateOptionOnDraftDefinition(
+          id,
+          FormMetadataOptionName.AllowCopy,
+          'true',
+          defaultAuthor
+        )
+      ).rejects.toThrow(error)
+
+      expect(dbMetadataSpy).not.toHaveBeenCalled()
+      expect(publishEventSpy).not.toHaveBeenCalled()
     })
   })
 })

@@ -2078,6 +2078,414 @@
       "response": []
     },
     {
+      "name": "Set form option - allowCopy to true",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.eql({ option: { allowCopy: 'true' } });",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"optionValue\": \"true\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft/options/allowCopy",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft",
+            "options",
+            "allowCopy"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get form option - allowCopy true turns on reference number and confirmation email",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"allowCopy is saved with its required settings\", function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.metadata.options.allowCopy).to.eq(true);",
+              "    pm.expect(response.options.showReferenceNumber).to.eq(true);",
+              "    const summary = response.pages.find((page) => page.path === '/summary');",
+              "    pm.expect(summary.controller).to.eq('SummaryPageWithConfirmationEmailController');",
+              "});",
+              "",
+              "pm.test(\"draft still contains $$__formVersion metadata\", function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.metadata.$$__formVersion).to.be.an('object');",
+              "    pm.expect(response.metadata.$$__formVersion.versionNumber).to.be.a('number');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Set form option - reference number to false is rejected while allowCopy is on",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is bad request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.error).to.eq('InvalidFormDefinitionError');",
+              "    pm.expect(response.message).to.include('Reference number must be enabled if the form allows answers to be reused');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"optionValue\": \"false\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft/options/showReferenceNumber",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft",
+            "options",
+            "showReferenceNumber"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get form option - reference number still true after rejected change",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"rejected change was not saved\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.options.showReferenceNumber).to.eq(true);",
+              "    pm.expect(response.metadata.options.allowCopy).to.eq(true);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create live with allowCopy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const { status } = pm.response.json();",
+              "    pm.expect(status).to.eq('created-live');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/create-live",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "create-live"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /forms/:form_id/definition - live definition has allowCopy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"live definition keeps allowCopy\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.metadata.options.allowCopy).to.eq(true);",
+              "    pm.expect(response.options.showReferenceNumber).to.eq(true);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create draft with allowCopy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const { status } = pm.response.json();",
+              "    pm.expect(status).to.eq('created-draft');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/create-draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "create-draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /forms/:form_id/definition/draft - new draft has allowCopy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"new draft keeps allowCopy\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.metadata.options.allowCopy).to.eq(true);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Set form option - allowCopy to false",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"response is ok\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.eql({ option: { allowCopy: 'false' } });",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"optionValue\": \"false\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft/options/allowCopy",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft",
+            "options",
+            "allowCopy"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get form option - allowCopy false keeps reference number and confirmation email",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"allowCopy is off and its required settings are kept\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.metadata.options.allowCopy).to.eq(false);",
+              "    pm.expect(response.options.showReferenceNumber).to.eq(true);",
+              "    const summary = response.pages.find((page) => page.path === '/summary');",
+              "    pm.expect(summary.controller).to.eq('SummaryPageWithConfirmationEmailController');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{root}}/forms/{{go_live_form_id}}/definition/draft",
+          "host": [
+            "{{root}}"
+          ],
+          "path": [
+            "forms",
+            "{{go_live_form_id}}",
+            "definition",
+            "draft"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Save secret",
       "event": [
         {
